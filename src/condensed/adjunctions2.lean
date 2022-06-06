@@ -29,7 +29,7 @@ def profinite_free_adj_aux (M : Condensed.{u} Ab.{u+1}) (S : Profinite.{u}ᵒᵖ
 let E := Condensed_Ab_CondensedSet_adjunction.hom_equiv S.unop.to_Condensed M,
   E' := E.trans (Sheaf.hom_equiv _ _),
   E'' := E'.trans (yoneda'_equiv _ _) in
-{ map_add' := sorry,
+{ map_add' := λ f g, rfl,
   ..E'' }
 
 def profinite_free_adj (M : Condensed.{u} Ab.{u+1}) :
@@ -37,10 +37,13 @@ def profinite_free_adj (M : Condensed.{u} Ab.{u+1}) :
   M.val :=
 nat_iso.of_components
 (λ S, begin
-  dsimp,
   apply add_equiv.to_AddCommGroup_iso,
   apply profinite_free_adj_aux,
 end)
-sorry
+begin
+  intros S T f,
+  ext,
+  sorry
+end
 
 end condensed
