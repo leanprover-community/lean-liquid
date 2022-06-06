@@ -396,7 +396,6 @@ is_iso ((homology_functor 𝓐 c j).map f) :=
 begin
   sorry
 end
-.
 
 lemma map_is_iso (n : ℤ) : is_iso
   (homology.map (homological_complex.d_to_comp_d_from _ _)
