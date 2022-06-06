@@ -145,6 +145,8 @@ begin
   dsimp only [hom_single_iso, iso.trans_hom, iso.symm_hom, functor.comp_map, functor.op_map,
     functor.right_op_map, quiver.hom.unop_op],
   simp only [category.assoc, homology_iso_inv_homology_functor_map],
+  simp only [← category.assoc], congr' 1, simp only [category.assoc],
+  rw [homology.map_eq, AddCommGroup.homology_iso_inv_homology_map],
   simp only [← category.assoc], congr' 1,
   sorry
 end
