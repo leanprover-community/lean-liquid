@@ -22,20 +22,6 @@ universes u
 open category_theory category_theory.limits homotopy_category opposite
 open function (surjective)
 
-namespace category_theory
-
-open_locale big_operators
-
-def nat_trans.sum_app {C D : Type*} [category C] [category D] [preadditive D]
-  (α : Type*) (S : finset α) (F G : C ⥤ D) (η : α → (F ⟶ G)) (X) :
-  (∑ i in S, η i).app X = ∑ i in S, (η i).app X := sorry
-
-def nat_trans.zsmul_app {C D : Type*} [category C] [category D] [preadditive D]
-  (F G : C ⥤ D) (η : (F ⟶ G)) (i : ℤ) (X) :
-  (i • η).app X = i • (η.app X) := sorry
-
-end category_theory
-
 namespace condensed
 
 set_option pp.universes true
@@ -322,8 +308,8 @@ begin
     rw [if_pos, if_pos], swap, refl, swap, refl, rw [category.id_comp, category.id_comp],
     dsimp [simplicial_object.augmented.to_complex_d, simplicial_object.boundary],
     simp only [preadditive.sum_comp, preadditive.comp_sum, preadditive.zsmul_comp,
-      preadditive.comp_zsmul, category_theory.nat_trans.sum_app,
-      category_theory.nat_trans.zsmul_app],
+      preadditive.comp_zsmul, category_theory.nat_trans.app_sum,
+      category_theory.nat_trans.app_zsmul],
     apply finset.sum_congr rfl, rintros i -, congr' 1,
     dsimp [simplicial_object.δ],
 
