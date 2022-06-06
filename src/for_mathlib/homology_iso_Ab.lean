@@ -1,5 +1,6 @@
 import for_mathlib.homology_exact
 import algebra.category.Group.abelian
+import for_mathlib.homology_map
 
 noncomputable theory
 
@@ -70,8 +71,10 @@ A ⧸ C ≃* B ⧸ D :=
 
 attribute [elementwise] iso.hom_inv_id
 
+namespace AddCommGroup
+
 protected noncomputable
-def AddCommGroup.homology_iso {A B C : AddCommGroup.{u}} (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0) :
+def homology_iso {A B C : AddCommGroup.{u}} (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0) :
   homology f g w ≅ AddCommGroup.of (g.ker ⧸ (f.range.comap g.ker.subtype)) :=
 begin
   refine homology_iso_cokernel_lift f g w ≪≫
@@ -95,3 +98,47 @@ begin
   simp only [add_subgroup.mem_comap, add_monoid_hom.mem_range, add_subgroup.coe_subtype,
     subtype.coe_mk, ← this.eq_iff, category_theory.limits.kernel.lift_ι_apply],
 end
+.
+
+variables {A₁ B₁ C₁ A₂ B₂ C₂ : AddCommGroup.{u}}
+variables {f₁ : A₁ ⟶ B₁} {g₁ : B₁ ⟶ C₁} (w₁ : f₁ ≫ g₁ = 0)
+variables {f₂ : A₂ ⟶ B₂} {g₂ : B₂ ⟶ C₂} (w₂ : f₂ ≫ g₂ = 0)
+variables {α : A₁ ⟶ A₂} {β : B₁ ⟶ B₂} {γ : C₁ ⟶ C₂}
+variables (sq1 : commsq f₁ α β f₂) (sq2 : commsq g₁ β γ g₂)
+
+include sq1
+
+@[simps apply]
+def ker_map : ↥(add_monoid_hom.ker f₁) →+ ↥(add_monoid_hom.ker f₂) :=
+add_monoid_hom.mk' (λ x, ⟨α x, by { rw [f₂.mem_ker, ← comp_apply, ← sq1.w, comp_apply], convert β.map_zero, exact x.2 }⟩) $
+by { rintro ⟨a, _⟩ ⟨b, _⟩, ext, apply α.map_add, }
+
+include sq2
+
+noncomputable
+def homology_map :
+  of (↥(add_monoid_hom.ker g₁) ⧸ add_subgroup.comap (add_monoid_hom.ker g₁).subtype (add_monoid_hom.range f₁)) ⟶
+  of (↥(add_monoid_hom.ker g₂) ⧸ add_subgroup.comap (add_monoid_hom.ker g₂).subtype (add_monoid_hom.range f₂)) :=
+AddCommGroup.of_hom $ quotient_add_group.lift _
+  ((quotient_add_group.mk' _).comp $ ker_map sq2)
+begin
+  rintro ⟨y, hx : g₁ y = 0⟩ ⟨x, rfl : f₁ x = y⟩,
+  dsimp only [add_monoid_hom.comp_apply, ker_map_apply, quotient_add_group.mk'_apply, subtype.coe_mk],
+  rw quotient_add_group.eq_zero_iff,
+  refine ⟨α x, _⟩,
+  rw [← comp_apply, ← sq1.w], refl
+end
+
+noncomputable
+def homology_iso_hom_homology_map :
+  (AddCommGroup.homology_iso f₁ g₁ w₁).hom ≫ homology_map sq1 sq2 =
+  homology.map' w₁ w₂ sq1 sq2 ≫ (AddCommGroup.homology_iso f₂ g₂ w₂).hom :=
+sorry
+
+noncomputable
+def homology_iso_inv_homology_map :
+  (AddCommGroup.homology_iso f₁ g₁ w₁).inv ≫ homology.map' w₁ w₂ sq1 sq2 =
+  homology_map sq1 sq2 ≫ (AddCommGroup.homology_iso f₂ g₂ w₂).inv :=
+by rw [iso.inv_comp_eq, ← category.assoc, iso.eq_comp_inv, homology_iso_hom_homology_map]
+
+end AddCommGroup
