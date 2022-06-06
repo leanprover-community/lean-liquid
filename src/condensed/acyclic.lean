@@ -22,6 +22,20 @@ universes u
 open category_theory category_theory.limits homotopy_category opposite
 open function (surjective)
 
+namespace category_theory
+
+open_locale big_operators
+
+def nat_trans.sum_app {C D : Type*} [category C] [category D] [preadditive D]
+  (α : Type*) (S : finset α) (F G : C ⥤ D) (η : α → (F ⟶ G)) (X) :
+  (∑ i in S, η i).app X = ∑ i in S, (η i).app X := sorry
+
+def nat_trans.zsmul_app {C D : Type*} [category C] [category D] [preadditive D]
+  (F G : C ⥤ D) (η : (F ⟶ G)) (i : ℤ) (X) :
+  (i • η).app X = i • (η.app X) := sorry
+
+end category_theory
+
 namespace condensed
 
 set_option pp.universes true
@@ -282,9 +296,6 @@ end)
 begin
   rintros (_|i) (_|j) ⟨rfl⟩,
   { dsimp [yet_another_iso._match_1, iso.refl_hom], rw category.comp_id,
-    --apply_fun AddCommGroup.adj.hom_equiv _ _,
-    --simp only [AddCommGroup.adj.hom_equiv_unit],
-    --have := AddCommGroup.adj.right_triangle_components,
     dsimp [evaluated_free_ExtrDisc_Cech, unsheafified_free_ExtrDiscr_Cech],
     rw if_pos (rfl : (1 : ℕ) = 0 + 1), erw category.id_comp,
     rw if_pos (rfl : (1 : ℕ) = 0 + 1), erw category.id_comp,
@@ -305,7 +316,64 @@ begin
         (Profinite_to_ExtrDisc_presheaf.{u}.map F.hom).app (op.{u+2} X)))
       (ulift.up t),
     rw ← this, clear this, rw wide_pullback.lift_base, refl },
-  { sorry }
+  { dsimp [yet_another_iso._match_1,
+      evaluated_free_ExtrDisc_Cech,
+      unsheafified_free_ExtrDiscr_Cech],
+    rw [if_pos, if_pos], swap, refl, swap, refl, rw [category.id_comp, category.id_comp],
+    dsimp [simplicial_object.augmented.to_complex_d, simplicial_object.boundary],
+    simp only [preadditive.sum_comp, preadditive.comp_sum, preadditive.zsmul_comp,
+      preadditive.comp_zsmul, category_theory.nat_trans.sum_app,
+      category_theory.nat_trans.zsmul_app],
+    apply finset.sum_congr rfl, rintros i -, congr' 1,
+    dsimp [simplicial_object.δ],
+
+    apply free_abelian_group.lift.ext,
+    rintro ⟨t⟩,
+    simp only [comp_apply],
+    dsimp [AddCommGroup.free, Profinite_to_ExtrDisc_presheaf_Ab], congr' 1,
+    dsimp [ulift_wide_pullback_iso, ulift_wide_pullback_iso_hom_aux],
+
+    let f1 := wide_pullback.lift.{u+1 u+2} (wide_pullback.base.{u+1 u+2} (λ (i : ulift.{u+1 0}
+      (fin (j + 1 + 1))), (Profinite_to_ExtrDisc_presheaf.{u}.map F.hom).app (op.{u+2} X)))
+      (λ (i_1 : ulift.{u+1 0} (fin (j + 1))), wide_pullback.π.{u+1 u+2} (λ (i : ulift.{u+1 0}
+      (fin (j + 1 + 1))), (Profinite_to_ExtrDisc_presheaf.{u}.map F.hom).app (op.{u+2} X))
+      {down := (simplex_category.hom.to_order_hom (simplex_category.δ i)) i_1.down}) _,
+
+    let f2 := wide_pullback.lift.{u+1 u+2} (ulift_functor.{u+1 u}.map ((yoneda.{u u+1}.map
+      (wide_pullback.base.{u u+1} (λ (_x : ulift.{u 0} (fin (j.succ + 0 + 1))), F.hom))).app
+      (op.{u+2} X.val))) (λ (q : ulift.{u+1 0} (fin (j.succ + 0 + 1))), ulift_functor.{u+1 u}.map
+      ((yoneda.{u u+1}.map (wide_pullback.π.{u u+1} (λ (_x : ulift.{u 0} (fin (j.succ + 0 + 1))),
+      F.hom) {down := q.down})).app (op.{u+2} X.val))) _,
+
+    let f3 := wide_pullback.lift.{u+1 u+2} (ulift_functor.{u+1 u}.map ((yoneda.{u u+1}.map
+      (wide_pullback.base.{u u+1} (λ (_x : ulift.{u 0} (fin (j + 0 + 1))), F.hom))).app
+      (op.{u+2} X.val))) (λ (q : ulift.{u+1 0} (fin (j + 0 + 1))), ulift_functor.{u+1 u}.map
+      ((yoneda.{u u+1}.map (wide_pullback.π.{u u+1} (λ (_x : ulift.{u 0} (fin (j + 0 + 1))),
+      F.hom) {down := q.down})).app (op.{u+2} X.val))) _,
+
+    change (f2 ≫ f1) _ = f3 _,
+
+    let f4 := wide_pullback.lift.{u u+1} (wide_pullback.base.{u u+1} (λ (i : ulift.{u 0}
+      (fin (j + 1 + 1))), F.hom)) (λ (i_1 : ulift.{u 0} (fin (j + 1))), wide_pullback.π.{u u+1}
+      (λ (i : ulift.{u 0} (fin (j + 1 + 1))), F.hom) {down := (simplex_category.hom.to_order_hom
+      (simplex_category.δ i)) i_1.down}) _,
+
+    suffices : f2 ≫ f1 = ((yoneda'.map f4).app (op X.val) ≫ f3),
+    { rw this, refl },
+
+    apply wide_pullback.hom_ext,
+
+    { intros k,
+      dsimp [f4,f3,f2,f1],
+      simp only [category.assoc, wide_pullback.lift_π, wide_pullback.lift_π_assoc],
+      erw [wide_pullback.lift_π],
+      erw [← functor.map_comp, ← nat_trans.comp_app, ← functor.map_comp, wide_pullback.lift_π] },
+
+    { dsimp [f4,f3,f2,f1],
+      simp only [category.assoc, wide_pullback.lift_base, wide_pullback.lift_base_assoc],
+      erw wide_pullback.lift_base,
+      erw [← functor.map_comp, ← nat_trans.comp_app, ← functor.map_comp,
+        wide_pullback.lift_base] } }
 end
 
 lemma free_Cech_exact (F : arrow Profinite.{u}) (hF : function.surjective F.hom) : ∀ (n : ℤ),
