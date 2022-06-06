@@ -19,7 +19,7 @@ instance preserves_coproducts_single {α : Type v} (i : ℤ) :
 variables [enough_projectives A]
 
 instance preserves_coproducts_Ext' {α : Type v} (i : ℤ) (Y : A) :
-  preserves_limits_of_shape (discrete α)
-  ((Ext' i).flip.obj Y) := sorry
+  preserves_colimits_of_shape (discrete α)
+  ((Ext' i).flip.obj Y).right_op := sorry
 
 end bounded_homotopy_category
