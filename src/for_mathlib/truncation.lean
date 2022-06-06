@@ -397,6 +397,23 @@ begin
   apply_instance,
 end
 
+/-
+
+A --(f)-----> B --(g=0)-> C
+    |               |
+    | α             | β
+    |               |
+    \/              \/
+A' -(f'=0)--> B' --(g)--> C'
+
+coker.π : B -> coker f -(homology.map) ker g -> ker.π B'
+-/
+-- lemma homology.map_factor_of_zero_of_zero {V : Type*} [category V] [abelian V] {A B C : V}
+--   {f : A ⟶ B} {g : B ⟶ C} (hg : g = 0) {A' B' C' : V} {f' : A' ⟶ B'} {g' : B' ⟶ C'}
+--   (hf' : f' = 0) (α : arrow.mk f ⟶ arrow.mk f') (β : arrow.mk g ⟶ arrow.mk g')
+--   (h : α.right = β.left) : homology.map (show f ≫ g = 0, by simp [hg]) (by simp [hf']) α β h = sorry := sorry
+
+#check kernel_subobject_map
 -- looks simple? kmb didn't find it so simple ;-)
 instance to_single_quasi_iso (n : ℤ) :
   homotopy_category.is_quasi_iso $ (homotopy_category.quotient _ _).map (to_single C n) :=
