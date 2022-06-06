@@ -33,7 +33,12 @@ lemma profinite_free_adj_aux₁_naturality
   (x : CondensedSet_to_Condensed_Ab.obj S.unop.to_Condensed ⟶ M) :
   profinite_free_adj_aux₁ _ _
   ((CondensedSet_to_Condensed_Ab.map (Profinite_to_Condensed.map f.unop) ≫ x)) =
-  Profinite_to_Condensed.map f.unop ≫ profinite_free_adj_aux₁ _ _ x := sorry
+  Profinite_to_Condensed.map f.unop ≫ profinite_free_adj_aux₁ _ _ x :=
+begin
+  dsimp only [profinite_free_adj_aux₁],
+  simp only [adjunction.hom_equiv_naturality_left],
+  refl,
+end
 
 def profinite_free_adj_aux₂ (M : Condensed.{u} Ab.{u+1}) (S : Profinite.{u}ᵒᵖ) :
   ((opposite.unop S).to_Condensed ⟶ Condensed_Ab_to_CondensedSet.obj M) ≃
