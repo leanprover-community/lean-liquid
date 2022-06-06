@@ -288,10 +288,23 @@ begin
     dsimp [evaluated_free_ExtrDisc_Cech, unsheafified_free_ExtrDiscr_Cech],
     rw if_pos (rfl : (1 : ℕ) = 0 + 1), erw category.id_comp,
     rw if_pos (rfl : (1 : ℕ) = 0 + 1), erw category.id_comp,
-
-    --apply_fun AddCommGroup.adj.hom_equiv _ _,
-    sorry
-  },
+    apply free_abelian_group.lift.ext,
+    rintro ⟨t⟩,
+    dsimp [AddCommGroup.free, simplicial_object.augmented.to_complex_d],
+    simp only [category.comp_id, comp_apply, free_abelian_group.map_of_apply],
+    dsimp at t,
+    dsimp [ulift_wide_pullback_iso, ulift_wide_pullback_iso_hom_aux,
+      Profinite_to_ExtrDisc_presheaf_Ab], congr' 1,
+    have := types_comp_apply
+      (wide_pullback.lift.{u+1 u+2} (ulift_functor.{u+1 u}.map ((yoneda.{u u+1}.map
+        (wide_pullback.base.{u u+1} (λ (_x : ulift.{u 0} (fin (0 + 0 + 1))), F.hom))).app
+        (op.{u+2} X.val))) (λ (q : ulift.{u+1 0} (fin (0 + 0 + 1))), ulift_functor.{u+1 u}.map
+        ((yoneda.{u u+1}.map (wide_pullback.π.{u u+1} (λ (_x : ulift.{u 0} (fin (0 + 0 + 1))),
+        F.hom) {down := q.down})).app (op.{u+2} X.val))) _)
+      (wide_pullback.base.{u+1 u+2} (λ (i : ulift.{u+1 0} (fin (0 + 0 + 1))),
+        (Profinite_to_ExtrDisc_presheaf.{u}.map F.hom).app (op.{u+2} X)))
+      (ulift.up t),
+    rw ← this, clear this, rw wide_pullback.lift_base, refl },
   { sorry }
 end
 
