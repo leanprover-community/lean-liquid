@@ -3,6 +3,7 @@ import for_mathlib.derived.K_projective
 import for_mathlib.endomorphisms.Ext
 import for_mathlib.endomorphisms.functor
 import for_mathlib.truncation_Ext
+import for_mathlib.derived.ext_coproducts
 
 .
 
@@ -154,14 +155,80 @@ end
 -- `T` should be thought of as a tensor product functor,
 -- taking tensor products with `A : Condensed Ab`
 variables (T : Ab ⥤ 𝓐)
+variables [∀ α : Type v, preserves_colimits_of_shape (discrete α) T]
+variables (hT1 : T.obj (AddCommGroup.of $ punit →₀ ℤ) ≅ A)
+variables (hT : ∀ {X Y Z : Ab} (f : X ⟶ Y) (g : Y ⟶ Z), short_exact f g → short_exact (T.map f) (T.map g))
 
--- this needs extra assumptions:
--- * `T` should map a free resolution `0 → F₁ → F₂ → A' → 0` to a short exact sequence
--- * `T` should map a free object `F = ℤ^{⊕κ}` to `A^{⊕κ}`
-lemma bdd_step₆ (IH : ∀ i ≤ j, is_zero $ ((Ext' i).obj (op A)).obj B)
+lemma bdd_step₆_free₀ (A : Ab) :
+  ∃ (F₁ F₀ : Ab) (h₁ : module.free ℤ F₁) (h₀ : module.free ℤ F₀) (f : F₁ ⟶ F₀) (g : F₀ ⟶ A),
+  short_exact f g :=
+begin
+  let g := (finsupp.total A A ℤ id).to_add_monoid_hom,
+  let F := g.ker,
+  let f := F.subtype,
+  let F₀ : Ab := AddCommGroup.of (↥A →₀ ℤ),
+  let F₁ : Ab := AddCommGroup.of F,
+  -- let f' : F₁ ⟶ F₀ := by { exact f },
+  sorry
+end
+
+include hT1
+
+lemma bdd_step₆_free₁
+  (IH : ∀ i ≤ j, is_zero $ ((Ext' i).obj (op A)).obj B)
+  (i : ℤ) (hi : i ≤ j) (α : Type*) :
+  is_zero (((Ext' i).flip.obj B).obj (op (T.obj $ AddCommGroup.of $ α →₀ ℤ))) :=
+begin
+  let D : discrete α ⥤ Ab := discrete.functor (λ a, AddCommGroup.of $ punit →₀ ℤ),
+  let c : cocone D := cofan.mk (AddCommGroup.of $ α →₀ ℤ)
+    (λ a, finsupp.map_domain.add_monoid_hom $ λ _, a),
+  let hc : is_colimit c := ⟨λ s, _, _, _⟩,
+  rotate,
+  { refine (finsupp.total _ _ _ (λ a, _)).to_add_monoid_hom,
+    refine (s.ι.app a) (finsupp.single punit.star 1) },
+  { intros s a, apply finsupp.add_hom_ext', rintro ⟨⟩, apply add_monoid_hom.ext_int,
+    simp only [add_monoid_hom.comp_apply, category_theory.comp_apply,
+      linear_map.to_add_monoid_hom_coe, cofan.mk_ι_app,
+      finsupp.map_domain.add_monoid_hom_apply, finsupp.map_domain_single,
+      finsupp.single_add_hom_apply, finsupp.total_single, one_smul], },
+  { intros s m h,
+    apply finsupp.add_hom_ext', intro a, apply add_monoid_hom.ext_int,
+    simp only [add_monoid_hom.comp_apply, linear_map.to_add_monoid_hom_coe,
+      finsupp.single_add_hom_apply, finsupp.total_single, one_smul],
+    rw ← h,
+    simp only [category_theory.comp_apply, cofan.mk_ι_app,
+      finsupp.map_domain.add_monoid_hom_apply, finsupp.map_domain_single], },
+  sorry
+end
+
+lemma bdd_step₆_free
+  (IH : ∀ i ≤ j, is_zero $ ((Ext' i).obj (op A)).obj B)
+  (i : ℤ) (hi : i ≤ j) (A' : Ab) (hA' : module.free ℤ A') :
+  is_zero (((Ext' i).flip.obj B).obj (op (T.obj A'))) :=
+begin
+  let e' := module.free.choose_basis ℤ A',
+  let e'' := e'.repr.to_add_equiv,
+  let e : A' ≅ (AddCommGroup.of $ module.free.choose_basis_index ℤ A' →₀ ℤ),
+  { refine add_equiv_iso_AddCommGroup_iso.hom _, exact e'' },
+  refine is_zero.of_iso _ (functor.map_iso _ (T.map_iso e).op.symm),
+  apply bdd_step₆_free₁ A B j T hT1 IH i hi,
+end
+
+include hT
+
+lemma bdd_step₆
+  (IH : ∀ i ≤ j, is_zero $ ((Ext' i).obj (op A)).obj B)
   (i : ℤ) (hi : i ≤ j) (A' : Ab) :
   is_zero (((Ext' i).flip.obj B).obj (op (T.obj A'))) :=
-sorry
+begin
+  obtain ⟨F₁, F₀, h₁, h₀, f, g, hfg⟩ := bdd_step₆_free₀ A',
+  specialize hT f g hfg,
+  obtain ⟨i, rfl⟩ : ∃ k, k+1=i := ⟨i-1, sub_add_cancel _ _⟩,
+  have := ((hT.Ext'_five_term_exact_seq B i).drop 2).pair,
+  apply this.is_zero_of_is_zero_is_zero,
+  { apply bdd_step₆_free A B j T hT1 IH _ ((int.le_add_one le_rfl).trans hi) _ h₁, },
+  { apply bdd_step₆_free A B j T hT1 IH _ hi _ h₀, },
+end
 
 variables (hAT : ∀ t ≤ (-1:ℤ), ∃ A', nonempty (T.obj A' ≅ ((BD.eval F).obj A).val.as.homology t))
 
@@ -180,7 +247,7 @@ begin
   rw bdd_step₅,
   obtain ⟨A', ⟨e⟩⟩ := hAT t ht,
   apply (((Ext' (i+t)).flip.obj B).map_iso e.op).is_zero_iff.mpr,
-  apply bdd_step₆ A B _ T ih',
+  apply bdd_step₆ A B _ T hT1 @hT ih',
   linarith only [ht, hi]
 end
 
@@ -194,7 +261,7 @@ lemma bdd (j : ℤ) : IH BD F A B j :=
 begin
   apply int.induction_on' j,
   { exact IH_0 BD F A B hH0 },
-  { exact bdd_step BD F A B hH0 T hAT },
+  { exact bdd_step BD F A B hH0 T hT1 @hT hAT },
   { exact IH_neg BD F A B, },
 end
 
@@ -204,11 +271,11 @@ lemma is_zero :
 begin
   split,
   { intros H j,
-    refine (bdd BD F A B hH0 T hAT j).mp _ j le_rfl,
+    refine (bdd BD F A B hH0 T hT1 @hT hAT j).mp _ j le_rfl,
     intros i hij,
     apply H },
   { intros H j,
-    refine (bdd BD F A B hH0 T hAT j).mpr _ j le_rfl,
+    refine (bdd BD F A B hH0 T hT1 @hT hAT j).mpr _ j le_rfl,
     intros i hij,
     apply H }
 end
@@ -234,10 +301,13 @@ lemma main_lemma (A : 𝓐) (B : 𝓐) (f : A ⟶ A) (g : B ⟶ B)
 begin
   rw [← endomorphisms.Ext'_is_zero_iff' A B f g],
   rw [← endomorphisms.Ext_is_zero_iff'],
-  refine (main_lemma.is_zero BD F.map_endomorphisms _ _ _ _ _).trans _,
+  refine (main_lemma.is_zero BD F.map_endomorphisms _ _ _ _ _ _ _).trans _,
   { sorry },
   -- the next `sorry` are not provable in general,
   -- they should be made assumptions that can be filled in when applied to `Cond(Ab)`
+  { sorry },
+  { sorry },
+  { sorry },
   { sorry },
   { sorry },
   apply forall_congr, intro i,
