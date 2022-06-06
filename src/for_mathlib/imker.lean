@@ -110,6 +110,12 @@ begin
   refl,
 end
 
+lemma d_from_eq_zero {n i : ℤ} (h : i ≠ n - 1) : (C.imker n).d_from i = 0 :=
+begin
+  rw [homological_complex.d_from_eq (C.imker n) rfl, d_def, dif_neg h, zero_comp],
+end
+
+
 lemma bounded_by (i : ℤ) :
   ((homotopy_category.quotient _ _).obj (C.imker i)).bounded_by (i+1) :=
 begin
@@ -262,8 +268,7 @@ begin
 end
 
 lemma is_iso_cokernel.desc {V : Type*} [category V] [abelian V] {A B C : V} {f : A ⟶ B} {g : B ⟶ C}
-  (h : exact f g) (h2 : epi g) : is_iso
-  (cokernel.desc f g h.1) :=
+  (h : exact f g) (h2 : epi g) : is_iso (cokernel.desc f g h.1) :=
 is_iso_of_op (cokernel.desc f g h.w)
 
 lemma sq_from_epi_of_epi {ι : Type*} {V : Type*} [_inst_1 : category V] [_inst_2 : abelian V]
@@ -344,23 +349,11 @@ begin
   { rw [← kernel_subobject_arrow, hf'],
     simp,
     apply_instance },
-  -- I just made epi (iso ≫ f) ↔ epi f and epi (f ≫ iso) ↔ epi f
-  -- but now I realise I need is_iso versions :-/
   suffices : epi (kernel_subobject_map φ ≫ (kernel_subobject f').arrow),
-  { constructor,
-    intros A g h h',
-    suffices : inv ((kernel_subobject f').arrow) ≫ g = inv ((kernel_subobject f').arrow) ≫ h,
-    { simpa },
-    resetI,
-    rw ← cancel_epi (kernel_subobject_map φ ≫ (kernel_subobject f').arrow),
-    simp only [category.assoc, h', is_iso.hom_inv_id_assoc],
-  },
-  simp only [kernel_subobject_map_arrow],
-  constructor,
-  intros A g h h',
-  simp only [category.assoc] at h',
-  rw cancel_epi at h',
-  rwa cancel_epi at h',
+  { rwa epi_is_iso_comp_iff_epi at this },
+  rw kernel_subobject_map_arrow,
+  simp,
+  apply_instance,
 end
 
 lemma zero_of_epi_of_comp_zero {V : Type*} [category V] [abelian V]
@@ -395,7 +388,45 @@ begin
   apply_instance,
 end
 
--- looks simple? kmb didn't find it so simple ;-)
+lemma homology_functor.is_iso_of_is_zero_of_is_zero_of_is_zero {ι : Type*} {c : complex_shape ι}
+  {i j : ι} (hij : c.rel i j) {C₁ C₂ : homological_complex 𝓐 c} (h1from : C₁.d_from j = 0)
+  (h2to : C₂.d_to j = 0) (h2from : C₂.d_from j = 0) (isomap : cokernel (C₁.d_to j) ≅ C₂.X j)
+  {f : C₁ ⟶ C₂} (hf : f.f j = cokernel.π (C₁.d_to j) ≫ isomap.hom) :
+is_iso ((homology_functor 𝓐 c j).map f) :=
+begin
+  sorry
+end
+.
+
+lemma map_is_iso (n : ℤ) : is_iso
+  (homology.map (homological_complex.d_to_comp_d_from _ _)
+    (homological_complex.d_to_comp_d_from _ _) (homological_complex.hom.sq_to (to_single C n) n)
+    (homological_complex.hom.sq_from (to_single C n) n) rfl) :=
+begin
+/-
+image_subobject (C.d_to) -> kernel_subobject (C.d_from) -> 0
+ |
+ \⧸
+ 0                       -> C.homology n                -> 0
+
+-/
+  change is_iso ((homology_functor 𝓐 (complex_shape.up ℤ) n).map (to_single C n)),
+  refine homology_functor.is_iso_of_is_zero_of_is_zero_of_is_zero _ _ _ _ _ _,
+  { exact (n-1)},
+  { show _ = _, by ring},
+  { rw d_from_eq_zero, linarith },
+  { rw single.d_to_eq_zero, },
+  { rw single.d_from_eq_zero, },
+  { refine _ ≪≫ (homological_complex.single_obj_X_self _ _ _ _).symm,
+    refine cokernel_iso_of_eq (homological_complex.d_to_eq (C.imker n) (show (n - 1) + 1 = n, by ring)) ≪≫ _,
+    refine (cokernel_epi_comp _ _) ≪≫ _,
+    refine cokernel_iso_of_eq (d_interesting _ rfl rfl) ≪≫ _,
+    refine (cokernel_epi_comp _ _) ≪≫ _,
+    apply cokernel_comp_is_iso, },
+  { delta to_single,
+    dsimp, simp, refl, },
+end
+
 instance to_single_quasi_iso (n : ℤ) :
   homotopy_category.is_quasi_iso $ (homotopy_category.quotient _ _).map (to_single C n) :=
 ⟨begin
@@ -420,73 +451,8 @@ instance to_single_quasi_iso (n : ℤ) :
       quite far from ker/im, it's ker(ker/im->0)/im(0->ker/im).
       -/
     delta homology_functor, dsimp,
-    -- Adam says "do something else here"
-    delta homology.map,
-    dsimp only [homological_complex.d_to_comp_d_from, cokernel.condition, comp_zero, homological_complex.hom.sq_from_id,
-      homology.π_map, kernel_subobject_map_id, category.id_comp, category.comp_id, homological_complex.hom.sq_from_comp,
-      kernel_subobject_map_comp, category.assoc, homology.π_map_assoc],
-    have foo : image_to_kernel (homological_complex.d_to (C.imker i) i) (homological_complex.d_from (C.imker i) i) _ ≫
-      kernel_subobject_map (homological_complex.hom.sq_from (to_single C i) i) = 0,
-    { rw [← cancel_epi (factor_thru_image_subobject (homological_complex.d_to (C.imker i) i)), comp_zero],
-      rw [← cancel_mono ((kernel_subobject _).arrow)], swap, exact (kernel_subobject (((single 𝓐 (complex_shape.up ℤ) i).obj (homological_complex.homology C i)).d_from i)).arrow_mono,
-      rw zero_comp,
-      simp only [category.assoc, kernel_subobject_map_arrow, homological_complex.hom.sq_from_left, image_to_kernel_arrow_assoc,
-        image_subobject_arrow_comp_assoc],
-      rw homological_complex.d_to_eq,
-      rw category.assoc,
-      rw ← homological_complex.hom.comm,
-      simp, swap, use i-1, show (i - 1) + 1 = i, ring,
-    },
-    rw ← cokernel.desc_comp_left foo,
-    apply @is_iso.comp_is_iso _ _ _ _ _ _ _ _ _, swap,
-    { apply is_iso_cokernel_pi_image_to_kernel_of_zero_of_zero,
-      { apply single.d_to_eq_zero, },
-      { apply single.d_from_eq_zero, },
-    },
-    apply is_iso_cokernel.desc, swap,
-    { -- prove epi iff map in the middle epi because so many 0s
-      --delta homological_complex.hom.sq_from arrow.hom_mk,
-      --delta kernel_subobject_map subobject.factor_thru,
-      --dsimp,
-      -- This one shouldn't be too bad.
-      apply kernel_subobject_map_epi_of_epi _ _ _,
-      { have := homological_complex.X_next_iso (C.imker i) (show i + 1 = i + 1, by refl),
-        apply is_zero_of_iso_of_zero _ this.symm,
-        apply X_is_zero_of_ne;
-        linarith, },
-      { have := homological_complex.X_next_iso ((single 𝓐 (complex_shape.up ℤ) i).obj
-          (homological_complex.homology C i)) (show i + 1 = i + 1, by refl),
-        apply is_zero_of_iso_of_zero _ this.symm,
-        delta single, dsimp, rw if_neg, apply is_zero_zero, linarith, },
-      { delta homological_complex.hom.sq_from to_single to_single arrow.hom_mk,
-        dsimp,
-        rw dif_pos rfl,
-        simp,
-        exact strong_epi.epi, } },
-    { refine ⟨foo, _⟩,
-      /-
-      C_{i-1}---(f)---> C_i ---(g)--> C_{i+1} (f and g both called d)
-
-      It's a complex, so we get an induced map Im(f)->Ker(g).
-
-      This map also forms part of a complex:
-
-      im(f)->ker(g)->ker(ker(g)/im(f)->0) is a complex, so we get an induced map
-
-      im(im(f)->ker(g)) -> ker(ker(g)->ker(ker(g)/im(f)->0))
-
-      and the claim is that this is an epi.
-
-      If
-      A --(mono)-> B --(epi)-> C is a complex, then
-      Im(d) -> Ker(d) is epi iff A -> ker(d) is an epi
-      -/
-      -- perhaps the next step is to show that ker(ker(g)->ker(ker(g)/im(f)->0) is iso to ker(g)?
-
-      sorry }, },
-  -- the below sorry can be removed, it's not even there. It's the proof that all the other
-  -- vertical maps are isos on homology.
-  sorry;{ rcases eq_or_ne i (n-1) with (rfl | hin'),
+    apply map_is_iso, },
+  { rcases eq_or_ne i (n-1) with (rfl | hin'),
     { rw ← functor.comp_map,
       apply map_is_iso_of_iso_of_map_is_iso (homotopy_category.homology_factors 𝓐
         (complex_shape.up ℤ) (n-1)).symm,
@@ -535,7 +501,7 @@ instance to_single_quasi_iso (n : ℤ) :
         apply obj_is_zero_of_iso (homotopy_category.homology_factors 𝓐 (complex_shape.up ℤ) i).symm,
         rw homology_functor_obj,
         apply homology_is_zero_of_is_zero,
-        apply homological_complex.single_obj_eq_zero _ _ hin,
+        apply homological_complex.single_obj_is_zero _ _ hin,
       }
     }
   }
@@ -544,8 +510,3 @@ end⟩
 end imker
 
 end cochain_complex
-
---lemma homology.map_factor_of_zero_of_zero {V : Type*} [category V] [abelian V] {A B C : V}
---   {f : A ⟶ B} {g : B ⟶ C} (hg : g = 0) {A' B' C' : V} {f' : A' ⟶ B'} {g' : B' ⟶ C'}
---   (hf' : f' = 0) (α : arrow.mk f ⟶ arrow.mk f') (β : arrow.mk g ⟶ arrow.mk g')
---   (h : α.right = β.left) : homology.map (show f ≫ g = 0, by simp [hg]) (by simp [hf']) α β h = sorry := sorry
