@@ -53,7 +53,12 @@ yoneda'_equiv _ _
 lemma profinite_free_adj_aux₃_naturality
   (x : (opposite.unop S).to_Condensed.val ⟶ (Condensed_Ab_to_CondensedSet.obj M).val) :
   profinite_free_adj_aux₃ _ _ ((Profinite_to_Condensed.map f.unop).val ≫ x) =
-  (M.val.map f) (profinite_free_adj_aux₃ _ _ x) := sorry
+  (M.val.map f) (profinite_free_adj_aux₃ _ _ x) :=
+begin
+  have := x.naturality f,
+  apply_fun (λ e, e (ulift.up (𝟙 S.unop))) at this,
+  exact this,
+end
 
 def profinite_free_adj_aux (M : Condensed.{u} Ab.{u+1}) (S : Profinite.{u}ᵒᵖ):
   (AddCommGroup.of ((CondensedSet_to_Condensed_Ab.obj (opposite.unop S).to_Condensed) ⟶ M)) ≃+
