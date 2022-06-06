@@ -1,5 +1,6 @@
-import for_mathlib.homology_exact
 import algebra.category.Group.abelian
+import category_theory.abelian.homology
+import for_mathlib.homology_exact
 import for_mathlib.homology_map
 
 noncomputable theory
@@ -100,6 +101,19 @@ begin
 end
 .
 
+attribute [elementwise] AddCommGroup.kernel_iso_ker_hom_comp_subtype
+
+lemma homology_iso_hom_eq {A B C : AddCommGroup.{u}} (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0) :
+  (AddCommGroup.homology_iso f g w).hom =
+  homology.desc' _ _ _ ((AddCommGroup.kernel_iso_ker _).hom ≫ quotient_add_group.mk' _)
+  (by { ext x, simp only [comp_apply, quotient_add_group.mk'_apply, zero_apply, quotient_add_group.eq_zero_iff], refine ⟨x, _⟩, rw [kernel_iso_ker_hom_comp_subtype_apply, ← comp_apply, limits.kernel.lift_ι], }) :=
+begin
+  ext1,
+  dsimp only [AddCommGroup.homology_iso, iso.trans_hom],
+  rw [homology.π'_desc'],
+  sorry
+end
+
 variables {A₁ B₁ C₁ A₂ B₂ C₂ : AddCommGroup.{u}}
 variables {f₁ : A₁ ⟶ B₁} {g₁ : B₁ ⟶ C₁} (w₁ : f₁ ≫ g₁ = 0)
 variables {f₂ : A₂ ⟶ B₂} {g₂ : B₂ ⟶ C₂} (w₂ : f₂ ≫ g₂ = 0)
@@ -133,7 +147,12 @@ noncomputable
 def homology_iso_hom_homology_map :
   (AddCommGroup.homology_iso f₁ g₁ w₁).hom ≫ homology_map sq1 sq2 =
   homology.map' w₁ w₂ sq1 sq2 ≫ (AddCommGroup.homology_iso f₂ g₂ w₂).hom :=
-sorry
+begin
+  ext1,
+  rw [homology_iso_hom_eq, homology_iso_hom_eq, homology.π'_desc'_assoc, homology.map',
+    homology.map_eq_desc'_lift_left, homology.π'_desc'_assoc],
+  sorry
+end
 
 noncomputable
 def homology_iso_inv_homology_map :
