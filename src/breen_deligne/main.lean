@@ -3,7 +3,8 @@ import for_mathlib.derived.K_projective
 import for_mathlib.endomorphisms.Ext
 import for_mathlib.endomorphisms.functor
 import for_mathlib.truncation_Ext
-import for_mathlib.derived.ext_coproducts
+import for_mathlib.single_coproducts
+import category_theory.limits.opposites
 
 .
 
@@ -154,7 +155,7 @@ end
 
 -- `T` should be thought of as a tensor product functor,
 -- taking tensor products with `A : Condensed Ab`
-variables (T : Ab ⥤ 𝓐)
+variables (T : Ab.{v} ⥤ 𝓐)
 variables [∀ α : Type v, preserves_colimits_of_shape (discrete α) T]
 variables (hT1 : T.obj (AddCommGroup.of $ punit →₀ ℤ) ≅ A)
 variables (hT : ∀ {X Y Z : Ab} (f : X ⟶ Y) (g : Y ⟶ Z), short_exact f g → short_exact (T.map f) (T.map g))
@@ -168,6 +169,7 @@ begin
   let f := F.subtype,
   let F₀ : Ab := AddCommGroup.of (↥A →₀ ℤ),
   let F₁ : Ab := AddCommGroup.of F,
+  refine ⟨F₁, F₀, _⟩,
   -- let f' : F₁ ⟶ F₀ := by { exact f },
   sorry
 end
@@ -176,7 +178,7 @@ include hT1
 
 lemma bdd_step₆_free₁
   (IH : ∀ i ≤ j, is_zero $ ((Ext' i).obj (op A)).obj B)
-  (i : ℤ) (hi : i ≤ j) (α : Type*) :
+  (i : ℤ) (hi : i ≤ j) (α : Type v) :
   is_zero (((Ext' i).flip.obj B).obj (op (T.obj $ AddCommGroup.of $ α →₀ ℤ))) :=
 begin
   let D : discrete α ⥤ Ab := discrete.functor (λ a, AddCommGroup.of $ punit →₀ ℤ),
@@ -198,7 +200,20 @@ begin
     rw ← h,
     simp only [category_theory.comp_apply, cofan.mk_ι_app,
       finsupp.map_domain.add_monoid_hom_apply, finsupp.map_domain_single], },
-  sorry
+  let c' := T.map_cocone c,
+  let hc' : is_colimit c' := is_colimit_of_preserves T hc,
+  let c'' := ((Ext' i).flip.obj B).right_op.map_cocone c',
+  let hc'' : is_colimit c'' := is_colimit_of_preserves _ hc',
+  change is_zero c''.X.unop,
+  apply is_zero.unop,
+  haveI : has_colimits Ab.{v}ᵒᵖ := has_colimits_op_of_has_limits.{v v+1},
+  let e : c''.X ≅ colimit ((D ⋙ T) ⋙ ((Ext' i).flip.obj B).right_op) :=
+    hc''.cocone_point_unique_up_to_iso (colimit.is_colimit _),
+  apply is_zero.of_iso _ e,
+  apply is_zero_colimit,
+  intros j,
+  apply is_zero.of_iso _ (((Ext' i).flip.obj B).right_op.map_iso hT1),
+  apply (IH i hi).op,
 end
 
 lemma bdd_step₆_free
