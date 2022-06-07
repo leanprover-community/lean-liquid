@@ -183,9 +183,16 @@ def ker_hom
   {P₁ P₂ : bounded_homotopy_category C} (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
   ((hom_complex P₂ B i).d i (i - 1)).ker →+
   ((hom_complex P₁ B i).d i (i - 1)).ker :=
-{ to_fun := λ x, ⟨(map_hom_complex f B i).f _ ↑x, sorry⟩,
-  map_zero' := sorry,
-  map_add' := sorry }
+{ to_fun := λ x, ⟨(map_hom_complex f B i).f _ ↑x, begin
+    change _ = _,
+    have : _ = _ := x.2,
+    dsimp [hom_complex, map_hom_complex] at *,
+    rw [← category.assoc, ← f.out.comm, category.assoc, this, comp_zero],
+  end⟩,
+  map_zero' := by { ext, simp },
+  map_add' := begin
+    intros x y, ext, dsimp [map_hom_complex], simp,
+  end }
 
 def map_explicit_homology
   {P₁ P₂ : bounded_homotopy_category C} (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
