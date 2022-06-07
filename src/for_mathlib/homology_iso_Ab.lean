@@ -186,7 +186,7 @@ def homology_iso {A B C : AddCommGroup.{u}} (f : A ⟶ B) (g : B ⟶ C) (w : f �
 --   ext1,
 --   dsimp only [AddCommGroup.homology_iso, iso.trans_hom],
 --   rw [homology.π'_desc'],
---   sorry
+--   admit
 -- end
 
 variables {A₁ B₁ C₁ A₂ B₂ C₂ : AddCommGroup.{u}}
