@@ -373,9 +373,7 @@ begin
   rw [← category.assoc, ← category.assoc, π_iso, category.assoc, category.assoc, iso_inv, iso_ι,
     homology.has_π, homology.has_ι, ← category.assoc, homology.π'_map, ← category.assoc,
     ← kernel.lift_ι g₂ (kernel.ι g₁ ≫ β) (by simp [category.assoc, ← sq2.w]), category.assoc,
-    category.assoc],
-  apply congr_arg, -- works because kernel.lift ... = kernel.map g₁ g₂ β γ
-  simp,
+    category.assoc, homology.π'_ι],
 end
 
 end map
