@@ -178,6 +178,11 @@ noncomputable
 def homology_map : AddCommGroup.homology f₁ g₁ ⟶ AddCommGroup.homology f₂ g₂ :=
 (has_homology f₁ g₁ w₁).map (has_homology f₂ g₂ w₂) sq1 sq2
 
+@[simp]
+lemma homology_map_apply_mk (t) :
+  homology_map w₁ w₂ sq1 sq2 (quotient_add_group.mk t) =
+  quotient_add_group.mk (ker_map sq2 t) := sorry
+
 noncomputable
 def homology_iso_hom_homology_map :
   (AddCommGroup.homology_iso f₁ g₁ w₁).hom ≫ homology_map w₁ w₂ sq1 sq2 =

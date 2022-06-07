@@ -223,7 +223,10 @@ lemma map_explicit_homology_eq
     ((hom_complex P₁ B i).d_comp_d _ _ _)
     (commsq.of_eq $ ((map_hom_complex f B i).comm (i+1) i).symm)
     (commsq.of_eq $ ((map_hom_complex f B i).comm i (i-1)).symm) :=
-sorry
+begin
+  ext ⟨t⟩,
+  symmetry, apply AddCommGroup.homology_map_apply_mk,
+end
 
 lemma aux₂_naturality
   (P₁ P₂ : bounded_homotopy_category C) (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
