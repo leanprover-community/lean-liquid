@@ -166,6 +166,16 @@ lift_unique _ _ _ _ hH.π_ι
   (by rw [category.assoc, hψ, comp_zero]) :=
 by { apply lift_unique, rw [category.assoc, lift_comp_ι] }
 
+lemma homology_lift_eq {X Y Z W : 𝓐} (f : X ⟶ Y) (g : Y ⟶ Z) (w : f ≫ g = 0)
+  (φ : W ⟶ cokernel f) (hφ) :
+  homology.lift f g w φ hφ = (homology.has f g w).lift φ hφ :=
+begin
+  ext,
+  simp only [homology.lift_ι],
+  dsimp [has_homology.lift],
+  erw [exact.mono_lift_comp],
+end
+
 end lift
 
 section desc
@@ -194,6 +204,16 @@ desc_unique _ _ _ _ hH.π_ι
 @[reassoc] lemma desc_comp {X Y : 𝓐} (φ : kernel g ⟶ X) (ψ : X ⟶ Y) (hφ : kernel.lift g f hH.w ≫ φ = 0) :
   hH.desc φ hφ ≫ ψ = hH.desc (φ ≫ ψ) (by rw [reassoc_of hφ, zero_comp]) :=
 by { apply desc_unique, rw [π_comp_desc_assoc] }
+
+lemma homology_desc_eq {X Y Z W : 𝓐} (f : X ⟶ Y) (g : Y ⟶ Z) (w)
+  (φ : kernel g ⟶ W) (hφ) :
+  homology.desc' f g w φ hφ = (homology.has f g w).desc φ hφ :=
+begin
+  ext,
+  simp only [homology.π'_desc'],
+  dsimp [has_homology.desc],
+  simp only [exact.comp_epi_desc],
+end
 
 end desc
 
@@ -234,6 +254,20 @@ h₁.π_comp_desc _ _
 by { apply h₁.desc_unique, rw [h₁.π_map_assoc, h₂.lift_comp_ι] }
 
 lemma π_map_ι : h₁.π ≫ h₁.map h₂ sq1 sq2 ≫ h₂.ι = kernel.ι _ ≫ β ≫ cokernel.π _ := by simp
+
+lemma homology_map_eq (w₁ : f₁ ≫ g₁ = 0) (w₂ : f₂ ≫ g₂ = 0)
+  (e₁ : α ≫ (arrow.mk f₂).hom = (arrow.mk f₁).hom ≫ β)
+  (e₂ : β ≫ (arrow.mk g₂).hom = (arrow.mk g₁).hom ≫ γ) :
+  homology.map w₁ w₂ (arrow.hom_mk e₁) (arrow.hom_mk e₂) rfl =
+  (homology.has f₁ g₁ w₁).map (homology.has f₂ g₂ w₂)
+  (commsq.of_eq e₁.symm) (commsq.of_eq e₂.symm) :=
+begin
+  --- I don't think using `exact.epi_desc` and `exact.mono_desc` is a good choice...
+  rw homology.map_eq_desc'_lift_left,
+  apply (homology.has _ _ w₁).ext_π,
+  apply (homology.has _ _ w₂).ext_ι,
+  simp [homology_lift_eq, homology_desc_eq],
+end
 
 lemma eq_map_of_π_map_ι (φ : H₁ ⟶ H₂) (hφ : h₁.π ≫ φ ≫ h₂.ι = kernel.ι g₁ ≫ β ≫ cokernel.π f₂) :
   φ = h₁.map h₂ sq1 sq2 :=

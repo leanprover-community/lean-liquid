@@ -179,20 +179,83 @@ def aux₂
   AddCommGroup.homology ((hom_complex P B i).d (i+1) i) ((hom_complex P B i).d i (i-1)) :=
 (AddCommGroup.homology_iso _ _ _)
 
+def ker_hom
+  {P₁ P₂ : bounded_homotopy_category C} (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
+  ((hom_complex P₂ B i).d i (i - 1)).ker →+
+  ((hom_complex P₁ B i).d i (i - 1)).ker :=
+{ to_fun := λ x, ⟨(map_hom_complex f B i).f _ ↑x, begin
+    change _ = _,
+    have : _ = _ := x.2,
+    dsimp [hom_complex, map_hom_complex] at *,
+    rw [← category.assoc, ← f.out.comm, category.assoc, this, comp_zero],
+  end⟩,
+  map_zero' := by { ext, simp },
+  map_add' := begin
+    intros x y, ext, dsimp [map_hom_complex], simp,
+  end }
+
 def map_explicit_homology
   {P₁ P₂ : bounded_homotopy_category C} (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
   AddCommGroup.homology ((hom_complex P₂ B i).d (i+1) i) ((hom_complex P₂ B i).d i (i-1)) ⟶
   AddCommGroup.homology ((hom_complex P₁ B i).d (i+1) i) ((hom_complex P₁ B i).d i (i-1)) :=
-AddCommGroup.homology_map
-  ((hom_complex P₂ B i).d_comp_d _ _ _)
-  ((hom_complex P₁ B i).d_comp_d _ _ _)
-  (commsq.of_eq $ ((map_hom_complex f B i).comm (i+1) i).symm)
-  (commsq.of_eq $ ((map_hom_complex f B i).comm i (i-1)).symm)
+quotient_add_group.lift _
+(add_monoid_hom.comp (quotient_add_group.mk' _) $ ker_hom f _ _)
+begin
+  rintros ⟨x,(hx : _ = _)⟩ hh,
+  dsimp [ker_hom, map_hom_complex],
+  rw quotient_add_group.eq_zero_iff,
+  rw add_subgroup.mem_comap at *, dsimp at *,
+  change ∃ e, _,
+  obtain ⟨e,he⟩ := hh,
+  dsimp [hom_complex] at *,
+  use f.out.f _ ≫ e,
+  rw [← category.assoc, ← f.out.comm, category.assoc, he],
+end
+
+--TODO: This relates the above construction to AddcommGroup.homology_map
+-- the above def has more convenient defeq properties for some of the proofs below, but
+-- the `AddCommGroup.homology_map` is better suited for `aux₂_naturality`.
+lemma map_explicit_homology_eq
+  {P₁ P₂ : bounded_homotopy_category C} (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
+  map_explicit_homology f B i =
+  AddCommGroup.homology_map
+    ((hom_complex P₂ B i).d_comp_d _ _ _)
+    ((hom_complex P₁ B i).d_comp_d _ _ _)
+    (commsq.of_eq $ ((map_hom_complex f B i).comm (i+1) i).symm)
+    (commsq.of_eq $ ((map_hom_complex f B i).comm i (i-1)).symm) :=
+sorry
 
 lemma aux₂_naturality
   (P₁ P₂ : bounded_homotopy_category C) (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
   (aux₂ P₂ B i).hom ≫ map_explicit_homology f _ _ =
-  map_homology f _ _ ≫ (aux₂ P₁ B i).hom := sorry
+  map_homology f _ _ ≫ (aux₂ P₁ B i).hom :=
+begin
+  rw map_explicit_homology_eq,
+  dsimp [aux₂],
+  dsimp [AddCommGroup.homology_iso, AddCommGroup.homology_map, map_homology],
+  generalize_proofs _ _ w _ w',
+  apply (homology.has _ _ w).ext_π,
+  apply (AddCommGroup.has_homology _ _ w').ext_ι,
+  rw has_homology.homology_map_eq,
+  simp only [has_homology.π_map, category.assoc, has_homology.π_map_assoc,
+    has_homology.map_ι, has_homology.map_ι_assoc],
+  let t := _, change t ≫ _ = _,
+  have ht : t = kernel.lift _ (kernel.ι _) _ ≫ (AddCommGroup.has_homology _ _ w).π,
+  rotate 2,
+  { apply kernel.condition },
+  { apply (AddCommGroup.has_homology _ _ w).ext_ι,
+    simp [has_homology.π_ι] },
+  rw ht, clear ht, clear t,
+  let t := _, change _ = _ ≫ t,
+  have ht : t = (homology.has _ _ w').ι ≫ cokernel.desc _ (cokernel.π _) _,
+  rotate 2,
+  { apply cokernel.condition },
+  { apply (homology.has _ _ w').ext_π,
+    rw [← category.assoc, has_homology.π_ι],
+    simp },
+  rw ht, clear ht, clear t,
+  simp,
+end
 
 lemma aux₂_naturality_inv
   (P₁ P₂ : bounded_homotopy_category C) (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
@@ -235,11 +298,50 @@ begin
     refl }
 end
 
+lemma aux₃_apply
+  (P : bounded_homotopy_category C) (B : C) (i : ℤ)
+  (f : P ⟶ (single C i).obj B) :
+  aux₃ P B i f = quotient_add_group.mk ⟨f.out.f i ≫ eq_to_hom (if_pos rfl), begin
+    change _ = _, dsimp [hom_complex],
+    rw [← category.assoc, ← f.out.comm, category.assoc],
+    convert zero_comp,
+    apply is_zero.eq_of_tgt, convert is_zero_zero _,
+    dsimp [single], rw if_neg, simp,
+  end⟩ := rfl
+
 lemma aux₃_naturality
   (P₁ P₂ : bounded_homotopy_category C) (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
   (map_explicit_homology f B i).comp (aux₃ P₂ B i).to_add_monoid_hom =
   add_monoid_hom.comp (aux₃ P₁ B i).to_add_monoid_hom ((preadditive_yoneda.obj _).map f.op) :=
-sorry
+begin
+  ext ⟨x⟩,
+  dsimp, simp_rw aux₃_apply,
+  dsimp [map_explicit_homology, ker_hom, map_hom_complex],
+  rw ← sub_eq_zero,
+  erw ← (quotient_add_group.mk' _).map_sub,
+  erw quotient_add_group.eq_zero_iff,
+  rw [add_subgroup.mem_comap],
+  dsimp,
+  -- now we need to use a homotopy...
+  simp_rw [← category.assoc, ← homological_complex.comp_f],
+  let t := _, let s := _, change homological_complex.hom.f t i ≫ _ -
+    homological_complex.hom.f s i ≫ _ ∈ _,
+  let hh : homotopy t s := begin
+    apply homotopy_category.homotopy_of_eq,
+    simpa,
+  end,
+  let e := hh.hom (i+1) i,
+  change ∃ e, _,
+  dsimp [hom_complex],
+  use e ≫ eq_to_hom (if_pos rfl),
+  rw [← preadditive.sub_comp _ _ (eq_to_hom _), ← category.assoc,
+    ← homological_complex.comp_f], congr' 1,
+  erw hh.comm i,
+  simp only [homological_complex.cochain_complex_d_next,
+    homological_complex.cochain_complex_prev_d, add_sub_cancel,
+    self_eq_add_right],
+  exact comp_zero,
+end
 
 lemma comp_add_equiv_iso_AddcommGroup_iso_eq_comp
   (X X' B : AddCommGroup.{u}) (e' : X' ≃+ B) (f : X ⟶ X') :
