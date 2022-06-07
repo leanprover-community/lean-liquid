@@ -368,12 +368,10 @@ has_homology.map h₁ h₂ sq1 sq2 = (has_homology.iso h₁ (homology.has f₁ g
   (homology.map h₁.w h₂.w ⟨α, β, sq1.w.symm⟩ ⟨β, γ, sq2.w.symm⟩ rfl) ≫
   (has_homology.iso h₂ (homology.has f₂ g₂ h₂.w)).inv:=
 begin
-  symmetry,
-  apply eq_map_of_π_map_ι,
-  rw [← category.assoc, ← category.assoc, π_iso, category.assoc, category.assoc, iso_inv, iso_ι,
-    homology.has_π, homology.has_ι, ← category.assoc, homology.π'_map, ← category.assoc,
-    ← kernel.lift_ι g₂ (kernel.ι g₁ ≫ β) (by simp [category.assoc, ← sq2.w]), category.assoc,
-    category.assoc, homology.π'_ι],
+  erw homology_map_eq,
+  apply h₁.ext_π,
+  apply h₂.ext_ι,
+  simp,
 end
 
 end map

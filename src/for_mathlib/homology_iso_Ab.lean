@@ -88,7 +88,7 @@ protected noncomputable
 def homology {A B C : AddCommGroup.{u}} (f : A ⟶ B) (g : B ⟶ C) : AddCommGroup :=
 AddCommGroup.of (g.ker ⧸ (f.range.comap g.ker.subtype))
 
-lemma has_homology : has_homology f g (AddCommGroup.homology f g) :=
+def has_homology : has_homology f g (AddCommGroup.homology f g) :=
 { w := w,
   π := (AddCommGroup.kernel_iso_ker _).hom ≫ of_hom (quotient_add_group.mk' _),
   ι := quotient_add_group.lift _ ((cokernel.π f).comp $ add_subgroup.subtype _) begin
@@ -181,7 +181,40 @@ def homology_map : AddCommGroup.homology f₁ g₁ ⟶ AddCommGroup.homology f�
 @[simp]
 lemma homology_map_apply_mk (t) :
   homology_map w₁ w₂ sq1 sq2 (quotient_add_group.mk t) =
-  quotient_add_group.mk (ker_map sq2 t) := sorry
+  quotient_add_group.mk (ker_map sq2 t) :=
+begin
+  dsimp [homology_map, has_homology.map, has_homology.desc],
+  generalize_proofs _ h _ _ h1 h2,
+  have := h.comp_epi_desc
+    ((has_homology f₂ g₂ w₂).lift (kernel.ι g₁ ≫ β ≫ cokernel.π f₂) h1) h2,
+  let e : kernel g₁ ≅ AddCommGroup.of (add_monoid_hom.ker g₁) := AddCommGroup.kernel_iso_ker _,
+  let s := e.inv t,
+  let p := (has_homology f₁ g₁ w₁).π,
+  have ht : quotient_add_group.mk t = p s,
+  { dsimp [s, p], rw ← comp_apply,
+    let pp : AddCommGroup.of g₁.ker ⟶ AddCommGroup.homology f₁ g₁ :=
+      quotient_add_group.mk' _,
+    suffices : pp = e.inv ≫ p, rw ← this, refl,
+    rw iso.eq_inv_comp,
+    ext t, refl },
+  rw [ht, ← comp_apply, this],
+  dsimp [s],
+  rw ← comp_apply,
+  dsimp [e, has_homology.desc, has_homology.lift],
+  generalize_proofs hh,
+  let q := (kernel_iso_ker g₁).inv ≫ hh.mono_lift (kernel.ι g₁ ≫ β ≫ cokernel.π f₂) h1,
+  let pp : AddCommGroup.of g₂.ker ⟶ AddCommGroup.homology f₂ g₂ :=
+    quotient_add_group.mk' _,
+  let tt : AddCommGroup.of g₁.ker ⟶ AddCommGroup.of g₂.ker :=
+    ker_map sq2,
+  have hq : (kernel_iso_ker g₁).inv ≫ hh.mono_lift (kernel.ι g₁ ≫ β ≫ cokernel.π f₂) h1 =
+    tt ≫ pp,
+  { rw iso.inv_comp_eq,
+    have := hh.mono_lift_comp (kernel.ι g₁ ≫ β ≫ cokernel.π f₂) h1,
+    rw [← cancel_mono (has_homology f₂ g₂ w₂).ι, this],
+    ext, refl } ,
+  rw hq, refl,
+end
 
 noncomputable
 def homology_iso_hom_homology_map :
