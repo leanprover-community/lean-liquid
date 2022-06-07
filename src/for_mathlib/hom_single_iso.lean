@@ -211,13 +211,51 @@ begin
   use f.out.f _ ≫ e,
   rw [← category.assoc, ← f.out.comm, category.assoc, he],
 end
---TODO: Relate the above construction to AddcommGroup.homology_map
--- the above def has more convenient defeq properties for the proof below.
+
+--TODO: This relates the above construction to AddcommGroup.homology_map
+-- the above def has more convenient defeq properties for some of the proofs below, but
+-- the `AddCommGroup.homology_map` is better suited for `aux₂_naturality`.
+lemma map_explicit_homology_eq
+  {P₁ P₂ : bounded_homotopy_category C} (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
+  map_explicit_homology f B i =
+  AddCommGroup.homology_map
+    ((hom_complex P₂ B i).d_comp_d _ _ _)
+    ((hom_complex P₁ B i).d_comp_d _ _ _)
+    (commsq.of_eq $ ((map_hom_complex f B i).comm (i+1) i).symm)
+    (commsq.of_eq $ ((map_hom_complex f B i).comm i (i-1)).symm) :=
+sorry
 
 lemma aux₂_naturality
   (P₁ P₂ : bounded_homotopy_category C) (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
   (aux₂ P₂ B i).hom ≫ map_explicit_homology f _ _ =
-  map_homology f _ _ ≫ (aux₂ P₁ B i).hom := sorry
+  map_homology f _ _ ≫ (aux₂ P₁ B i).hom :=
+begin
+  rw map_explicit_homology_eq,
+  dsimp [aux₂],
+  dsimp [AddCommGroup.homology_iso, AddCommGroup.homology_map, map_homology],
+  generalize_proofs _ _ w _ w',
+  apply (homology.has _ _ w).ext_π,
+  apply (AddCommGroup.has_homology _ _ w').ext_ι,
+  rw has_homology.homology_map_eq,
+  simp only [has_homology.π_map, category.assoc, has_homology.π_map_assoc,
+    has_homology.map_ι, has_homology.map_ι_assoc],
+  let t := _, change t ≫ _ = _,
+  have ht : t = kernel.lift _ (kernel.ι _) _ ≫ (AddCommGroup.has_homology _ _ w).π,
+  rotate 2,
+  { apply kernel.condition },
+  { apply (AddCommGroup.has_homology _ _ w).ext_ι,
+    simp [has_homology.π_ι] },
+  rw ht, clear ht, clear t,
+  let t := _, change _ = _ ≫ t,
+  have ht : t = (homology.has _ _ w').ι ≫ cokernel.desc _ (cokernel.π _) _,
+  rotate 2,
+  { apply cokernel.condition },
+  { apply (homology.has _ _ w').ext_π,
+    rw [← category.assoc, has_homology.π_ι],
+    simp },
+  rw ht, clear ht, clear t,
+  simp,
+end
 
 lemma aux₂_naturality_inv
   (P₁ P₂ : bounded_homotopy_category C) (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :

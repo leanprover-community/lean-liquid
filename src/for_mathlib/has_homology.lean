@@ -217,6 +217,17 @@ end
 
 omit h₁ h₂ sq1 sq2
 
+lemma homology_map_eq (w₁ : f₁ ≫ g₁ = 0) (w₂ : f₂ ≫ g₂ = 0)
+  (e₁ : α ≫ (arrow.mk f₂).hom = (arrow.mk f₁).hom ≫ β)
+  (e₂ : β ≫ (arrow.mk g₂).hom = (arrow.mk g₁).hom ≫ γ) :
+  homology.map w₁ w₂ (arrow.hom_mk e₁) (arrow.hom_mk e₂) rfl =
+  (homology.has f₁ g₁ w₁).map (homology.has f₂ g₂ w₂)
+  (commsq.of_eq e₁.symm) (commsq.of_eq e₂.symm) :=
+begin
+  --- I don't think using `exact.epi_desc` and `exact.mono_desc` is a good choice...
+  sorry
+end
+
 @[simp, reassoc] lemma π_map :
   h₁.π ≫ h₁.map h₂ sq1 sq2 = (h₂.lift (kernel.ι _ ≫ β ≫ cokernel.π _) $
   by simp only [category.assoc, cokernel.π_desc, ← sq2.w, kernel.condition_assoc, zero_comp]) :=
