@@ -101,14 +101,30 @@ def homological_complex.hom_single_iso
 
 namespace bounded_homotopy_category
 
+namespace hom_single_iso_setup
+
+def aux₁
+  (P : bounded_homotopy_category C) (B : C) (i : ℤ) :
+  homology
+    ((((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op).d (i+1) i)
+    ((((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op).d i (i-1))
+    (homological_complex.d_comp_d _ _ _ _) ≅
+  (((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op).homology i :=
+(homology_iso'
+  ((((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op))
+  (i+1) i (i-1) (by simp) (by simp)).symm
+
+end hom_single_iso_setup
+
+open hom_single_iso_setup
+
 noncomputable
 def hom_single_iso
   (P : bounded_homotopy_category C) (B : C) (i : ℤ) :
   AddCommGroup.of (P ⟶ (bounded_homotopy_category.single C i).obj B) ≅
   (((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op).homology i :=
 begin
-  refine _ ≪≫ (homology_iso' _ (i+1) i (i-1) _ _).symm,
-  rotate, { dsimp, refl }, { dsimp, exact sub_add_cancel _ _ },
+  refine _ ≪≫ aux₁ P B i,
   refine add_equiv_iso_AddCommGroup_iso.hom _ ≪≫ (AddCommGroup.homology_iso _ _ _).symm,
   refine add_equiv.surjective_congr (homological_complex.hom_single_iso P.val.as B i)
     (homotopy_category.quotient_map_hom _ _)
