@@ -206,8 +206,16 @@ apply_nolint category_theory.exact_seq.w def_lemma
 apply_nolint homological_complex.complex_to_functor_functor unused_arguments
 
 -- for_mathlib/homology_iso.lean
+apply_nolint category_theory.homology_iso_inv_homology_functor_map def_lemma
 apply_nolint category_theory.homology_iso_map def_lemma
 apply_nolint category_theory.kernel_lift_eq unused_arguments
+
+-- for_mathlib/homology_iso_Ab.lean
+apply_nolint AddCommGroup.homology_iso_hom_homology_map def_lemma
+apply_nolint AddCommGroup.homology_iso_inv_homology_map def_lemma
+
+-- for_mathlib/homology_map.lean
+apply_nolint is_iso_of_square unused_arguments
 
 -- for_mathlib/homotopy_category_coproducts.lean
 apply_nolint category_theory.is_initial_colimit def_lemma unused_arguments
@@ -218,15 +226,17 @@ apply_nolint homotopy_category.homotopic_of_quotient_map_eq unused_arguments
 apply_nolint short_exact_sequence.biprod_factors unused_arguments
 apply_nolint short_exact_sequence.horseshoe_ker unused_arguments
 
+-- for_mathlib/imker.lean
+apply_nolint cochain_complex.imker.cokernel.desc_is_iso unused_arguments
+apply_nolint cochain_complex.imker.map_is_iso_of_iso_of_map_is_iso unused_arguments
+apply_nolint cochain_complex.imker.obj_is_zero_of_iso unused_arguments
+
 -- for_mathlib/internal_hom.lean
 apply_nolint category_theory.monoidal.split_left unused_arguments
 apply_nolint category_theory.monoidal.split_right unused_arguments
 
 -- for_mathlib/is_iso_iota.lean
 apply_nolint category_theory.limits.is_initial.colimit_cocone unused_arguments
-
--- for_mathlib/is_quasi_iso.lean
-apply_nolint is_iso_of_square unused_arguments
 
 -- for_mathlib/mapping_cone.lean
 apply_nolint homological_complex.homological_complex.zero_X dup_namespace
@@ -303,10 +313,6 @@ apply_nolint category_theory.triangulated.triangle.right_unitality_aux unused_ar
 apply_nolint category_theory.triangulated.triangle.shift_add_comp_eq_to_hom unused_arguments
 apply_nolint category_theory.triangulated.triangle.shift_add_comp_eq_to_hom' unused_arguments
 apply_nolint category_theory.triangulated.triangle.shift_comm_eq_eq_to_hom unused_arguments
-
--- for_mathlib/truncation.lean
-apply_nolint cochain_complex.imker.map_is_iso_of_iso_of_map_is_iso unused_arguments
-apply_nolint cochain_complex.imker.obj_is_zero_of_iso unused_arguments
 
 -- free_pfpng/epi.lean
 apply_nolint exists_signed_sum_aux decidable_classical unused_arguments
