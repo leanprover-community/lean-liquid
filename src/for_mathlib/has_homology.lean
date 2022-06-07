@@ -58,6 +58,12 @@ def homology.has (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0) :
   epi_π := by { delta homology.π', apply epi_comp },
   mono_ι := by { delta homology.ι, apply mono_comp } }
 
+lemma homology.has_π {f : A ⟶ B} {g : B ⟶ C} (w : f ≫ g = 0) :
+  (homology.has f g w).π = homology.π' f g w := rfl
+
+lemma homology.has_ι {f : A ⟶ B} {g : B ⟶ C} (w : f ≫ g = 0) :
+  (homology.has f g w).ι = homology.ι f g w := rfl
+
 namespace has_homology
 
 attribute [instance] epi_π mono_ι
@@ -305,6 +311,38 @@ end
 abbreviation iso (h₁ : has_homology f g H₁) (h₂ : has_homology f g H₂) :
   H₁ ≅ H₂ :=
 map_iso h₁ h₂ (_root_.commsq.vrefl f) (_root_.commsq.vrefl g)
+
+lemma iso_inv (h₁ : has_homology f g H₁) (h₂ : has_homology f g H₂) :
+  (iso h₁ h₂).inv = (iso h₂ h₁).hom := rfl
+
+lemma π_iso (h₁ : has_homology f g H₁) (h₂ : has_homology f g H₂) :
+  h₁.π ≫ (h₁.iso h₂).hom = h₂.π :=
+begin
+  simp only [iso.refl_hom, category.id_comp, map_iso_hom, π_map],
+  exact (π_eq_lift h₂).symm,
+end
+
+lemma iso_ι (h₁ : has_homology f g H₁) (h₂ : has_homology f g H₂) :
+  (h₁.iso h₂).hom ≫ h₂.ι = h₁.ι :=
+begin
+  simp only [iso.refl_hom, category.id_comp, map_iso_hom, map_ι],
+  exact (ι_eq_desc h₁).symm,
+end
+
+lemma has_homology.map_iso_homology_map :
+has_homology.map h₁ h₂ sq1 sq2 = (has_homology.iso h₁ (homology.has f₁ g₁ h₁.w)).hom ≫
+  (homology.map h₁.w h₂.w ⟨α, β, sq1.w.symm⟩ ⟨β, γ, sq2.w.symm⟩ rfl) ≫
+  (has_homology.iso h₂ (homology.has f₂ g₂ h₂.w)).inv:=
+begin
+  symmetry,
+  apply eq_map_of_π_map_ι,
+  rw [← category.assoc, ← category.assoc, π_iso, category.assoc, category.assoc, iso_inv, iso_ι,
+    homology.has_π, homology.has_ι, ← category.assoc, homology.π'_map, ← category.assoc,
+    ← kernel.lift_ι g₂ (kernel.ι g₁ ≫ β) (by simp [category.assoc, ← sq2.w]), category.assoc,
+    category.assoc],
+  apply congr_arg, -- works because kernel.lift ... = kernel.map g₁ g₂ β γ
+  simp,
+end
 
 end map
 
