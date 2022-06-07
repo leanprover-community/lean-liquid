@@ -405,6 +405,32 @@ begin
   simp,
 end
 
+lemma image_to_kernel_eq_image_to_kernel_of_eq_snd {A B C : 𝓐} (f : A ⟶ B) {g h : B ⟶ C}
+  (hgh : g = h) (w : f ≫ g = 0) : image_to_kernel f g w = image_to_kernel f h (by rw [← hgh, w]) ≫
+  eq_to_hom (by rw hgh) :=
+begin
+  subst hgh,
+  simp only [eq_to_hom_refl, category.comp_id],
+end
+
+lemma image_to_kernel_eq_image_to_kernel_of_eq_fst {A B C : 𝓐} (f g : A ⟶ B) {h : B ⟶ C}
+  (hfg : f = g) (w : f ≫ h = 0) : image_to_kernel f h w = eq_to_hom (by rw hfg) ≫
+    image_to_kernel g h (by rw [← hfg, w]) :=
+begin
+  subst hfg,
+  simp only [eq_to_hom_refl, category.id_comp],
+end
+
+lemma cokernel.desc_with_isomorphisms {A B C D : 𝓐} (f : A ⟶ B) (e : B ⟶ C) (g : C ⟶ D)
+  [is_iso e] (w : f ≫ e ≫ g = 0) :
+  (cokernel_comp_is_iso f e).hom ≫ cokernel.desc f (e ≫ g) w =
+  cokernel.desc (f ≫ e) g (by simp [w]) :=
+begin
+  simp,
+  sorry, -- presumably this is true!
+end
+
+
 lemma homology_functor.is_iso_of_is_zero_of_is_zero_of_is_zero {ι : Type*} {c : complex_shape ι}
   {i j : ι} (hij : c.rel i j) {C₁ C₂ : homological_complex 𝓐 c} (h1from : C₁.d_from j = 0)
   (h2to : C₂.d_to j = 0) (h2from : C₂.d_from j = 0) (isomap : cokernel (C₁.d_to j) ≅ C₂.X j)
@@ -417,7 +443,42 @@ begin
   have foo : image_to_kernel (C₁.d_to j) (C₁.d_from j) (C₁.d_to_comp_d_from j) =
     (image_to_kernel (C₁.d_to j) (0 : C₁.X j ⟶ C₁.X_next j) (comp_zero)) ≫
     eq_to_hom (by rw h1from),
-  { sorry, }, -- assuming this is right, it should be factored out as a lemma
+  { apply image_to_kernel_eq_image_to_kernel_of_eq_snd },
+  rw ← cokernel_iso_of_eq_hom_comp_desc foo,
+  apply @is_iso.comp_is_iso _ _ _ _ _ _ _ _ _, apply_instance, swap, sorry, -- definitely true
+  rw image_to_kernel_zero_right,
+  have bar : image_to_kernel (C₂.d_to j) (C₂.d_from j) (C₂.d_to_comp_d_from j) =
+    eq_to_hom (by rw [h2to]) ≫ (image_to_kernel (0 : C₂.X_prev j ⟶ C₂.X j)
+      (0 : C₂.X j ⟶ C₂.X_next j) (comp_zero)) ≫ eq_to_hom (by rw [h2from]),
+  { rw ← image_to_kernel_eq_image_to_kernel_of_eq_snd,
+    rw image_to_kernel_eq_image_to_kernel_of_eq_fst },
+
+  have bar' : image_to_kernel (C₂.d_to j) (C₂.d_from j) (C₂.d_to_comp_d_from j) = 0,
+  { rw bar, simp, },
+  rw ← π_comp_cokernel_iso_of_eq_hom bar'.symm,
+  rw ← cokernel.desc_is_iso, swap, sorry, -- definitely true
+  apply @is_iso.comp_is_iso _ _ _ _ _ _ _ _ _, swap, apply_instance,
+  clear foo bar,
+  dsimp,
+  rw ← cokernel.desc_with_isomorphisms ((image_subobject (C₁.d_to j)).arrow ≫ inv (kernel_subobject 0).arrow) _ (kernel_subobject_map (homological_complex.hom.sq_from f j)),
+  swap, sorry, -- definitely true
+  apply @is_iso.comp_is_iso _ _ _ _ _ _ _ _ _, apply_instance,
+  rw ← cokernel.desc_with_isomorphisms,
+  swap, sorry, -- definitely true
+  apply @is_iso.comp_is_iso _ _ _ _ _ _ _ _ _, apply_instance,
+  simp,
+  delta homological_complex.hom.sq_from arrow.hom_mk,
+  haveI foo : is_iso (kernel_subobject (C₂.d_from j)).arrow,
+  { rw h2from, apply_instance, },
+  apply is_iso.of_is_iso_comp_right _ (kernel_subobject (C₂.d_from j)).arrow,
+  rw cokernel.desc_is_iso,
+  suffices : is_iso (cokernel.desc (image_subobject (C₁.d_to j)).arrow (f.f j) sorry),
+  { convert this,
+    simp,
+    rw ← category.assoc,
+    congr',
+    sorry,
+  },
   sorry
 end
 
