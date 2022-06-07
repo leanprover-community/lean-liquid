@@ -179,15 +179,23 @@ def aux₂
   AddCommGroup.homology ((hom_complex P B i).d (i+1) i) ((hom_complex P B i).d i (i-1)) :=
 (AddCommGroup.homology_iso _ _ _)
 
+def ker_hom
+  {P₁ P₂ : bounded_homotopy_category C} (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
+  ((hom_complex P₂ B i).d i (i - 1)).ker →+
+  ((hom_complex P₁ B i).d i (i - 1)).ker :=
+{ to_fun := λ x, ⟨(map_hom_complex f B i).f _ ↑x, sorry⟩,
+  map_zero' := sorry,
+  map_add' := sorry }
+
 def map_explicit_homology
   {P₁ P₂ : bounded_homotopy_category C} (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
   AddCommGroup.homology ((hom_complex P₂ B i).d (i+1) i) ((hom_complex P₂ B i).d i (i-1)) ⟶
   AddCommGroup.homology ((hom_complex P₁ B i).d (i+1) i) ((hom_complex P₁ B i).d i (i-1)) :=
-AddCommGroup.homology_map
-  ((hom_complex P₂ B i).d_comp_d _ _ _)
-  ((hom_complex P₁ B i).d_comp_d _ _ _)
-  (commsq.of_eq $ ((map_hom_complex f B i).comm (i+1) i).symm)
-  (commsq.of_eq $ ((map_hom_complex f B i).comm i (i-1)).symm)
+quotient_add_group.lift _
+(add_monoid_hom.comp (quotient_add_group.mk' _) $ ker_hom f _ _)
+sorry
+--TODO: Relate the above construction to AddcommGroup.homology_map
+-- the above def has more convenient defeq properties for the proof below.
 
 lemma aux₂_naturality
   (P₁ P₂ : bounded_homotopy_category C) (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
@@ -235,11 +243,33 @@ begin
     refl }
 end
 
+lemma aux₃_apply
+  (P : bounded_homotopy_category C) (B : C) (i : ℤ)
+  (f : P ⟶ (single C i).obj B) :
+  aux₃ P B i f = quotient_add_group.mk ⟨f.out.f i ≫ eq_to_hom (if_pos rfl), begin
+    change _ = _, dsimp [hom_complex],
+    rw [← category.assoc, ← f.out.comm, category.assoc],
+    convert zero_comp,
+    apply is_zero.eq_of_tgt, convert is_zero_zero _,
+    dsimp [single], rw if_neg, simp,
+  end⟩ := rfl
+
 lemma aux₃_naturality
   (P₁ P₂ : bounded_homotopy_category C) (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
   (map_explicit_homology f B i).comp (aux₃ P₂ B i).to_add_monoid_hom =
   add_monoid_hom.comp (aux₃ P₁ B i).to_add_monoid_hom ((preadditive_yoneda.obj _).map f.op) :=
-sorry
+begin
+  ext ⟨x⟩,
+  dsimp, simp_rw aux₃_apply,
+  dsimp [map_explicit_homology, ker_hom, map_hom_complex],
+  rw ← sub_eq_zero,
+  erw ← (quotient_add_group.mk' _).map_sub,
+  erw quotient_add_group.eq_zero_iff,
+  rw [add_subgroup.mem_comap],
+  dsimp,
+  -- now we need to use a homotopy...
+  sorry
+end
 
 lemma comp_add_equiv_iso_AddcommGroup_iso_eq_comp
   (X X' B : AddCommGroup.{u}) (e' : X' ≃+ B) (f : X ⟶ X') :
