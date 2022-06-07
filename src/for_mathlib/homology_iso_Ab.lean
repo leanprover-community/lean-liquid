@@ -85,10 +85,10 @@ attribute [elementwise] AddCommGroup.kernel_iso_ker_hom_comp_subtype AddCommGrou
 variables {A B C : AddCommGroup.{u}} (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0)
 
 protected noncomputable
-def homology {A B C : AddCommGroup.{u}} (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0) : AddCommGroup :=
+def homology {A B C : AddCommGroup.{u}} (f : A ⟶ B) (g : B ⟶ C) : AddCommGroup :=
 AddCommGroup.of (g.ker ⧸ (f.range.comap g.ker.subtype))
 
-lemma has_homology : has_homology f g (AddCommGroup.homology f g w) :=
+lemma has_homology : has_homology f g (AddCommGroup.homology f g) :=
 { w := w,
   π := (AddCommGroup.kernel_iso_ker _).hom ≫ of_hom (quotient_add_group.mk' _),
   ι := quotient_add_group.lift _ ((cokernel.π f).comp $ add_subgroup.subtype _) begin
@@ -175,7 +175,7 @@ by { rintro ⟨a, _⟩ ⟨b, _⟩, ext, apply α.map_add, }
 include sq2
 
 noncomputable
-def homology_map : AddCommGroup.homology f₁ g₁ w₁ ⟶ AddCommGroup.homology f₂ g₂ w₂ :=
+def homology_map : AddCommGroup.homology f₁ g₁ ⟶ AddCommGroup.homology f₂ g₂ :=
 (has_homology f₁ g₁ w₁).map (has_homology f₂ g₂ w₂) sq1 sq2
 
 noncomputable

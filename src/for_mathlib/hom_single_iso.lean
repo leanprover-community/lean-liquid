@@ -186,9 +186,7 @@ by rw [iso.comp_inv_eq, category.assoc, iso.eq_inv_comp, aux₂_naturality]
 def aux₃
   (P : bounded_homotopy_category C) (B : C) (i : ℤ) :
   (P ⟶ (single C i).obj B) ≃+
-  (((hom_complex P B i).d i (i-1)).ker ⧸
-    ((hom_complex P B i).d (i+1) i).range.comap
-    ((hom_complex P B i).d i (i-1)).ker.subtype) :=
+  AddCommGroup.homology ((hom_complex P B i).d (i+1) i) ((hom_complex P B i).d i (i-1)) :=
 begin
   refine add_equiv.surjective_congr (homological_complex.hom_single_iso P.val.as B i)
     (homotopy_category.quotient_map_hom _ _)
