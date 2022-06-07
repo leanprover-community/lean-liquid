@@ -1,5 +1,6 @@
 import for_mathlib.derived.defs
 import for_mathlib.homology_map
+import for_mathlib.has_homology
 
 noncomputable theory
 
@@ -22,49 +23,25 @@ lemma homology_map_homology_op_iso {A₁ B₁ C₁ A₂ B₂ C₂ : 𝓐}
   (f₂ : A₂ ⟶ B₂) (g₂ : B₂ ⟶ C₂) (w₂ : f₂ ≫ g₂ = 0)
   (a : A₁ ⟶ A₂) (b : B₁ ⟶ B₂) (c : C₁ ⟶ C₂)
   (sq1 : commsq f₁ a b f₂) (sq2 : commsq g₁ b c g₂) :
-  homology.map' _ _ sq2.op sq1.op ≫ (homology_op_iso f₁ g₁ w₁).hom =
-  (homology_op_iso _ _ _).hom ≫ (homology.map' w₁ w₂ sq1 sq2).op :=
+  homology.map' _ _ sq2.op sq1.op ≫ (has_homology.homology_op_iso f₁ g₁ w₁).hom =
+  (has_homology.homology_op_iso _ _ _).hom ≫ (homology.map' w₁ w₂ sq1 sq2).op :=
 begin
-  --delta homology_op_iso, dsimp,
-  simp_rw [homology_op_iso_eq_desc'],
-  rw [← homology.map_eq],
-  simp_rw homology.map_eq_desc'_lift_left,
-  apply homology.hom_from_ext,
-  simp only [category.assoc, exact.kernel.ι_op, eq_to_hom_refl, category.id_comp,
-    kernel_op_op_hom, homology.π'_desc'_assoc],
-  rw ← (homology.lift g₁.op _ _ _ _).op_unop,
-  rw ← (homology.desc' g₁.op _ _ _ _).op_unop,
-  simp_rw ← op_comp, congr' 1,
-  apply homology.hom_from_ext,
-  simp only [category.assoc, op_comp, limits.cokernel.π_desc, homology.π'_desc'_assoc,
-    homology.lift_ι_assoc],
-  dsimp [exact.kernel_op_iso],
-  simp_rw limits.cokernel.π_desc,
-  simp only [category.id_comp],
-  rw [← (homology.π' f₁ g₁ w₁).unop_op],
-  conv_rhs { rw ← b.unop_op },
-  rw ← (limits.kernel.ι g₁).unop_op,
-  simp_rw ← unop_comp,
-  congr' 1,
-  simp only [category.assoc, exact.kernel.ι_op, category.id_comp, eq_to_hom_refl],
-  let s := _, change s ≫ _ = _,
-  have hs : s = limits.kernel.lift _ (limits.kernel.ι _ ≫ b.op) _ ≫ homology.π' _ _ _,
-  { apply homology.hom_to_ext,
-    simp only [homology.lift_ι, category.assoc, homological_complex.homology.π'_ι,
-      limits.kernel.lift_ι_assoc] },
-  rw hs,
-  simp only [category.assoc, homology.π'_desc'_assoc],
-  rw ← (limits.kernel.lift f₁.op _ _).op_unop,
-  conv_rhs { rw ← (limits.kernel.ι f₂.op).op_unop },
-  simp_rw ← op_comp, congr' 1,
-  rw homology.π'_ι,
-  simp only [category.assoc, limits.cokernel.π_desc_assoc],
-  dsimp [exact.kernel_op_iso],
-  simp only [category.assoc, limits.cokernel.π_desc_assoc],
-  rw [← unop_comp, limits.kernel.lift_ι],
-  simp,
-  { simp only [category.assoc, ← op_comp, sq1.w],
-    simp }
+  suffices : (homology.map' w₁ w₂ sq1 sq2).op =
+    (homology.has _ _ _).op.map (homology.has _ _ _).op sq2.op sq1.op,
+  { erw [this, has_homology.map_comp_map, has_homology.map_comp_map],
+    apply (homology.has _ _ _).ext_π,
+    apply (homology.has _ _ _).op.ext_ι,
+    simp only [has_homology.π_map, has_homology.lift_comp_ι, iso.refl_hom],
+    erw [has_homology.lift_comp_ι],
+    congr' 2, rw [category.id_comp, category.comp_id], },
+  apply (homology.has _ _ _).op.ext_π,
+  apply (homology.has _ _ _).op.ext_ι,
+  simp only [has_homology.π_map, has_homology.lift_comp_ι],
+  dsimp only [has_homology.op, kernel_op_op_hom, cokernel_op_op_inv],
+  simp only [← op_comp, homology.map', category.assoc, has_homology.π_map_assoc,
+    has_homology.lift_comp_ι_assoc, limits.kernel.lift_ι_assoc, limits.cokernel.π_desc],
+  simp only [op_comp, category.assoc],
+  refl,
 end
 
 lemma is_quasi_iso_of_op {X Y : (chain_complex 𝓐 ℤ)ᵒᵖ} (f : X ⟶ Y)
@@ -83,7 +60,7 @@ begin
   replace aux := @is_iso.of_is_iso_comp_left _ _ _ _ _ _ _ _ aux,
   replace aux := @is_iso.of_is_iso_comp_right _ _ _ _ _ _ _ _ aux,
   rw [← is_iso_op_iff],
-  refine is_iso_of_square _ (homology_op_iso _ _ _).hom (homology_op_iso _ _ _).hom  _ _ aux _ _,
+  refine is_iso_of_square _ (has_homology.homology_op_iso _ _ _).hom (has_homology.homology_op_iso _ _ _).hom  _ _ aux _ _,
   swap, { apply_instance }, swap, { apply_instance },
   rw [homology.map_eq, homology.map_eq, ← homology_map_homology_op_iso],
   congr' 2,
