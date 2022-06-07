@@ -147,22 +147,15 @@ def aux₂
   AddCommGroup.homology ((hom_complex P B i).d (i+1) i) ((hom_complex P B i).d i (i-1)) :=
 (AddCommGroup.homology_iso _ _ _)
 
-def ker_hom
-  {P₁ P₂ : bounded_homotopy_category C} (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
-  ((hom_complex P₂ B i).d i (i - 1)).ker →+
-  ((hom_complex P₁ B i).d i (i - 1)).ker :=
-{ to_fun := λ x, ⟨(map_hom_complex f B i).f _ ↑x, sorry⟩,
-  map_zero' := sorry,
-  map_add' := sorry }
-
 def map_explicit_homology
   {P₁ P₂ : bounded_homotopy_category C} (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
   AddCommGroup.homology ((hom_complex P₂ B i).d (i+1) i) ((hom_complex P₂ B i).d i (i-1)) ⟶
   AddCommGroup.homology ((hom_complex P₁ B i).d (i+1) i) ((hom_complex P₁ B i).d i (i-1)) :=
--- alternative: use `AddCommGroup.homology_map`
-quotient_add_group.lift _
-(add_monoid_hom.comp (quotient_add_group.mk' _) $ ker_hom f _ _)
-sorry
+AddCommGroup.homology_map
+  ((hom_complex P₂ B i).d_comp_d _ _ _)
+  ((hom_complex P₁ B i).d_comp_d _ _ _)
+  (commsq.of_eq $ ((map_hom_complex f B i).comm (i+1) i).symm)
+  (commsq.of_eq $ ((map_hom_complex f B i).comm i (i-1)).symm)
 
 lemma aux₂_naturality
   (P₁ P₂ : bounded_homotopy_category C) (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
