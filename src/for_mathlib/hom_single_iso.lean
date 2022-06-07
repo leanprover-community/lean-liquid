@@ -268,7 +268,24 @@ begin
   rw [add_subgroup.mem_comap],
   dsimp,
   -- now we need to use a homotopy...
-  sorry
+  simp_rw [← category.assoc, ← homological_complex.comp_f],
+  let t := _, let s := _, change homological_complex.hom.f t i ≫ _ -
+    homological_complex.hom.f s i ≫ _ ∈ _,
+  let hh : homotopy t s := begin
+    apply homotopy_category.homotopy_of_eq,
+    simpa,
+  end,
+  let e := hh.hom (i+1) i,
+  change ∃ e, _,
+  dsimp [hom_complex],
+  use e ≫ eq_to_hom (if_pos rfl),
+  rw [← preadditive.sub_comp _ _ (eq_to_hom _), ← category.assoc,
+    ← homological_complex.comp_f], congr' 1,
+  erw hh.comm i,
+  simp only [homological_complex.cochain_complex_d_next,
+    homological_complex.cochain_complex_prev_d, add_sub_cancel,
+    self_eq_add_right],
+  exact comp_zero,
 end
 
 lemma comp_add_equiv_iso_AddcommGroup_iso_eq_comp
