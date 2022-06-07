@@ -103,35 +103,86 @@ namespace bounded_homotopy_category
 
 namespace hom_single_iso_setup
 
+abbreviation hom_complex
+  (P : bounded_homotopy_category C) (B : C) (i : ℤ) :=
+(((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op)
+
+abbreviation map_hom_complex
+  {P₁ P₂ : bounded_homotopy_category C} (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
+  hom_complex P₂ B i ⟶ hom_complex P₁ B i :=
+(((preadditive_yoneda.obj B).map_homological_complex _).map
+  (homological_complex.op_functor.map f.out.op))
+
 def aux₁
   (P : bounded_homotopy_category C) (B : C) (i : ℤ) :
   homology
-    ((((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op).d (i+1) i)
-    ((((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op).d i (i-1))
-    (homological_complex.d_comp_d _ _ _ _) ≅
-  (((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op).homology i :=
-(homology_iso'
-  ((((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op))
-  (i+1) i (i-1) (by simp) (by simp)).symm
+    ((hom_complex P B i).d (i+1) i)
+    ((hom_complex P B i).d i (i-1))
+    ((hom_complex P B i).d_comp_d _ _ _) ≅
+  (hom_complex P B i).homology i :=
+(homology_iso' (hom_complex P B i) (i+1) i (i-1) (by simp) (by simp)).symm
+
+abbreviation map_homology
+  {P₁ P₂ : bounded_homotopy_category C} (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
+  homology ((hom_complex P₂ B i).d (i + 1) i) ((hom_complex P₂ B i).d i (i - 1))
+    ((hom_complex _ B i).d_comp_d _ _ _) ⟶
+  homology ((hom_complex P₁ B i).d (i + 1) i) ((hom_complex P₁ B i).d i (i - 1))
+    ((hom_complex _ B i).d_comp_d _ _ _) :=
+homology.map _ _
+(arrow.hom_mk $ (map_hom_complex f B i).comm _ _)
+(arrow.hom_mk $ (map_hom_complex f B i).comm _ _)
+rfl
+
+lemma aux₁_naturality
+  (P₁ P₂ : bounded_homotopy_category C) (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
+  (aux₁ P₂ B i).hom ≫ (homology_functor _ _ _).map (map_hom_complex f B i) =
+  (map_homology f _ _) ≫ (aux₁ P₁ B i).hom := sorry
 
 def aux₂
   (P : bounded_homotopy_category C) (B : C) (i : ℤ) :
   homology
-    ((((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op).d (i+1) i)
-    ((((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op).d i (i-1))
+    ((hom_complex P B i).d (i+1) i)
+    ((hom_complex P B i).d i (i-1))
     (homological_complex.d_comp_d _ _ _ _) ≅
   AddCommGroup.of
-  (((((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op).d i (i-1)).ker ⧸
-    ((((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op).d (i+1) i).range.comap
-    ((((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op).d i (i-1)).ker.subtype) :=
+  (((hom_complex P B i).d i (i-1)).ker ⧸
+    ((hom_complex P B i).d (i+1) i).range.comap
+    ((hom_complex P B i).d i (i-1)).ker.subtype) :=
 (AddCommGroup.homology_iso _ _ _)
+
+def ker_hom
+  {P₁ P₂ : bounded_homotopy_category C} (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
+  ((hom_complex P₂ B i).d i (i - 1)).ker →+
+  ((hom_complex P₁ B i).d i (i - 1)).ker :=
+{ to_fun := λ x, ⟨(map_hom_complex f B i).f _ ↑x, sorry⟩,
+  map_zero' := sorry,
+  map_add' := sorry }
+
+def map_explicit_homology
+  {P₁ P₂ : bounded_homotopy_category C} (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
+  AddCommGroup.of
+  (((hom_complex P₂ B i).d i (i-1)).ker ⧸
+    ((hom_complex P₂ B i).d (i+1) i).range.comap
+    ((hom_complex P₂ B i).d i (i-1)).ker.subtype) ⟶
+  AddCommGroup.of
+  (((hom_complex P₁ B i).d i (i-1)).ker ⧸
+    ((hom_complex P₁ B i).d (i+1) i).range.comap
+    ((hom_complex P₁ B i).d i (i-1)).ker.subtype) :=
+quotient_add_group.lift _
+(add_monoid_hom.comp (quotient_add_group.mk' _) $ ker_hom f _ _)
+sorry
+
+lemma aux₂_naturality
+  (P₁ P₂ : bounded_homotopy_category C) (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
+  (aux₂ P₂ B i).hom ≫ map_explicit_homology f _ _ =
+  map_homology f _ _ ≫ (aux₂ P₁ B i).hom := sorry
 
 def aux₃
   (P : bounded_homotopy_category C) (B : C) (i : ℤ) :
   (P ⟶ (single C i).obj B) ≃+
-  (((((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op).d i (i-1)).ker ⧸
-    ((((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op).d (i+1) i).range.comap
-    ((((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op).d i (i-1)).ker.subtype) :=
+  (((hom_complex P B i).d i (i-1)).ker ⧸
+    ((hom_complex P B i).d (i+1) i).range.comap
+    ((hom_complex P B i).d i (i-1)).ker.subtype) :=
 begin
   refine add_equiv.surjective_congr (homological_complex.hom_single_iso P.val.as B i)
     (homotopy_category.quotient_map_hom _ _)
@@ -153,6 +204,12 @@ begin
     homological_complex.hom_single_iso_apply_coe],
   rw [← is_iso.comp_inv_eq, inv_eq_to_hom, eq_comm, category.assoc],
 end
+
+lemma aux₃_naturality
+  (P₁ P₂ : bounded_homotopy_category C) (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
+  (map_explicit_homology f B i).comp (aux₃ P₂ B i).to_add_monoid_hom =
+  add_monoid_hom.comp (aux₃ P₁ B i).to_add_monoid_hom ((preadditive_yoneda.obj _).map f.op) :=
+sorry
 
 end hom_single_iso_setup
 
