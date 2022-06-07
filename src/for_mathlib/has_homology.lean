@@ -269,6 +269,11 @@ begin
   simp [homology_lift_eq, homology_desc_eq],
 end
 
+lemma homology_map_eq' (w₁ : f₁ ≫ g₁ = 0) (w₂ : f₂ ≫ g₂ = 0) :
+  homology.map w₁ w₂ ⟨α, β, sq1.w.symm⟩ ⟨β, γ, sq2.w.symm⟩ rfl =
+  (homology.has f₁ g₁ w₁).map (homology.has f₂ g₂ w₂) sq1 sq2 :=
+homology_map_eq _ _ _ _
+
 lemma eq_map_of_π_map_ι (φ : H₁ ⟶ H₂) (hφ : h₁.π ≫ φ ≫ h₂.ι = kernel.ι g₁ ≫ β ≫ cokernel.π f₂) :
   φ = h₁.map h₂ sq1 sq2 :=
 by rwa [← π_map_ι h₁ h₂ sq1 sq2, cancel_epi, cancel_mono] at hφ
@@ -368,10 +373,9 @@ has_homology.map h₁ h₂ sq1 sq2 = (has_homology.iso h₁ (homology.has f₁ g
   (homology.map h₁.w h₂.w ⟨α, β, sq1.w.symm⟩ ⟨β, γ, sq2.w.symm⟩ rfl) ≫
   (has_homology.iso h₂ (homology.has f₂ g₂ h₂.w)).inv:=
 begin
-  erw homology_map_eq,
   apply h₁.ext_π,
   apply h₂.ext_ι,
-  simp,
+  simp [homology_map_eq'],
 end
 
 end map
