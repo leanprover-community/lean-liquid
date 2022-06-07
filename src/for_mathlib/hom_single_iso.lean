@@ -177,6 +177,12 @@ lemma aux₂_naturality
   (aux₂ P₂ B i).hom ≫ map_explicit_homology f _ _ =
   map_homology f _ _ ≫ (aux₂ P₁ B i).hom := sorry
 
+lemma aux₂_naturality_inv
+  (P₁ P₂ : bounded_homotopy_category C) (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
+  map_explicit_homology f _ _ ≫ (aux₂ P₁ B i).inv =
+  (aux₂ P₂ B i).inv ≫  map_homology f _ _ :=
+by rw [iso.comp_inv_eq, category.assoc, iso.eq_inv_comp, aux₂_naturality]
+
 def aux₃
   (P : bounded_homotopy_category C) (B : C) (i : ℤ) :
   (P ⟶ (single C i).obj B) ≃+
@@ -211,6 +217,14 @@ lemma aux₃_naturality
   add_monoid_hom.comp (aux₃ P₁ B i).to_add_monoid_hom ((preadditive_yoneda.obj _).map f.op) :=
 sorry
 
+lemma comp_add_equiv_iso_AddcommGroup_iso_eq_comp
+  (X X' B : AddCommGroup.{u}) (e' : X' ≃+ B) (f : X ⟶ X') :
+  f ≫ (add_equiv_iso_AddCommGroup_iso.hom e').hom =
+  e'.to_add_monoid_hom.comp f := rfl
+
+def hom_mk {A B : Type u} [add_comm_group A] [add_comm_group B] (f : A →+ B) :
+  (AddCommGroup.of A) ⟶ (AddCommGroup.of B) := f
+
 end hom_single_iso_setup
 
 open hom_single_iso_setup
@@ -237,15 +251,19 @@ lemma hom_single_iso_naturality
       homological_complex.unop_functor.right_op ⋙
       (_root_.homology_functor _ _ _).op).map f.out).unop :=
 begin
-  /-
   dsimp only [hom_single_iso, iso.trans_hom, iso.symm_hom, functor.comp_map, functor.op_map,
     functor.right_op_map, quiver.hom.unop_op],
-  simp only [category.assoc, homology_iso_inv_homology_functor_map],
-  simp only [← category.assoc], congr' 1, simp only [category.assoc],
-  rw [homology.map_eq, AddCommGroup.homology_iso_inv_homology_map],
-  simp only [← category.assoc], congr' 1,
-  -/
-  sorry
+  simp_rw [← category.assoc, comp_add_equiv_iso_AddcommGroup_iso_eq_comp],
+  rw ← aux₃_naturality,
+  rw [category.assoc],
+
+  let t := hom_mk (aux₃ P₂ B i).to_add_monoid_hom,
+  change (t ≫ (map_explicit_homology f B i)) ≫ _ ≫ _ = _,
+  slice_lhs 2 3
+  { rw aux₂_naturality_inv },
+  simp_rw category.assoc,
+  rw ← aux₁_naturality,
+  refl,
 end
 
 end bounded_homotopy_category
