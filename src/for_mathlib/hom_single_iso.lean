@@ -200,7 +200,17 @@ def map_explicit_homology
   AddCommGroup.homology ((hom_complex P₁ B i).d (i+1) i) ((hom_complex P₁ B i).d i (i-1)) :=
 quotient_add_group.lift _
 (add_monoid_hom.comp (quotient_add_group.mk' _) $ ker_hom f _ _)
-sorry
+begin
+  rintros ⟨x,(hx : _ = _)⟩ hh,
+  dsimp [ker_hom, map_hom_complex],
+  rw quotient_add_group.eq_zero_iff,
+  rw add_subgroup.mem_comap at *, dsimp at *,
+  change ∃ e, _,
+  obtain ⟨e,he⟩ := hh,
+  dsimp [hom_complex] at *,
+  use f.out.f _ ≫ e,
+  rw [← category.assoc, ← f.out.comm, category.assoc, he],
+end
 --TODO: Relate the above construction to AddcommGroup.homology_map
 -- the above def has more convenient defeq properties for the proof below.
 
