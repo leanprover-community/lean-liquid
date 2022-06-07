@@ -98,7 +98,7 @@ def has_homology : has_homology f g (AddCommGroup.homology f g) :=
     rw [← comp_apply, cokernel.condition, zero_apply],
   end,
   π_ι := by { rw [← kernel_iso_ker_hom_comp_subtype], refl },
-  ex_π := by sorry ; begin
+  ex_π := begin
     rw [← exact_comp_hom_inv_comp_iff (kernel_iso_ker g), iso.inv_hom_id_assoc],
     rw AddCommGroup.exact_iff',
     split,
@@ -114,7 +114,7 @@ def has_homology : has_homology f g (AddCommGroup.homology f g) :=
       rw [← comp_apply, kernel.lift_ι, ht],
       refl }
   end,
-  ι_ex := by sorry ; begin
+  ι_ex := begin
     rw AddCommGroup.exact_iff',
     split,
     { ext ⟨t⟩,
@@ -144,8 +144,9 @@ def has_homology : has_homology f g (AddCommGroup.homology f g) :=
     rw [quotient_add_group.mk'_apply, quotient_add_group.lift_mk] at hy,
     rw add_subgroup.mem_comap,
     dsimp at hy ⊢,
-    change ∃ e, _,
-    have : exact f (cokernel.π f), by library_search,
+    have : exact f (cokernel.π f) := abelian.exact_cokernel f,
+    rw AddCommGroup.exact_iff' at this,
+    exact this.2 hy,
   end }
 
 protected noncomputable
