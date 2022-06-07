@@ -144,10 +144,7 @@ def aux₂
     ((hom_complex P B i).d (i+1) i)
     ((hom_complex P B i).d i (i-1))
     (homological_complex.d_comp_d _ _ _ _) ≅
-  AddCommGroup.of
-  (((hom_complex P B i).d i (i-1)).ker ⧸
-    ((hom_complex P B i).d (i+1) i).range.comap
-    ((hom_complex P B i).d i (i-1)).ker.subtype) :=
+  AddCommGroup.homology ((hom_complex P B i).d (i+1) i) ((hom_complex P B i).d i (i-1)) :=
 (AddCommGroup.homology_iso _ _ _)
 
 def ker_hom
@@ -160,14 +157,9 @@ def ker_hom
 
 def map_explicit_homology
   {P₁ P₂ : bounded_homotopy_category C} (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
-  AddCommGroup.of
-  (((hom_complex P₂ B i).d i (i-1)).ker ⧸
-    ((hom_complex P₂ B i).d (i+1) i).range.comap
-    ((hom_complex P₂ B i).d i (i-1)).ker.subtype) ⟶
-  AddCommGroup.of
-  (((hom_complex P₁ B i).d i (i-1)).ker ⧸
-    ((hom_complex P₁ B i).d (i+1) i).range.comap
-    ((hom_complex P₁ B i).d i (i-1)).ker.subtype) :=
+  AddCommGroup.homology ((hom_complex P₂ B i).d (i+1) i) ((hom_complex P₂ B i).d i (i-1)) ⟶
+  AddCommGroup.homology ((hom_complex P₁ B i).d (i+1) i) ((hom_complex P₁ B i).d i (i-1)) :=
+-- alternative: use `AddCommGroup.homology_map`
 quotient_add_group.lift _
 (add_monoid_hom.comp (quotient_add_group.mk' _) $ ker_hom f _ _)
 sorry
