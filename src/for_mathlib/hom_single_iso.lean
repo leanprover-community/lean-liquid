@@ -103,11 +103,11 @@ namespace bounded_homotopy_category
 
 namespace hom_single_iso_setup
 
-abbreviation hom_complex
+def hom_complex
   (P : bounded_homotopy_category C) (B : C) (i : ℤ) :=
 (((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op)
 
-abbreviation map_hom_complex
+def map_hom_complex
   {P₁ P₂ : bounded_homotopy_category C} (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
   hom_complex P₂ B i ⟶ hom_complex P₁ B i :=
 (((preadditive_yoneda.obj B).map_homological_complex _).map
@@ -122,7 +122,7 @@ def aux₁
   (hom_complex P B i).homology i :=
 (homology_iso' (hom_complex P B i) (i+1) i (i-1) (by simp) (by simp)).symm
 
-abbreviation map_homology
+def map_homology
   {P₁ P₂ : bounded_homotopy_category C} (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
   homology ((hom_complex P₂ B i).d (i + 1) i) ((hom_complex P₂ B i).d i (i - 1))
     ((hom_complex _ B i).d_comp_d _ _ _) ⟶
@@ -136,7 +136,39 @@ rfl
 lemma aux₁_naturality
   (P₁ P₂ : bounded_homotopy_category C) (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
   (aux₁ P₂ B i).hom ≫ (homology_functor _ _ _).map (map_hom_complex f B i) =
-  (map_homology f _ _) ≫ (aux₁ P₁ B i).hom := sorry
+  (map_homology f _ _) ≫ (aux₁ P₁ B i).hom :=
+begin
+  dsimp only [map_homology, aux₁, homology_iso', iso.symm_hom, homology.map_iso,
+    homology_functor_map],
+  rw homology.map_eq_desc'_lift_left,
+  rw homology.map_eq_lift_desc'_left,
+  rw homology.map_eq_desc'_lift_left,
+  rw homology.map_eq_lift_desc'_left,
+  apply homology.hom_from_ext, apply homology.hom_to_ext,
+  simp only [homology.π'_desc', category.assoc, homology.π'_desc'_assoc,
+    homology.lift_ι, homology.lift_ι_assoc],
+  let t := _, change t ≫ _ = _,
+  have ht : t = kernel.lift _ (kernel.ι _) _ ≫ homology.π' _ _ _,
+  rotate 2,
+  { rw homological_complex.d_from_eq,
+    rw [kernel.condition_assoc, zero_comp],
+    simp, },
+  { apply homology.hom_to_ext,
+    simp, dsimp, simp },
+  rw ht, clear ht, clear t,
+  simp only [kernel.lift_ι_assoc, category.assoc, arrow.hom_mk_left, arrow.iso_mk_inv_left,
+    iso.refl_inv, homological_complex.hom.sq_from_left, homology.π'_desc'],
+  let t := _, change _ = _ ≫ t,
+  have ht : t = homology.ι _ _ _ ≫ cokernel.desc _ (cokernel.π _) _,
+  rotate 2,
+  { have := (hom_complex P₁ B i).d_to_eq (by simp : (complex_shape.up ℤ).symm.rel (i+1) i),
+    rw ← iso.inv_comp_eq at this,
+    rw [← this, category.assoc, cokernel.condition, comp_zero] },
+  { apply homology.hom_from_ext,
+    simp, dsimp, simp },
+  rw ht, clear ht, clear t,
+  simp only [category.assoc, cokernel.π_desc, homology.lift_ι_assoc],
+end
 
 def aux₂
   (P : bounded_homotopy_category C) (B : C) (i : ℤ) :
@@ -191,7 +223,16 @@ begin
   simp only [add_zero, quiver.hom.unop_op, linear_map.to_add_monoid_hom_coe,
     preadditive_yoneda_obj_map_apply, homological_complex.zero_f_apply,
     homological_complex.hom_single_iso_apply_coe],
-  rw [← is_iso.comp_inv_eq, inv_eq_to_hom, eq_comm, category.assoc],
+  rw [← is_iso.comp_inv_eq, eq_comm],
+  split,
+  { intro h,
+    rw [h, is_iso.comp_inv_eq, category.assoc, category.assoc, eq_to_hom_trans,
+      eq_to_hom_refl, category.comp_id],
+    refl },
+  { intro h,
+    rw [h, is_iso.eq_comp_inv, category.assoc, category.assoc, eq_to_hom_trans,
+      eq_to_hom_refl, category.comp_id],
+    refl }
 end
 
 lemma aux₃_naturality
