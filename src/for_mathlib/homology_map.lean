@@ -1,5 +1,5 @@
 import for_mathlib.homological_complex_op
-import for_mathlib.commsq
+import for_mathlib.has_homology
 
 noncomputable theory
 
@@ -22,7 +22,7 @@ def homology.map' {A₁ B₁ C₁ A₂ B₂ C₂ : 𝓐}
   {a : A₁ ⟶ A₂} {b : B₁ ⟶ B₂} {c : C₁ ⟶ C₂}
   (sq1 : commsq f₁ a b f₂) (sq2 : commsq g₁ b c g₂) :
   homology f₁ g₁ w₁ ⟶ homology f₂ g₂ w₂ :=
-homology.map w₁ w₂ ⟨a, b, sq1.w.symm⟩ ⟨b, c, sq2.w.symm⟩ rfl
+(homology.has f₁ g₁ w₁).map (homology.has f₂ g₂ w₂) sq1 sq2
 
 lemma homology.map_eq {A₁ B₁ C₁ A₂ B₂ C₂ : 𝓐}
   {f₁ : A₁ ⟶ B₁} {g₁ : B₁ ⟶ C₁} (w₁ : f₁ ≫ g₁ = 0)
@@ -31,4 +31,10 @@ lemma homology.map_eq {A₁ B₁ C₁ A₂ B₂ C₂ : 𝓐}
   homology.map w₁ w₂ sq1 sq2 H =
     @homology.map' _ _ _ _ _ _ _ _ _ _ _ w₁ _ _ w₂ sq1.left sq1.right sq2.right
       (commsq.of_eq sq1.w.symm) (commsq.of_eq $ by { rw H, exact sq2.w.symm }) :=
-by { rw homology.map', cases sq1, cases sq2, congr, rw H, }
+begin
+  apply (homology.has f₂ g₂ w₂).ext_ι,
+  erw [has_homology.map_ι],
+  apply (homology.has f₁ g₁ w₁).ext_π,
+  erw [← category.assoc, homology.π'_map, category.assoc, homology.π'_ι, has_homology.π_comp_desc,
+    limits.kernel.lift_ι_assoc, category.assoc],
+end

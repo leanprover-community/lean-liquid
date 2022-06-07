@@ -27,7 +27,7 @@ lemma homology_map_homology_op_iso {A₁ B₁ C₁ A₂ B₂ C₂ : 𝓐}
 begin
   --delta homology_op_iso, dsimp,
   simp_rw [homology_op_iso_eq_desc'],
-  dsimp only [homology.map'],
+  rw [← homology.map_eq],
   simp_rw homology.map_eq_desc'_lift_left,
   apply homology.hom_from_ext,
   simp only [category.assoc, exact.kernel.ι_op, eq_to_hom_refl, category.id_comp,
