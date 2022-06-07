@@ -99,7 +99,8 @@ lemma has_homology : has_homology f g (AddCommGroup.homology f g w) :=
   end,
   π_ι := by { rw [← kernel_iso_ker_hom_comp_subtype], refl },
   ex_π := begin
-    rw AddCommGroup.exact_iff,
+    rw [← exact_comp_hom_inv_comp_iff (kernel_iso_ker g), iso.inv_hom_id_assoc],
+    rw AddCommGroup.exact_iff',
     sorry
   end,
   ι_ex := begin
