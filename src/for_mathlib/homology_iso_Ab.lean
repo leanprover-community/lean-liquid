@@ -98,13 +98,39 @@ def has_homology : has_homology f g (AddCommGroup.homology f g) :=
     rw [← comp_apply, cokernel.condition, zero_apply],
   end,
   π_ι := by { rw [← kernel_iso_ker_hom_comp_subtype], refl },
-  ex_π := begin
+  ex_π := by sorry ; begin
     rw [← exact_comp_hom_inv_comp_iff (kernel_iso_ker g), iso.inv_hom_id_assoc],
     rw AddCommGroup.exact_iff',
-    sorry
+    split,
+    { ext, simp, },
+    { rintros ⟨x, hx : _ = _⟩ (hh : _ = _),
+      dsimp at hh,
+      rw quotient_add_group.eq_zero_iff at hh,
+      obtain ⟨t,ht⟩ := hh,
+      use t,
+      ext,
+      simp_rw comp_apply,
+      dsimp [kernel_iso_ker],
+      rw [← comp_apply, kernel.lift_ι, ht],
+      refl }
   end,
-  ι_ex := begin
-    sorry
+  ι_ex := by sorry ; begin
+    rw AddCommGroup.exact_iff',
+    split,
+    { ext ⟨t⟩,
+      simpa only [comp_apply, add_monoid_hom.coe_comp, quotient_add_group.coe_mk',
+        function.comp_app, quotient_add_group.lift_mk, add_subgroup.coe_subtype,
+        add_subgroup.coe_mk, cokernel.π_desc_apply, add_monoid_hom.zero_comp,
+        add_monoid_hom.zero_apply] },
+    { rintros x (hx : _ = _),
+      change ∃ e, _,
+      have : function.surjective (cokernel.π f) := surjective_of_epi (cokernel.π f),
+      obtain ⟨y,rfl⟩ := this x,
+      rw [← comp_apply, cokernel.π_desc] at hx,
+      let yy : g.ker := ⟨y,hx⟩,
+      use quotient_add_group.mk yy,
+      simp only [quotient_add_group.lift_mk', add_monoid_hom.coe_comp, add_subgroup.coe_subtype,
+        function.comp_app, subtype.coe_mk] }
   end,
   epi_π := begin
     apply_with epi_comp {instances:=ff}, { apply_instance },
@@ -116,7 +142,10 @@ def has_homology : has_homology f g (AddCommGroup.homology f g) :=
     obtain ⟨⟨y, hy'⟩, rfl⟩ := quotient_add_group.mk'_surjective _ y,
     rw [quotient_add_group.mk'_apply, quotient_add_group.eq_zero_iff],
     rw [quotient_add_group.mk'_apply, quotient_add_group.lift_mk] at hy,
-    sorry
+    rw add_subgroup.mem_comap,
+    dsimp at hy ⊢,
+    change ∃ e, _,
+    have : exact f (cokernel.π f), by library_search,
   end }
 
 protected noncomputable
