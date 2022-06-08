@@ -15,8 +15,7 @@ namespace cochain_complex
 variables {𝓐 : Type*} [category 𝓐] [abelian 𝓐]
 variables (C : cochain_complex 𝓐 ℤ)
 
-
-local attribute [instance] has_zero_object.has_zero -- isn't there a locale which does this??
+open_locale zero_object
 
 /--
 Given a cochain complex
@@ -31,21 +30,19 @@ supported in degrees n-1 and n (note that both terms are naturally subobjects
 of C^n). As a result, `H_i(imker C n) = 0` for all `i≠n`, and `= H_i(C)` for `i=n`.
 -/
 def imker (C : cochain_complex 𝓐 ℤ) (n : ℤ) : cochain_complex 𝓐 ℤ :=
-{ X := λ i,
-  if i = n-1
-    then image_subobject (C.d_to n)
-    else if i = n
-      then kernel_subobject (C.d_from n)
+{ X := λ i, if i = n-1
+      then image_subobject (C.d_to n)
+      else if i = n
+        then kernel_subobject (C.d_from n)
+        else 0,
+  d := λ i j, if hi : i = n - 1
+      then if hj : j = n
+        -- modulo eq_to_iso this is just the `image_to_kernel` map.
+        then (eq_to_iso (by rw [hi, if_pos rfl]) : (_ : 𝓐) ≅ image_subobject (C.d_to n)).hom ≫
+          image_to_kernel _ _ (homological_complex.d_to_comp_d_from _ n) ≫
+          (eq_to_iso begin rw [if_neg, if_pos hj], linarith, end).hom
+        else 0
       else 0,
-  d := λ i j,
-  if hi : i = n - 1
-    then if hj : j = n
-      -- modulo eq_to_iso this is just the `image_to_kernel` map.
-      then (eq_to_iso (by rw [hi, if_pos rfl]) : (_ : 𝓐) ≅ image_subobject (C.d_to n)).hom ≫
-        image_to_kernel _ _ (homological_complex.d_to_comp_d_from _ n) ≫
-        (eq_to_iso begin rw [if_neg, if_pos hj], linarith, end).hom
-      else 0
-    else 0,
   shape' := begin
     rintro i j (h : _ ≠ _),
     split_ifs with hi,
@@ -66,10 +63,11 @@ namespace imker
 
 open homological_complex (single)
 
-lemma X_def {n i : ℤ} : (imker C n).X i =
-if i = n-1 then image_subobject (C.d_to n) else
-  if i = n then kernel_subobject (C.d_from n) else
-    (has_zero_object.has_zero 𝓐).zero :=
+lemma X_def {n i : ℤ} : (imker C n).X i = if i = n-1
+  then image_subobject (C.d_to n)
+  else if i = n
+    then kernel_subobject (C.d_from n)
+    else (has_zero_object.has_zero 𝓐).zero :=
 rfl
 
 @[simps] def X_iso_image (n : ℤ) : (imker C n).X (n-1) ≅ image_subobject (C.d_to n) :=
@@ -96,14 +94,16 @@ begin
   exact is_zero_zero 𝓐,
 end
 
-@[simp] lemma d_def {n i j : ℤ} : (imker C n).d i j = if hi : i = n - 1 then if hj : j = n then
-    (eq_to_iso (by rw [hi, if_pos rfl]) : ((if i = n-1 then image_subobject (C.d_to n) else
-  if i = n then kernel_subobject (C.d_from n) else 0) : 𝓐) ≅ image_subobject (C.d_to n)).hom ≫
-    image_to_kernel _ _ (homological_complex.d_to_comp_d_from _ n) ≫
-            (eq_to_iso begin dsimp only [imker], rw [if_neg, if_pos hj], linarith, end :
-              (kernel_subobject (C.d_from n) : 𝓐) ≅ _).hom
-          else 0
-        else 0 :=
+@[simp] lemma d_def {n i j : ℤ} : (imker C n).d i j = if hi : i = n - 1
+  then if hj : j = n
+    then (eq_to_iso (by rw [hi, if_pos rfl]) :
+      ((if i = n-1 then image_subobject (C.d_to n) else if i = n then kernel_subobject
+        (C.d_from n) else 0) : 𝓐) ≅ image_subobject (C.d_to n)).hom ≫
+      image_to_kernel _ _ (homological_complex.d_to_comp_d_from _ n) ≫
+      (eq_to_iso begin dsimp only [imker], rw [if_neg, if_pos hj], linarith, end :
+        (kernel_subobject (C.d_from n) : 𝓐) ≅ _).hom
+    else 0
+  else 0 :=
 rfl
 
 lemma d_eq_im_to_ker {n i j : ℤ} (h : i = n - 1) (hj : j = n) : (imker C n).d i j =
