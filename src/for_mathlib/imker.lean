@@ -31,16 +31,21 @@ supported in degrees n-1 and n (note that both terms are naturally subobjects
 of C^n). As a result, `H_i(imker C n) = 0` for all `i≠n`, and `= H_i(C)` for `i=n`.
 -/
 def imker (C : cochain_complex 𝓐 ℤ) (n : ℤ) : cochain_complex 𝓐 ℤ :=
-{ X := λ i, if i = n-1 then image_subobject (C.d_to n) else
-  if i = n then kernel_subobject (C.d_from n) else 0,
-  d := λ i j, if hi : i = n - 1 then if hj : j = n then
-    (eq_to_iso (by rw [hi, if_pos rfl]) : ((if i = n-1 then image_subobject (C.d_to n) else
-  if i = n then kernel_subobject (C.d_from n) else 0) : 𝓐) ≅ image_subobject (C.d_to n)).hom ≫
-    image_to_kernel _ _ (homological_complex.d_to_comp_d_from _ n) ≫
-            (eq_to_iso begin rw [if_neg, if_pos hj], linarith, end :
-              (kernel_subobject (C.d_from n) : 𝓐) ≅ _).hom
-          else 0
-        else 0,
+{ X := λ i,
+  if i = n-1
+    then image_subobject (C.d_to n)
+    else if i = n
+      then kernel_subobject (C.d_from n)
+      else 0,
+  d := λ i j,
+  if hi : i = n - 1
+    then if hj : j = n
+      -- modulo eq_to_iso this is just the `image_to_kernel` map.
+      then (eq_to_iso (by rw [hi, if_pos rfl]) : (_ : 𝓐) ≅ image_subobject (C.d_to n)).hom ≫
+        image_to_kernel _ _ (homological_complex.d_to_comp_d_from _ n) ≫
+        (eq_to_iso begin rw [if_neg, if_pos hj], linarith, end).hom
+      else 0
+    else 0,
   shape' := begin
     rintro i j (h : _ ≠ _),
     split_ifs with hi,
@@ -131,10 +136,13 @@ instance is_bounded_above (i : ℤ) :
 /-- The natural map from `imker C n` to `H_n(C)[n]`, the complex consisting of the n'th
 homology of C supported in degree n. -/
 def to_single (n : ℤ) : C.imker n ⟶ (single _ _ n).obj (C.homology n) :=
-{ f := λ i, if h : i = n then (X_iso_kernel_of_eq C h).hom ≫
-  cokernel.π (image_to_kernel _ _ (homological_complex.d_to_comp_d_from _ n)) ≫
- (homological_complex.single_obj_X_self 𝓐 (complex_shape.up ℤ) n _).inv ≫
- (eq_to_iso (begin rw h, refl, end)).hom else 0,
+{ f := λ i,
+  if h : i = n
+    then (X_iso_kernel_of_eq C h).hom ≫
+      cokernel.π (image_to_kernel _ _ (homological_complex.d_to_comp_d_from _ n)) ≫
+      (homological_complex.single_obj_X_self 𝓐 (complex_shape.up ℤ) n _).inv ≫
+      (eq_to_iso (begin rw h, refl, end)).hom
+    else 0,
   comm' := begin
    rintro i j (rfl : _ = _),
    simp only [homological_complex.single_obj_X_self_inv, eq_to_iso.hom, eq_to_hom_trans,
@@ -147,6 +155,8 @@ def to_single (n : ℤ) : C.imker n ⟶ (single _ _ n).obj (C.homology n) :=
    { exact (hn rfl).elim },
    { rw comp_zero },
   end }
+
+-- TODO: the next few lemmas are in the wrong file and the wrong namespace.
 
 -- move
 lemma is_iso_of_is_zero_of_is_zero {a b : 𝓐} (ha : is_zero a) (hb : is_zero b)
@@ -181,6 +191,7 @@ begin
   exact is_zero_zero V,
 end
 
+-- move
 def _root_.homological_complex.single_obj_iso_zero (V : Type*) [_inst_1 : category V]
   [_inst_2 : has_zero_morphisms V] [_inst_3 : has_zero_object V] {ι : Type*}
   [_inst_4 : decidable_eq ι] (c : complex_shape ι) {i j : ι} (h : i ≠ j) (A : V) :
@@ -199,10 +210,12 @@ begin
   exact is_zero_of_iso_of_zero hB (homology_zero_zero.symm),
 end
 
+-- move to `single`
 lemma single.d_eq_zero (V : Type*) [category V] [has_zero_morphisms V] [has_zero_object V]
   {ι : Type*} [decidable_eq ι] (c : complex_shape ι) (i j k : ι) ( v : V) :
   ((single V c i).obj v).d j k = 0 := rfl
 
+-- move to `single`
 lemma single.d_from_eq_zero (V : Type*) [category V] [has_zero_morphisms V] [has_zero_object V]
   {ι : Type*} [decidable_eq ι] (c : complex_shape ι) (i j : ι) ( v : V) :
   ((single V c i).obj v).d_from j = 0 :=
@@ -215,6 +228,7 @@ begin
   },
 end
 
+-- move to `single`
 lemma single.d_to_eq_zero (V : Type*) [category V] [has_zero_morphisms V] [has_zero_object V]
   {ι : Type*} [decidable_eq ι] (c : complex_shape ι) (i j : ι) ( v : V) :
   ((single V c i).obj v).d_to j = 0 :=
@@ -228,12 +242,14 @@ begin
 end
 
 -- variant of homology_zero_zero
+-- move
 def homology_zero_zero' {V : Type*} [category V] [abelian V]
   {A B C : V} {f : A ⟶ B} {g : B ⟶ C} (hf : f = 0) (hg : g = 0) :
   homology f g (by simp [hf]) ≅ B :=
 (eq_to_iso (show homology f g _ = homology (0 : A ⟶ B) (0 : B ⟶ C) (by simp), by simp [hf, hg]))
   ≪≫ homology_zero_zero
 
+-- move
 lemma is_iso_cokernel_pi_image_to_kernel_of_zero_of_zero {V : Type*} [category V]
   [abelian V] {A B C : V} {f : A ⟶ B} {g : B ⟶ C} (hf : f = 0) (hg : g = 0) :
 is_iso (cokernel.π (image_to_kernel f g (by simp [hf]))) :=
@@ -244,6 +260,7 @@ begin
   apply cokernel.π_of_zero,
 end
 
+-- move
 lemma cokernel.desc_spec {V : Type*} [category V]
   [abelian V] {A B C : V} {f : A ⟶ B} {g : B ⟶ C} (w : f ≫ g = 0)
   (c : cokernel f ⟶ C) : (cokernel.π f ≫ c = g) ↔ c = cokernel.desc f g w :=
@@ -257,6 +274,7 @@ begin
     assumption },
 end
 
+-- move
 lemma cokernel.desc_comp_left {V : Type*} [category V]
   [abelian V] {A B C D : V} {f : A ⟶ B} {g : B ⟶ C} {e : C ⟶ D} (w : f ≫ g = 0) :
   (cokernel.desc f g w) ≫ e =
@@ -266,10 +284,12 @@ begin
   simp [cokernel.π_desc],
 end
 
+-- move
 lemma is_iso_cokernel.desc {V : Type*} [category V] [abelian V] {A B C : V} {f : A ⟶ B} {g : B ⟶ C}
   (h : exact f g) (h2 : epi g) : is_iso (cokernel.desc f g h.1) :=
 is_iso_of_op (cokernel.desc f g h.w)
 
+-- move
 lemma sq_from_epi_of_epi {ι : Type*} {V : Type*} [_inst_1 : category V] [_inst_2 : abelian V]
   {c : complex_shape ι}
   {C₁ C₂ : homological_complex V c} [_inst_3 : has_zero_object V] (φ : C₁.hom C₂) (i : ι)
@@ -289,6 +309,7 @@ epi (homological_complex.hom.sq_from φ i) :=
     subst gR0, },
 end⟩
 
+-- move
 @[simp] lemma epi_comp_iso_iff_epi {V : Type*} [category V] {A B C : V} (e : A ≅ B) (f : B ⟶ C) :
   epi (e.hom ≫ f) ↔ epi f :=
 begin
@@ -306,6 +327,7 @@ begin
   },
 end
 
+-- move
 @[simp] lemma epi_iso_comp_iff_epi {V : Type*} [category V] {A B C : V} (f : A ⟶ B) (e : B ≅ C) :
   epi (f ≫ e.hom) ↔ epi f :=
 begin
@@ -325,6 +347,7 @@ begin
     rwa cancel_epi at h2, },
 end
 
+-- move
 lemma is_iso_iff_is_iso_comp_left {V : Type*} [category V] {A B C : V} (f : A ⟶ B) {e : B ⟶ C}
   [is_iso f] : is_iso (f ≫ e) ↔ is_iso e :=
 begin
@@ -333,6 +356,7 @@ begin
   { introI h, exact is_iso.comp_is_iso },
 end
 
+-- move
 lemma is_iso_iff_is_iso_comp_right {V : Type*} [category V] {A B C : V} {f : A ⟶ B} (g : B ⟶ C)
   [is_iso g] : is_iso (f ≫ g) ↔ is_iso f :=
 begin
@@ -340,14 +364,18 @@ begin
   { introI, exact is_iso.of_is_iso_comp_right f g},
   { introI h, exact is_iso_of_op (f ≫ g), },
 end
+
+-- move
 @[simp] lemma epi_comp_is_iso_iff_epi {V : Type*} [category V] {A B C : V} (e : A ⟶ B) (f : B ⟶ C)
   [is_iso e] : epi (e ≫ f) ↔ epi f :=
 epi_comp_iso_iff_epi (as_iso e) f
 
+-- move
 @[simp] lemma epi_is_iso_comp_iff_epi {V : Type*} [category V] {A B C : V} (f : A ⟶ B) (e : B ⟶ C)
   [is_iso e] : epi (f ≫ e) ↔ epi f :=
 epi_iso_comp_iff_epi f (as_iso e)
 
+-- move
 lemma kernel_subobject_map_epi_of_epi {C : Type*} [_inst_1 : category C] [abelian C] {X Y : C}
   {f : X ⟶ Y} (hY : is_zero Y)
    {X' Y' : C} {f' : X' ⟶ Y'} (hY' : is_zero Y')
@@ -370,10 +398,12 @@ begin
   apply_instance,
 end
 
+-- move
 lemma zero_of_epi_of_comp_zero {V : Type*} [category V] [abelian V]
   {A B C : V} {f : A ⟶ B} {g : B ⟶ C} (w : f ≫ g = 0) [epi f] : g = 0 :=
 (preadditive.epi_iff_cancel_zero f).mp infer_instance C g w
 
+-- move
 lemma epi_of_epi_of_comp_epi_of_mono {V : Type*} [category V] [abelian V]
   {A B C : V} (f : A ⟶ B) (g : B ⟶ C) [epi (f ≫ g)] [mono g] : epi f :=
 begin
@@ -385,6 +415,7 @@ begin
   simp * at *,
 end
 
+-- move
 lemma image_to_kernel_epi_of_epi {V : Type*} [category V] [abelian V]
   {A B C : V} (f : A ⟶ B) (g : B ⟶ C) [epi f] (w : f ≫ g = 0) :
   epi (image_to_kernel f g w) :=
@@ -402,6 +433,7 @@ begin
   apply_instance,
 end
 
+-- move
 lemma image_to_kernel_zero_left' {V : Type*} [category V] [has_zero_morphisms V]
   {A B C : V} {f : A ⟶ B} (hf : f = 0) (g : B ⟶ C) [has_kernels V]
   [has_zero_object V] [has_image f] :
@@ -411,6 +443,7 @@ begin
   rw zero_comp,
 end
 
+-- move
 lemma cokernel.desc_is_iso {A B C D : 𝓐} (f : A ⟶ B) (g : B ⟶ C) (e : C ⟶ D) [is_iso e]
   (w : f ≫ g = 0) : cokernel.desc f g w ≫ e = cokernel.desc f (g ≫ e)
   (begin rw [← category.assoc, w, zero_comp] end) :=
@@ -419,6 +452,7 @@ begin
   simp,
 end
 
+-- move
 lemma image_to_kernel_eq_image_to_kernel_of_eq_snd {A B C : 𝓐} (f : A ⟶ B) {g h : B ⟶ C}
   (hgh : g = h) (w : f ≫ g = 0) : image_to_kernel f g w = image_to_kernel f h (by rw [← hgh, w]) ≫
   eq_to_hom (by rw hgh) :=
@@ -427,6 +461,7 @@ begin
   simp only [eq_to_hom_refl, category.comp_id],
 end
 
+-- move
 lemma image_to_kernel_eq_image_to_kernel_of_eq_fst {A B C : 𝓐} (f g : A ⟶ B) {h : B ⟶ C}
   (hfg : f = g) (w : f ≫ h = 0) : image_to_kernel f h w = eq_to_hom (by rw hfg) ≫
     image_to_kernel g h (by rw [← hfg, w]) :=
@@ -444,7 +479,7 @@ end
 --   admit, -- presumably this is true!
 -- end
 
-
+-- this is preparation for `imker.map_is_iso` which follows.
 lemma homology_functor.is_iso_of_is_zero_of_is_zero_of_is_zero {ι : Type*} {c : complex_shape ι}
   {i j : ι} (hij : c.rel i j) {C₁ C₂ : homological_complex 𝓐 c} (h1from : C₁.d_from j = 0)
   (h2to : C₂.d_to j = 0) (h2from : C₂.d_from j = 0) (isomap : cokernel (C₁.d_to j) ≅ C₂.X j)
@@ -458,19 +493,21 @@ begin
     (commsq.of_eq (homological_complex.hom.comm_to f j)).symm
     (commsq.of_eq (homological_complex.hom.comm_from f j)).symm,
   rw ← is_iso_iff_is_iso_comp_left ((h₁.iso (homology.has (C₁.d_to j) (C₁.d_from j) _)).hom),
-  swap, apply_instance,
+    swap, apply_instance,
   rw ← is_iso_iff_is_iso_comp_right ((h₂.iso (homology.has (C₂.d_to j) (C₂.d_from j) _)).inv),
-  swap, apply_instance,
+    swap, apply_instance,
   suffices h2 : is_iso (h₁.map h₂ (commsq.of_eq _).symm (commsq.of_eq _).symm),
   { rw this at h2, convert h2 using 1, simp, congr, },
   convert_to is_iso (isomap.hom), swap, apply_instance,
-  simp [h₁, h₂, has_homology.map, has_homology.snd_eq_zero', has_homology.fst_snd_eq_zero', has_homology.desc, has_homology.lift, hf],
+  simp only [h₁, h₂, has_homology.map, has_homology.snd_eq_zero', has_homology.fst_snd_eq_zero', has_homology.desc,
+    has_homology.lift, hf, category.assoc],
   symmetry,
   apply exact.epi_desc_unique,
   apply exact.mono_lift_unique,
-  simp,
+  simp only [category.assoc],
 end
 
+/-- `to_single C n` induces an isomorphism of cohomology in degree `n`. -/
 lemma map_is_iso (n : ℤ) : is_iso
   (homology.map (homological_complex.d_to_comp_d_from _ _)
     (homological_complex.d_to_comp_d_from _ _) (homological_complex.hom.sq_to (to_single C n) n)
@@ -519,22 +556,18 @@ instance to_single_quasi_iso (n : ℤ) :
           \/      \⧸      \/
            0  -> ker/im-> 0
 
-
-      The main problem right now is that the homology of 0 -> ker/im -> 0 is in some sense
-      quite far from ker/im, it's ker(ker/im->0)/im(0->ker/im).
+      But we just proved this in `map_is_iso`.
       -/
-    delta homology_functor, dsimp,
+
     apply map_is_iso, },
+  -- For the "boring" cases (where we're asserting 0 ≅ 0) we deal with degree n-1 separately.
   { rcases eq_or_ne i (n-1) with (rfl | hin'),
+    -- degree n-1
     { rw ← functor.comp_map,
       apply map_is_iso_of_iso_of_map_is_iso (homotopy_category.homology_factors 𝓐
         (complex_shape.up ℤ) (n-1)).symm,
       apply is_iso_of_is_zero_of_is_zero,
-      { delta homology_functor,
-        dsimp,
-        delta homological_complex.homology,
-        delta homology,
-        apply @is_zero_cokernel_of_epi _ _ _ _ _ _ _,
+      { apply @is_zero_cokernel_of_epi _ _ _ _ _ _ _,
         have foo : homological_complex.d_to (C.imker n) (n - 1) = 0,
         { apply is_zero.eq_zero_of_src,
           have := homological_complex.X_prev_iso (C.imker n) (show (n-2)+1 = (n-1), by ring),
@@ -551,12 +584,12 @@ instance to_single_quasi_iso (n : ℤ) :
       { rw ← functor.comp_obj,
         apply obj_is_zero_of_iso (homotopy_category.homology_factors 𝓐 (complex_shape.up ℤ) (n-1)).symm,
         rw homology_functor_obj,
-        dsimp,
         apply homology_is_zero_of_is_zero,
         dsimp only,
         rw if_neg hin,
         apply is_zero_zero,
       }, },
+    -- other degrees
     { apply is_iso_of_is_zero_of_is_zero,
       { rw ← functor.comp_obj,
         apply obj_is_zero_of_iso (homotopy_category.homology_factors 𝓐 (complex_shape.up ℤ) i).symm,
