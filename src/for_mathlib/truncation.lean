@@ -71,6 +71,12 @@ eq_to_iso (by simp [truncation, if_pos h] )
 @[reducible] def X_iso_of_eq {i n : ℤ} (h : i = n) : (C.truncation n).X i ≅ kernel (C.d n (n+1)) :=
 eq_to_iso (by simp [truncation, if_neg (show ¬ i < n, by linarith), if_pos h] )
 
+lemma is_zero_X_of_lt {i n : ℤ} (h : n < i) : is_zero ((C.truncation n).X i) :=
+begin
+  simp [truncation, if_neg (show ¬ i < n, by linarith), if_neg (show ¬ i = n, by linarith),
+    is_zero_zero],
+end
+
 lemma bounded_by (n : ℤ) :
   ((homotopy_category.quotient _ _).obj (C.truncation n)).bounded_by (n+1) :=
 begin
@@ -112,17 +118,74 @@ def ι (n : ℤ) : C.truncation n ⟶ C :=
     { rw dif_neg hiltn,
       by_cases hin : i = n,
       { subst hin,
-        simp,
-      },
+        simp, },
       { rw dif_neg hin,
         rw dif_neg (show ¬ i + 1 < n, by linarith),
         rw dif_neg (show ¬ i + 1 = n, by linarith),
         simp, } },
   end }
 
-lemma ι_iso (i : ℤ) (hC : ((homotopy_category.quotient _ _).obj C).bounded_by (i+1)) :
-  is_iso (truncation.ι C i) :=
-sorry
+def ι_inv (n : ℤ) (hn : is_zero (C.X (n + 1))) : C ⟶ C.truncation n :=
+{ f := λ i, if hin : i < n
+    then (X_iso_of_lt C hin).inv
+    else if hi : i = n
+      then (eq_to_hom (by rw hi) : C.X i ⟶ C.X n) ≫
+        kernel.lift (C.d n (n+1)) (𝟙 (C.X n)) (hn.eq_zero_of_tgt _) ≫
+        (X_iso_of_eq C hi).inv
+      else 0,
+  comm' := λ i j, begin
+    rintro (rfl : i + 1 = j),
+    dsimp only [truncation],
+    simp only [eq_self_iff_true, eq_to_iso.inv, eq_to_hom_trans_assoc, dif_pos],
+    by_cases hiltn : i < n,
+    { rw dif_pos hiltn,
+      by_cases hi1ltn : i + 1 < n,
+      { simp [dif_pos hi1ltn], },
+      { have hi1n : i + 1 = n, linarith,
+        subst hi1n,
+        simp only [eq_self_iff_true, add_left_inj, lt_self_iff_false, not_false_iff, dif_pos,
+          dif_neg, eq_to_hom_trans_assoc, eq_to_hom_refl, category.id_comp, ← category.assoc],
+        congr' 1,
+        ext,
+        simp, } },
+    { rw dif_neg hiltn,
+      by_cases hin : i = n,
+      { simp [hin], },
+      { rw [dif_neg hin, zero_comp],
+        rw dif_neg (show ¬ i + 1 < n, by linarith),
+        rw [dif_neg (show ¬ i + 1 = n, by linarith), comp_zero], }, },
+  end }
+
+lemma ι_iso (n : ℤ) (hC : ((homotopy_category.quotient _ _).obj C).bounded_by (n+1)) :
+  is_iso (truncation.ι C n) :=
+{ out := ⟨ι_inv C n (hC (n+1) (by refl)),
+  begin
+    ext i,
+    simp only [homological_complex.comp_f, homological_complex.id_f, ι, ι_inv, eq_to_iso.hom,
+      eq_to_iso.inv],
+    by_cases hiltn : i < n,
+    { simp [dif_pos hiltn], },
+    { rw [dif_neg hiltn, dif_neg hiltn],
+      by_cases hin : i = n,
+      { subst hin,
+        simp only [eq_self_iff_true, eq_to_hom_refl, dif_pos, category.id_comp, category.assoc],
+        rw ← category.assoc (kernel.ι (C.d i (i + 1))),
+        suffices : kernel.ι (C.d i (i + 1)) ≫ kernel.lift (C.d i (i + 1)) (𝟙 (C.X i)) _ = 𝟙 _,
+        { simp [this] },
+        { ext,
+          simp },
+        { apply is_zero.eq_zero_of_tgt,
+          simpa using hC (i + 1) (by refl), } },
+      { apply is_zero.eq_of_tgt,
+        apply is_zero_X_of_lt,
+        push_neg at hiltn,
+        obtain (h1 | h2) := lt_or_eq_of_le hiltn,
+        { exact h1 },
+        { exact (hin h2.symm).elim, } } },
+  end,
+  begin
+    sorry
+  end⟩ }
 
 -- feel free to skip this, and directly provide a defn for `ι_succ` below
 def map_of_le (i j : ℤ) (h : i ≤ j) : C.truncation i ⟶ C.truncation j :=
