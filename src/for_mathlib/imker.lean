@@ -202,7 +202,7 @@ is_zero.iso_zero (homological_complex.single_obj_is_zero _ _ h _)
 -- move
 lemma homology_is_zero_of_is_zero {V : Type*} [category V] [has_zero_morphisms V] {A B C : V}
   (hB : is_zero B) {f : A ⟶ B} {g : B ⟶ C} [has_kernels V] [has_images V] [has_cokernels V]
-  [has_zero_object V]
+  [has_zero_object V] -- ??
   (w : f ≫ g = 0) : is_zero (homology f g w) :=
 begin
   simp_rw is_zero.eq_zero_of_tgt hB f,
@@ -368,9 +368,14 @@ begin
 end
 
 -- move
-lemma zero_of_epi_of_comp_zero {V : Type*} [category V] [abelian V]
+lemma zero_of_epi_comp_zero {V : Type*} [category V] [abelian V]
   {A B C : V} {f : A ⟶ B} {g : B ⟶ C} (w : f ≫ g = 0) [epi f] : g = 0 :=
 (preadditive.epi_iff_cancel_zero f).mp infer_instance C g w
+
+-- move
+@[simp] lemma zero_iff_comp_mono_zero {V : Type*} [category V] [abelian V]
+  {A B C : V} {f : A ⟶ B} {g : B ⟶ C} [mono g] : f ≫ g = 0 ↔ f = 0 :=
+⟨(preadditive.mono_iff_cancel_zero g).1 infer_instance A f, λ f, f.symm ▸ zero_comp⟩
 
 -- move
 lemma epi_of_epi_of_comp_epi_of_mono {V : Type*} [category V] [abelian V]
