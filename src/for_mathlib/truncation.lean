@@ -159,7 +159,7 @@ def ι_inv (n : ℤ) (hn : is_zero (C.X (n + 1))) : C ⟶ C.truncation n :=
 lemma ι_iso (n : ℤ) (hC : ((homotopy_category.quotient _ _).obj C).bounded_by (n+1)) :
   is_iso (truncation.ι C n) :=
 { out := ⟨ι_inv C n (hC (n+1) (by refl)),
-  begin
+  by {
     ext i,
     simp only [homological_complex.comp_f, homological_complex.id_f, ι, ι_inv, eq_to_iso.hom,
       eq_to_iso.inv],
@@ -181,10 +181,24 @@ lemma ι_iso (n : ℤ) (hC : ((homotopy_category.quotient _ _).obj C).bounded_by
         push_neg at hiltn,
         obtain (h1 | h2) := lt_or_eq_of_le hiltn,
         { exact h1 },
-        { exact (hin h2.symm).elim, } } },
-  end,
+        { exact (hin h2.symm).elim, } } } },
   begin
-    sorry
+    ext i,
+    simp only [ι, ι_inv, eq_to_iso.inv, eq_to_iso.hom, homological_complex.comp_f,
+      homological_complex.id_f],
+        by_cases hiltn : i < n,
+    { simp [dif_pos hiltn], },
+    { rw [dif_neg hiltn, dif_neg hiltn],
+      by_cases hin : i = n,
+      { subst hin,
+        simp only [eq_to_hom_refl, category.id_comp, dif_pos, category.comp_id, category.assoc,
+          eq_to_hom_trans_assoc, kernel.lift_ι], },
+      { apply is_zero.eq_of_tgt,
+        simpa using hC i _,
+        push_neg at hiltn,
+        obtain (h1 | h2) := lt_or_eq_of_le hiltn,
+        { exact int.add_one_le_iff.mpr h1, },
+        { exact (hin h2.symm).elim, } } }
   end⟩ }
 
 -- feel free to skip this, and directly provide a defn for `ι_succ` below
