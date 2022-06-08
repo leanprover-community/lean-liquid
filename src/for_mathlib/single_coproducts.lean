@@ -1,4 +1,5 @@
 import for_mathlib.derived.ext_coproducts
+import for_mathlib.product_op
 
 .
 
@@ -105,8 +106,28 @@ sorry
 
 variables [enough_projectives A]
 
-instance preserves_coproducts_Ext' {α : Type v} (i : ℤ) (Y : A) :
+instance Ab_op_has_colimits : has_colimits Abᵒᵖ := has_colimits_op_of_has_limits
+
+noncomputable
+instance preserves_coproducts_Ext' {α : Type v} (i : ℤ) (Y : A) [AB4 A] :
   preserves_colimits_of_shape (discrete α)
-  ((Ext' i).flip.obj Y).right_op := sorry
+  ((Ext' i).flip.obj Y).right_op :=
+preserves_coproducts_aux _
+(λ X, begin
+  dsimp [Ext'],
+  let e₁ : (single A 0).obj (∐ X) ≅ ∐ _ := single_sigma_iso _ _,
+  let e₂ : ((Ext i).obj (opposite.op ((single A 0).obj (∐ X)))).obj ((single A 0).obj Y) ≅
+    ((Ext i).obj (opposite.op (∐ _))).obj ((single A 0).obj Y) :=
+    ((Ext i).map_iso e₁.symm.op).app _,
+  let e₃ : ((Ext i).obj (opposite.op (∐ λ (a : α), (single A 0).obj (X a)))).obj
+    ((single A 0).obj Y) ≅ ∏ _ := Ext_coproduct_iso _ _ _,
+  let e₄ : opposite.op (∏ λ (a : α), ((Ext i).obj (opposite.op ((single A 0).obj (X a)))).obj ((single A 0).obj Y)) ≅
+    ∐ _ := op_product_iso _,
+  refine _ ≪≫ e₄,
+  refine iso.op _,
+  refine e₃.symm ≪≫ _,
+  exact e₂.symm,
+end)
+sorry
 
 end bounded_homotopy_category
