@@ -13,6 +13,14 @@ namespace condensed
 
 variables (BD : package)
 
+-- needs torsion-free condition on `M`
+def homology_bd_eval (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
+  ((BD.eval freeCond').obj M).val.as.homology i ≅
+  (tensor M $ ((BD.eval $
+    category_theory.forget AddCommGroup ⋙ AddCommGroup.free').obj
+      (AddCommGroup.of $ punit →₀ ℤ)).val.as.homology i) :=
+sorry
+
 lemma bd_lemma (A : Condensed.{u} Ab.{u+1}) (B : Condensed.{u} Ab.{u+1})
   (f : A ⟶ A) (g : B ⟶ B)
   (hH0 : (((data.eval_functor freeCond').obj BD.data).obj A).homology 0 ≅ A) :
