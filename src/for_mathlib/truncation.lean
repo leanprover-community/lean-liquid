@@ -223,7 +223,7 @@ truncation.map_of_le _ _ _ $ by simp only [le_add_iff_nonneg_right, zero_le_one]
 
 def to_imker (n : ℤ) : C.truncation n ⟶ imker C n :=
 { f := λ i, if hi : i = n - 1
-           then sorry
+           then sorry ≫ factor_thru_image (C.d (n-1) n) ≫ sorry -- C(n-1) ⟶ Im(d^{n-1})
            else if i = n
              then sorry
              else 0,
