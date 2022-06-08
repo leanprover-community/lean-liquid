@@ -94,7 +94,7 @@ lemma exact_zero_right_of_epi [epi f] : exact f (0 : B ⟶ C) :=
 
 local attribute [instance] epi_comp --`mono_comp` is a global instance!
 
-lemma fst_eq_zero : has_homology (0 : A ⟶ B) g (kernel g) :=
+def fst_eq_zero : has_homology (0 : A ⟶ B) g (kernel g) :=
 { w := zero_comp,
   π := 𝟙 _,
   ι := kernel.ι g ≫ cokernel.π 0,
@@ -110,7 +110,7 @@ lemma fst_eq_zero : has_homology (0 : A ⟶ B) g (kernel g) :=
   epi_π := infer_instance,
   mono_ι := infer_instance }
 
-lemma snd_eq_zero : has_homology f (0 : B ⟶ C) (cokernel f) :=
+def snd_eq_zero : has_homology f (0 : B ⟶ C) (cokernel f) :=
 { w := comp_zero,
   π := kernel.ι 0 ≫ cokernel.π f,
   ι := 𝟙 _,
@@ -125,6 +125,58 @@ lemma snd_eq_zero : has_homology f (0 : B ⟶ C) (cokernel f) :=
   end,
   epi_π := infer_instance,
   mono_ι := infer_instance }
+
+def snd_eq_zero' (hg : g = 0) : has_homology f g (cokernel f) :=
+{ w := hg.symm ▸ comp_zero,
+  π := kernel.ι g ≫ cokernel.π f,
+  ι := 𝟙 _,
+  π_ι := by simp,
+  ex_π := begin
+    subst hg,
+    simp [exact_iso_comp_snd_iff_exact_comp_iso_fst_iff, kernel.lift_ι],
+    exact abelian.exact_cokernel f,
+  end,
+  ι_ex := begin
+    subst hg,
+    rw [cokernel.desc_zero],
+    exact exact_zero_right_of_epi,
+  end,
+  epi_π := by subst hg; apply_instance,
+  mono_ι := infer_instance }
+
+def fst_snd_eq_zero : has_homology (0 : A ⟶ B) (0 : B ⟶ C) B :=
+{ w := comp_zero,
+  π := kernel.ι 0,
+  ι := cokernel.π 0,
+  π_ι := rfl,
+  ex_π := begin
+    rw kernel.lift_zero,
+    exact exact_zero_left_of_mono A,
+  end,
+  ι_ex := begin
+    rw cokernel.desc_zero,
+    exact exact_zero_right_of_epi,
+  end,
+  epi_π := infer_instance,
+  mono_ι := infer_instance }
+
+def fst_snd_eq_zero' (hf : f = 0) (hg : g = 0) : has_homology f g B :=
+{ w := hf.symm ▸ zero_comp,
+  π := kernel.ι g,
+  ι := cokernel.π f,
+  π_ι := rfl,
+  ex_π := begin
+    subst hf,
+    rw kernel.lift_zero,
+    exact exact_zero_left_of_mono A,
+  end,
+  ι_ex := begin
+    subst hg,
+    rw cokernel.desc_zero,
+    exact exact_zero_right_of_epi,
+  end,
+  epi_π := by subst hg; apply_instance,
+  mono_ι := by subst hf; apply_instance }
 
 end degenerate
 
@@ -368,7 +420,7 @@ begin
   exact (ι_eq_desc h₁).symm,
 end
 
-lemma has_homology.map_iso_homology_map :
+lemma map_iso_homology_map :
 has_homology.map h₁ h₂ sq1 sq2 = (has_homology.iso h₁ (homology.has f₁ g₁ h₁.w)).hom ≫
   (homology.map h₁.w h₂.w ⟨α, β, sq1.w.symm⟩ ⟨β, γ, sq2.w.symm⟩ rfl) ≫
   (has_homology.iso h₂ (homology.has f₂ g₂ h₂.w)).inv:=
