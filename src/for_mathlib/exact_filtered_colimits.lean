@@ -14,9 +14,9 @@ set_option pp.universes true
 noncomputable theory
 
 -- Axiom AB5 for `AddCommGroup`
-theorem exact_colim_map_iff_of_is_filtered
+theorem exact_colim_of_exact_of_is_filtered
   (F G H : J ⥤ AddCommGroup.{u}) (η : F ⟶ G) (γ : G ⟶ H) :
-  exact (limits.colim_map η) (limits.colim_map γ) ↔ (∀ j, exact (η.app j) (γ.app j)) :=
+  (∀ j, exact (η.app j) (γ.app j)) → exact (limits.colim_map η) (limits.colim_map γ) :=
 sorry
 
 end AddCommGroup

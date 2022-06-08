@@ -12,12 +12,12 @@ universes u
 variables {J : Type (u+1)} [small_category J] [is_filtered J]
 
 -- Axiom AB5 for `Condensed Ab`
-theorem exact_colim_map_iff_of_is_filtered
+theorem exact_colim_of_exact_of_is_filtered
   (F G H : J ⥤ Condensed.{u} Ab.{u+1}) (η : F ⟶ G) (γ : G ⟶ H) :
-  exact (limits.colim_map η) (limits.colim_map γ) ↔ (∀ j, exact (η.app j) (γ.app j)) :=
+  (∀ j, exact (η.app j) (γ.app j)) → exact (limits.colim_map η) (limits.colim_map γ) :=
 begin
-  simp_rw condensed.exact_iff_ExtrDisc,
-  rw forall_swap, apply forall_congr (λ S, _),
+  intros h,
+  simp_rw condensed.exact_iff_ExtrDisc at *, intros S,
   let eF : (colimit F).val.obj (ExtrDisc_to_Profinite.op.obj (opposite.op S)) ≅
     colimit (F ⋙ Condensed.evaluation _ S.val) :=
     preserves_colimit_iso (Condensed.evaluation _ S.val) _,
@@ -27,7 +27,7 @@ begin
   let eH : (colimit H).val.obj (ExtrDisc_to_Profinite.op.obj (opposite.op S)) ≅
     colimit (H ⋙ Condensed.evaluation _ S.val) :=
     preserves_colimit_iso (Condensed.evaluation _ S.val) _,
-  let t := _, let s := _, change exact s t ↔ _,
+  let t := _, let s := _, change exact s t,
   let ηS : F ⋙ Condensed.evaluation _ S.val ⟶ G ⋙ Condensed.evaluation _ S.val :=
     whisker_right η _,
   let γS : G ⋙ Condensed.evaluation _ S.val ⟶ H ⋙ Condensed.evaluation _ S.val :=
@@ -54,7 +54,7 @@ begin
   rw [← iso.symm_hom],
   nth_rewrite 1 ← iso.symm_inv,
   rw exact_comp_hom_inv_comp_iff,
-  apply AddCommGroup.exact_colim_map_iff_of_is_filtered,
+  apply AddCommGroup.exact_colim_of_exact_of_is_filtered, intros j, apply h,
 end
 
 
