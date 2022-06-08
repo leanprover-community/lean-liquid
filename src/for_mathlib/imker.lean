@@ -66,10 +66,6 @@ if i = n-1 then image_subobject (C.d_to n) else
   if i = n then kernel_subobject (C.d_from n) else
     (has_zero_object.has_zero 𝓐).zero :=
 rfl
---lemma homology.map_factor_of_zero_of_zero {V : Type*} [category V] [abelian V] {A B C : V}
---   {f : A ⟶ B} {g : B ⟶ C} (hg : g = 0) {A' B' C' : V} {f' : A' ⟶ B'} {g' : B' ⟶ C'}
---   (hf' : f' = 0) (α : arrow.mk f ⟶ arrow.mk f') (β : arrow.mk g ⟶ arrow.mk g')
---   (h : α.right = β.left) : homology.map (show f ≫ g = 0, by simp [hg]) (by simp [hf']) α β h = sorry := sorry
 
 @[simps] def X_iso_image (n : ℤ) : (imker C n).X (n-1) ≅ image_subobject (C.d_to n) :=
 eq_to_iso (by {rw [X_def, if_pos rfl]})
@@ -445,7 +441,7 @@ end
 --   cokernel.desc (f ≫ e) g (by simp [w]) :=
 -- begin
 --   simp,
---   sorry, -- presumably this is true!
+--   admit, -- presumably this is true!
 -- end
 
 
