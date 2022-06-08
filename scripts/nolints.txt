@@ -202,6 +202,14 @@ apply_nolint category_theory.endomorphisms.free unused_arguments
 -- for_mathlib/exact_seq3.lean
 apply_nolint category_theory.exact_seq.w def_lemma
 
+-- for_mathlib/has_homology.lean
+apply_nolint has_homology.fst_eq_zero def_lemma
+apply_nolint has_homology.has_homology.map_iso_homology_map dup_namespace
+apply_nolint has_homology.snd_eq_zero def_lemma
+
+-- for_mathlib/hom_single_iso.lean
+apply_nolint bounded_homotopy_category.hom_single_iso_setup.hom_complex unused_arguments
+
 -- for_mathlib/homological_complex_equiv_functor_category.lean
 apply_nolint homological_complex.complex_to_functor_functor unused_arguments
 
