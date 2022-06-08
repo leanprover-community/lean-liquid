@@ -31,15 +31,15 @@ of C^n). As a result, `H_i(imker C n) = 0` for all `i≠n`, and `= H_i(C)` for `
 -/
 def imker (C : cochain_complex 𝓐 ℤ) (n : ℤ) : cochain_complex 𝓐 ℤ :=
 { X := λ i, if i = n-1
-      then image_subobject (C.d_to n)
+      then image (C.d_to n)
       else if i = n
-        then kernel_subobject (C.d_from n)
+        then kernel (C.d_from n)
         else 0,
   d := λ i j, if hi : i = n - 1
       then if hj : j = n
         -- modulo eq_to_iso this is just the `image_to_kernel` map.
-        then (eq_to_iso (by rw [hi, if_pos rfl]) : (_ : 𝓐) ≅ image_subobject (C.d_to n)).hom ≫
-          image_to_kernel _ _ (homological_complex.d_to_comp_d_from _ n) ≫
+        then (eq_to_iso (by rw [hi, if_pos rfl]) : (_ : 𝓐) ≅ image (C.d_to n)).hom ≫
+          image_to_kernel' _ _ (homological_complex.d_to_comp_d_from _ n) ≫
           (eq_to_iso begin rw [if_neg, if_pos hj], linarith, end).hom
         else 0
       else 0,
@@ -64,28 +64,28 @@ namespace imker
 open homological_complex (single)
 
 lemma X_def {n i : ℤ} : (imker C n).X i = if i = n-1
-  then image_subobject (C.d_to n)
+  then image (C.d_to n)
   else if i = n
-    then kernel_subobject (C.d_from n)
-    else (has_zero_object.has_zero 𝓐).zero :=
+    then kernel (C.d_from n)
+    else 0 :=
 rfl
 
-@[simps] def X_iso_image (n : ℤ) : (imker C n).X (n-1) ≅ image_subobject (C.d_to n) :=
+@[simps] def X_iso_image (n : ℤ) : (imker C n).X (n-1) ≅ image (C.d_to n) :=
 eq_to_iso (by {rw [X_def, if_pos rfl]})
 
 @[simps] def X_iso_image_of_eq {n i : ℤ} (h : i = n - 1) :
-  (imker C n).X i ≅ image_subobject (C.d_to n) :=
+  (imker C n).X i ≅ image (C.d_to n) :=
 eq_to_iso (by {rw [X_def, if_pos h]})
 
-@[simps] def X_iso_kernel (n : ℤ) : (imker C n).X n ≅ kernel_subobject (C.d_from n) :=
+@[simps] def X_iso_kernel (n : ℤ) : (imker C n).X n ≅ kernel (C.d_from n) :=
 eq_to_iso (by {rw [X_def, if_neg, if_pos rfl], linarith})
 
 @[simps] def X_iso_kernel_of_eq {n i : ℤ} (h : i = n) :
-  (imker C n).X i ≅ kernel_subobject (C.d_from n) :=
+  (imker C n).X i ≅ kernel (C.d_from n) :=
 eq_to_iso (by {rw [X_def, if_neg, if_pos h], linarith})
 
 @[simps] def kernel_iso_X_of_eq {n i : ℤ} (h : i = n) :
-  (kernel_subobject (C.d_from n) : 𝓐) ≅ (imker C n).X i :=
+  (kernel (C.d_from n) : 𝓐) ≅ (imker C n).X i :=
 eq_to_iso (by {rw [X_def, if_neg, if_pos h], linarith})
 
 lemma X_is_zero_of_ne {i j : ℤ} (h1 : j ≠ i - 1) (h2 : j ≠ i) : is_zero ((C.imker i).X j) :=
@@ -97,18 +97,18 @@ end
 @[simp] lemma d_def {n i j : ℤ} : (imker C n).d i j = if hi : i = n - 1
   then if hj : j = n
     then (eq_to_iso (by rw [hi, if_pos rfl]) :
-      ((if i = n-1 then image_subobject (C.d_to n) else if i = n then kernel_subobject
-        (C.d_from n) else 0) : 𝓐) ≅ image_subobject (C.d_to n)).hom ≫
-      image_to_kernel _ _ (homological_complex.d_to_comp_d_from _ n) ≫
+      ((if i = n-1 then image (C.d_to n) else if i = n then kernel
+        (C.d_from n) else 0) : 𝓐) ≅ image (C.d_to n)).hom ≫
+      image_to_kernel' _ _ (homological_complex.d_to_comp_d_from _ n) ≫
       (eq_to_iso begin dsimp only [imker], rw [if_neg, if_pos hj], linarith, end :
-        (kernel_subobject (C.d_from n) : 𝓐) ≅ _).hom
+        (kernel (C.d_from n) : 𝓐) ≅ _).hom
     else 0
   else 0 :=
 rfl
 
 lemma d_eq_im_to_ker {n i j : ℤ} (h : i = n - 1) (hj : j = n) : (imker C n).d i j =
 (X_iso_image_of_eq C h).hom ≫
-image_to_kernel _ _ (homological_complex.d_to_comp_d_from _ n) ≫ (X_iso_kernel_of_eq _ hj).inv :=
+image_to_kernel' _ _ (homological_complex.d_to_comp_d_from _ n) ≫ (X_iso_kernel_of_eq _ hj).inv :=
 begin
   simp only [h, hj, eq_self_iff_true, d_def, eq_to_iso.hom, dif_pos, X_iso_image_of_eq_hom,
     X_iso_kernel_of_eq_inv],
@@ -139,9 +139,10 @@ def to_single (n : ℤ) : C.imker n ⟶ (single _ _ n).obj (C.homology n) :=
 { f := λ i,
   if h : i = n
     then (X_iso_kernel_of_eq C h).hom ≫
-      cokernel.π (image_to_kernel _ _ (homological_complex.d_to_comp_d_from _ n)) ≫
+      cokernel.π (image_to_kernel' _ _ (homological_complex.d_to_comp_d_from _ n)) ≫
+      (homology_iso_cokernel_image_to_kernel' _ _ _).inv ≫
       (homological_complex.single_obj_X_self 𝓐 (complex_shape.up ℤ) n _).inv ≫
-      (eq_to_iso (begin rw h, refl, end)).hom
+      eq_to_hom (by rw h)
     else 0,
   comm' := begin
    rintro i j (rfl : _ = _),
@@ -537,9 +538,11 @@ image_subobject (C.d_to) -> kernel_subobject (C.d_from) -> 0
     refine (cokernel_epi_comp _ _) ≪≫ _,
     refine cokernel_iso_of_eq (d_eq_im_to_ker _ rfl rfl) ≪≫ _,
     refine (cokernel_epi_comp _ _) ≪≫ _,
-    apply cokernel_comp_is_iso, },
+    refine (cokernel_comp_is_iso _ _) ≪≫ _,
+    exact (homology_iso_cokernel_image_to_kernel' _ _ _).symm,
+    },
   { delta to_single,
-    dsimp, simp, refl, },
+    dsimp, simp },
 end
 
 instance to_single_quasi_iso (n : ℤ) :
@@ -581,9 +584,9 @@ instance to_single_quasi_iso (n : ℤ) :
           linarith },
         haveI : mono (homological_complex.d_from (C.imker n) (n - 1)),
         { rw homological_complex.d_from_eq (C.imker n) (show (n-1)+1=n, by ring),
-          apply @mono_comp _ _ _ _ _ _ _,
           rw d_eq_im_to_ker _ rfl rfl,
-          apply_instance, },
+          delta image_to_kernel', -- should register the instance that image_to_kernel' is mono!
+          apply_instance },
         convert image_to_kernel_epi_of_zero_of_mono (homological_complex.d_from (C.imker n) (n - 1)),
       },
       { rw ← functor.comp_obj,
