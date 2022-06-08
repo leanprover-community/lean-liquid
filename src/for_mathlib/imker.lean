@@ -373,7 +373,7 @@ lemma zero_of_epi_comp_zero {V : Type*} [category V] [abelian V]
 (preadditive.epi_iff_cancel_zero f).mp infer_instance C g w
 
 -- move
-@[simp] lemma zero_iff_comp_mono_zero {V : Type*} [category V] [abelian V]
+@[simp] lemma comp_mono_zero_iff {V : Type*} [category V] [abelian V]
   {A B C : V} {f : A ⟶ B} {g : B ⟶ C} [mono g] : f ≫ g = 0 ↔ f = 0 :=
 ⟨(preadditive.mono_iff_cancel_zero g).1 infer_instance A f, λ f, f.symm ▸ zero_comp⟩
 
