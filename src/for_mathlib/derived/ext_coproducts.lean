@@ -245,7 +245,7 @@ lemma preserves_coproducts_aux
   [category.{v} C] [category.{v} D]
   (F : C ⥤ D)
   [has_coproducts_of_shape α C]
-  [has_coproducts_of_shape α D]
+  [∀ (X : α → C), has_coproduct (λ a, F.obj (X a))]
   (e : Π (X : α → C), F.obj (∐ X) ≅ ∐ (λ a, F.obj (X a)))
   (he : ∀ (X : α → C) (a : α), F.map (sigma.ι X a) ≫ (e X).hom = sigma.ι _ a) :
   preserves_colimits_of_shape (discrete α) F :=

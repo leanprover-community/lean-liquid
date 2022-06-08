@@ -235,6 +235,14 @@ instance {α : Type v} (X : α → homotopy_category A (complex_shape.up ℤ)) :
   has_coproduct X :=
 { exists_colimit := nonempty.intro $ ⟨colimit_cofan _, is_colimit_cofan _⟩ }
 
+instance {α : Type v} : has_colimits_of_shape (discrete α)
+  (homotopy_category A (complex_shape.up ℤ)) :=
+begin
+  constructor, intros K,
+  let E : K ≅ discrete.functor K.obj := discrete.nat_iso (λ _, iso.refl _),
+  apply has_colimit_of_iso E,
+end
+
 noncomputable
 instance {α : Type v} : preserves_colimits_of_shape (discrete α)
   (quotient A (complex_shape.up ℤ)) :=
