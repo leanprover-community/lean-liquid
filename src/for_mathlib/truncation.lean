@@ -68,8 +68,12 @@ namespace truncation
 @[reducible] def X_iso_of_lt {i n : ℤ} (h : i < n) : (C.truncation n).X i ≅ C.X i :=
 eq_to_iso (by simp [truncation, if_pos h] )
 
+-- don't know whether to go for kernel of d_n or of d_i!
 @[reducible] def X_iso_of_eq {i n : ℤ} (h : i = n) : (C.truncation n).X i ≅ kernel (C.d n (n+1)) :=
-eq_to_iso (by simp [truncation, if_neg (show ¬ i < n, by linarith), if_pos h] )
+eq_to_iso (by subst h; simp [truncation, if_neg (show ¬ i < i, by linarith)] )
+
+@[reducible] def X_iso_of_eq' {i n : ℤ} (h : i = n) : (C.truncation n).X i ≅ kernel (C.d i (i+1)) :=
+eq_to_iso (by subst h; simp [truncation, if_neg (show ¬ i < i, by linarith)] )
 
 lemma is_zero_X_of_lt {i n : ℤ} (h : n < i) : is_zero ((C.truncation n).X i) :=
 begin
@@ -202,14 +206,28 @@ lemma ι_iso (n : ℤ) (hC : ((homotopy_category.quotient _ _).obj C).bounded_by
   end⟩ }
 
 -- feel free to skip this, and directly provide a defn for `ι_succ` below
-def map_of_le (i j : ℤ) (h : i ≤ j) : C.truncation i ⟶ C.truncation j :=
-sorry
+def map_of_le (m n : ℤ) (h : m ≤ n) : C.truncation m ⟶ C.truncation n :=
+{ f := λ i, if him : i < m
+    then (X_iso_of_lt C him).hom ≫
+      (X_iso_of_lt C (lt_of_lt_of_le him h)).inv -- id
+    else if him' : i = m -- domain is ker(d)
+      then if hin : i < n
+        then (X_iso_of_eq C him').hom ≫ kernel.ι _ ≫
+          (eq_to_hom (by rw him') : C.X m ⟶ C.X i) ≫ (X_iso_of_lt C hin).inv -- kernel.ι
+        else (X_iso_of_eq' C him').hom ≫ (X_iso_of_eq' C (by linarith : i = n)).inv -- identity
+      else 0,
+  comm' := sorry }
 
-def ι_succ (i : ℤ) : C.truncation i ⟶ C.truncation (i+1) :=
+def ι_succ (n : ℤ) : C.truncation n ⟶ C.truncation (n+1) :=
 truncation.map_of_le _ _ _ $ by simp only [le_add_iff_nonneg_right, zero_le_one]
 
-def to_imker (i : ℤ) : C.truncation i ⟶ imker C i :=
-sorry
+def to_imker (n : ℤ) : C.truncation n ⟶ imker C n :=
+{ f := λ i, if hi : i = n - 1
+           then sorry
+           else if i = n
+             then sorry
+             else 0,
+  comm' := sorry }
 
 lemma short_exact_ι_succ_to_imker (i : ℤ) :
   ∀ n, short_exact ((ι_succ C i).f n) ((to_imker C (i+1)).f n) :=
