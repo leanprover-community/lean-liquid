@@ -21,13 +21,24 @@ begin
   { rintro rfl, linarith only [hk] }
 end
 
+instance has_coproduct_of_shape_single {α : Type v} (i : ℤ)
+  [has_coproducts_of_shape α A]
+  (X : α → A) : has_coproduct (λ a, (single A i).obj (X a)) :=
+sorry
+
+def single_sigma_iso {α : Type v} (i : ℤ) (X : α → A)
+  [has_coproducts_of_shape α A] :
+  (single A i).obj (∐ X) ≅ ∐ λ (a : α), (single A i).obj (X a) := sorry
+
+noncomputable
 instance preserves_coproducts_single {α : Type v}
-  [has_coproducts_of_shape α A] [has_coproducts_of_shape α (bounded_homotopy_category A)]
+  [has_coproducts_of_shape α A]
   (i : ℤ) :
   preserves_colimits_of_shape (discrete α) (single A i) :=
 begin
-  sorry
-  -- refine preserves_coproducts_aux _ _ _,
+  refine preserves_coproducts_aux _ _ _,
+  { sorry },
+  { sorry }
   -- { intro X,
   --   refine ⟨_, sigma.desc (λ a, (single A i).map (sigma.ι _ _)), _, _⟩,
   --   { sorry },
