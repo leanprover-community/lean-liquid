@@ -210,37 +210,6 @@ begin
   exact is_zero_of_iso_of_zero hB (homology_zero_zero.symm),
 end
 
--- move to `single`
-lemma single.d_eq_zero (V : Type*) [category V] [has_zero_morphisms V] [has_zero_object V]
-  {ι : Type*} [decidable_eq ι] (c : complex_shape ι) (i j k : ι) ( v : V) :
-  ((single V c i).obj v).d j k = 0 := rfl
-
--- move to `single`
-lemma single.d_from_eq_zero (V : Type*) [category V] [has_zero_morphisms V] [has_zero_object V]
-  {ι : Type*} [decidable_eq ι] (c : complex_shape ι) (i j : ι) ( v : V) :
-  ((single V c i).obj v).d_from j = 0 :=
-begin
-  rcases hj : c.next j with _ | ⟨k, hjk⟩,
-  { rw homological_complex.d_from_eq_zero _ hj, },
-  { rw homological_complex.d_from_eq _ hjk,
-    rw single.d_eq_zero,
-    apply zero_comp,
-  },
-end
-
--- move to `single`
-lemma single.d_to_eq_zero (V : Type*) [category V] [has_zero_morphisms V] [has_zero_object V]
-  {ι : Type*} [decidable_eq ι] (c : complex_shape ι) (i j : ι) ( v : V) :
-  ((single V c i).obj v).d_to j = 0 :=
-begin
-  rcases hj : c.prev j with _ | ⟨k, hjk⟩,
-  { rw homological_complex.d_to_eq_zero _ hj, },
-  { rw homological_complex.d_to_eq _ hjk,
-    rw single.d_eq_zero,
-    apply comp_zero,
-  },
-end
-
 -- variant of homology_zero_zero
 -- move
 def homology_zero_zero' {V : Type*} [category V] [abelian V]
@@ -478,6 +447,37 @@ end
 --   simp,
 --   admit, -- presumably this is true!
 -- end
+
+-- move to `single`
+lemma single.d_eq_zero (V : Type*) [category V] [has_zero_morphisms V] [has_zero_object V]
+  {ι : Type*} [decidable_eq ι] (c : complex_shape ι) (i j k : ι) ( v : V) :
+  ((single V c i).obj v).d j k = 0 := rfl
+
+-- move to `single`
+lemma single.d_from_eq_zero (V : Type*) [category V] [has_zero_morphisms V] [has_zero_object V]
+  {ι : Type*} [decidable_eq ι] (c : complex_shape ι) (i j : ι) ( v : V) :
+  ((single V c i).obj v).d_from j = 0 :=
+begin
+  rcases hj : c.next j with _ | ⟨k, hjk⟩,
+  { rw homological_complex.d_from_eq_zero _ hj, },
+  { rw homological_complex.d_from_eq _ hjk,
+    rw single.d_eq_zero,
+    apply zero_comp,
+  },
+end
+
+-- move to `single`
+lemma single.d_to_eq_zero (V : Type*) [category V] [has_zero_morphisms V] [has_zero_object V]
+  {ι : Type*} [decidable_eq ι] (c : complex_shape ι) (i j : ι) ( v : V) :
+  ((single V c i).obj v).d_to j = 0 :=
+begin
+  rcases hj : c.prev j with _ | ⟨k, hjk⟩,
+  { rw homological_complex.d_to_eq_zero _ hj, },
+  { rw homological_complex.d_to_eq _ hjk,
+    rw single.d_eq_zero,
+    apply comp_zero,
+  },
+end
 
 -- this is preparation for `imker.map_is_iso` which follows.
 lemma homology_functor.is_iso_of_is_zero_of_is_zero_of_is_zero {ι : Type*} {c : complex_shape ι}
