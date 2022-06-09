@@ -278,15 +278,26 @@ def map_of_le (m n : ℤ) (h : m ≤ n) : C.truncation m ⟶ C.truncation n :=
 def ι_succ (n : ℤ) : C.truncation n ⟶ C.truncation (n+1) :=
 truncation.map_of_le _ _ _ $ by simp only [le_add_iff_nonneg_right, zero_le_one]
 
+--move
+lemma _root_.homological_complex.d_from_eq_d_comp_X_next_iso_inv {ι V : Type*} [category V]
+  [has_zero_morphisms V] {c : complex_shape ι} (C : homological_complex V c) [has_zero_object V]
+    {i j : ι} (r : c.rel i j) :
+  C.d_from i = C.d i j ≫ (C.X_next_iso r).inv :=
+by simp [C.d_from_eq r]
+
 def to_imker (n : ℤ) : C.truncation n ⟶ imker C n :=
 { f := λ i, if hi : i = n - 1
            then (X_iso_of_lt C (show i < n, by linarith)).hom ≫ eq_to_hom (by rw hi) ≫
            factor_thru_image (C.d (n-1) n) ≫
-           eq_to_hom (show image (C.d (n - 1) n) = image ((homological_complex.X_prev_iso C (show n - 1 + 1 = n, by ring)).inv ≫ homological_complex.d_to C n), by { rw ← C.X_prev_iso_comp_d_to }) ≫
+           eq_to_hom (show image (C.d (n - 1) n) = image ((homological_complex.X_prev_iso C
+               (show n - 1 + 1 = n, by ring)).inv ≫ homological_complex.d_to C n), by { rw ← C.X_prev_iso_comp_d_to }) ≫
              image.pre_comp (C.X_prev_iso (show (n - 1) + 1 = n, by ring)).inv (C.d_to n) ≫
              (imker.X_iso_image_of_eq C hi).inv -- C(n-1) ⟶ Im(d^{n-1})
-           else if i = n
-             then sorry
+           else if hn : i = n
+             then (X_iso_of_eq C hn).hom ≫
+             kernel.lift (C.d n (n+1) ≫ (C.X_next_iso (show n + 1 = n + 1, from rfl)).inv) (kernel.ι _) (by {rw [← category.assoc, kernel.condition, zero_comp]}) ≫
+             eq_to_hom begin simp_rw ← C.d_from_eq_d_comp_X_next_iso_inv, end ≫
+             (imker.kernel_iso_X_of_eq C hn).hom
              else 0,
   comm' := sorry }
 
