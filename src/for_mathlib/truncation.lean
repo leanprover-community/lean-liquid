@@ -216,14 +216,82 @@ def map_of_le (m n : ℤ) (h : m ≤ n) : C.truncation m ⟶ C.truncation n :=
           (eq_to_hom (by rw him') : C.X m ⟶ C.X i) ≫ (X_iso_of_lt C hin).inv -- kernel.ι
         else (X_iso_of_eq' C him').hom ≫ (X_iso_of_eq' C (by linarith : i = n)).inv -- identity
       else 0,
-  comm' := sorry }
+  comm' := λ i j, begin
+    rintro (rfl : _ = _),
+    delta truncation,
+    dsimp only [zero_add, neg_zero, add_zero, zero_lt_one, neg_neg, neg_eq_zero, homological_complex.d_comp_d, dif_neg, dif_pos,
+  category.assoc, eq_to_hom_trans_assoc, eq_to_hom_refl, category.id_comp, homological_complex.d_comp_d_assoc,
+  zero_comp, comp_zero, preadditive.is_iso.comp_left_eq_zero, imker.comp_mono_zero_iff,
+  homological_complex.d_comp_eq_to_hom, add_tsub_cancel_right, complex_shape.up_rel, add_left_inj, eq_self_iff_true,
+  equalizer_as_kernel, kernel.lift_ι, mul_one],
+    simp only [eq_self_iff_true, eq_to_iso.hom, eq_to_iso.inv, eq_to_hom_trans, eq_to_hom_trans_assoc, dif_pos],
+    by_cases him : i < m,
+    { rw dif_pos him,
+      by_cases hi1n : i + 1 < n,
+      { rw dif_pos hi1n,
+        by_cases hi1m : i + 1 < m,
+        { simp [dif_pos hi1m], },
+        { have hm : i + 1 = m, linarith,
+          subst hm,
+          rw dif_neg hi1m,
+          rw dif_pos rfl,
+          rw dif_neg hi1m,
+          rw dif_pos rfl,
+          rw dif_pos hi1n,
+          simp only [eq_to_hom_trans_assoc, category.assoc, eq_to_hom_refl, category.id_comp, kernel.lift_ι_assoc],
+          congr';
+          ring,
+        }
+      },
+      { rw dif_neg hi1n,
+        have hn : i + 1 = n, linarith,
+        subst hn,
+        have hm : m = i + 1, linarith,
+        subst hm,
+        simp, } },
+    { rw dif_neg him,
+      by_cases hm : i = m,
+      { subst hm,
+        rw dif_pos rfl,
+        rw dif_neg (show ¬ (i + 1) < i, by linarith),
+        rw dif_neg (show ¬ i + 1 = i, by linarith),
+        rw zero_comp,
+        obtain (hn | rfl) := lt_or_eq_of_le h,
+        { rw dif_pos hn,
+          by_cases hi1n : i + 1 < n,
+          { rw dif_pos hi1n,
+            simp, },
+          { rw dif_neg hi1n,
+            have hn2 : i + 1 = n, linarith,
+            subst hn2,
+            simp,
+            have hi : eq_to_hom _ ≫ kernel.lift (C.d (i + 1) (i + 1 + 1)) (C.d (i + 1 - 1) (i + 1)) _ = kernel.lift (C.d (i + 1) (i + 1 + 1)) (C.d i (i + 1)) _,
+            { ext, simp, },
+            rw ← category.assoc (eq_to_hom _),
+            rw hi, swap, apply C.d_comp_d, clear hi,
+            rw ← category.assoc,
+            convert zero_comp,
+            ext, simp, } },
+        { rw dif_neg him,
+          rw dif_neg (show ¬ i + 1 < i, by linarith),
+          rw dif_neg (show i + 1 ≠ i, by linarith),
+          apply comp_zero, }
+      },
+      { rw dif_neg hm,
+        rw zero_comp,
+        rw dif_neg (show ¬ i + 1 < m, by linarith),
+        rw dif_neg (show i + 1 ≠ m, by linarith),
+        rw zero_comp,
+      } }
+  end }
 
 def ι_succ (n : ℤ) : C.truncation n ⟶ C.truncation (n+1) :=
 truncation.map_of_le _ _ _ $ by simp only [le_add_iff_nonneg_right, zero_le_one]
 
 def to_imker (n : ℤ) : C.truncation n ⟶ imker C n :=
 { f := λ i, if hi : i = n - 1
-           then sorry ≫ factor_thru_image (C.d (n-1) n) ≫ sorry -- C(n-1) ⟶ Im(d^{n-1})
+           then (X_iso_of_lt C (show i < n, by linarith)).hom ≫ eq_to_hom (by rw hi) ≫
+           factor_thru_image (C.d (n-1) n) ≫ sorry ≫ (imker.X_iso_image_of_eq C hi).inv -- C(n-1) ⟶ Im(d^{n-1})
            else if i = n
              then sorry
              else 0,
