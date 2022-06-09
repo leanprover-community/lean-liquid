@@ -203,6 +203,8 @@ begin
   let c' := T.map_cocone c,
   let hc' : is_colimit c' := is_colimit_of_preserves T hc,
   let c'' := ((Ext' i).flip.obj B).right_op.map_cocone c',
+  haveI : has_coproducts 𝓐 := sorry, -- TODO: Make this an assumption above.
+  haveI : AB4 𝓐 := sorry, -- TODO: Make this an assumption above.
   let hc'' : is_colimit c'' := is_colimit_of_preserves _ hc',
   change is_zero c''.X.unop,
   apply is_zero.unop,

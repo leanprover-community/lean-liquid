@@ -202,11 +202,6 @@ apply_nolint category_theory.endomorphisms.free unused_arguments
 -- for_mathlib/exact_seq3.lean
 apply_nolint category_theory.exact_seq.w def_lemma
 
--- for_mathlib/has_homology.lean
-apply_nolint has_homology.fst_eq_zero def_lemma
-apply_nolint has_homology.has_homology.map_iso_homology_map dup_namespace
-apply_nolint has_homology.snd_eq_zero def_lemma
-
 -- for_mathlib/hom_single_iso.lean
 apply_nolint bounded_homotopy_category.hom_single_iso_setup.hom_complex unused_arguments
 
@@ -236,6 +231,7 @@ apply_nolint short_exact_sequence.horseshoe_ker unused_arguments
 
 -- for_mathlib/imker.lean
 apply_nolint cochain_complex.imker.cokernel.desc_is_iso unused_arguments
+apply_nolint cochain_complex.imker.homology_functor.is_iso_of_is_zero_of_is_zero_of_is_zero unused_arguments
 apply_nolint cochain_complex.imker.map_is_iso_of_iso_of_map_is_iso unused_arguments
 apply_nolint cochain_complex.imker.obj_is_zero_of_iso unused_arguments
 
@@ -291,6 +287,9 @@ apply_nolint extended_le_span unused_arguments
 
 -- for_mathlib/sheafification_mono.lean
 apply_nolint category_theory.grothendieck_topology.eq_zero_of_exists unused_arguments
+
+-- for_mathlib/single_coproducts.lean
+apply_nolint bounded_homotopy_category.uniformly_bounded_single unused_arguments
 
 -- for_mathlib/snake_lemma.lean
 apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_col unused_arguments
