@@ -42,4 +42,6 @@ def map_homology_iso {X Y Z : A} (f : X ⟶ Y) (g : Y ⟶ Z) (w w') :
 
 end functor
 
+-- TODO: Exact iff preserves finite limits and colimits
+
 end category_theory
