@@ -285,12 +285,36 @@ lemma _root_.homological_complex.d_from_eq_d_comp_X_next_iso_inv {ι V : Type*} 
   C.d_from i = C.d i j ≫ (C.X_next_iso r).inv :=
 by simp [C.d_from_eq r]
 
+-- example (A B : 𝓐) (f g : A ⟶ B) (h : f = g) :
+--   (category_theory.eq_to_hom (by rw h) : image f ⟶ image g) = (image.eq_to_iso h).hom :=
+-- begin
+--   sorry -- :-(
+-- end
+
+-- lemma factor_thru_image_comp_iso (A B : 𝓐) (f g : A ⟶ B) (h : f = g) :
+--   factor_thru_image f ≫ (eq_to_hom (by rw h) : image f ⟶ image g) =
+--   factor_thru_image g :=
+-- begin
+--   sorry
+-- end
+
+-- lemma factor_thru_image_comp_iso_comp_image_ι (A B : 𝓐) (f g : A ⟶ B) (h : f = g) :
+--   factor_thru_image f ≫ (eq_to_hom (by rw h) : image f ⟶ image g) ≫ image.ι g = f :=
+-- begin
+--   simp only [iso_comp_image_ι, image.fac],
+-- end
+-- #exit
+--factor_thru_image (e.hom ≫ d) ≫ image.ι (e.hom ≫ d) = factor_thru_image
+
+attribute [reassoc] image.eq_fac
+
+#check image.eq_fac_assoc
+
 def to_imker (n : ℤ) : C.truncation n ⟶ imker C n :=
 { f := λ i, if hi : i = n - 1
            then (X_iso_of_lt C (show i < n, by linarith)).hom ≫ eq_to_hom (by rw hi) ≫
            factor_thru_image (C.d (n-1) n) ≫
-           eq_to_hom (show image (C.d (n - 1) n) = image ((homological_complex.X_prev_iso C
-               (show n - 1 + 1 = n, by ring)).inv ≫ homological_complex.d_to C n), by { rw ← C.X_prev_iso_comp_d_to }) ≫
+           (image.eq_to_iso (by { rw ← C.X_prev_iso_comp_d_to, show (n - 1) + 1 = n, ring, })).hom ≫
              image.pre_comp (C.X_prev_iso (show (n - 1) + 1 = n, by ring)).inv (C.d_to n) ≫
              (imker.X_iso_image_of_eq C hi).inv -- C(n-1) ⟶ Im(d^{n-1})
            else if hn : i = n
@@ -316,8 +340,14 @@ def to_imker (n : ℤ) : C.truncation n ⟶ imker C n :=
       congr' 1,
       ext,
       delta image_to_kernel',
-      simp,
+      simp only [category.assoc, eq_to_iso.hom, eq_to_hom_refl, category.comp_id, imker.X_iso_image_of_eq_inv, eq_to_hom_trans,
+  equalizer_as_kernel, kernel.lift_ι, image.pre_comp_ι],
       congr' 1,
+      have foo := (category_theory.limits.image.eq_fac (C.X_prev_iso_comp_d_to (show (n - 1) + 1 = n, by ring)).symm).symm,
+      dsimp, dsimp at foo,
+      rw foo,
+      rw image.fac,
+      --simp only [← category_theory.limits.image.eq_fac_assoc (C.X_prev_iso_comp_d_to (show (n - 1) + 1 = n, by ring))],
       sorry,
       /-
       ⊢ factor_thru_image (C.d (n - 1) n) ≫
