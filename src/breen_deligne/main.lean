@@ -143,14 +143,27 @@ begin
     { linarith only [hk, hk', hij] } },
 end
 
+open bounded_homotopy_category (Ext0)
+
+def bdd_step₅_aux' (X Y : bounded_homotopy_category 𝓐) (k : ℤ) :
+  (preadditive_yoneda.obj X).obj (op Y) ≅ (preadditive_yoneda.obj (X⟦k⟧)).obj (op (Y⟦k⟧)) :=
+sorry
+
+def bdd_step₅_aux (X Y : bounded_homotopy_category 𝓐) (k : ℤ) :
+  (Ext0.obj (op X)).obj Y ≅ (Ext0.obj (op $ X⟦k⟧)).obj (Y⟦k⟧) :=
+sorry
+
 lemma bdd_step₅ (k i : ℤ) :
   is_zero (((Ext i).obj (op ((single 𝓐 k).obj A))).obj ((single 𝓐 0).obj B)) ↔
   is_zero (((Ext' (i+k)).obj (op $ A)).obj B) :=
 begin
   apply iso.is_zero_iff,
-  -- this should follow from the defn of `Ext`
-  -- dsimp [Ext', Ext],
-  sorry
+  dsimp only [Ext', Ext, functor.comp_obj, functor.flip_obj_obj, whiskering_left_obj_obj],
+  refine bdd_step₅_aux _ _ k ≪≫ _,
+  refine functor.map_iso _ _ ≪≫ iso.app (functor.map_iso _ _) _,
+  { refine (shift_add _ _ _).symm },
+  { refine ((bounded_homotopy_category.shift_single_iso k k).app A).op.symm ≪≫ _,
+    refine eq_to_iso _, rw sub_self, refl },
 end
 
 -- `T` should be thought of as a tensor product functor,
