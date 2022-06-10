@@ -299,7 +299,43 @@ def to_imker (n : ℤ) : C.truncation n ⟶ imker C n :=
              eq_to_hom begin simp_rw ← C.d_from_eq_d_comp_X_next_iso_inv, end ≫
              (imker.kernel_iso_X_of_eq C hn).hom
              else 0,
-  comm' := sorry }
+  comm' := λ i j, begin
+    rintro (rfl : _ = _),
+    by_cases hi : i = n - 1,
+    { rw dif_pos hi,
+      subst hi,
+      delta imker truncation, dsimp only,
+      rw dif_pos rfl,
+      rw dif_pos (show n - 1 + 1 = n, by ring),
+      rw dif_pos rfl,
+      rw dif_neg (show ¬ n - 1 + 1 < n, by linarith),
+      rw dif_pos (show n - 1 + 1 = n, by ring),
+      rw dif_neg (show n - 1 + 1 ≠ n - 1, by linarith),
+      rw dif_pos (show n - 1 + 1 = n, by ring),
+      simp only [← category.assoc],
+      congr' 1,
+      ext,
+      delta image_to_kernel',
+      simp,
+      congr' 1,
+      sorry,
+      /-
+      ⊢ factor_thru_image (C.d (n - 1) n) ≫
+            eq_to_hom _ ≫ image.ι ((homological_complex.X_prev_iso C _).inv ≫ homological_complex.d_to C n) =
+          kernel.lift (C.d n (n + 1)) (C.d (n - 1) n) _ ≫
+            kernel.lift (C.d n (n + 1) ≫ (homological_complex.X_next_iso C _).inv) (kernel.ι (C.d n (n + 1))) _ ≫
+              eq_to_hom _ ≫ kernel.ι (homological_complex.d_from C n)
+
+C(n-1)->im(d(n-1))->im(previsoinv>>d_to)->C(n)
+C(n-1)->ker(d(n))->ker(d(n)>>nextisoinv)->ker(d_from)->C(n)
+      -/
+
+      --simp,sorry
+    },
+    {
+      sorry
+    }
+  end }
 
 lemma short_exact_ι_succ_to_imker (i : ℤ) :
   ∀ n, short_exact ((ι_succ C i).f n) ((to_imker C (i+1)).f n) :=
