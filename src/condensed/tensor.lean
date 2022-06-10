@@ -2,6 +2,8 @@ import condensed.adjunctions
 import condensed.extr.equivalence
 import linear_algebra.tensor_product
 
+import for_mathlib.endomorphisms.functor
+
 noncomputable theory
 
 universes u
@@ -67,5 +69,14 @@ def tensor_functor_conj_iso :
     (Condensed_ExtrSheafProd_equiv Ab.{u+1}).functor)).obj tensor_functor ≅
   ExtrSheafProd.tensor_functor :=
 sorry
+
+def endo_tensor :
+  (endomorphisms $ Condensed.{u} Ab.{u+1}) ⥤ Ab.{u+1} ⥤
+  (endomorphisms $ Condensed.{u} Ab.{u+1}) :=
+functor.flip $
+{ obj := λ A, (tensor_functor.flip.obj A).map_endomorphisms,
+  map := sorry,
+  map_id' := sorry,
+  map_comp' := sorry }
 
 end condensed
