@@ -233,6 +233,13 @@ instance functor_category_is_iso_coim_to_im {F G : C ⥤ D} (η : F ⟶ G) :
 instance functor_category_is_abelian : abelian (C ⥤ D) :=
 abelian.of_coimage_image_comparison_is_iso
 
+set_option pp.universes true
+
+-- We need to help lean out a little bit because of the `max` in the universe parameters above.
+instance functor_category_is_abelian' {A : Type u} [category.{v} A] [abelian A]
+  {J : Type v} [small_category J] : abelian (J ⥤ A) :=
+@category_theory.functor_category_is_abelian.{u v v} J _ A _ _
+
 end abelian
 
 end category_theory
