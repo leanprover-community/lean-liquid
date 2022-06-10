@@ -189,6 +189,8 @@ end
 
 include hT1
 
+variables [has_coproducts 𝓐] [AB4 𝓐]
+
 lemma bdd_step₆_free₁
   (IH : ∀ i ≤ j, is_zero $ ((Ext' i).obj (op A)).obj B)
   (i : ℤ) (hi : i ≤ j) (α : Type v) :
@@ -216,8 +218,6 @@ begin
   let c' := T.map_cocone c,
   let hc' : is_colimit c' := is_colimit_of_preserves T hc,
   let c'' := ((Ext' i).flip.obj B).right_op.map_cocone c',
-  haveI : has_coproducts 𝓐 := sorry, -- TODO: Make this an assumption above.
-  haveI : AB4 𝓐 := sorry, -- TODO: Make this an assumption above.
   let hc'' : is_colimit c'' := is_colimit_of_preserves _ hc',
   change is_zero c''.X.unop,
   apply is_zero.unop,
@@ -322,8 +322,17 @@ def mk_bo_ha_ca_Q (X : 𝓐) (f : X ⟶ X) :
   (BD.eval F.map_endomorphisms).obj ⟨X, f⟩ :=
 sorry
 
+variables [has_coproducts (endomorphisms 𝓐)]
+variables [AB4 (endomorphisms 𝓐)]
+
 lemma main_lemma (A : 𝓐) (B : 𝓐) (f : A ⟶ A) (g : B ⟶ B)
-  (hH0 : (((data.eval_functor F).obj BD.data).obj A).homology 0 ≅ A) :
+  (hH0 : ((data.eval_functor F).obj BD.data) ⋙ homology_functor _ _ 0 ≅ 𝟭 _)
+  (T : Ab.{v} ⥤ endomorphisms 𝓐) [Π (α : Type v), preserves_colimits_of_shape (discrete α) T]
+  (hT0 : T.obj (AddCommGroup.of (punit →₀ ℤ)) ≅ ⟨A, f⟩)
+  (hT : ∀ {X Y Z : Ab} (f : X ⟶ Y) (g : Y ⟶ Z),
+    short_exact f g → short_exact (T.map f) (T.map g))
+  (hTA : ∀ t ≤ (-1:ℤ), (∃ (A' : Ab),
+    nonempty (T.obj A' ≅ ((BD.eval F.map_endomorphisms).obj ⟨A, f⟩).val.as.homology t))) :
   (∀ i, is_iso $ ((Ext' i).map f.op).app B - ((Ext' i).obj (op A)).map g) ↔
   (∀ i, is_iso $
     ((Ext i).map ((BD.eval F).map f).op).app ((single _ 0).obj B) -
@@ -331,15 +340,9 @@ lemma main_lemma (A : 𝓐) (B : 𝓐) (f : A ⟶ A) (g : B ⟶ B)
 begin
   rw [← endomorphisms.Ext'_is_zero_iff' A B f g],
   rw [← endomorphisms.Ext_is_zero_iff'],
-  refine (main_lemma.is_zero BD F.map_endomorphisms _ _ _ _ _ _ _).trans _,
-  { sorry },
-  -- the next `sorry` are not provable in general,
-  -- they should be made assumptions that can be filled in when applied to `Cond(Ab)`
-  { sorry },
-  { sorry },
-  { sorry },
-  { sorry },
-  { sorry },
+  refine (main_lemma.is_zero BD F.map_endomorphisms _ _ _ T hT0 @hT hTA).trans _,
+  { -- use `hH0`
+    sorry },
   apply forall_congr, intro i,
   apply iso.is_zero_iff,
   refine functor.map_iso _ _ ≪≫ iso.app (functor.map_iso _ _) _,

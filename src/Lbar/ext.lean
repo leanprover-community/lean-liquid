@@ -248,8 +248,7 @@ end
 /-- Thm 9.4bis of [Analytic]. More precisely: the first observation in the proof 9.4 => 9.1. -/
 theorem is_iso_Tinv_sub [normed_with_aut r V] : ∀ i, is_iso (Tinv_sub r r' S V i) :=
 begin
-  refine (condensed.bd_lemma breen_deligne.eg _ _ _ _ _).mpr _,
-  { sorry },
+  refine (condensed.bd_lemma _ _ _ _).mpr _,
   rintro ((_|_)|_),
   { sorry },
   { sorry },
