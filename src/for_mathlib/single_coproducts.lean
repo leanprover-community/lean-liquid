@@ -20,12 +20,26 @@ def sigma_single_component {α : Type v} (i : ℤ) (X : α → A) :
   inv := sigma.desc $ λ a, eq_to_hom (if_pos rfl).symm ≫
     (sigma.ι (λ (a : α), (single A (complex_shape.up ℤ) i).obj (X a)) a).f i,
   hom_inv_id' := begin
-    sorry,
+    apply (is_colimit_of_preserves (eval A (complex_shape.up ℤ) i)
+      (colimit.is_colimit (discrete.functor
+        (λ (a : α), (single A (complex_shape.up ℤ) i).obj (X a))))).hom_ext,
+    intros j,
+    dsimp,
+    rw category.comp_id,
+    slice_lhs 1 2
+    { erw (is_colimit_of_preserves (eval A (complex_shape.up ℤ) i)
+        (colimit.is_colimit (discrete.functor
+        (λ (a : α), (single A (complex_shape.up ℤ) i).obj (X a))))).fac },
+    dsimp,
+    rw [category.assoc, colimit.ι_desc], dsimp, simp,
   end,
   inv_hom_id' := begin
     ext j,
     simp only [colimit.ι_desc_assoc, cofan.mk_ι_app, category.assoc, category.comp_id],
-    sorry,
+    erw (is_colimit_of_preserves (eval A (complex_shape.up ℤ) i)
+      (colimit.is_colimit (discrete.functor (λ (a : α),
+      (single A (complex_shape.up ℤ) i).obj (X a))))).fac,
+    dsimp, simp,
   end }
 
 noncomputable
