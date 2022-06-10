@@ -73,7 +73,13 @@ def single_sigma_iso {α : Type v} (i : ℤ) (X : α → A) :
     rcases eq_or_ne j i with (rfl|hij),
     { rw [dif_pos rfl],
       simp only [category.assoc],
-      sorry },
+      rw ← is_iso.eq_inv_comp (eq_to_hom _), swap, apply_instance,
+      ext, simp only [colimit.ι_desc_assoc, cofan.mk_ι_app, category.assoc,
+        inv_eq_to_hom, category.comp_id],
+      dsimp [sigma_single_component_of_eq, sigma_single_component],
+      simp only [category.comp_id, colimit.ι_desc_assoc, cofan.mk_ι_app, category.assoc],
+      rw [← homological_complex.comp_f, colimit.ι_desc], dsimp,
+      rw dif_pos rfl, simp },
     { rw [dif_neg hij, zero_comp, if_neg hij, eq_comm, ← is_zero_iff_id_eq_zero],
       exact limits.is_zero_zero A }
   end,
@@ -87,8 +93,8 @@ def single_sigma_iso {α : Type v} (i : ℤ) (X : α → A) :
       simp only [category.assoc, eq_to_hom_trans_assoc, eq_to_hom_refl, category.id_comp,
         colimit.ι_desc, cofan.mk_ι_app, sigma_single_component_of_eq, iso.trans_inv,
         sigma_single_component, colimit.ι_desc_assoc, eq_to_iso, category.comp_id], },
-    { rw [dif_neg hin, zero_comp],
-      sorry }
+    { rw [dif_neg hin, zero_comp], apply is_zero.eq_of_src,
+      dsimp, rw if_neg hin, exact limits.is_zero_zero A }
   end }
 
 noncomputable
