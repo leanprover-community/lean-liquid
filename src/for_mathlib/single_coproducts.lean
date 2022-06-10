@@ -19,8 +19,14 @@ def sigma_single_component {α : Type v} (i : ℤ) (X : α → A) :
     discrete.nat_trans $ λ a, eq_to_hom (if_pos rfl) ≫ sigma.ι _ a⟩,
   inv := sigma.desc $ λ a, eq_to_hom (if_pos rfl).symm ≫
     (sigma.ι (λ (a : α), (single A (complex_shape.up ℤ) i).obj (X a)) a).f i,
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+  hom_inv_id' := begin
+    sorry,
+  end,
+  inv_hom_id' := begin
+    ext j,
+    simp only [colimit.ι_desc_assoc, cofan.mk_ι_app, category.assoc, category.comp_id],
+    sorry,
+  end }
 
 noncomputable
 def sigma_single_component_of_eq {α : Type v} (j i : ℤ) (X : α → A) (h : j = i) :
@@ -34,22 +40,64 @@ def single_sigma_iso {α : Type v} (i : ℤ) (X : α → A) :
 { hom :=
   { f := λ j, if h : j = i then eq_to_hom (if_pos h) ≫
       sigma.desc (λ a, sigma.ι _ _ ≫ (sigma_single_component_of_eq j i X h).inv) else 0,
-    comm' := sorry },
+    comm' := begin
+      rintro j k (rfl : _ = _),
+      rcases eq_or_ne j i with (rfl|hij),
+      { rw [dif_pos rfl, dif_neg], swap, { exact succ_ne_self j },
+        simp only [category.assoc, single_obj_d, zero_comp, preadditive.is_iso.comp_left_eq_zero,
+          sigma_single_component_of_eq, iso.trans_inv, sigma_single_component, eq_to_hom_refl,
+          colimit.ι_desc_assoc, eq_to_iso, category.comp_id, cofan.mk_ι_app, colimit.ι_desc],
+        sorry },
+      { rw [dif_neg hij, zero_comp],
+        split_ifs with hij',
+        { subst i, simp only [single_obj_d, zero_comp], },
+        { rw comp_zero } },
+    end },
   inv := sigma.desc $ λ a,
   { f := λ j, if h : j = i then
       eq_to_hom (if_pos h) ≫
         sigma.ι _ _ ≫
         eq_to_hom (if_pos h).symm else 0,
-    comm' := sorry },
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+    comm' := begin
+      rintro j k (rfl : _ = _),
+      rcases eq_or_ne j i with (rfl|hij),
+      { rw [dif_pos rfl, dif_neg], swap, { exact succ_ne_self j },
+        simp only [category.assoc, single_obj_d, zero_comp, comp_zero], },
+      { rw [dif_neg hij, zero_comp],
+        split_ifs with hij',
+        { subst i, simp only [single_obj_d, zero_comp], },
+        { rw comp_zero } },
+    end },
+  hom_inv_id' := begin
+    ext j, dsimp,
+    rcases eq_or_ne j i with (rfl|hij),
+    { rw [dif_pos rfl],
+      simp only [category.assoc],
+      sorry },
+    { rw [dif_neg hij, zero_comp, if_neg hij, eq_comm, ← is_zero_iff_id_eq_zero],
+      exact limits.is_zero_zero A }
+  end,
+  inv_hom_id' := begin
+    apply colimit.hom_ext, intro j,
+    rw [colimit.ι_desc_assoc, cofan.mk_ι_app, category.comp_id],
+    ext n,
+    simp only [comp_f],
+    rcases eq_or_ne n i with (rfl|hin),
+    { rw [dif_pos rfl, dif_pos rfl],
+      simp only [category.assoc, eq_to_hom_trans_assoc, eq_to_hom_refl, category.id_comp,
+        colimit.ι_desc, cofan.mk_ι_app, sigma_single_component_of_eq, iso.trans_inv,
+        sigma_single_component, colimit.ι_desc_assoc, eq_to_iso, category.comp_id], },
+    { rw [dif_neg hin, zero_comp],
+      sorry }
+  end }
 
 noncomputable
 instance preserves_coproducts_single {α : Type v} (i : ℤ) :
   preserves_colimits_of_shape (discrete α) (single A (complex_shape.up ℤ) i) :=
-preserves_coproducts_aux _
-(λ X, single_sigma_iso _ _)
-sorry
+preserves_coproducts_aux _ (λ X, single_sigma_iso _ _) $ λ X a,
+begin
+  sorry
+end
 
 end homological_complex
 
