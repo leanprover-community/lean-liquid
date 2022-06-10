@@ -347,6 +347,8 @@ def to_imker (n : ℤ) : C.truncation n ⟶ imker C n :=
       dsimp, dsimp at foo,
       rw foo,
       rw image.fac,
+      convert (kernel.lift_ι _ _ _).symm,
+      -- nearly there!
       --simp only [← category_theory.limits.image.eq_fac_assoc (C.X_prev_iso_comp_d_to (show (n - 1) + 1 = n, by ring))],
       sorry,
       /-
