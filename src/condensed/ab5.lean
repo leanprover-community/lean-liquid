@@ -57,5 +57,11 @@ begin
   apply AddCommGroup.exact_colim_of_exact_of_is_filtered, intros j, apply h,
 end
 
+instance AB5 : AB5 (Condensed.{u} Ab.{u+1}) :=
+begin
+  constructor, introsI J _ _, constructor, intros F G H f g h,
+  apply exact_colim_of_exact_of_is_filtered,
+  exact (nat_trans.exact_iff_forall.{(u+2) (u+1) (u+1)} f g).1 h,
+end
 
 end Condensed

@@ -2,6 +2,7 @@ import algebra.category.Group.abelian
 import algebra.category.Group.filtered_colimits
 import category_theory.limits.concrete_category
 import for_mathlib.AddCommGroup.exact
+import for_mathlib.ab5
 
 .
 
@@ -34,6 +35,13 @@ begin
     use limits.colimit.ι F k t,
     erw [← comp_apply, limits.colimit.ι_map, comp_apply, ht, ← comp_apply],
     congr' 1, simp }
+end
+
+instance AB5 : AB5 AddCommGroup.{u} :=
+begin
+  constructor, introsI J _ _, constructor, intros F G H f g h,
+  apply exact_colim_of_exact_of_is_filtered,
+  exact (nat_trans.exact_iff_forall.{(u+1) u u} f g).1 h,
 end
 
 end AddCommGroup

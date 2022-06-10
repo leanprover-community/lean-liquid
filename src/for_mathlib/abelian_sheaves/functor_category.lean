@@ -2,7 +2,7 @@ import category_theory.limits.shapes.kernels
 import category_theory.limits.functor_category
 import category_theory.preadditive.functor_category
 import category_theory.additive.basic
-import category_theory.abelian.basic
+import category_theory.abelian.exact
 
 -- This can be removed after #13686 is merged
 
@@ -232,6 +232,9 @@ instance functor_category_is_iso_coim_to_im {F G : C ⥤ D} (η : F ⟶ G) :
 
 instance functor_category_is_abelian : abelian (C ⥤ D) :=
 abelian.of_coimage_image_comparison_is_iso
+
+theorem nat_trans.exact_iff_forall {F G H : C ⥤ D} (η : F ⟶ G) (γ : G ⟶ H) :
+  exact η γ ↔ (∀ j, exact (η.app j) (γ.app j)) := sorry
 
 set_option pp.universes true
 
