@@ -47,7 +47,7 @@ def single_sigma_iso {α : Type v} (i : ℤ) (X : α → A) :
         simp only [category.assoc, single_obj_d, zero_comp, preadditive.is_iso.comp_left_eq_zero,
           sigma_single_component_of_eq, iso.trans_inv, sigma_single_component, eq_to_hom_refl,
           colimit.ι_desc_assoc, eq_to_iso, category.comp_id, cofan.mk_ι_app, colimit.ι_desc],
-        sorry },
+        ext, simp },
       { rw [dif_neg hij, zero_comp],
         split_ifs with hij',
         { subst i, simp only [single_obj_d, zero_comp], },
