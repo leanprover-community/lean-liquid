@@ -2,12 +2,14 @@ import algebra.category.Module.adjunctions
 import group_theory.free_abelian_group_finsupp
 import algebra.category.Group.adjunctions
 import algebra.category.Group.filtered_colimits
+import algebra.category.Group.biproducts
 import algebra.category.Group.abelian
 import category_theory.limits.preserves.shapes.products
 import category_theory.limits.preserves.filtered
 import category_theory.limits.shapes.terminal
 import linear_algebra.free_module.pid
 import for_mathlib.AddCommGroup.epi
+import algebra.group.ulift
 
 open category_theory
 
@@ -65,27 +67,44 @@ def tunit.lift {A : AddCommGroup.{u}} (e : ⊤_ _ ⟶ (forget _).obj A) :
   tunit ⟶ A :=
 (AddCommGroup.adj'.hom_equiv _ _).symm e
 
+def tunit_add_equiv : tunit.{u} ≃+ ℤ :=
+sorry
+
 def tunit.gen : tunit.{u} :=
 AddCommGroup.adj'.unit.app _ $
   (limits.terminal.from (punit : Type u) : punit → ⊤_ (Type u)) punit.star
 
 open_locale classical
 
-def hom_of_basis {ι : Type u} {A : AddCommGroup.{u}} (𝓑 : basis ι ℤ A) :
-  (∐ (λ i : ι, tunit.{u})) ⟶ A :=
-limits.sigma.desc $ λ b, tunit.lift $ types.pt (𝓑 b)
-
-instance is_iso_hom_of_basis {ι : Type u} (A : AddCommGroup.{u}) (𝓑 : basis ι ℤ A) :
-  is_iso (hom_of_basis 𝓑) :=
-begin
-  sorry
-end
-
-local attribute [-simp] forget_map_eq_coe
-
-def iso_of_basis {ι : Type u} {A : AddCommGroup.{u}} (𝓑 : basis ι ℤ A) :
+-- Of course this is true without the fintype assumption...
+def iso_of_basis {ι : Type u} [fintype ι] {A : AddCommGroup.{u}} (𝓑 : basis ι ℤ A) :
   (∐ (λ i : ι, tunit.{u})) ≅ A :=
-as_iso (hom_of_basis 𝓑)
+begin
+  -- This is very messy...
+  let e : (∐ (λ i : ι, tunit.{u})) ≅ (⨁ (λ i, tunit.{u})) :=
+    (limits.colimit.is_colimit _).cocone_point_unique_up_to_iso
+      (limits.biproduct.is_bilimit _).is_colimit,
+  refine e ≪≫ _,
+  refine biproduct_iso_pi _ ≪≫ _,
+  refine AddCommGroup.of_iso _ ≪≫ (AddCommGroup.of_iso 𝓑.repr.to_add_equiv).symm ≪≫
+    ⟨add_monoid_hom.id _, add_monoid_hom.id _, by { ext, refl }, by { ext, refl }⟩,
+  let q : tunit.{u} ≃+ ℤ := tunit_add_equiv,
+  let e : (ι →₀ ℤ) ≃+ (ι → ℤ),
+  { fconstructor,
+    exact finsupp.equiv_fun_on_fintype,
+    exact finsupp.equiv_fun_on_fintype.symm,
+    exact finsupp.equiv_fun_on_fintype.left_inverse_symm,
+    exact finsupp.equiv_fun_on_fintype.right_inverse_symm,
+    intros x y, refl },
+  refine add_equiv.trans _ e.symm,
+  fconstructor,
+  { intros f i, exact q (f i) },
+  { intros f i, exact q.symm (f i) },
+  { intros f, ext, dsimp, simp },
+  { intros f, ext, dsimp, simp },
+  { intros f g, ext i, simp, },
+end
+--as_iso (hom_of_basis 𝓑)
 
 @[derive partial_order]
 def index_cat (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A] : Type u :=
@@ -203,6 +222,7 @@ lemma exists_sigma_iso_of_index (A : AddCommGroup.{u}) [no_zero_smul_divisors �
   (e : (∐ (λ i : ι, tunit.{u})) ≅ AddCommGroup.of I.1), true :=
 begin
   obtain ⟨ι,hι,𝓑,-⟩ := exists_basis_of_index A I,
+  resetI,
   use [ι, hι, iso_of_basis 𝓑],
 end
 
