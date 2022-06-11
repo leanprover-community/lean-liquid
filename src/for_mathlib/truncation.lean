@@ -205,7 +205,7 @@ lemma ι_iso (n : ℤ) (hC : ((homotopy_category.quotient _ _).obj C).bounded_by
         { exact (hin h2.symm).elim, } } }
   end⟩ }
 
--- feel free to skip this, and directly provide a defn for `ι_succ` below
+/-- The obvious "inclusion" from the m'th truncation to the n'th, if m<=n. -/
 def map_of_le (m n : ℤ) (h : m ≤ n) : C.truncation m ⟶ C.truncation n :=
 { f := λ i, if him : i < m
     then (X_iso_of_lt C him).hom ≫
@@ -274,6 +274,7 @@ def map_of_le (m n : ℤ) (h : m ≤ n) : C.truncation m ⟶ C.truncation n :=
       } }
   end }
 .
+
 
 def ι_succ (n : ℤ) : C.truncation n ⟶ C.truncation (n+1) :=
 truncation.map_of_le _ _ _ $ by simp only [le_add_iff_nonneg_right, zero_le_one]
@@ -395,6 +396,36 @@ instance kernel.lift_iso_of_iso {A B C : 𝓐} (f : A ⟶ B) (e : B ⟶ C) [is_i
   is_iso (kernel.lift (f ≫ e) (kernel.ι f) (by simp) : kernel f ⟶ kernel (f ≫ e)) :=
 ⟨⟨kernel.lift _ (kernel.ι (f ≫ e))  (by { rw ← cancel_mono e, simp }), by {ext, simp}, by {ext, simp}⟩⟩
 
+lemma kernel.ι_comp_iso {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) [is_iso g] : kernel.ι (f ≫ g) =
+inv (kernel.lift (f ≫ g) (kernel.ι f) (by simp) : kernel f ⟶ kernel (f ≫ g)) ≫ kernel.ι f :=
+begin
+  rw [is_iso.eq_inv_comp, kernel.lift_ι],
+end
+
+/-- Factors kernel.ι (iso ≫ g) as iso ≫ kernel.ι g ≫ iso. -/
+lemma kernel.ι_iso_comp {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) [is_iso f] : kernel.ι (f ≫ g) =
+  (kernel.lift g (kernel.ι (f ≫ g) ≫ f) (by simp) : kernel (f ≫ g) ⟶ kernel g) ≫ kernel.ι g ≫ (inv f) :=
+by rw [← category.assoc, kernel.lift_ι, category.assoc, is_iso.hom_inv_id, category.comp_id]
+
+instance cokernel.desc_iso_of_iso {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) [is_iso f] :
+  is_iso (cokernel.desc (f ≫ g) (cokernel.π g) (by simp) : cokernel (f ≫ g) ⟶ cokernel g) :=
+⟨⟨cokernel.desc _ (cokernel.π (f ≫ g)) (by { rw [← cancel_epi f, ← category.assoc], simp }),
+  by {ext, simp}, by {ext, simp}⟩⟩
+
+lemma cokernel.π_iso_comp {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) [is_iso f] : cokernel.π (f ≫ g) =
+cokernel.π g ≫ inv (cokernel.desc _ (cokernel.π g) (by simp) : cokernel (f ≫ g) ⟶ cokernel g) :=
+begin
+  rw [is_iso.eq_comp_inv, cokernel.π_desc],
+end
+
+/-
+cokernel.π (kernel.ι (C.d n (n + 1)) ≫ eq_to_hom _ ≫ (X_iso_of_lt C _).inv)
+-/
+/-- Factors cokernel.π (f ≫ iso) as iso ≫ cokernel.π f ≫ iso. -/
+lemma cokernel.π_comp_iso {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) [is_iso g] : cokernel.π (f ≫ g) =
+inv g ≫ cokernel.π f ≫ (cokernel.desc _ (g ≫ cokernel.π (f ≫ g)) (by rw [← category.assoc, cokernel.condition])) :=
+by rw [cokernel.π_desc, is_iso.inv_hom_id_assoc]
+
 instance {i n : ℤ} : epi ((to_imker C i).f n) :=
 begin
   delta to_imker, dsimp only,
@@ -440,17 +471,7 @@ end
 lemma ι_succ.comp_to_imker_zero {i n : ℤ} : (ι_succ C i).f n ≫ (to_imker C (i + 1)).f n = 0 :=
 begin
   delta ι_succ map_of_le to_imker,
-  dsimp only [le_add_iff_nonneg_right, zero_le_one, neg_zero, zero_add, add_zero, zero_lt_one, neg_neg, neg_eq_zero,
-  homological_complex.d_comp_d, dif_neg, dif_pos, category.assoc, eq_to_hom_trans_assoc, eq_to_hom_refl,
-  category.id_comp, homological_complex.d_comp_d_assoc, zero_comp, comp_zero, preadditive.is_iso.comp_left_eq_zero,
-  imker.comp_mono_zero_iff, homological_complex.d_comp_eq_to_hom, add_tsub_cancel_right, complex_shape.up_rel,
-  add_left_inj, eq_self_iff_true, equalizer_as_kernel, kernel.lift_ι, mul_one, eq_to_iso.hom, eq_to_iso.inv,
-  eq_to_hom_trans, kernel.lift_ι_assoc, add_lt_add_iff_right, lt_self_iff_false, not_false_iff, dite_eq_ite, if_true,
-  if_false, category.comp_id, kernel.condition_assoc, homological_complex.eq_to_hom_comp_d, kernel.condition,
-  homological_complex.X_prev_iso_comp_d_to, homological_complex.d_to_comp_d_from, add_right_eq_self, one_ne_zero,
-  image.fac_assoc, imker.X_iso_image_of_eq_inv, image.pre_comp_ι, category_theory.limits.eq_to_hom_comp_image.ι,
-  image.fac, category_theory.limits.eq_to_hom_comp_kernel.ι, imker.d_def, if_t_t,
-  homological_complex.d_comp_eq_to_hom_assoc], -- lol thanks squeeze_dsimp
+  dsimp only,
   by_cases h : n < i,
   { rw [dif_pos h, dif_neg (show n ≠ i + 1 - 1, by linarith), dif_neg (show n ≠ i + 1, by linarith),
       comp_zero], },
@@ -466,14 +487,74 @@ begin
     { rw [dif_neg hn, zero_comp], } },
 end
 
+lemma comp_zero_cancel_left {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) (h : g = 0) : f ≫ g = 0 :=
+by rw [h, comp_zero]
+
+lemma comp_zero_cancel_right {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) (h : f = 0) : f ≫ g = 0 :=
+by rw [h, zero_comp]
+
+lemma ι_succ_to_imker_π_ι {i n : ℤ} : kernel.ι ((to_imker C (i + 1)).f n) ≫
+  cokernel.π ((ι_succ C i).f n) = 0 :=
+begin
+  delta to_imker ι_succ map_of_le,
+  dsimp only,
+  by_cases hn : n = i,
+  sorry;{ subst hn,
+    rw [dif_pos (show n = n + 1 - 1, by ring), dif_neg (show ¬ n < n, by linarith),
+      dif_pos (rfl : n = n), dif_pos (show n < n + 1, by linarith)],
+    rw [kernel.ι_iso_comp, category.assoc],
+    apply comp_zero_cancel_left,
+    rw [kernel.ι_iso_comp, category.assoc, category.assoc],
+    apply comp_zero_cancel_left,
+    rw [kernel.ι_comp_iso, category.assoc, category.assoc],
+    apply comp_zero_cancel_left,
+    rw [cokernel.π_iso_comp, ← category.assoc _ _ (inv _), ← category.assoc _ _ (inv _), ← category.assoc _ _ (inv _)],
+    apply comp_zero_cancel_right,
+    rw cokernel.π_comp_iso,
+    simp,
+    sorry
+  },
+  { rw [dif_neg (show n ≠ i + 1 - 1, by {intro h, apply hn, linarith})],
+    by_cases hn1 : n = i + 1,
+    { rw dif_pos hn1,
+      apply comp_zero_cancel_right,
+      -- kernel of iso is 0
+      sorry
+    },
+    { rw dif_neg hn1,
+      by_cases hni : n < i,
+      { rw dif_pos hni,
+        apply comp_zero_cancel_left, -- cokernel of iso is 0
+        sorry
+      },
+      { rw [dif_neg hni, dif_neg hn], -- middle term is 0
+        simp,
+        sorry
+      }
+    }
+  }
+end
+
+lemma ι_succ_to_imker_ex_π {i n : ℤ} : epi (kernel.lift ((to_imker C (i + 1)).f n)
+  ((ι_succ C i).f n) (ι_succ.comp_to_imker_zero C)) :=
+begin
+  sorry
+end
+
+lemma ι_succ_to_imker_ι_ex {i n : ℤ} : mono (cokernel.desc ((ι_succ C i).f n)
+  ((to_imker C (i + 1)).f n) (ι_succ.comp_to_imker_zero C)) :=
+begin
+  sorry
+end
+
 def ι_succ_to_imker_has_homology_zero {i n : ℤ} :
   has_homology ((ι_succ C i).f n) ((to_imker C (i + 1)).f n) 0 :=
 { w := ι_succ.comp_to_imker_zero C,
   π := 0,
   ι := 0,
-  π_ι := sorry,
-  ex_π := sorry,
-  ι_ex := sorry,
+  π_ι := by simp [ι_succ_to_imker_π_ι],
+  ex_π := by {rw ← epi_iff_exact_zero_right, apply ι_succ_to_imker_ex_π},
+  ι_ex := by {rw ← mono_iff_exact_zero_left, apply ι_succ_to_imker_ι_ex },
   epi_π := epi_of_target_iso_zero _ (iso.refl _),
   mono_ι := mono_of_source_iso_zero _ (iso.refl _) }
 
