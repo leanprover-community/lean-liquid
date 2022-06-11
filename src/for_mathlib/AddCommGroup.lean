@@ -142,9 +142,22 @@ begin
     apply B.reindex,
     exact equiv.ulift.symm },
   { apply le_antisymm, { intros x hx, trivial },
-    rintros x -,
-    rw ← hS at x,
-    sorry },
+    rintros ⟨x,hx⟩ -,
+    let J := (submodule.span ℤ (set.range e)).to_add_subgroup,
+    change _ ∈ J,
+    have hJ : J = (J.map I.1.subtype).comap I.1.subtype, -- is this not a lemma?!
+    { apply le_antisymm,
+      { exact add_subgroup.le_comap_map I.val.subtype J },
+      { intros t ht,
+        simpa using ht } },
+    rw [hJ, add_subgroup.mem_comap], clear hJ,
+    dsimp [J],
+    convert hx,
+    rw [← hS, submodule.span_int_eq_add_subgroup_closure, add_monoid_hom.map_closure], congr' 1,
+    ext t,
+    split,
+    { rintros ⟨t,⟨t,rfl⟩,rfl⟩, exact t.2 },
+    { intros ht, refine ⟨⟨t, _⟩, ⟨⟨t, ht⟩, rfl⟩, rfl⟩ } },
 end
 
 lemma exists_sigma_iso_of_index (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A]
