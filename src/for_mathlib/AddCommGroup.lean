@@ -137,7 +137,7 @@ lemma is_iso_of_preserves {𝓐 : Type u'} [category.{u} 𝓐] [preadditive 𝓐
   [limits.preserves_filtered_colimits F]
   [limits.preserves_filtered_colimits G]
   (η : F ⟶ G)
-  (hη : is_iso (η.app tunit))
+  [hη : is_iso (η.app tunit)]
   (A : AddCommGroup.{u})
   [no_zero_smul_divisors ℤ A] :
   is_iso (η.app A) :=
