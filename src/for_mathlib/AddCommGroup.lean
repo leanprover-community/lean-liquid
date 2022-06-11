@@ -5,6 +5,7 @@ import algebra.category.Group.filtered_colimits
 import algebra.category.Group.abelian
 import category_theory.limits.preserves.shapes.products
 import category_theory.limits.preserves.filtered
+import linear_algebra.free_module.pid
 
 open category_theory
 
@@ -124,7 +125,27 @@ def colimit_comparison (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A] :
 
 lemma exists_basis_of_index (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A]
   (I : A.index_cat) : ∃ (ι : Type u) [fintype ι]
-  (𝓑 : basis ι ℤ (AddCommGroup.of I.1)), true := sorry
+  (𝓑 : basis ι ℤ (AddCommGroup.of I.1)), true :=
+begin
+  obtain ⟨S,hS⟩ := I.2,
+  let e : S → I.1 := λ s, ⟨s,_⟩,
+  swap, { rw ← hS, apply add_subgroup.subset_closure, exact s.2 },
+  haveI : no_zero_smul_divisors ℤ I.1,
+  { constructor, rintros c ⟨x, hx⟩ h, apply_fun (λ e, e.val) at h,
+    dsimp at h,
+    cases no_zero_smul_divisors.eq_zero_or_eq_zero_of_smul_eq_zero h,
+    left, assumption,
+    right, ext, assumption },
+  obtain ⟨n,B⟩ := @module.free_of_finite_type_torsion_free S ℤ _ _ _ I.1 _ _ _ e _ _,
+  { use [ulift (fin n), infer_instance],
+    refine ⟨_, trivial⟩,
+    apply B.reindex,
+    exact equiv.ulift.symm },
+  { apply le_antisymm, { intros x hx, trivial },
+    rintros x -,
+    rw ← hS at x,
+    sorry },
+end
 
 lemma exists_sigma_iso_of_index (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A]
   (I : A.index_cat) : ∃ (ι : Type u) [fintype ι]
