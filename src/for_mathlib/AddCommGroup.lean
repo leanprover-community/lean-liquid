@@ -3,6 +3,8 @@ import group_theory.free_abelian_group_finsupp
 import algebra.category.Group.adjunctions
 import algebra.category.Group.filtered_colimits
 import algebra.category.Group.abelian
+import category_theory.limits.preserves.shapes.products
+import category_theory.limits.preserves.filtered
 
 open category_theory
 
@@ -121,5 +123,26 @@ lemma exists_basis_of_index (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A]
 lemma exists_sigma_iso_of_index (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A]
   (I : A.index_cat) : ∃ (ι : Type u) [fintype ι]
   (e : (∐ (λ i : ι, tunit.{u})) ≅ AddCommGroup.of I.1), true := sorry
+
+lemma exists_biprod_iso_of_index (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A]
+  (I : A.index_cat) : ∃ (ι : Type u) [fintype ι]
+  (e : by exactI (⨁ (λ i : ι, tunit.{u})) ≅ AddCommGroup.of I.1), true := sorry
+
+universes u'
+
+lemma is_iso_of_preserves {𝓐 : Type u'} [category.{u} 𝓐] [preadditive 𝓐]
+  (F G : AddCommGroup ⥤ 𝓐)
+  [F.additive]
+  [G.additive]
+  [limits.preserves_filtered_colimits F]
+  [limits.preserves_filtered_colimits G]
+  (η : F ⟶ G)
+  (hη : is_iso (η.app tunit))
+  (A : AddCommGroup.{u})
+  [no_zero_smul_divisors ℤ A] :
+  is_iso (η.app A) :=
+begin
+  sorry
+end
 
 end AddCommGroup
