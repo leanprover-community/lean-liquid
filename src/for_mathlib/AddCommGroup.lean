@@ -80,12 +80,18 @@ def index_cat (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A] : Type u :=
 { H : add_subgroup A // H.fg } -- Is this the condition we want?
 
 instance nonempty_index_cat (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A] :
-  nonempty A.index_cat := ⟨⟨⊥, sorry⟩⟩
+  nonempty A.index_cat := ⟨⟨⊥, ∅, by simp⟩⟩
 
 instance semilattice_sup_index_cat
   (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A] :
   semilattice_sup A.index_cat :=
-{ sup := λ I J, ⟨I.1 ⊔ J.1, sorry⟩,
+{ sup := λ I J, ⟨I.1 ⊔ J.1, begin
+    obtain ⟨S,hS⟩ := I.2,
+    obtain ⟨T,hT⟩ := J.2,
+    rw [← hS, ← hT],
+    use S ∪ T,
+    simp only [finset.coe_union, add_subgroup.closure_union],
+  end⟩,
   le_sup_left := λ I J, @le_sup_left (add_subgroup A) _ _ _,
   le_sup_right := λ I J, @le_sup_right (add_subgroup A) _ _ _,
   sup_le := λ I J K h1 h2, @sup_le (add_subgroup A) _ _ _ _ h1 h2,
