@@ -58,6 +58,10 @@ end AddCommGroup
 def types.pt {α : Type u} (a : α) : ⊤_ _ ⟶ α :=
 λ x, a
 
+def types.punit_iso : (punit : Type u) ≅ ⊤_ _ :=
+{ hom := limits.terminal.from _,
+  inv := types.pt punit.star }
+
 namespace AddCommGroup
 
 def tunit : AddCommGroup.{u} :=
@@ -67,8 +71,27 @@ def tunit.lift {A : AddCommGroup.{u}} (e : ⊤_ _ ⟶ (forget _).obj A) :
   tunit ⟶ A :=
 (AddCommGroup.adj'.hom_equiv _ _).symm e
 
+-- Do we really not have this?!
+def _root_.finsupp.punit_add_equiv (M : Type*) [add_monoid M] :
+  ((punit : Type u) →₀ M) ≃+ M :=
+{ to_fun := λ f, f punit.star,
+  inv_fun := λ m, finsupp.single punit.star m,
+  left_inv := λ x, by { ext, dsimp, simp },
+  right_inv := λ x, by { dsimp, simp },
+  map_add' := λ f g, by simp }
+
+-- Do we really not have this?!
+def add_equiv_of_iso (A B : AddCommGroup.{u}) (e : A ≅ B) :
+  A ≃+ B :=
+{ to_fun := e.hom,
+  inv_fun := e.inv,
+  left_inv := λ x, by simp,
+  right_inv := λ x, by simp,
+  map_add' := λ x y, e.hom.map_add _ _ }
+
 def tunit_add_equiv : tunit.{u} ≃+ ℤ :=
-sorry
+add_equiv.trans (add_equiv_of_iso _ _ $ AddCommGroup.free'.map_iso
+  types.punit_iso.symm) (finsupp.punit_add_equiv ℤ)
 
 def tunit.gen : tunit.{u} :=
 AddCommGroup.adj'.unit.app _ $
