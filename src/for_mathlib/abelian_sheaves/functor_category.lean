@@ -234,7 +234,36 @@ instance functor_category_is_abelian : abelian (C ⥤ D) :=
 abelian.of_coimage_image_comparison_is_iso
 
 theorem nat_trans.exact_iff_forall {F G H : C ⥤ D} (η : F ⟶ G) (γ : G ⟶ H) :
-  exact η γ ↔ (∀ j, exact (η.app j) (γ.app j)) := sorry
+  exact η γ ↔ (∀ j, exact (η.app j) (γ.app j)) :=
+begin
+  simp_rw abelian.exact_iff,
+  split,
+  { rintros ⟨h1,h2⟩ j,
+    split,
+    { apply_fun (λ e, e.app j) at h1, simpa using h1 },
+    { apply_fun (λ e, e.app j) at h2,
+      simp only [nat_trans.comp_app, nat_trans.app_zero] at h2,
+      let eK : (kernel γ).obj j ≅ kernel (γ.app j) :=
+        (nat_trans.kernel_obj_iso γ j),
+      let eQ : (cokernel η).obj j ≅ cokernel (η.app j) :=
+        (nat_trans.cokernel_obj_iso η j),
+      have : kernel.ι (γ.app j) = eK.inv ≫ (kernel.ι γ).app j, by simp, rw this, clear this,
+      have : cokernel.π (η.app j) = (cokernel.π η).app j ≫ eQ.hom, by simp, rw this, clear this,
+      simp only [category.assoc, reassoc_of h2, zero_comp, comp_zero] } },
+  { intros h,
+    split,
+    { ext j,
+      exact (h j).1 },
+    { ext j,
+      dsimp,
+      let eK : (kernel γ).obj j ≅ kernel (γ.app j) :=
+        (nat_trans.kernel_obj_iso γ j),
+      let eQ : (cokernel η).obj j ≅ cokernel (η.app j) :=
+        (nat_trans.cokernel_obj_iso η j),
+      have : (kernel.ι γ).app j = eK.hom ≫ kernel.ι _, by simp, rw this, clear this,
+      have : (cokernel.π η).app j = cokernel.π _ ≫ eQ.inv, by simp, rw this, clear this,
+      simp only [category.assoc, reassoc_of (h j).2, comp_zero, zero_comp] } },
+end
 
 set_option pp.universes true
 
