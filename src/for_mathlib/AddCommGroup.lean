@@ -79,7 +79,11 @@ as_iso (hom_of_basis 𝓑)
 def index_cat (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A] : Type u :=
 { H : add_subgroup A // H.fg } -- Is this the condition we want?
 
-instance semilattice_sup (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A] :
+instance nonempty_index_cat (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A] :
+  nonempty A.index_cat := ⟨⟨⊥, sorry⟩⟩
+
+instance semilattice_sup_index_cat
+  (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A] :
   semilattice_sup A.index_cat :=
 { sup := λ I J, ⟨I.1 ⊔ J.1, sorry⟩,
   le_sup_left := λ I J, @le_sup_left (add_subgroup A) _ _ _,
@@ -142,7 +146,40 @@ lemma is_iso_of_preserves {𝓐 : Type u'} [category.{u} 𝓐] [preadditive 𝓐
   [no_zero_smul_divisors ℤ A] :
   is_iso (η.app A) :=
 begin
-  sorry
+  let T := (limits.cocones.precompose (whisker_left A.diagram η)).obj
+    (G.map_cocone A.cocone),
+  let S := F.map_cocone A.cocone,
+  let hS : limits.is_colimit S :=
+    limits.is_colimit_of_preserves F A.is_colimit_cocone,
+  have : η.app A = hS.desc T, sorry,
+  rw this, clear this,
+  suffices : ∀ I : A.index_cat, is_iso (η.app (A.diagram.obj I)),
+  { sorry }, -- general colimit nonsense..., but I can't find an applicable lemma :-(
+  intros I,
+  obtain ⟨ι,hι,e,-⟩ := A.exists_biprod_iso_of_index I,
+  -- now use the fact that the functors are additive and that there exists some iso with a biproduct
+  resetI,
+  let eF : F.obj (⨁ λ (i : ι), tunit.{u}) ≅ ⨁ λ (i : ι), F.obj tunit,
+  { sorry }, -- additivity
+  let eG : G.obj (⨁ λ (i : ι), tunit.{u}) ≅ ⨁ λ (i : ι), G.obj tunit,
+  { sorry }, -- additivity
+  have : η.app (A.diagram.obj I) =
+    F.map e.inv ≫ eF.hom ≫ limits.biproduct.desc
+      (λ i, η.app _ ≫ limits.biproduct.ι _ i) ≫ eG.inv ≫ G.map e.hom,
+  { sorry },
+  rw this,
+  apply_with is_iso.comp_is_iso { instances := ff },
+  apply_instance,
+  apply_with is_iso.comp_is_iso { instances := ff },
+  apply_instance,
+  apply_with is_iso.comp_is_iso { instances := ff },
+  swap,
+  apply_instance,
+  use limits.biproduct.desc
+      (λ i, inv (η.app _) ≫ limits.biproduct.ι _ i),
+  split,
+  { ext, simp },
+  { ext, simp },
 end
 
 end AddCommGroup
