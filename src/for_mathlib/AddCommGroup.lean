@@ -100,24 +100,20 @@ instance semilattice_sup_index_cat
 def diagram (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A] :
   A.index_cat ⥤ AddCommGroup.{u} :=
 { obj := λ I, AddCommGroup.of I.1,
-  map := λ I J h, add_subgroup.inclusion h.le,
-  map_id' := sorry,
-  map_comp' := sorry }
+  map := λ I J h, add_subgroup.inclusion h.le }
 
 def cocone (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A] :
   limits.cocone A.diagram :=
 { X := A,
-  ι :=
-  { app := λ I, I.1.subtype,
-    naturality' := sorry } }
+  ι := { app := λ I, I.1.subtype } }
 
 def is_colimit_cocone (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A] :
   limits.is_colimit A.cocone :=
 { desc := λ S,
-  { to_fun := λ a, S.ι.app ⟨add_subgroup.closure {a}, sorry⟩
+  { to_fun := λ a, S.ι.app ⟨add_subgroup.closure {a}, {a}, by simp⟩
       ⟨a, add_subgroup.subset_closure rfl⟩,
-    map_zero' := sorry,
-    map_add' := sorry },
+    map_zero' := add_monoid_hom.map_zero _,
+    map_add' := λ x y, sorry },
   fac' := sorry,
   uniq' := sorry }
 
@@ -132,11 +128,21 @@ lemma exists_basis_of_index (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A]
 
 lemma exists_sigma_iso_of_index (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A]
   (I : A.index_cat) : ∃ (ι : Type u) [fintype ι]
-  (e : (∐ (λ i : ι, tunit.{u})) ≅ AddCommGroup.of I.1), true := sorry
+  (e : (∐ (λ i : ι, tunit.{u})) ≅ AddCommGroup.of I.1), true :=
+begin
+  obtain ⟨ι,hι,𝓑,-⟩ := exists_basis_of_index A I,
+  use [ι, hι, iso_of_basis 𝓑],
+end
 
 lemma exists_biprod_iso_of_index (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A]
   (I : A.index_cat) : ∃ (ι : Type u) [fintype ι]
-  (e : by exactI (⨁ (λ i : ι, tunit.{u})) ≅ AddCommGroup.of I.1), true := sorry
+  (e : by exactI (⨁ (λ i : ι, tunit.{u})) ≅ AddCommGroup.of I.1), true :=
+begin
+  obtain ⟨ι,hι,e,-⟩ := exists_sigma_iso_of_index A I,
+  resetI, use [ι, hι],
+  use (limits.biproduct.is_bilimit _).is_colimit.cocone_point_unique_up_to_iso
+      (limits.colimit.is_colimit _) ≪≫ e,
+end
 
 universes u'
 
