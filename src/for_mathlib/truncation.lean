@@ -377,6 +377,28 @@ begin
   { exact h3 }
 end
 
+-- move!
+instance kernel.lift_iso_of_iso {A B C : 𝓐} (f : A ⟶ B) (e : B ⟶ C) [is_iso e] :
+  is_iso (kernel.lift (f ≫ e) (kernel.ι f) (by simp) : kernel f ⟶ kernel (f ≫ e)) :=
+⟨⟨kernel.lift _ (kernel.ι (f ≫ e))  (by { rw ← cancel_mono e, simp }), by {ext, simp}, by {ext, simp}⟩⟩
+
+instance {i n : ℤ} : epi ((to_imker C i).f n) :=
+begin
+  delta to_imker, dsimp only,
+  split_ifs with hn hi,
+  { subst hn,
+    simp only [imker.epi_comp_is_iso_iff_epi, imker.epi_is_iso_comp_iff_epi,
+      factor_thru_image.category_theory.epi], },
+  { subst hi,
+    simp,
+    apply_instance, },
+  { apply epi_of_target_iso_zero,
+    -- easy,
+    sorry,
+  }
+end
+
+
 lemma map_of_le_mono {m n : ℤ} (h : m ≤ n) (i : ℤ) : mono ((map_of_le C m n h).f i) :=
 begin
   delta map_of_le, dsimp only,
