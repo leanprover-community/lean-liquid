@@ -285,36 +285,45 @@ lemma _root_.homological_complex.d_from_eq_d_comp_X_next_iso_inv {ι V : Type*} 
   C.d_from i = C.d i j ≫ (C.X_next_iso r).inv :=
 by simp [C.d_from_eq r]
 
--- example (A B : 𝓐) (f g : A ⟶ B) (h : f = g) :
---   (category_theory.eq_to_hom (by rw h) : image f ⟶ image g) = (image.eq_to_iso h).hom :=
--- begin
---   sorry -- :-(
--- end
+--- move
+@[simp, reassoc] lemma _root_.category_theory.limits.eq_to_hom_comp_image.ι {C : Type*} [category C] {X Y : C} {f f' : X ⟶ Y}
+  [has_image f] [has_image f'] [has_equalizers C] (h : f = f') :
+(eq_to_hom (by simp_rw h)) ≫ image.ι f' = image.ι f :=
+begin
+  unfreezingI {subst h},
+  simp,
+end
 
--- lemma factor_thru_image_comp_iso (A B : 𝓐) (f g : A ⟶ B) (h : f = g) :
---   factor_thru_image f ≫ (eq_to_hom (by rw h) : image f ⟶ image g) =
---   factor_thru_image g :=
--- begin
---   sorry
--- end
+--- move
+@[simp, reassoc] lemma _root_.category_theory.limits.eq_to_hom_comp_kernel.ι {C : Type*}
+  [category C] [abelian C] {X Y : C} {f f' : X ⟶ Y} (h : f = f') :
+(eq_to_hom (by simp_rw h)) ≫ kernel.ι f' = kernel.ι f :=
+begin
+  unfreezingI {subst h},
+  simp,
+end
 
--- lemma factor_thru_image_comp_iso_comp_image_ι (A B : 𝓐) (f g : A ⟶ B) (h : f = g) :
---   factor_thru_image f ≫ (eq_to_hom (by rw h) : image f ⟶ image g) ≫ image.ι g = f :=
--- begin
---   simp only [iso_comp_image_ι, image.fac],
--- end
--- #exit
---factor_thru_image (e.hom ≫ d) ≫ image.ι (e.hom ≫ d) = factor_thru_image
+-- move
+attribute [reassoc] homological_complex.d_comp_eq_to_hom
 
-attribute [reassoc] image.eq_fac
+-- move
+@[ext] lemma image.ι.hom_ext {A B X : 𝓐} (f : A ⟶ B) (s t : X ⟶ image f)
+  (h : s ≫ image.ι f = t ≫ image.ι f) : s = t :=
+by rwa cancel_mono at h
 
-#check image.eq_fac_assoc
+-- move
+@[reassoc] lemma comp_factor_thru_image_eq_zero {A B C : 𝓐} {f : A ⟶ B} {g : B ⟶ C}
+  (w : f ≫ g = 0) : f ≫ factor_thru_image g = 0 :=
+begin
+  ext,
+  simp [w],
+end
 
 def to_imker (n : ℤ) : C.truncation n ⟶ imker C n :=
 { f := λ i, if hi : i = n - 1
            then (X_iso_of_lt C (show i < n, by linarith)).hom ≫ eq_to_hom (by rw hi) ≫
            factor_thru_image (C.d (n-1) n) ≫
-           (image.eq_to_iso (by { rw ← C.X_prev_iso_comp_d_to, show (n - 1) + 1 = n, ring, })).hom ≫
+           (eq_to_hom (by { rw ← C.X_prev_iso_comp_d_to, show (n - 1) + 1 = n, ring, })) ≫
              image.pre_comp (C.X_prev_iso (show (n - 1) + 1 = n, by ring)).inv (C.d_to n) ≫
              (imker.X_iso_image_of_eq C hi).inv -- C(n-1) ⟶ Im(d^{n-1})
            else if hn : i = n
@@ -329,52 +338,86 @@ def to_imker (n : ℤ) : C.truncation n ⟶ imker C n :=
     { rw dif_pos hi,
       subst hi,
       delta imker truncation, dsimp only,
-      rw dif_pos rfl,
-      rw dif_pos (show n - 1 + 1 = n, by ring),
-      rw dif_pos rfl,
-      rw dif_neg (show ¬ n - 1 + 1 < n, by linarith),
-      rw dif_pos (show n - 1 + 1 = n, by ring),
-      rw dif_neg (show n - 1 + 1 ≠ n - 1, by linarith),
-      rw dif_pos (show n - 1 + 1 = n, by ring),
+      rw [dif_pos rfl, dif_pos (show n - 1 + 1 = n, by ring), dif_pos rfl,
+        dif_neg (show ¬ n - 1 + 1 < n, by linarith), dif_pos (show n - 1 + 1 = n, by ring),
+        dif_neg (show n - 1 + 1 ≠ n - 1, by linarith), dif_pos (show n - 1 + 1 = n, by ring)],
       simp only [← category.assoc],
       congr' 1,
       ext,
       delta image_to_kernel',
-      simp only [category.assoc, eq_to_iso.hom, eq_to_hom_refl, category.comp_id, imker.X_iso_image_of_eq_inv, eq_to_hom_trans,
-  equalizer_as_kernel, kernel.lift_ι, image.pre_comp_ι],
-      congr' 1,
-      have foo := (category_theory.limits.image.eq_fac (C.X_prev_iso_comp_d_to (show (n - 1) + 1 = n, by ring)).symm).symm,
-      dsimp, dsimp at foo,
-      rw foo,
-      rw image.fac,
-      convert (kernel.lift_ι _ _ _).symm,
-      -- nearly there!
-      --simp only [← category_theory.limits.image.eq_fac_assoc (C.X_prev_iso_comp_d_to (show (n - 1) + 1 = n, by ring))],
-      sorry,
-      /-
-      ⊢ factor_thru_image (C.d (n - 1) n) ≫
-            eq_to_hom _ ≫ image.ι ((homological_complex.X_prev_iso C _).inv ≫ homological_complex.d_to C n) =
-          kernel.lift (C.d n (n + 1)) (C.d (n - 1) n) _ ≫
-            kernel.lift (C.d n (n + 1) ≫ (homological_complex.X_next_iso C _).inv) (kernel.ι (C.d n (n + 1))) _ ≫
-              eq_to_hom _ ≫ kernel.ι (homological_complex.d_from C n)
-
-C(n-1)->im(d(n-1))->im(previsoinv>>d_to)->C(n)
-C(n-1)->ker(d(n))->ker(d(n)>>nextisoinv)->ker(d_from)->C(n)
-      -/
-
-      --simp,sorry
-    },
-    {
-      sorry
-    }
+      simp only [homological_complex.X_prev_iso_comp_d_to, category.assoc, eq_to_iso.hom, eq_to_hom_refl, category.comp_id,
+  imker.X_iso_image_of_eq_inv, eq_to_hom_trans, kernel.lift_ι, image.pre_comp_ι,
+  category_theory.limits.eq_to_hom_comp_image.ι, image.fac, category_theory.limits.eq_to_hom_comp_kernel.ι],
+      refl, },
+    { rw dif_neg hi,
+      by_cases hn : i = n,
+      { subst hn,
+        simp only [dif_neg (show i + 1 ≠ i - 1, by linarith), imker.d_def, add_right_eq_self, one_ne_zero, not_false_iff, dif_neg, dite_eq_ite, if_t_t, comp_zero], },
+      { rw dif_neg hn,
+        by_cases hin : i + 1 = n - 1,
+        { rw dif_pos hin,
+          have hi : i = n - 2, linarith, subst hi,
+          delta truncation, dsimp only,
+          simp only [dif_pos (show (n - 2) + 1 < n, by linarith),
+            C.d_comp_eq_to_hom_assoc (show (n - 2) + 1 = n - 1, by ring),
+            comp_factor_thru_image_eq_zero_assoc, homological_complex.d_comp_d, eq_to_iso.hom, zero_comp, eq_to_hom_trans_assoc,
+  dif_pos, category.assoc, complex_shape.up_rel, comp_zero], },
+        { rw dif_neg hin,
+          rw dif_neg (show i + 1 ≠ n, by {intro h, apply hi, linarith}),
+          rw [zero_comp, comp_zero], } } }
   end }
+.
 
-lemma short_exact_ι_succ_to_imker (i : ℤ) :
-  ∀ n, short_exact ((ι_succ C i).f n) ((to_imker C (i+1)).f n) :=
-sorry
+-- move!
+lemma lt_of_not_lt_of_ne {a b : ℤ} (h1 : ¬ a < b) (h2 : ¬ a = b) : b < a :=
+begin
+  rcases lt_trichotomy a b with (h3 | rfl | h3),
+  { contradiction },
+  { exact h2.elim rfl },
+  { exact h3 }
+end
 
-example (X Y Z : 𝓐) (g : Z ⟶ X) (h : Y ⟶ Z) : image (h ≫ g) ⟶ image g :=
-image.pre_comp h g
+-- move!
+instance kernel.lift_iso_of_iso {A B C : 𝓐} (f : A ⟶ B) (e : B ⟶ C) [is_iso e] :
+  is_iso (kernel.lift (f ≫ e) (kernel.ι f) (by simp) : kernel f ⟶ kernel (f ≫ e)) :=
+⟨⟨kernel.lift _ (kernel.ι (f ≫ e))  (by { rw ← cancel_mono e, simp }), by {ext, simp}, by {ext, simp}⟩⟩
+
+instance {i n : ℤ} : epi ((to_imker C i).f n) :=
+begin
+  delta to_imker, dsimp only,
+  split_ifs with hn hi,
+  { subst hn,
+    simp only [imker.epi_comp_is_iso_iff_epi, imker.epi_is_iso_comp_iff_epi,
+      factor_thru_image.category_theory.epi], },
+  { subst hi,
+    simp,
+    apply_instance, },
+  { apply epi_of_target_iso_zero,
+    -- easy,
+    sorry,
+  }
+end
+
+
+lemma map_of_le_mono {m n : ℤ} (h : m ≤ n) (i : ℤ) : mono ((map_of_le C m n h).f i) :=
+begin
+  delta map_of_le, dsimp only,
+  split_ifs with hnotlt hnoteq; try {apply_instance},
+  apply mono_of_source_iso_zero,
+  exact is_zero.iso_zero (is_zero_X_of_lt C (lt_of_not_lt_of_ne hnotlt hnoteq)),
+end
+
+instance ι_succ_mono {i n : ℤ} : mono ((ι_succ C i).f n) :=
+begin
+  delta ι_succ,
+  apply map_of_le_mono,
+end
+
+lemma short_exact_ι_succ_to_imker (i : ℤ) (n : ℤ) :
+  short_exact ((ι_succ C i).f n) ((to_imker C (i+1)).f n) :=
+{ mono := infer_instance,
+  epi := sorry,
+  exact := sorry }
 
 end truncation
 
