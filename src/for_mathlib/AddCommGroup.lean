@@ -151,21 +151,39 @@ begin
   let S := F.map_cocone A.cocone,
   let hS : limits.is_colimit S :=
     limits.is_colimit_of_preserves F A.is_colimit_cocone,
-  have : η.app A = hS.desc T, sorry,
+  have : η.app A = hS.desc T,
+  { apply hS.hom_ext, intros j, rw hS.fac,
+    dsimp, apply η.naturality },
   rw this, clear this,
   suffices : ∀ I : A.index_cat, is_iso (η.app (A.diagram.obj I)),
   { resetI,
-    haveI : is_iso (whisker_left A.diagram η) := sorry,
-    sorry
+    haveI : is_iso (whisker_left A.diagram η),
+    { apply_with nat_iso.is_iso_of_is_iso_app { instances := ff },
+      intros I, exact this I },
+    let hT : limits.is_colimit T :=
+      (limits.is_colimit.precompose_hom_equiv (as_iso (whisker_left A.diagram η))
+      (G.map_cocone A.cocone)).symm (limits.is_colimit_of_preserves G A.is_colimit_cocone),
+    use hT.desc S,
+    split,
+    { apply hS.hom_ext,
+      intros j,
+      erw [hS.fac_assoc, hT.fac, category.comp_id] },
+    { apply hT.hom_ext,
+      intros j,
+      erw [hT.fac_assoc, hS.fac, category.comp_id] }
   }, --^ general colimit nonsense..., but I can't find applicable lemmas :-(
   intros I,
   obtain ⟨ι,hι,e,-⟩ := A.exists_biprod_iso_of_index I,
   -- now use the fact that the functors are additive and that there exists some iso with a biproduct
   resetI,
-  let eF : F.obj (⨁ λ (i : ι), tunit.{u}) ≅ ⨁ λ (i : ι), F.obj tunit,
-  { sorry }, -- additivity
-  let eG : G.obj (⨁ λ (i : ι), tunit.{u}) ≅ ⨁ λ (i : ι), G.obj tunit,
-  { sorry }, -- additivity
+  let eF : F.obj (⨁ λ (i : ι), tunit.{u}) ≅ ⨁ λ (i : ι), F.obj tunit :=
+    (limits.is_bilimit_of_preserves F
+    (limits.biproduct.is_bilimit (λ i : ι, tunit.{u}))).is_colimit.cocone_point_unique_up_to_iso
+    (limits.biproduct.is_bilimit (λ i : ι, F.obj tunit)).is_colimit,
+  let eG : G.obj (⨁ λ (i : ι), tunit.{u}) ≅ ⨁ λ (i : ι), G.obj tunit :=
+    (limits.is_bilimit_of_preserves G
+    (limits.biproduct.is_bilimit (λ i : ι, tunit.{u}))).is_colimit.cocone_point_unique_up_to_iso
+    (limits.biproduct.is_bilimit (λ i : ι, G.obj tunit)).is_colimit,
   have : η.app (A.diagram.obj I) =
     F.map e.inv ≫ eF.hom ≫ limits.biproduct.desc
       (λ i, η.app _ ≫ limits.biproduct.ι _ i) ≫ eG.inv ≫ G.map e.hom,
