@@ -114,7 +114,22 @@ def is_colimit_cocone (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A] :
   { to_fun := λ a, S.ι.app ⟨add_subgroup.closure {a}, {a}, by simp⟩
       ⟨a, add_subgroup.subset_closure rfl⟩,
     map_zero' := add_monoid_hom.map_zero _,
-    map_add' := λ x y, sorry },
+    map_add' := λ x y, begin
+      let I : A.index_cat := ⟨add_subgroup.closure {x}, {x}, by simp⟩,
+      let J : A.index_cat := ⟨add_subgroup.closure {y}, {y}, by simp⟩,
+      let K : A.index_cat := ⟨add_subgroup.closure {x + y}, {x + y}, by simp⟩,
+      let IJ : A.index_cat := ⟨add_subgroup.closure {x,y}, {x,y}, by simp⟩,
+      let iI : I ⟶ IJ := hom_of_le (add_subgroup.closure_mono $ by simp),
+      let iJ : J ⟶ IJ := hom_of_le (add_subgroup.closure_mono $ by simp),
+      let iK : K ⟶ IJ := hom_of_le ((add_subgroup.closure_le _).2 _),
+      swap,
+      { rintro a (rfl : a = _), change x + y ∈ IJ.1, apply IJ.1.add_mem,
+        { apply add_subgroup.subset_closure, simp },
+        { apply add_subgroup.subset_closure, simp } },
+      rw [← S.w iI, ← S.w iJ, ← S.w iK, comp_apply, comp_apply, comp_apply,
+        ← add_monoid_hom.map_add],
+      refl,
+    end },
   fac' := sorry,
   uniq' := sorry }
 
