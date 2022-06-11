@@ -466,14 +466,24 @@ begin
     { rw [dif_neg hn, zero_comp], } },
 end
 
+def ι_succ_to_imker_has_homology_zero {i n : ℤ} :
+  has_homology ((ι_succ C i).f n) ((to_imker C (i + 1)).f n) 0 :=
+{ w := ι_succ.comp_to_imker_zero C,
+  π := 0,
+  ι := 0,
+  π_ι := sorry,
+  ex_π := sorry,
+  ι_ex := sorry,
+  epi_π := epi_of_target_iso_zero _ (iso.refl _),
+  mono_ι := mono_of_source_iso_zero _ (iso.refl _) }
+
 lemma short_exact_ι_succ_to_imker (i : ℤ) (n : ℤ) :
   short_exact ((ι_succ C i).f n) ((to_imker C (i+1)).f n) :=
 { mono := infer_instance,
   epi := infer_instance,
   exact := begin
     rw abelian.exact_iff_has_homology_zero,
-    refine ⟨ι_succ.comp_to_imker_zero C, _⟩,
-  sorry
+    exact ⟨ι_succ.comp_to_imker_zero C, ⟨ι_succ_to_imker_has_homology_zero C⟩⟩,
 end }
 
 end truncation
