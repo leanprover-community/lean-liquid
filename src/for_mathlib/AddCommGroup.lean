@@ -5,7 +5,9 @@ import algebra.category.Group.filtered_colimits
 import algebra.category.Group.abelian
 import category_theory.limits.preserves.shapes.products
 import category_theory.limits.preserves.filtered
+import category_theory.limits.shapes.terminal
 import linear_algebra.free_module.pid
+import for_mathlib.AddCommGroup.epi
 
 open category_theory
 
@@ -51,17 +53,21 @@ AddCommGroup.adj.of_nat_iso_left $ free_iso_free'.{u}
 
 end AddCommGroup
 
-def types.pt {α : Type u} (a : α) : ⊥_ _ ⟶ α :=
+def types.pt {α : Type u} (a : α) : ⊤_ _ ⟶ α :=
 λ x, a
 
 namespace AddCommGroup
 
 def tunit : AddCommGroup.{u} :=
-  AddCommGroup.free'.obj (⊥_ _)
+  AddCommGroup.free'.obj (⊤_ _)
 
-def tunit.lift {A : AddCommGroup.{u}} (e : ⊥_ _ ⟶ (forget _).obj A) :
+def tunit.lift {A : AddCommGroup.{u}} (e : ⊤_ _ ⟶ (forget _).obj A) :
   tunit ⟶ A :=
 (AddCommGroup.adj'.hom_equiv _ _).symm e
+
+def tunit.gen : tunit.{u} :=
+AddCommGroup.adj'.unit.app _ $
+  (limits.terminal.from (punit : Type u) : punit → ⊤_ (Type u)) punit.star
 
 open_locale classical
 
@@ -70,7 +76,12 @@ def hom_of_basis {ι : Type u} {A : AddCommGroup.{u}} (𝓑 : basis ι ℤ A) :
 limits.sigma.desc $ λ b, tunit.lift $ types.pt (𝓑 b)
 
 instance is_iso_hom_of_basis {ι : Type u} (A : AddCommGroup.{u}) (𝓑 : basis ι ℤ A) :
-  is_iso (hom_of_basis 𝓑) := sorry
+  is_iso (hom_of_basis 𝓑) :=
+begin
+  sorry
+end
+
+local attribute [-simp] forget_map_eq_coe
 
 def iso_of_basis {ι : Type u} {A : AddCommGroup.{u}} (𝓑 : basis ι ℤ A) :
   (∐ (λ i : ι, tunit.{u})) ≅ A :=
@@ -130,8 +141,20 @@ def is_colimit_cocone (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A] :
         ← add_monoid_hom.map_add],
       refl,
     end },
-  fac' := sorry,
-  uniq' := sorry }
+  fac' := begin
+    rintros S J, ext ⟨x,hx⟩,
+    let I : A.index_cat := ⟨add_subgroup.closure {x}, {x}, by simp⟩,
+    let e : I ⟶ J := hom_of_le ((add_subgroup.closure_le _).2 _),
+    { rw comp_apply, dsimp [cocone], rw ← S.w e, refl },
+    rintros x (rfl : x = _), exact hx,
+  end,
+  uniq' := begin
+    intros S m hm, ext x, dsimp [cocone] at x ⊢,
+    let I : A.index_cat := ⟨add_subgroup.closure {x}, {x}, by simp⟩,
+    specialize hm I,
+    let y : I.1 := ⟨x, add_subgroup.subset_closure rfl⟩,
+    apply_fun (λ e, e y) at hm, exact hm,
+  end }
 
 def colimit_comparison (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A] :
   limits.colimit A.diagram ≅ A :=
