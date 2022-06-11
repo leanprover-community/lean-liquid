@@ -77,6 +77,16 @@ hH.ι_ex.w
 @[simp, reassoc] lemma lift_π (hH : has_homology f g H) : kernel.lift g f hH.w ≫ hH.π = 0 :=
 hH.ex_π.w
 
+def of_iso {H₁ H₂ : 𝓐} (hH : has_homology f g H₁) (i : H₁ ≅ H₂) : has_homology f g H₂ :=
+{ w := hH.w,
+  π := hH.π ≫ i.hom,
+  ι := i.inv ≫ hH.ι,
+  π_ι := by simp [hH.π_ι],
+  ex_π := exact_comp_iso.2 hH.ex_π,
+  ι_ex := exact_iso_comp.2 hH.ι_ex,
+  epi_π := epi_comp _ _,
+  mono_ι := mono_comp _ _ }
+
 end misc
 
 section degenerate
