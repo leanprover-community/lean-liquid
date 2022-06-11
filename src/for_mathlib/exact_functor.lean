@@ -88,7 +88,20 @@ def kernel_comparison {X Y : A} (f : X ⟶ Y) :
 kernel.lift _ (F.map $ kernel.ι _) $
   by rw [← F.map_comp, limits.kernel.condition, F.map_zero]
 
-instance {X Y : A} (f : X ⟶ Y) : is_iso (F.kernel_comparison f) := sorry
+instance {X Y : A} (f : X ⟶ Y) : is_iso (F.kernel_comparison f) :=
+begin
+  have : category_theory.exact (F.map (kernel.ι f)) (F.map f),
+  { apply exact.cond, exact exact_kernel_ι },
+  dsimp [kernel_comparison],
+  apply_with is_iso_of_mono_of_epi { instances := ff },
+  apply_instance,
+  constructor,
+  intros Z a b h,
+  apply_fun (λ e, e ≫ kernel.ι _) at h,
+  simp at h,
+  rwa cancel_mono at h,
+  apply this.epi_lift,
+end
 
 def map_homology_iso {X Y Z : A} (f : X ⟶ Y) (g : Y ⟶ Z) (w w') :
   F.obj (homology f g w) ≅ homology (F.map f) (F.map g) w' :=
