@@ -187,7 +187,12 @@ begin
   have : η.app (A.diagram.obj I) =
     F.map e.inv ≫ eF.hom ≫ limits.biproduct.desc
       (λ i, η.app _ ≫ limits.biproduct.ι _ i) ≫ eG.inv ≫ G.map e.hom,
-  { sorry },
+  { rw [← functor.map_iso_inv, iso.eq_inv_comp, ← iso.inv_comp_eq],
+    apply limits.biproduct.hom_ext', intros i,
+    simp only [functor.map_iso_hom, nat_trans.naturality,
+      limits.biproduct.ι_desc_assoc, category.assoc],
+    erw [limits.biproduct.ι_desc_assoc, limits.biproduct.ι_desc_assoc],
+    dsimp, rw η.naturality_assoc },
   rw this,
   apply_with is_iso.comp_is_iso { instances := ff },
   apply_instance,
