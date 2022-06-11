@@ -393,11 +393,8 @@ begin
     simp,
     apply_instance, },
   { apply epi_of_target_iso_zero,
-    -- easy,
-    sorry,
-  }
+    exact is_zero.iso_zero (imker.X_is_zero_of_ne C hn hi), }
 end
-
 
 lemma map_of_le_mono {m n : ℤ} (h : m ≤ n) (i : ℤ) : mono ((map_of_le C m n h).f i) :=
 begin
@@ -416,7 +413,7 @@ end
 lemma short_exact_ι_succ_to_imker (i : ℤ) (n : ℤ) :
   short_exact ((ι_succ C i).f n) ((to_imker C (i+1)).f n) :=
 { mono := infer_instance,
-  epi := sorry,
+  epi := infer_instance,
   exact := sorry }
 
 end truncation
