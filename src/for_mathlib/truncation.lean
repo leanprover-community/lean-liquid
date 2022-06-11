@@ -307,6 +307,15 @@ end
 attribute [reassoc] homological_complex.d_comp_eq_to_hom
 
 -- move
+lemma _root_.category_theory.limits.factor_thru_image_of_eq {A B : 𝓐} {f f' : A ⟶ B} (h : f = f') :
+factor_thru_image f ≫ (eq_to_hom (by rw h)) = factor_thru_image f' :=
+begin
+  subst h,
+  simp,
+end
+
+
+-- move
 @[ext] lemma image.ι.hom_ext {A B X : 𝓐} (f : A ⟶ B) (s t : X ⟶ image f)
   (h : s ≫ image.ι f = t ≫ image.ι f) : s = t :=
 by rwa cancel_mono at h
@@ -318,6 +327,10 @@ begin
   ext,
   simp [w],
 end
+
+@[simp, reassoc] lemma kernel_ι_comp_factor_thru_image {A B : 𝓐} {f : A ⟶ B} :
+kernel.ι f ≫ factor_thru_image f = 0 :=
+comp_factor_thru_image_eq_zero (kernel.condition f)
 
 def to_imker (n : ℤ) : C.truncation n ⟶ imker C n :=
 { f := λ i, if hi : i = n - 1
@@ -410,11 +423,58 @@ begin
   apply map_of_le_mono,
 end
 
+-- has_homology version of exact
+lemma _root_.abelian.exact_iff_has_homology_zero {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) :
+  exact f g ↔ ∃ w : f ≫ g = 0, nonempty (has_homology f g 0) :=
+begin
+  rw preadditive.exact_iff_homology_zero,
+  apply exists_congr,
+  intro w,
+  split,
+  { rintro ⟨h⟩,
+    exact ⟨(homology.has f g w).of_iso h⟩ },
+  { rintro ⟨h⟩,
+    exact ⟨(homology.has f g w).iso h⟩, },
+end
+
+lemma ι_succ.comp_to_imker_zero {i n : ℤ} : (ι_succ C i).f n ≫ (to_imker C (i + 1)).f n = 0 :=
+begin
+  delta ι_succ map_of_le to_imker,
+  dsimp only [le_add_iff_nonneg_right, zero_le_one, neg_zero, zero_add, add_zero, zero_lt_one, neg_neg, neg_eq_zero,
+  homological_complex.d_comp_d, dif_neg, dif_pos, category.assoc, eq_to_hom_trans_assoc, eq_to_hom_refl,
+  category.id_comp, homological_complex.d_comp_d_assoc, zero_comp, comp_zero, preadditive.is_iso.comp_left_eq_zero,
+  imker.comp_mono_zero_iff, homological_complex.d_comp_eq_to_hom, add_tsub_cancel_right, complex_shape.up_rel,
+  add_left_inj, eq_self_iff_true, equalizer_as_kernel, kernel.lift_ι, mul_one, eq_to_iso.hom, eq_to_iso.inv,
+  eq_to_hom_trans, kernel.lift_ι_assoc, add_lt_add_iff_right, lt_self_iff_false, not_false_iff, dite_eq_ite, if_true,
+  if_false, category.comp_id, kernel.condition_assoc, homological_complex.eq_to_hom_comp_d, kernel.condition,
+  homological_complex.X_prev_iso_comp_d_to, homological_complex.d_to_comp_d_from, add_right_eq_self, one_ne_zero,
+  image.fac_assoc, imker.X_iso_image_of_eq_inv, image.pre_comp_ι, category_theory.limits.eq_to_hom_comp_image.ι,
+  image.fac, category_theory.limits.eq_to_hom_comp_kernel.ι, imker.d_def, if_t_t,
+  homological_complex.d_comp_eq_to_hom_assoc], -- lol thanks squeeze_dsimp
+  by_cases h : n < i,
+  { rw [dif_pos h, dif_neg (show n ≠ i + 1 - 1, by linarith), dif_neg (show n ≠ i + 1, by linarith),
+      comp_zero], },
+  { rw dif_neg h,
+    by_cases hn : n = i,
+    { rw dif_pos hn,
+      subst hn,
+      rw [dif_pos (show n < n + 1, by linarith), dif_pos (show n = n + 1 - 1, by ring),
+        ← image.factor_thru_image_pre_comp_assoc, ← category_theory.limits.factor_thru_image_of_eq
+          ((C.eq_to_hom_comp_d rfl (show n + 1 - 1 + 1 = n + 1, by ring)).symm)],
+      simp,
+    },
+    { rw [dif_neg hn, zero_comp], } },
+end
+
 lemma short_exact_ι_succ_to_imker (i : ℤ) (n : ℤ) :
   short_exact ((ι_succ C i).f n) ((to_imker C (i+1)).f n) :=
 { mono := infer_instance,
   epi := infer_instance,
-  exact := sorry }
+  exact := begin
+    rw abelian.exact_iff_has_homology_zero,
+    refine ⟨ι_succ.comp_to_imker_zero C, _⟩,
+  sorry
+end }
 
 end truncation
 
