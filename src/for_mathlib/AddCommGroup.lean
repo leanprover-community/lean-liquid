@@ -154,7 +154,10 @@ begin
   have : η.app A = hS.desc T, sorry,
   rw this, clear this,
   suffices : ∀ I : A.index_cat, is_iso (η.app (A.diagram.obj I)),
-  { sorry }, -- general colimit nonsense..., but I can't find an applicable lemma :-(
+  { resetI,
+    haveI : is_iso (whisker_left A.diagram η) := sorry,
+    sorry
+  }, --^ general colimit nonsense..., but I can't find applicable lemmas :-(
   intros I,
   obtain ⟨ι,hι,e,-⟩ := A.exists_biprod_iso_of_index I,
   -- now use the fact that the functors are additive and that there exists some iso with a biproduct
