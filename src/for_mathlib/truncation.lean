@@ -366,10 +366,36 @@ def to_imker (n : ℤ) : C.truncation n ⟶ imker C n :=
           rw dif_neg (show i + 1 ≠ n, by {intro h, apply hi, linarith}),
           rw [zero_comp, comp_zero], } } }
   end }
+.
 
-lemma short_exact_ι_succ_to_imker (i : ℤ) :
-  ∀ n, short_exact ((ι_succ C i).f n) ((to_imker C (i+1)).f n) :=
-sorry
+-- move!
+lemma lt_of_not_lt_of_ne {a b : ℤ} (h1 : ¬ a < b) (h2 : ¬ a = b) : b < a :=
+begin
+  rcases lt_trichotomy a b with (h3 | rfl | h3),
+  { contradiction },
+  { exact h2.elim rfl },
+  { exact h3 }
+end
+
+lemma map_of_le_mono {m n : ℤ} (h : m ≤ n) (i : ℤ) : mono ((map_of_le C m n h).f i) :=
+begin
+  delta map_of_le, dsimp only,
+  split_ifs with hnotlt hnoteq; try {apply_instance},
+  apply mono_of_source_iso_zero,
+  exact is_zero.iso_zero (is_zero_X_of_lt C (lt_of_not_lt_of_ne hnotlt hnoteq)),
+end
+
+instance ι_succ_mono {i n : ℤ} : mono ((ι_succ C i).f n) :=
+begin
+  delta ι_succ,
+  apply map_of_le_mono,
+end
+
+lemma short_exact_ι_succ_to_imker (i : ℤ) (n : ℤ) :
+  short_exact ((ι_succ C i).f n) ((to_imker C (i+1)).f n) :=
+{ mono := infer_instance,
+  epi := sorry,
+  exact := sorry }
 
 end truncation
 
