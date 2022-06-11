@@ -261,6 +261,7 @@ end
 
 universes u'
 
+
 lemma is_iso_of_preserves {𝓐 : Type u'} [category.{u} 𝓐] [preadditive 𝓐]
   (F G : AddCommGroup ⥤ 𝓐)
   [F.additive]
@@ -333,6 +334,90 @@ begin
   split,
   { ext, simp },
   { ext, simp },
+end
+
+def is_tensor_unit (A : AddCommGroup.{u}) : Prop :=
+∃ a : A, ∀ (B : AddCommGroup.{u}), function.bijective
+  (λ f : A ⟶ B, (f : A → B) a)
+
+def is_tensor_unit.gen {A : AddCommGroup.{u}} (h : A.is_tensor_unit) :
+  A := h.some
+
+def is_tensor_unit.as_hom {A B : AddCommGroup.{u}} (h : A.is_tensor_unit)
+  (b : B) : A ⟶ B :=
+((h.some_spec B).2 b).some
+
+@[simp]
+lemma is_tensor_unit.eval_as_hom {A B : AddCommGroup.{u}} (h : A.is_tensor_unit)
+  (b : B) : h.as_hom b h.gen = b :=
+((h.some_spec B).2 b).some_spec
+
+lemma is_tensor_unit.ext {A B : AddCommGroup.{u}} (h : A.is_tensor_unit)
+  (f g : A ⟶ B) (hh : f h.gen = g h.gen) : f = g :=
+(h.some_spec B).1 hh
+
+def is_tensor_unit.iso {A B : AddCommGroup.{u}} (hA : A.is_tensor_unit)
+  (hB : B.is_tensor_unit) : A ≅ B :=
+{ hom := hA.as_hom hB.gen,
+  inv := hB.as_hom hA.gen,
+  hom_inv_id' := begin
+    apply hA.ext,
+    simp,
+  end,
+  inv_hom_id' := begin
+    apply hB.ext,
+    simp,
+  end }
+
+lemma is_tensor_unit_tunit : tunit.{u}.is_tensor_unit :=
+begin
+  use tunit.gen,
+  intros B,
+  split,
+  { intros f g h,
+    dsimp [tunit.gen] at h,
+    change (adj'.unit.app _ ≫ (forget _).map f) _ =
+      (adj'.unit.app _ ≫ (forget _).map g) _ at h,
+    apply_fun adj'.hom_equiv _ _,
+    simp only [adjunction.hom_equiv_unit],
+    ext t,
+    let e := limits.terminal.from (punit : Type u),
+    suffices : t = e punit.star,
+    { rw this, exact h },
+    apply_fun types.punit_iso.inv,
+    { simp },
+    intros i j h, apply_fun types.punit_iso.hom at h,
+    simpa using h },
+  { intros t,
+    use tunit.lift (types.pt t),
+    dsimp only [tunit.lift, types.pt, tunit.gen],
+    simp only [adjunction.hom_equiv_counit],
+    change (adj'.unit.app _ ≫
+      (forget _).map (free'.map (λ (x : ⊤_ Type u), t) ≫ adj'.counit.app B)) _ = _,
+    simp only [functor.map_comp, adjunction.unit_naturality_assoc],
+    erw adj'.right_triangle_components, refl }
+end
+
+lemma is_iso_of_preserves_of_is_tensor_unit {𝓐 : Type u'} [category.{u} 𝓐] [preadditive 𝓐]
+  (F G : AddCommGroup ⥤ 𝓐)
+  [F.additive]
+  [G.additive]
+  [limits.preserves_filtered_colimits F]
+  [limits.preserves_filtered_colimits G]
+  (η : F ⟶ G)
+  (U : AddCommGroup)
+  (hU : U.is_tensor_unit)
+  [hη : is_iso (η.app U)]
+  (A : AddCommGroup.{u})
+  [no_zero_smul_divisors ℤ A] :
+  is_iso (η.app A) :=
+begin
+  suffices : is_iso (η.app tunit),
+  { resetI, apply is_iso_of_preserves },
+  let e : tunit ≅ U := is_tensor_unit_tunit.iso hU,
+  suffices : η.app tunit = F.map e.hom ≫ η.app U ≫ G.map e.inv,
+  { rw this, apply is_iso.comp_is_iso, },
+  rw [← η.naturality, ← F.map_comp_assoc, e.hom_inv_id, F.map_id, category.id_comp],
 end
 
 end AddCommGroup
