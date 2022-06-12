@@ -44,12 +44,10 @@ variables [exact F]
 
 noncomputable theory
 
-def cokernel_comparison {X Y : A} (f : X ⟶ Y) :
-  cokernel (F.map f) ⟶ F.obj (cokernel f) :=
-cokernel.desc _ (F.map $ cokernel.π _) $
-  by rw [← F.map_comp, limits.cokernel.condition, F.map_zero]
+-- Sanity check
+example : preserves_zero_morphisms F := infer_instance
 
-open_locale zero_object
+open_locale zero_object classical
 
 instance epi_of_epi_of_exact {X Y : A} (f : X ⟶ Y)
   [epi f] : epi (F.map f) :=
@@ -69,7 +67,7 @@ begin
   apply this.mono_of_exact_zero_left,
 end
 
-instance {X Y : A} (f : X ⟶ Y) : is_iso (F.cokernel_comparison f) :=
+instance {X Y : A} (f : X ⟶ Y) : is_iso (cokernel_comparison f F) :=
 begin
   have : category_theory.exact (F.map f) (F.map (cokernel.π f)),
   { apply exact.cond, exact abelian.exact_cokernel f },
@@ -83,14 +81,16 @@ begin
   rwa cancel_epi at h,
 end
 
-instance preserves_finite_colimits : preserves_finite_colimits F := sorry
+instance preserves_finite_colimits : preserves_finite_colimits F :=
+begin
+  apply_with preserves_finite_colimits_of_preserves_coequalizers_and_finite_coproducts { instances := ff },
+  any_goals { apply_instance },
+  { sorry }, -- use cokernel iso above
+  { introsI J hI,
+    apply preserves_coproducts_of_shape_of_preserves_biproducts_of_shape }
+end
 
-def kernel_comparison {X Y : A} (f : X ⟶ Y) :
-  F.obj (kernel f) ⟶ kernel (F.map f) :=
-kernel.lift _ (F.map $ kernel.ι _) $
-  by rw [← F.map_comp, limits.kernel.condition, F.map_zero]
-
-instance {X Y : A} (f : X ⟶ Y) : is_iso (F.kernel_comparison f) :=
+instance {X Y : A} (f : X ⟶ Y) : is_iso (kernel_comparison f F) :=
 begin
   have : category_theory.exact (F.map (kernel.ι f)) (F.map f),
   { apply exact.cond, exact exact_kernel_ι },
@@ -105,13 +105,20 @@ begin
   apply this.epi_lift,
 end
 
-instance preserves_finite_limits : preserves_finite_colimits F := sorry
+instance preserves_finite_limits : preserves_finite_limits F :=
+begin
+  apply_with preserves_finite_limits_of_preserves_equalizers_and_finite_products { instances := ff },
+  any_goals { apply_instance },
+  { sorry }, -- use kernel iso above
+  { introsI J hJ,
+    apply preserves_products_of_shape_of_preserves_biproducts_of_shape }
+end
 
 def homology_iso {X Y Z : A} (f : X ⟶ Y) (g : Y ⟶ Z) (w w') :
   F.obj (homology f g w) ≅ homology (F.map f) (F.map g) w' :=
 { hom := homology.lift _ _ _ (F.map (homology.ι _ _ _) ≫
-    category_theory.inv (F.cokernel_comparison _)) sorry,
-  inv := homology.desc' _ _ _ (category_theory.inv (F.kernel_comparison _) ≫
+    category_theory.inv (cokernel_comparison _ _)) sorry,
+  inv := homology.desc' _ _ _ (category_theory.inv (kernel_comparison _ _) ≫
     F.map (homology.π' _ _ _)) sorry,
   hom_inv_id' := sorry,
   inv_hom_id' := sorry }
