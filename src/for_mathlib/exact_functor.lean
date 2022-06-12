@@ -3,8 +3,8 @@ import for_mathlib.abelian_category
 
 namespace category_theory
 
-universes v v' u u'
-variables {A : Type u} {B : Type u'} [category.{v} A] [category.{v'} B]
+universes v u u'
+variables {A : Type u} {B : Type u'} [category.{v} A] [category.{v} B]
   [abelian A] [abelian B] (F : A ⥤ B) [functor.additive F]
 
 lemma exact.mono_desc {X Y Z : A} {f : X ⟶ Y} {g : Y ⟶ Z} (e : exact f g) :
@@ -69,7 +69,7 @@ begin
   apply this.mono_of_exact_zero_left,
 end
 
-instance {X Y : A} (f : X ⟶ Y)  : is_iso (F.cokernel_comparison f) :=
+instance {X Y : A} (f : X ⟶ Y) : is_iso (F.cokernel_comparison f) :=
 begin
   have : category_theory.exact (F.map f) (F.map (cokernel.π f)),
   { apply exact.cond, exact abelian.exact_cokernel f },
@@ -82,6 +82,8 @@ begin
   simp at h,
   rwa cancel_epi at h,
 end
+
+instance preserves_finite_colimits : preserves_finite_colimits F := sorry
 
 def kernel_comparison {X Y : A} (f : X ⟶ Y) :
   F.obj (kernel f) ⟶ kernel (F.map f) :=
@@ -103,7 +105,9 @@ begin
   apply this.epi_lift,
 end
 
-def map_homology_iso {X Y Z : A} (f : X ⟶ Y) (g : Y ⟶ Z) (w w') :
+instance preserves_finite_limits : preserves_finite_colimits F := sorry
+
+def homology_iso {X Y Z : A} (f : X ⟶ Y) (g : Y ⟶ Z) (w w') :
   F.obj (homology f g w) ≅ homology (F.map f) (F.map g) w' :=
 { hom := homology.lift _ _ _ (F.map (homology.ι _ _ _) ≫
     category_theory.inv (F.cokernel_comparison _)) sorry,
