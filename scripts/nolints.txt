@@ -97,6 +97,9 @@ apply_nolint category_theory.functor.finite_product_condition_of_sum unused_argu
 -- condensed/rescale.lean
 apply_nolint fact_max_pos unused_arguments
 
+-- for_mathlib/AddCommGroup.lean
+apply_nolint AddCommGroup.index_cat unused_arguments
+
 -- for_mathlib/Gordan.lean
 apply_nolint missing unused_arguments
 
@@ -198,6 +201,10 @@ apply_nolint category_theory.endomorphisms.mk_bo_ho_ca unused_arguments
 -- for_mathlib/endomorphisms/basic.lean
 apply_nolint category_theory.endomorphisms.cofree unused_arguments
 apply_nolint category_theory.endomorphisms.free unused_arguments
+
+-- for_mathlib/exact_functor.lean
+apply_nolint category_theory.functor.cokernel_comparison unused_arguments
+apply_nolint category_theory.functor.kernel_comparison unused_arguments
 
 -- for_mathlib/exact_seq3.lean
 apply_nolint category_theory.exact_seq.w def_lemma
@@ -320,6 +327,9 @@ apply_nolint category_theory.triangulated.triangle.right_unitality_aux unused_ar
 apply_nolint category_theory.triangulated.triangle.shift_add_comp_eq_to_hom unused_arguments
 apply_nolint category_theory.triangulated.triangle.shift_add_comp_eq_to_hom' unused_arguments
 apply_nolint category_theory.triangulated.triangle.shift_comm_eq_eq_to_hom unused_arguments
+
+-- for_mathlib/truncation.lean
+apply_nolint category_theory.limits.eq_to_hom_comp_image.ι unused_arguments
 
 -- free_pfpng/epi.lean
 apply_nolint exists_signed_sum_aux decidable_classical unused_arguments
