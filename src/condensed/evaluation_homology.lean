@@ -21,10 +21,9 @@ instance evaluation_additive (S : Profinite.{u}) :
   functor.additive (Condensed.evaluation _ S : Condensed.{u} Ab.{u+1} ⥤ _) :=
 ⟨λ X Y f g, rfl⟩
 
-instance evaluation_exact (S : ExtrDisc.{u}) :
+lemma evaluation_exact (S : ExtrDisc.{u}) :
   functor.exact (Condensed.evaluation _ S.val : Condensed.{u} Ab.{u+1} ⥤ _) :=
 begin
-  constructor,
   intros X Y Z f g h,
   rw condensed.exact_iff_ExtrDisc at h,
   apply h

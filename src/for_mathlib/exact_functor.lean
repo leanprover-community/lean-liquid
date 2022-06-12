@@ -37,10 +37,8 @@ namespace functor
 
 open category_theory.limits
 
-class exact : Prop :=
-(cond [] : ∀ {X Y Z : A} (f : X ⟶ Y) (g : Y ⟶ Z), exact f g → exact (F.map f) (F.map g))
-
-variables [exact F]
+def exact : Prop :=
+∀ ⦃X Y Z : A⦄ (f : X ⟶ Y) (g : Y ⟶ Z), exact f g → exact (F.map f) (F.map g)
 
 noncomputable theory
 
@@ -49,28 +47,29 @@ example : preserves_zero_morphisms F := infer_instance
 
 open_locale zero_object classical
 
-instance epi_of_epi_of_exact {X Y : A} (f : X ⟶ Y)
+lemma epi_of_epi_of_exact (h : F.exact) {X Y : A} (f : X ⟶ Y)
   [epi f] : epi (F.map f) :=
 begin
   have : category_theory.exact f (0 : _ ⟶ 0) := exact_epi_zero f,
-  replace this := exact.cond F _ _ this,
+  replace this := h _ _ this,
   simp at this,
   apply this.epi_of_exact_zero_right,
 end
 
-instance mono_of_mono_of_exact {X Y : A} (f : X ⟶ Y)
+lemma mono_of_mono_of_exact (h : F.exact) {X Y : A} (f : X ⟶ Y)
   [mono f] : mono (F.map f) :=
 begin
   have : category_theory.exact (0 : X ⟶ _) f := exact_zero_left_of_mono X,
-  replace this := exact.cond F _ _ this,
+  replace this := h _ _ this,
   simp at this,
   apply this.mono_of_exact_zero_left,
 end
 
-instance {X Y : A} (f : X ⟶ Y) : is_iso (cokernel_comparison f F) :=
+lemma is_iso_cokernel_comparison_of_exact
+  (hh : F.exact) {X Y : A} (f : X ⟶ Y) : is_iso (cokernel_comparison f F) :=
 begin
   have : category_theory.exact (F.map f) (F.map (cokernel.π f)),
-  { apply exact.cond, exact abelian.exact_cokernel f },
+  { apply hh, exact abelian.exact_cokernel f },
   dsimp [cokernel_comparison],
   apply_with is_iso_of_mono_of_epi { instances := ff },
   apply_instance,
@@ -78,22 +77,25 @@ begin
   constructor, intros Z a b h,
   apply_fun (λ e, cokernel.π _ ≫ e) at h,
   simp at h,
+  haveI := epi_of_epi_of_exact _ hh (cokernel.π f),
   rwa cancel_epi at h,
 end
 
-instance preserves_finite_colimits : preserves_finite_colimits F :=
+lemma preserves_finite_colimits_of_exact (hh : F.exact) : preserves_finite_colimits F :=
 begin
-  apply_with preserves_finite_colimits_of_preserves_coequalizers_and_finite_coproducts { instances := ff },
+  apply_with preserves_finite_colimits_of_preserves_coequalizers_and_finite_coproducts
+    { instances := ff },
   any_goals { apply_instance },
   { sorry }, -- use cokernel iso above
   { introsI J hI,
     apply preserves_coproducts_of_shape_of_preserves_biproducts_of_shape }
 end
 
-instance {X Y : A} (f : X ⟶ Y) : is_iso (kernel_comparison f F) :=
+lemma is_iso_kernel_comparison_of_exact
+  (hh : F.exact) {X Y : A} (f : X ⟶ Y) : is_iso (kernel_comparison f F) :=
 begin
   have : category_theory.exact (F.map (kernel.ι f)) (F.map f),
-  { apply exact.cond, exact exact_kernel_ι },
+  { apply hh, exact exact_kernel_ι },
   dsimp [kernel_comparison],
   apply_with is_iso_of_mono_of_epi { instances := ff },
   apply_instance,
@@ -101,11 +103,12 @@ begin
   intros Z a b h,
   apply_fun (λ e, e ≫ kernel.ι _) at h,
   simp at h,
+  haveI := mono_of_mono_of_exact _ hh (kernel.ι f),
   rwa cancel_mono at h,
   apply this.epi_lift,
 end
 
-instance preserves_finite_limits : preserves_finite_limits F :=
+lemma preserves_finite_limits_of_exact (h : F.exact) : preserves_finite_limits F :=
 begin
   apply_with preserves_finite_limits_of_preserves_equalizers_and_finite_products { instances := ff },
   any_goals { apply_instance },
@@ -113,6 +116,8 @@ begin
   { introsI J hJ,
     apply preserves_products_of_shape_of_preserves_biproducts_of_shape }
 end
+
+variables [preserves_finite_limits F] [preserves_finite_colimits F]
 
 def homology_iso {X Y Z : A} (f : X ⟶ Y) (g : Y ⟶ Z) (w w') :
   F.obj (homology f g w) ≅ homology (F.map f) (F.map g) w' :=
