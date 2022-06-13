@@ -203,8 +203,9 @@ apply_nolint category_theory.endomorphisms.cofree unused_arguments
 apply_nolint category_theory.endomorphisms.free unused_arguments
 
 -- for_mathlib/exact_functor.lean
-apply_nolint category_theory.functor.cokernel_comparison unused_arguments
-apply_nolint category_theory.functor.kernel_comparison unused_arguments
+apply_nolint category_theory.functor.exact unused_arguments
+apply_nolint category_theory.functor.preserves_finite_colimits_of_exact def_lemma
+apply_nolint category_theory.functor.preserves_finite_limits_of_exact def_lemma
 
 -- for_mathlib/exact_seq3.lean
 apply_nolint category_theory.exact_seq.w def_lemma
