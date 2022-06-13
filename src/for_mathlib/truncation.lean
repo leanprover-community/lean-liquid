@@ -573,11 +573,40 @@ begin
           { exact hn1.elim rfl, }, },
         { exact hn.elim rfl, } } } }
 end
+.
 
 lemma ι_succ_to_imker_ex_π {i n : ℤ} : epi (kernel.lift ((to_imker C (i + 1)).f n)
   ((ι_succ C i).f n) (ι_succ.comp_to_imker_zero C)) :=
 begin
-  sorry
+  delta to_imker ι_succ map_of_le, dsimp only,
+  by_cases h : n = i,
+  { subst h,
+    -- `simp_rw dif_pos (show n = n + 1 - 1, by ring)` fails so we hack our way around it.
+    suffices : epi (kernel.lift ((X_iso_of_lt C _).hom ≫ eq_to_hom _ ≫
+      factor_thru_image (C.d (n + 1 - 1) (n + 1)) ≫
+      eq_to_hom _ ≫
+      image.pre_comp (homological_complex.X_prev_iso C _).inv (homological_complex.d_to C (n + 1)) ≫
+      (imker.X_iso_image_of_eq C (show n = n + 1 - 1, by ring)).inv) _ _),
+    -- 14 goals but bear with me
+    convert this, -- 11 goals
+    rw dif_pos (show n = n + 1 - 1, by ring), -- 4 goals
+    rw dif_pos (show n = n + 1 - 1, by ring), -- 3 goals
+    swap, apply_instance, -- 2 goals
+    swap,
+    { convert ι_succ.comp_to_imker_zero C,
+      delta to_imker, dsimp only, rw dif_pos (show n = n + 1 - 1, by ring), },-- rw finally works!,
+    -- back to 1 goal
+    simp only [zero_lt_one, dif_pos, dif_neg, eq_to_hom_refl, category.id_comp, eq_self_iff_true,
+      not_false_iff, eq_to_iso.hom, eq_to_hom_trans, lt_add_iff_pos_right, lt_self_iff_false,
+      eq_to_iso.inv],
+    -- show epi from split epi?
+    apply @split_epi.epi _ _ _ _ _ _,
+    refine ⟨_, _⟩, -- maybe this is the way to do it? Not sure.
+    sorry, sorry,
+  },
+  {
+    sorry
+  }
 end
 
 lemma ι_succ_to_imker_ι_ex {i n : ℤ} : mono (cokernel.desc ((ι_succ C i).f n)
