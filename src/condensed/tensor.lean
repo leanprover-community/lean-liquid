@@ -68,7 +68,30 @@ def tensor_functor_conj_iso :
   ((whiskering_right _ _ _).obj $ ((whiskering_right _ _ _).obj
     (Condensed_ExtrSheafProd_equiv Ab.{u+1}).functor)).obj tensor_functor ≅
   ExtrSheafProd.tensor_functor :=
-sorry
+nat_iso.of_components
+(λ X, begin
+  refine functor.associator _ _ _ ≪≫ _,
+  refine iso_whisker_left _ (Condensed_ExtrSheafProd_equiv Ab.{u+1}).counit_iso ≪≫ _,
+  refine functor.right_unitor _ ≪≫ _,
+  refine functor.map_iso _ _,
+  exact ((Condensed_ExtrSheafProd_equiv Ab.{u+1}).counit_iso.app X),
+end)
+begin
+  intros X Y f, ext : 2,
+  dsimp [tensor_functor],
+  simp only [equivalence.fun_inv_map, equivalence.equivalence_mk'_counit,
+    equivalence.equivalence_mk'_counit_inv, functor.map_comp, nat_trans.comp_app,
+    category.assoc, iso.inv_hom_id_app_assoc, category.id_comp,
+    nat_iso.cancel_nat_iso_hom_left],
+  rw [← nat_trans.comp_app, ← functor.map_comp, ← nat_trans.comp_app],
+  have : (Condensed_ExtrSheafProd_equiv Ab).counit_iso.inv.app Y ≫
+    (Condensed_ExtrSheafProd_equiv Ab).counit_iso.hom.app Y = 𝟙 _,
+  { rw [← nat_trans.comp_app, iso.inv_hom_id], refl },
+  rw this,
+  simp only [nat_trans.comp_app],
+  dsimp,
+  simp only [category_theory.functor.map_id, nat_trans.id_app, category.comp_id],
+end
 
 def endo_tensor :
   (endomorphisms $ Condensed.{u} Ab.{u+1}) ⥤ Ab.{u+1} ⥤
