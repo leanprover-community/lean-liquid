@@ -70,7 +70,16 @@ def tensor_curry_equiv (A B C : AddCommGroup.{u}) :
   (tensor A B ⟶ C) ≃+ (A ⟶ (AddCommGroup.of (B ⟶ C))) :=
 { to_fun := tensor_curry,
   inv_fun := tensor_uncurry,
-  left_inv := sorry, -- use tensor_product.induction_on
+  left_inv := begin
+    intros f,
+    ext t,
+    apply tensor_product.induction_on t,
+    { simp, },
+    { intros x y, dsimp [tensor_uncurry, tensor_curry],
+      simp, },
+    { intros x y h1 h2,
+      simp only [map_add, h1, h2] }
+  end,
   right_inv := λ f, by { ext, dsimp [tensor_uncurry, tensor_curry], simp, },
   map_add' := λ x y, by { ext, refl } }
 
