@@ -30,17 +30,34 @@ lemma map_tensor_comp_left {A A' A'' B : AddCommGroup.{u}} (f : A ⟶ A') (g : A
 lemma map_tensor_comp_right {A B B' B'' : AddCommGroup.{u}} (f : B ⟶ B') (g : B' ⟶ B'') :
   map_tensor (𝟙 A) (f ≫ g) = map_tensor (𝟙 _) f ≫ map_tensor (𝟙 _) g := sorry
 
+lemma map_tensor_eq_comp {A A' B B' : AddCommGroup.{u}} (f : A ⟶ A') (g : B ⟶ B') :
+  map_tensor f g = map_tensor f (𝟙 _) ≫ map_tensor (𝟙 _) g := sorry
+
+lemma map_tensor_eq_comp' {A A' B B' : AddCommGroup.{u}} (f : A ⟶ A') (g : B ⟶ B') :
+  map_tensor f g = map_tensor (𝟙 _) g ≫ map_tensor f (𝟙 _) := sorry
+
 def tensor_functor : AddCommGroup.{u} ⥤ AddCommGroup.{u} ⥤ AddCommGroup.{u} :=
 { obj := λ A,
   { obj := λ B, tensor A B,
     map := λ B B' f, map_tensor (𝟙 _) f,
-    map_id' := sorry,
-    map_comp' := sorry },
+    map_id' := λ A, map_tensor_id,
+    map_comp' := λ A B C f g, map_tensor_comp_right _ _ },
   map := λ A A' f,
   { app := λ B, map_tensor f (𝟙 _),
-    naturality' := sorry },
-  map_id' := sorry,
-  map_comp' := sorry }
+    naturality' := λ B C g, begin
+      dsimp,
+      rw [← map_tensor_eq_comp, ← map_tensor_eq_comp'],
+    end },
+  map_id' := begin
+    intros A,
+    ext B : 2,
+    dsimp, exact map_tensor_id,
+  end,
+  map_comp' := begin
+    intros A B C f g,
+    ext B : 2,
+    dsimp, exact map_tensor_comp_left _ _,
+  end }
 
 def tensor_pi_comparison {α : Type u} (X : α → AddCommGroup.{u+1})
   (B : AddCommGroup.{u+1}) :
