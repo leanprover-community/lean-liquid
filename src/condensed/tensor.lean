@@ -20,8 +20,14 @@ def linear_equiv_to_iso {A B : AddCommGroup.{u}}
   A ≅ B :=
 { hom := e.to_linear_map.to_add_monoid_hom,
   inv := e.symm.to_linear_map.to_add_monoid_hom,
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+  hom_inv_id' := begin
+    ext t,
+    simp,
+  end,
+  inv_hom_id' := begin
+    ext t,
+    simp,
+  end }
 
 def tensor (A B : AddCommGroup.{u}) : AddCommGroup.{u} :=
 AddCommGroup.of (A ⊗[ℤ] B)
@@ -63,8 +69,8 @@ def tensor_curry_equiv (A B C : AddCommGroup.{u}) :
   (tensor A B ⟶ C) ≃+ (A ⟶ (AddCommGroup.of (B ⟶ C))) :=
 { to_fun := tensor_curry,
   inv_fun := tensor_uncurry,
-  left_inv := sorry,
-  right_inv := sorry,
+  left_inv := sorry, -- use tensor_product.induction_on
+  right_inv := λ f, by { ext, dsimp [tensor_uncurry, tensor_curry], simp, },
   map_add' := λ x y, by { ext, refl } }
 
 def map_tensor {A A' B B' : AddCommGroup.{u}}
