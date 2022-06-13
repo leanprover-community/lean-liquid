@@ -3,6 +3,7 @@ import condensed.extr.equivalence
 import linear_algebra.tensor_product
 
 import for_mathlib.endomorphisms.functor
+import for_mathlib.AddCommGroup_instances
 
 noncomputable theory
 
@@ -11,46 +12,88 @@ open_locale tensor_product
 
 open category_theory
 
+namespace AddCommGroup
+
+def tensor (A B : AddCommGroup.{u}) : AddCommGroup.{u} :=
+AddCommGroup.of (A ⊗[ℤ] B)
+
+def map_tensor {A A' B B' : AddCommGroup.{u}}
+  (f : A ⟶ A') (g : B ⟶ B') : tensor A B ⟶ tensor A' B' :=
+(tensor_product.map f.to_int_linear_map g.to_int_linear_map).to_add_monoid_hom
+
+lemma map_tensor_id {A B : AddCommGroup.{u}} :
+  map_tensor (𝟙 A) (𝟙 B) = 𝟙 _ := sorry
+
+lemma map_tensor_comp_left {A A' A'' B : AddCommGroup.{u}} (f : A ⟶ A') (g : A' ⟶ A'') :
+  map_tensor (f ≫ g) (𝟙 B) = map_tensor f (𝟙 _) ≫ map_tensor g (𝟙 _) := sorry
+
+lemma map_tensor_comp_right {A B B' B'' : AddCommGroup.{u}} (f : B ⟶ B') (g : B' ⟶ B'') :
+  map_tensor (𝟙 A) (f ≫ g) = map_tensor (𝟙 _) f ≫ map_tensor (𝟙 _) g := sorry
+
+def tensor_functor : AddCommGroup.{u} ⥤ AddCommGroup.{u} ⥤ AddCommGroup.{u} :=
+{ obj := λ A,
+  { obj := λ B, tensor A B,
+    map := λ B B' f, map_tensor (𝟙 _) f,
+    map_id' := sorry,
+    map_comp' := sorry },
+  map := λ A A' f,
+  { app := λ B, map_tensor f (𝟙 _),
+    naturality' := sorry },
+  map_id' := sorry,
+  map_comp' := sorry }
+
+def tensor_pi_comparison {α : Type u} (X : α → AddCommGroup.{u+1})
+  (B : AddCommGroup.{u+1}) :
+  tensor (∏ X) B ⟶ ∏ (λ a, tensor (X a) B) :=
+limits.pi.lift $ λ b, map_tensor (limits.pi.π _ _) (𝟙 _)
+
+instance is_iso_tensor_pi_comparison {α : Type u} [fintype α]
+  (X : α → AddCommGroup.{u+1})
+  (B : AddCommGroup.{u+1}) : is_iso (tensor_pi_comparison X B) := sorry
+
+end AddCommGroup
+
 namespace ExtrSheafProd
 
+/-- S ↦ M(S) ⊗ A -/
 def tensor_presheaf (M : ExtrDisc.{u}ᵒᵖ ⥤ Ab.{u+1}) (A : Ab.{u+1}) :
   ExtrDisc.{u}ᵒᵖ ⥤ Ab.{u+1} :=
-{ obj := λ S, AddCommGroup.of $ M.obj S ⊗[ℤ] A,
-  map := λ S T f, (tensor_product.map (M.map f).to_int_linear_map $
-    linear_map.id).to_add_monoid_hom,
-  map_id' := λ X, by { ext x, apply tensor_product.induction_on x,
-    { simp },
-    { intros x y, dsimp, simp },
-    { intros x y h1 h2,
-      rw [add_monoid_hom.map_add, h1, h2], refl } },
-  map_comp' := begin
-    intros X Y Z f g,
-    ext x,
-    apply tensor_product.induction_on x,
-    { simp },
-    { intros x y, dsimp, simp },
-    { intros x y h1 h2,
-      rw [add_monoid_hom.map_add, add_monoid_hom.map_add, h1, h2] }
-  end }
+M ⋙ AddCommGroup.tensor_functor.flip.obj A
 
 def tensor (M : ExtrSheafProd.{u} Ab.{u+1}) (A : Ab.{u+1}) :
   ExtrSheafProd.{u} Ab.{u+1} :=
 { val := tensor_presheaf M.val A,
-  cond := sorry } -- tensor products commutes with direct sums.
+  cond := begin
+    introsI α _ X, dsimp [tensor_presheaf, AddCommGroup.tensor_functor],
+    let e := _, change is_iso e,
+    have hq := M.cond _ X, dsimp at hq, let q := _, change is_iso q at hq,
+    have he : e = AddCommGroup.map_tensor q (𝟙 _) ≫
+      AddCommGroup.tensor_pi_comparison _ _,
+    { ext1 j,
+      dsimp [AddCommGroup.tensor_pi_comparison],
+      simp only [←AddCommGroup.map_tensor_comp_left, limits.limit.lift_π,
+        limits.fan.mk_π_app, category.assoc]},
+    rw he, resetI, apply_with is_iso.comp_is_iso { instances := ff },
+    swap, apply_instance,
+    use AddCommGroup.map_tensor (inv q) (𝟙 _),
+    split,
+    { rw [← AddCommGroup.map_tensor_comp_left, is_iso.hom_inv_id, AddCommGroup.map_tensor_id], },
+    { rw [← AddCommGroup.map_tensor_comp_left, is_iso.inv_hom_id, AddCommGroup.map_tensor_id], },
+  end } -- tensor products commutes with direct sums.
 
 -- Slow, so probably break into pieces
 def tensor_functor : ExtrSheafProd.{u} Ab.{u+1} ⥤ Ab.{u+1} ⥤ ExtrSheafProd.{u} Ab.{u+1} :=
 { obj := λ M,
   { obj := λ A, tensor M A,
     map := λ A B f,
-      ⟨{ app := λ S, (tensor_product.map linear_map.id f.to_int_linear_map).to_add_monoid_hom,
+      ⟨{ app := λ S, AddCommGroup.map_tensor (𝟙 _) f,
          naturality' := sorry
          }⟩,
     map_id' := sorry,
     map_comp' := sorry },
   map := λ M N f,
   { app := λ A,
-    ⟨{ app := λ S, (tensor_product.map (f.val.app S).to_int_linear_map linear_map.id).to_add_monoid_hom,
+    ⟨{ app := λ S, AddCommGroup.map_tensor (f.val.app _) (𝟙 _),
        naturality' := sorry }⟩,
     naturality' := sorry },
   map_id' := sorry,
