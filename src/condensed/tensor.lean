@@ -210,6 +210,7 @@ lemma tensor_explicit_pi_iso_hom_eq {α : Type u} [fintype α]
   (B : AddCommGroup.{u+1}) :
   (tensor_explicit_pi_iso X B).hom = tensor_explicit_pi_comparison X B :=
 begin
+  symmetry,
   apply direct_sum_hom_ext.{u u+1}, swap, apply_instance,
   intros j,
   apply (tensor_curry_equiv _ _ _).injective,
