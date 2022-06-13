@@ -7,12 +7,11 @@ import for_mathlib.endomorphisms.functor
 noncomputable theory
 
 universes u
+open_locale tensor_product
 
 open category_theory
 
 namespace ExtrSheafProd
-
-open_locale tensor_product
 
 def tensor_presheaf (M : ExtrDisc.{u}ᵒᵖ ⥤ Ab.{u+1}) (A : Ab.{u+1}) :
   ExtrDisc.{u}ᵒᵖ ⥤ Ab.{u+1} :=
@@ -103,6 +102,34 @@ begin
   dsimp,
   simp only [category_theory.functor.map_id, nat_trans.id_app, category.comp_id],
 end
+
+def tensor_functor_conj_iso' :
+  tensor_functor ⋙ (whiskering_right _ _ _).obj
+  (Condensed_ExtrSheafProd_equiv _).functor ≅
+  (Condensed_ExtrSheafProd_equiv _).functor ⋙ ExtrSheafProd.tensor_functor :=
+nat_iso.of_components
+(λ X, begin
+  dsimp [tensor_functor],
+  refine functor.associator _ _ _ ≪≫ _,
+  refine _ ≪≫ functor.right_unitor _,
+  refine ((whiskering_left _ _ _).obj _).map_iso _,
+  refine (Condensed_ExtrSheafProd_equiv _).counit_iso,
+end)
+begin
+  intros X Y f, ext : 2,
+  dsimp [tensor_functor],
+  simp, dsimp, simp,
+end
+
+/-- The tensor product behaves in the naive way when evaluated
+on extremally disconnected sets. -/
+def tensor_eval_iso
+  (M : Condensed.{u} Ab.{u+1}) (A : Ab.{u+1}) (S : ExtrDisc.{u}) :
+  (tensor M A).val.obj (opposite.op S.val) ≅
+  AddCommGroup.of (M.val.obj (opposite.op S.val) ⊗[ℤ] A) :=
+let e := (tensor_functor_conj_iso'.app M).app A,
+  e' := (ExtrSheafProd_to_presheaf _).map_iso e in
+e'.app (opposite.op S)
 
 /-- A variant of the tensor product functor for the endormophism category. -/
 def endo_tensor :
