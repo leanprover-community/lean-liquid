@@ -4,6 +4,7 @@ import linear_algebra.tensor_product
 
 import for_mathlib.endomorphisms.functor
 import for_mathlib.AddCommGroup_instances
+import for_mathlib.AddCommGroup.explicit_products
 
 noncomputable theory
 
@@ -105,14 +106,53 @@ def tensor_functor : AddCommGroup.{u} ⥤ AddCommGroup.{u} ⥤ AddCommGroup.{u} 
     dsimp, exact map_tensor_comp_left _ _,
   end }
 
+def tensor_explicit_pi_comparison {α : Type u} (X : α → AddCommGroup.{u+1})
+  (B : AddCommGroup.{u+1}) :
+  tensor (AddCommGroup.of (Π i, X i)) B ⟶
+  AddCommGroup.of (Π i, tensor (X i) B) :=
+pi_lift.{u u+1} _ $ λ a, map_tensor (pi_π.{u u+1} _ _) (𝟙 _)
+
 def tensor_pi_comparison {α : Type u} (X : α → AddCommGroup.{u+1})
   (B : AddCommGroup.{u+1}) :
   tensor (∏ X) B ⟶ ∏ (λ a, tensor (X a) B) :=
 limits.pi.lift $ λ b, map_tensor (limits.pi.π _ _) (𝟙 _)
 
+instance is_iso_tensor_explicit_pi_comparison {α : Type u} [fintype α]
+  (X : α → AddCommGroup.{u+1})
+  (B : AddCommGroup.{u+1}) : is_iso (tensor_explicit_pi_comparison X B) :=
+sorry
+
+lemma tensor_explicit_pi_comparison_comparison {α : Type u}
+  (X : α → AddCommGroup.{u+1})
+  (B : AddCommGroup.{u+1}) :
+  tensor_pi_comparison X B =
+  map_tensor (pi_lift.{u u+1} _ $ limits.pi.π _) (𝟙 _) ≫
+  tensor_explicit_pi_comparison X B ≫
+  limits.pi.lift (pi_π.{u u+1} (λ i, tensor (X i) B)) :=
+begin
+  ext1,
+  dsimp [tensor_pi_comparison],
+  simp only [limits.limit.lift_π, limits.fan.mk_π_app, category.assoc],
+  dsimp [tensor_explicit_pi_comparison],
+  rw [pi_lift_π, ← map_tensor_comp_left, pi_lift_π],
+end
+
 instance is_iso_tensor_pi_comparison {α : Type u} [fintype α]
   (X : α → AddCommGroup.{u+1})
-  (B : AddCommGroup.{u+1}) : is_iso (tensor_pi_comparison X B) := sorry
+  (B : AddCommGroup.{u+1}) : is_iso (tensor_pi_comparison X B) :=
+begin
+  rw tensor_explicit_pi_comparison_comparison,
+  apply_with is_iso.comp_is_iso { instances := ff },
+  { change is_iso ((tensor_functor.flip.obj B).map _),
+    apply_with functor.map_is_iso { instances := ff },
+    change is_iso ((limits.limit.is_limit _).cone_point_unique_up_to_iso
+      (is_limit_pi_fan.{u u+1} X)).hom,
+    apply_instance },
+  apply_with is_iso.comp_is_iso { instances := ff }, apply_instance,
+  change is_iso ((is_limit_pi_fan.{u u+1} _).cone_point_unique_up_to_iso
+    (limits.limit.is_limit _)).hom,
+  apply_instance
+end
 
 end AddCommGroup
 
