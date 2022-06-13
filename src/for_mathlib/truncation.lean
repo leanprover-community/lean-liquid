@@ -580,7 +580,7 @@ lemma ι_succ_to_imker_ex_π {i n : ℤ} : epi (kernel.lift ((to_imker C (i + 1)
 begin
   delta to_imker ι_succ map_of_le, dsimp only,
   by_cases h : n = i,
-  { subst h,
+  sorry;{ subst h,
     -- `simp_rw dif_pos (show n = n + 1 - 1, by ring)` fails so we hack our way around it.
     suffices : epi (kernel.lift ((X_iso_of_lt C _).hom ≫ eq_to_hom _ ≫
       factor_thru_image (C.d (n + 1 - 1) (n + 1)) ≫
@@ -604,9 +604,27 @@ begin
     refine ⟨_, _⟩, -- maybe this is the way to do it? Not sure.
     sorry, sorry,
   },
-  {
-    sorry
-  }
+  { by_cases hn : n = i + 1,
+    { apply epi_of_target_iso_zero,
+      apply is_zero.iso_zero,
+      apply @is_zero_kernel_of_mono _ _ _ _ _ _ _,
+      subst hn,
+      rw [dif_neg (show i + 1 ≠ i + 1 - 1, by linarith), dif_pos rfl],
+      apply mono_comp, },
+    { suffices : epi (kernel.lift (0 : (C.truncation (i + 1)).X n ⟶ (C.imker (i + 1)).X n) _ _),
+      { convert this,
+        rw dif_neg (show n ≠ i + 1 - 1, by ring_nf; exact h),
+        rw dif_neg hn,
+        rw dif_neg (show n ≠ i + 1 - 1, by ring_nf; exact h),
+        rw dif_neg hn,
+      },
+      swap,
+      { convert ι_succ.comp_to_imker_zero C,
+        delta to_imker, dsimp only,
+        rw dif_neg (show n ≠ i + 1 - 1, by ring_nf; exact h),
+        rw dif_neg hn, },
+      -- epi(kernel.lift 0 f _) ↔ epi(f) is next
+      sorry }, }
 end
 
 lemma ι_succ_to_imker_ι_ex {i n : ℤ} : mono (cokernel.desc ((ι_succ C i).f n)
