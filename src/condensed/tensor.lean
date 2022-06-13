@@ -19,8 +19,20 @@ def tensor_presheaf (M : ExtrDisc.{u}ᵒᵖ ⥤ Ab.{u+1}) (A : Ab.{u+1}) :
 { obj := λ S, AddCommGroup.of $ M.obj S ⊗[ℤ] A,
   map := λ S T f, (tensor_product.map (M.map f).to_int_linear_map $
     linear_map.id).to_add_monoid_hom,
-  map_id' := sorry,
-  map_comp' := sorry }
+  map_id' := λ X, by { ext x, apply tensor_product.induction_on x,
+    { simp },
+    { intros x y, dsimp, simp },
+    { intros x y h1 h2,
+      rw [add_monoid_hom.map_add, h1, h2], refl } },
+  map_comp' := begin
+    intros X Y Z f g,
+    ext x,
+    apply tensor_product.induction_on x,
+    { simp },
+    { intros x y, dsimp, simp },
+    { intros x y h1 h2,
+      rw [add_monoid_hom.map_add, add_monoid_hom.map_add, h1, h2] }
+  end }
 
 def tensor (M : ExtrSheafProd.{u} Ab.{u+1}) (A : Ab.{u+1}) :
   ExtrSheafProd.{u} Ab.{u+1} :=
