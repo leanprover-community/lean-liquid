@@ -65,6 +65,7 @@ def tensor_curry {A B C : AddCommGroup.{u}}
 
 .
 
+@[simps]
 def tensor_curry_equiv (A B C : AddCommGroup.{u}) :
   (tensor A B ⟶ C) ≃+ (A ⟶ (AddCommGroup.of (B ⟶ C))) :=
 { to_fun := tensor_curry,
@@ -137,6 +138,24 @@ begin
   rw map_tensor_comp_comp,
 end
 
+@[simp]
+lemma map_tensor_zero_left {A A' B B' : AddCommGroup.{u}} (f : B ⟶ B') :
+  map_tensor (0 : A ⟶ A') f = 0 := sorry
+
+@[simp]
+lemma map_tensor_zero_right {A A' B B' : AddCommGroup.{u}} (f : A ⟶ A') :
+  map_tensor f (0 : B ⟶ B') = 0 := sorry
+
+lemma tensor_uncurry_curry {A B C D : AddCommGroup.{u}} (f : A ⟶ B) (g : B.tensor C ⟶ D) :
+  tensor_uncurry (f ≫ tensor_curry g) = map_tensor f (𝟙 _) ≫ g :=
+begin
+  apply (tensor_curry_equiv _ _ _).injective,
+  erw (tensor_curry_equiv _ _ _).apply_symm_apply,
+  ext a c,
+  dsimp [tensor_curry, tensor_curry_equiv, map_tensor],
+  simp,
+end
+
 @[simps]
 def tensor_functor : AddCommGroup.{u} ⥤ AddCommGroup.{u} ⥤ AddCommGroup.{u} :=
 { obj := λ A,
@@ -192,24 +211,32 @@ instance is_iso_tensor_explicit_pi_comparison {α : Type u} [fintype α]
 begin
   suffices : tensor_explicit_pi_comparison X B = (tensor_explicit_pi_iso X B).hom,
   { rw this, apply_instance },
-  sorry
-  /-
-  apply direct_sum_hom_ext.{u u+1},
-  intros i,
-  dsimp [tensor_explicit_pi_comparison], rw direct_sum_lift_π,
-  dsimp [tensor_explicit_pi_iso],
-  suffices : tensor_uncurry (direct_sum_desc.{u u+1} X (λ (i : α),
-    tensor_curry (direct_sum_ι.{u u+1} (λ (i : α), (X i).tensor B) i))) ≫
-    direct_sum_π.{u u+1} (λ (i : α), (X i).tensor B) i =
-    map_tensor (direct_sum_π.{u u+1} _ _) (𝟙 _), by rw this,
-  apply_fun tensor_curry_equiv _ _ _,
-  swap, { apply add_equiv.injective },
-  apply direct_sum_hom_ext'.{u u+1},
-  intros j, swap, apply_instance,
-  ext t b,
-  dsimp [direct_sum_ι, tensor_curry_equiv, tensor_curry, map_tensor, tensor_uncurry,
-    direct_sum_desc, direct_sum_π],
-  -/
+  apply direct_sum_hom_ext.{u u+1}, swap, apply_instance,
+  intros j,
+  apply (tensor_curry_equiv _ _ _).injective,
+  apply direct_sum_hom_ext'.{u u+1}, intros i,
+  apply (tensor_curry_equiv _ _ _).symm.injective,
+  dsimp,
+  simp_rw tensor_uncurry_curry,
+  erw [direct_sum_lift_π, ← map_tensor_comp_comp, category.id_comp],
+  dsimp only [tensor_explicit_pi_iso],
+  erw [← category.assoc], let t := _, change _ = t ≫ _,
+  have ht : t = direct_sum_ι.{u u+1} _ i,
+  { apply (tensor_curry_equiv _ _ _).injective,
+    ext a b k,
+    dsimp [tensor_curry, direct_sum_ι, direct_sum.of, t, map_tensor,
+      tensor_uncurry, tensor_curry, direct_sum_desc],
+    simp only [comp_apply, linear_map.to_add_monoid_hom_coe, tensor_product.map_tmul,
+      add_monoid_hom.coe_to_int_linear_map, dfinsupp.single_add_hom_apply, id_apply,
+      tensor_product.lift.tmul, linear_map.coe_comp, add_monoid_hom.coe_mk,
+      dfinsupp.single_apply],
+    dsimp [direct_sum.to_add_monoid],
+    simp only [dfinsupp.sum_add_hom_single, add_monoid_hom.coe_mk, dfinsupp.single_apply] },
+  rw ht, clear ht, clear t,
+  by_cases i = j,
+  { subst h,
+    simp [direct_sum_ι_π.{u u+1}] },
+  { simp [direct_sum_ι_π_of_ne.{u u+1} _ _ _ h], }
 end
 
 lemma tensor_explicit_pi_comparison_comparison {α : Type u}
