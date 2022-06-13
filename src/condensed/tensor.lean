@@ -110,8 +110,6 @@ def endo_tensor :
   (endomorphisms $ Condensed.{u} Ab.{u+1}) :=
 functor.flip $
 { obj := λ A, (tensor_functor.flip.obj A).map_endomorphisms,
-  map := sorry,
-  map_id' := sorry,
-  map_comp' := sorry }
+  map := λ A B f, nat_trans.map_endomorphisms $ tensor_functor.flip.map f }
 
 end condensed
