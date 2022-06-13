@@ -315,6 +315,15 @@ begin
   simp,
 end
 
+-- lemma _root_.category_theory.limits.factor_thru_image_comp {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) :
+--   factor_thru_image (f ≫ g) ≫ image.pre_comp f g = f ≫ factor_thru_image g :=
+-- begin
+--   exact image.factor_thru_image_pre_comp f g
+-- end
+
+lemma _root_.category_theory.limits.factor_thru_image_iso_comp {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C)
+  [is_iso f] : factor_thru_image (f ≫ g) = f ≫ factor_thru_image g ≫ inv (image.pre_comp f g):=
+by simp [← image.factor_thru_image_pre_comp_assoc]
 
 -- move
 @[ext] lemma image.ι.hom_ext {A B X : 𝓐} (f : A ⟶ B) (s t : X ⟶ image f)
@@ -392,8 +401,8 @@ begin
 end
 
 -- move!
-instance kernel.lift_iso_of_iso {A B C : 𝓐} (f : A ⟶ B) (e : B ⟶ C) [is_iso e] :
-  is_iso (kernel.lift (f ≫ e) (kernel.ι f) (by simp) : kernel f ⟶ kernel (f ≫ e)) :=
+instance kernel.lift_iso_of_comp_mono {A B C : 𝓐} (f : A ⟶ B) (e : B ⟶ C) [mono e] :
+  is_iso (kernel.lift (f ≫ e) (kernel.ι f) (by rw [kernel.condition_assoc, zero_comp]) : kernel f ⟶ kernel (f ≫ e)) :=
 ⟨⟨kernel.lift _ (kernel.ι (f ≫ e))  (by { rw ← cancel_mono e, simp }), by {ext, simp}, by {ext, simp}⟩⟩
 
 lemma kernel.ι_comp_iso {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) [is_iso g] : kernel.ι (f ≫ g) =
@@ -418,13 +427,11 @@ begin
   rw [is_iso.eq_comp_inv, cokernel.π_desc],
 end
 
-/-
-cokernel.π (kernel.ι (C.d n (n + 1)) ≫ eq_to_hom _ ≫ (X_iso_of_lt C _).inv)
--/
 /-- Factors cokernel.π (f ≫ iso) as iso ≫ cokernel.π f ≫ iso. -/
 lemma cokernel.π_comp_iso {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) [is_iso g] : cokernel.π (f ≫ g) =
 inv g ≫ cokernel.π f ≫ (cokernel.desc _ (g ≫ cokernel.π (f ≫ g)) (by rw [← category.assoc, cokernel.condition])) :=
 by rw [cokernel.π_desc, is_iso.inv_hom_id_assoc]
+
 
 instance {i n : ℤ} : epi ((to_imker C i).f n) :=
 begin
@@ -493,13 +500,31 @@ by rw [h, comp_zero]
 lemma comp_zero_cancel_right {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) (h : f = 0) : f ≫ g = 0 :=
 by rw [h, zero_comp]
 
+lemma kernel.ι_factor_thru_image {A B : 𝓐} (f : A ⟶ B) : kernel.ι (factor_thru_image f) =
+kernel.lift (factor_thru_image f ≫ image.ι f) (kernel.ι (factor_thru_image f))
+  (by rw [kernel.condition_assoc, zero_comp]) ≫ eq_to_hom (by simp) ≫ kernel.ι f :=
+by simp only [image.fac, category_theory.limits.eq_to_hom_comp_kernel.ι, kernel.lift_ι]
+
+lemma kernel.ι_factor_thru_image_comp_cokernel_π {A B : 𝓐} (f : A ⟶ B) :
+  kernel.ι (factor_thru_image f) ≫ cokernel.π (kernel.ι f) = 0 :=
+begin
+  rw [kernel.ι_factor_thru_image, category.assoc, category.assoc, cokernel.condition],
+  simp only [comp_zero],
+end
+
+lemma kernel.ι_iso_is_zero {A B : 𝓐} (f : A ⟶ B) [is_iso f] : kernel.ι f = 0 :=
+is_zero.eq_zero_of_src (is_zero_kernel_of_mono f) _
+
+lemma cokernel.π_iso_is_zero {A B : 𝓐} (f : A ⟶ B) [is_iso f] : cokernel.π f = 0 :=
+is_zero.eq_zero_of_tgt (is_zero_cokernel_of_epi f) _
+
 lemma ι_succ_to_imker_π_ι {i n : ℤ} : kernel.ι ((to_imker C (i + 1)).f n) ≫
   cokernel.π ((ι_succ C i).f n) = 0 :=
 begin
   delta to_imker ι_succ map_of_le,
   dsimp only,
   by_cases hn : n = i,
-  sorry;{ subst hn,
+  { subst hn, -- I seem to have to do all the work myself here :-(
     rw [dif_pos (show n = n + 1 - 1, by ring), dif_neg (show ¬ n < n, by linarith),
       dif_pos (rfl : n = n), dif_pos (show n < n + 1, by linarith)],
     rw [kernel.ι_iso_comp, category.assoc],
@@ -510,29 +535,43 @@ begin
     apply comp_zero_cancel_left,
     rw [cokernel.π_iso_comp, ← category.assoc _ _ (inv _), ← category.assoc _ _ (inv _), ← category.assoc _ _ (inv _)],
     apply comp_zero_cancel_right,
-    rw cokernel.π_comp_iso,
-    simp,
-    sorry
-  },
+    rw [cokernel.π_comp_iso, ← category.assoc _ _ (cokernel.desc _ _ _), ← category.assoc _ _ (cokernel.desc _ _ _), ← category.assoc _ _ (cokernel.desc _ _ _), ← category.assoc _ _ (cokernel.desc _ _ _)],
+    apply comp_zero_cancel_right,
+    rw ← category_theory.limits.eq_to_hom_comp_kernel.ι (category_theory.limits.factor_thru_image_of_eq
+          ((C.eq_to_hom_comp_d (show n + 1 - 1 + 1 = n + 1, by ring) rfl))).symm,
+    rw [kernel.ι_comp_iso, category.assoc, category.assoc],
+    apply comp_zero_cancel_left,
+    apply comp_zero_cancel_left,
+    have foo := category_theory.limits.factor_thru_image_iso_comp
+      (eq_to_hom (by rw (show n + 1 - 1 = n, by ring)) : C.X (n + 1 - 1) ⟶ C.X n) (C.d n (n + 1)),
+    rw category_theory.limits.factor_thru_image_iso_comp
+      (eq_to_hom (by rw (show n + 1 - 1 = n, by ring)) : C.X (n + 1 - 1) ⟶ C.X n) (C.d n (n + 1)),
+    rw [kernel.ι_iso_comp, category.assoc],
+    apply comp_zero_cancel_left,
+    simp only [kernel.ι_comp_iso, kernel.ι_factor_thru_image_comp_cokernel_π, inv_eq_to_hom,
+      category.assoc, eq_to_iso.hom, eq_to_hom_refl, eq_to_iso.inv, category.id_comp,
+      eq_to_hom_trans_assoc, comp_zero], },
   { rw [dif_neg (show n ≠ i + 1 - 1, by {intro h, apply hn, linarith})],
     by_cases hn1 : n = i + 1,
     { rw dif_pos hn1,
-      apply comp_zero_cancel_right,
-      -- kernel of iso is 0
-      sorry
-    },
+      apply comp_zero_cancel_right, -- kernel of iso is 0
+      apply kernel.ι_iso_is_zero, },
     { rw dif_neg hn1,
       by_cases hni : n < i,
       { rw dif_pos hni,
         apply comp_zero_cancel_left, -- cokernel of iso is 0
-        sorry
-      },
+        apply cokernel.π_iso_is_zero, },
       { rw [dif_neg hni, dif_neg hn], -- middle term is 0
-        simp,
-        sorry
-      }
-    }
-  }
+        apply comp_zero_cancel_right,
+        apply is_zero.eq_zero_of_tgt,
+        apply is_zero_X_of_lt,
+        rw not_lt at hni,
+        obtain (hlt | rfl) := lt_or_eq_of_le hni,
+        { rw int.lt_iff_add_one_le at hlt,
+          obtain (hlt' | rfl) := lt_or_eq_of_le hlt,
+          { exact hlt' },
+          { exact hn1.elim rfl, }, },
+        { exact hn.elim rfl, } } } }
 end
 
 lemma ι_succ_to_imker_ex_π {i n : ℤ} : epi (kernel.lift ((to_imker C (i + 1)).f n)
