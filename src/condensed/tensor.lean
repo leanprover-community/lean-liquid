@@ -15,8 +15,57 @@ open category_theory
 
 namespace AddCommGroup
 
+def linear_equiv_to_iso {A B : AddCommGroup.{u}}
+  (e : A ≃ₗ[ℤ] B) :
+  A ≅ B :=
+{ hom := e.to_linear_map.to_add_monoid_hom,
+  inv := e.symm.to_linear_map.to_add_monoid_hom,
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry }
+
 def tensor (A B : AddCommGroup.{u}) : AddCommGroup.{u} :=
 AddCommGroup.of (A ⊗[ℤ] B)
+
+def tensor_uncurry {A B C : AddCommGroup.{u}}
+  (e : A ⟶ AddCommGroup.of (B ⟶ C)) : tensor A B ⟶ C :=
+linear_map.to_add_monoid_hom $ tensor_product.lift $
+let e' := e.to_int_linear_map,
+  e'' : (B ⟶ C) →ₗ[ℤ] (B →ₗ[ℤ] C) :=
+  add_monoid_hom.to_int_linear_map
+  { to_fun := λ f, f.to_int_linear_map,
+    map_zero' := by { ext, refl },
+    map_add' := λ f g, by { ext, refl } } in
+e''.comp e'
+
+def tensor_curry {A B C : AddCommGroup.{u}}
+  (e : tensor A B ⟶ C) : A ⟶ AddCommGroup.of (B ⟶ C) :=
+{ to_fun := λ a,
+  { to_fun := λ b, e (a ⊗ₜ b),
+    map_zero' := by { rw [tensor_product.tmul_zero, e.map_zero], },
+    map_add' := begin
+      intros b c,
+      rw [tensor_product.tmul_add, e.map_add],
+    end },
+  map_zero' := begin
+    ext t,
+    dsimp,
+    rw [tensor_product.zero_tmul, e.map_zero],
+  end,
+  map_add' := begin
+    intros x y, ext t,
+    dsimp,
+    rw [tensor_product.add_tmul, e.map_add],
+  end }
+
+.
+
+def tensor_curry_equiv (A B C : AddCommGroup.{u}) :
+  (tensor A B ⟶ C) ≃+ (A ⟶ (AddCommGroup.of (B ⟶ C))) :=
+{ to_fun := tensor_curry,
+  inv_fun := tensor_uncurry,
+  left_inv := sorry,
+  right_inv := sorry,
+  map_add' := λ x y, by { ext, refl } }
 
 def map_tensor {A A' B B' : AddCommGroup.{u}}
   (f : A ⟶ A') (g : B ⟶ B') : tensor A B ⟶ tensor A' B' :=
@@ -106,35 +155,71 @@ def tensor_functor : AddCommGroup.{u} ⥤ AddCommGroup.{u} ⥤ AddCommGroup.{u} 
     dsimp, exact map_tensor_comp_left _ _,
   end }
 
-def tensor_explicit_pi_comparison {α : Type u} (X : α → AddCommGroup.{u+1})
+def tensor_explicit_pi_comparison {α : Type u} [fintype α] (X : α → AddCommGroup.{u+1})
   (B : AddCommGroup.{u+1}) :
-  tensor (AddCommGroup.of (Π i, X i)) B ⟶
-  AddCommGroup.of (Π i, tensor (X i) B) :=
-pi_lift.{u u+1} _ $ λ a, map_tensor (pi_π.{u u+1} _ _) (𝟙 _)
+  tensor (AddCommGroup.of (direct_sum α (λ i, X i))) B ⟶
+  AddCommGroup.of (direct_sum α (λ i, tensor (X i) B)) :=
+direct_sum_lift.{u u+1} _ $ λ a, map_tensor (direct_sum_π.{u u+1} _ _) (𝟙 _)
 
 def tensor_pi_comparison {α : Type u} (X : α → AddCommGroup.{u+1})
   (B : AddCommGroup.{u+1}) :
   tensor (∏ X) B ⟶ ∏ (λ a, tensor (X a) B) :=
 limits.pi.lift $ λ b, map_tensor (limits.pi.π _ _) (𝟙 _)
 
+open_locale classical
+
+def tensor_explicit_pi_iso {α : Type u}
+  (X : α → AddCommGroup.{u+1})
+  (B : AddCommGroup.{u+1}) :
+  (of (direct_sum α (λ (i : α), ↥(X i)))).tensor B ≅
+  of (direct_sum α (λ (i : α), ↥((X i).tensor B))) :=
+{ hom := tensor_uncurry $ direct_sum_desc.{u u+1} X $ λ i, tensor_curry $
+    direct_sum_ι.{u u+1} _ i,
+  inv := direct_sum_desc.{u u+1} _ $ λ i,
+    map_tensor (direct_sum_ι.{u u+1} X i) (𝟙 _),
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry }
+
 instance is_iso_tensor_explicit_pi_comparison {α : Type u} [fintype α]
   (X : α → AddCommGroup.{u+1})
   (B : AddCommGroup.{u+1}) : is_iso (tensor_explicit_pi_comparison X B) :=
-sorry
+begin
+  suffices : tensor_explicit_pi_comparison X B = (tensor_explicit_pi_iso X B).hom,
+  { rw this, apply_instance },
+  sorry
+  /-
+  apply direct_sum_hom_ext.{u u+1},
+  intros i,
+  dsimp [tensor_explicit_pi_comparison], rw direct_sum_lift_π,
+  dsimp [tensor_explicit_pi_iso],
+  suffices : tensor_uncurry (direct_sum_desc.{u u+1} X (λ (i : α),
+    tensor_curry (direct_sum_ι.{u u+1} (λ (i : α), (X i).tensor B) i))) ≫
+    direct_sum_π.{u u+1} (λ (i : α), (X i).tensor B) i =
+    map_tensor (direct_sum_π.{u u+1} _ _) (𝟙 _), by rw this,
+  apply_fun tensor_curry_equiv _ _ _,
+  swap, { apply add_equiv.injective },
+  apply direct_sum_hom_ext'.{u u+1},
+  intros j, swap, apply_instance,
+  ext t b,
+  dsimp [direct_sum_ι, tensor_curry_equiv, tensor_curry, map_tensor, tensor_uncurry,
+    direct_sum_desc, direct_sum_π],
+  -/
+end
 
 lemma tensor_explicit_pi_comparison_comparison {α : Type u}
+  [fintype α]
   (X : α → AddCommGroup.{u+1})
   (B : AddCommGroup.{u+1}) :
   tensor_pi_comparison X B =
-  map_tensor (pi_lift.{u u+1} _ $ limits.pi.π _) (𝟙 _) ≫
+  map_tensor (direct_sum_lift.{u u+1} _ $ limits.pi.π _) (𝟙 _) ≫
   tensor_explicit_pi_comparison X B ≫
-  limits.pi.lift (pi_π.{u u+1} (λ i, tensor (X i) B)) :=
+  limits.pi.lift (direct_sum_π.{u u+1} (λ i, tensor (X i) B)) :=
 begin
   ext1,
   dsimp [tensor_pi_comparison],
   simp only [limits.limit.lift_π, limits.fan.mk_π_app, category.assoc],
   dsimp [tensor_explicit_pi_comparison],
-  rw [pi_lift_π, ← map_tensor_comp_left, pi_lift_π],
+  rw [direct_sum_lift_π, ← map_tensor_comp_left, direct_sum_lift_π],
 end
 
 instance is_iso_tensor_pi_comparison {α : Type u} [fintype α]
@@ -146,11 +231,12 @@ begin
   { change is_iso ((tensor_functor.flip.obj B).map _),
     apply_with functor.map_is_iso { instances := ff },
     change is_iso ((limits.limit.is_limit _).cone_point_unique_up_to_iso
-      (is_limit_pi_fan.{u u+1} X)).hom,
+      (is_limit_direct_sum_fan.{u u+1} X)).hom,
     apply_instance },
   apply_with is_iso.comp_is_iso { instances := ff }, apply_instance,
-  change is_iso ((is_limit_pi_fan.{u u+1} _).cone_point_unique_up_to_iso
+  change is_iso ((is_limit_direct_sum_fan.{u u+1} _).cone_point_unique_up_to_iso
     (limits.limit.is_limit _)).hom,
+  apply_instance,
   apply_instance
 end
 
