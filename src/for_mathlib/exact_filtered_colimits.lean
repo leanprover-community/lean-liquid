@@ -39,7 +39,7 @@ end
 
 instance AB5 : AB5 AddCommGroup.{u} :=
 begin
-  constructor, introsI J _ _, constructor, intros F G H f g h,
+  constructor, introsI J _ _, intros F G H f g h,
   apply exact_colim_of_exact_of_is_filtered,
   exact (nat_trans.exact_iff_forall.{(u+1) u u} f g).1 h,
 end

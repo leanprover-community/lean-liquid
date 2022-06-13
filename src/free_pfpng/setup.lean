@@ -8,6 +8,7 @@ import free_pfpng.lemmas
 import condensed.exact
 
 import for_mathlib.int
+import for_mathlib.AddCommGroup_instances
 
 .
 
@@ -105,8 +106,8 @@ def Profinite.free'_to_condensed_free_pfpng (S : Profinite.{u}) :
   S.free' ⟶ S.condensed_free_pfpng :=
 S.free'_lift S.to_condensed_free_pfpng
 
-instance : limits.has_limits_of_size.{u u} Ab.{u+1} :=
-category_theory.limits.has_limits_of_size_shrink.{u u (u+1) (u+1)} Ab.{u+1}
+--instance : limits.has_limits_of_size.{u u} Ab.{u+1} :=
+--category_theory.limits.has_limits_of_size_shrink.{u u (u+1) (u+1)} Ab.{u+1}
 
 /-- the limit `lim_i ℤ[S_i]`. -/
 def Profinite.limit_free (S : Profinite.{u}) : Ab.{u+1} :=
