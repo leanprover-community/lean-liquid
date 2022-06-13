@@ -205,12 +205,11 @@ def tensor_explicit_pi_iso {α : Type u}
   hom_inv_id' := sorry,
   inv_hom_id' := sorry }
 
-instance is_iso_tensor_explicit_pi_comparison {α : Type u} [fintype α]
+lemma tensor_explicit_pi_iso_hom_eq {α : Type u} [fintype α]
   (X : α → AddCommGroup.{u+1})
-  (B : AddCommGroup.{u+1}) : is_iso (tensor_explicit_pi_comparison X B) :=
+  (B : AddCommGroup.{u+1}) :
+  (tensor_explicit_pi_iso X B).hom = tensor_explicit_pi_comparison X B :=
 begin
-  suffices : tensor_explicit_pi_comparison X B = (tensor_explicit_pi_iso X B).hom,
-  { rw this, apply_instance },
   apply direct_sum_hom_ext.{u u+1}, swap, apply_instance,
   intros j,
   apply (tensor_curry_equiv _ _ _).injective,
@@ -237,6 +236,14 @@ begin
   { subst h,
     simp [direct_sum_ι_π.{u u+1}] },
   { simp [direct_sum_ι_π_of_ne.{u u+1} _ _ _ h], }
+end
+
+instance is_iso_tensor_explicit_pi_comparison {α : Type u} [fintype α]
+  (X : α → AddCommGroup.{u+1})
+  (B : AddCommGroup.{u+1}) : is_iso (tensor_explicit_pi_comparison X B) :=
+begin
+  rw ← tensor_explicit_pi_iso_hom_eq,
+  apply_instance
 end
 
 lemma tensor_explicit_pi_comparison_comparison {α : Type u}
