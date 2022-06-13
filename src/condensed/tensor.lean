@@ -21,21 +21,67 @@ def map_tensor {A A' B B' : AddCommGroup.{u}}
   (f : A ⟶ A') (g : B ⟶ B') : tensor A B ⟶ tensor A' B' :=
 (tensor_product.map f.to_int_linear_map g.to_int_linear_map).to_add_monoid_hom
 
+lemma id_helper (A : AddCommGroup.{u}) :
+  (𝟙 A : A ⟶ A).to_int_linear_map = linear_map.id := rfl
+
+lemma comp_helper {A B C : AddCommGroup.{u}}
+  (f : A ⟶ B) (g : B ⟶ C) :
+  (f ≫ g).to_int_linear_map = g.to_int_linear_map.comp f.to_int_linear_map := rfl
+
+@[simp]
 lemma map_tensor_id {A B : AddCommGroup.{u}} :
-  map_tensor (𝟙 A) (𝟙 B) = 𝟙 _ := sorry
+  map_tensor (𝟙 A) (𝟙 B) = 𝟙 _ :=
+begin
+  ext t, dsimp [map_tensor], simp [id_helper],
+end
 
+@[simp]
 lemma map_tensor_comp_left {A A' A'' B : AddCommGroup.{u}} (f : A ⟶ A') (g : A' ⟶ A'') :
-  map_tensor (f ≫ g) (𝟙 B) = map_tensor f (𝟙 _) ≫ map_tensor g (𝟙 _) := sorry
+  map_tensor (f ≫ g) (𝟙 B) = map_tensor f (𝟙 _) ≫ map_tensor g (𝟙 _) :=
+begin
+  ext t,
+  rw ← category.id_comp (𝟙 B),
+  dsimp [map_tensor], simp only [comp_helper, id_helper, tensor_product.map_comp],
+  simp,
+end
 
+@[simp]
 lemma map_tensor_comp_right {A B B' B'' : AddCommGroup.{u}} (f : B ⟶ B') (g : B' ⟶ B'') :
-  map_tensor (𝟙 A) (f ≫ g) = map_tensor (𝟙 _) f ≫ map_tensor (𝟙 _) g := sorry
+  map_tensor (𝟙 A) (f ≫ g) = map_tensor (𝟙 _) f ≫ map_tensor (𝟙 _) g :=
+begin
+  ext t,
+  rw ← category.id_comp (𝟙 A),
+  dsimp [map_tensor], simp only [comp_helper, id_helper, tensor_product.map_comp],
+  simp,
+end
+
+@[simp]
+lemma map_tensor_comp_comp {A A' A'' B B' B'' : AddCommGroup.{u}}
+  (f : A ⟶ A') (f' : A' ⟶ A'') (g : B ⟶ B') (g' : B' ⟶ B'') :
+  map_tensor (f ≫ f') (g ≫ g') = map_tensor f g ≫ map_tensor f' g' :=
+begin
+  ext t,
+  dsimp [map_tensor], simp only [comp_helper, id_helper, tensor_product.map_comp],
+  simp,
+end
 
 lemma map_tensor_eq_comp {A A' B B' : AddCommGroup.{u}} (f : A ⟶ A') (g : B ⟶ B') :
-  map_tensor f g = map_tensor f (𝟙 _) ≫ map_tensor (𝟙 _) g := sorry
+  map_tensor f g = map_tensor f (𝟙 _) ≫ map_tensor (𝟙 _) g :=
+begin
+  nth_rewrite 0 ← category.id_comp g,
+  nth_rewrite 0 ← category.comp_id f,
+  rw map_tensor_comp_comp,
+end
 
 lemma map_tensor_eq_comp' {A A' B B' : AddCommGroup.{u}} (f : A ⟶ A') (g : B ⟶ B') :
-  map_tensor f g = map_tensor (𝟙 _) g ≫ map_tensor f (𝟙 _) := sorry
+  map_tensor f g = map_tensor (𝟙 _) g ≫ map_tensor f (𝟙 _) :=
+begin
+  nth_rewrite 0 ← category.id_comp f,
+  nth_rewrite 0 ← category.comp_id g,
+  rw map_tensor_comp_comp,
+end
 
+@[simps]
 def tensor_functor : AddCommGroup.{u} ⥤ AddCommGroup.{u} ⥤ AddCommGroup.{u} :=
 { obj := λ A,
   { obj := λ B, tensor A B,
@@ -104,17 +150,46 @@ def tensor_functor : ExtrSheafProd.{u} Ab.{u+1} ⥤ Ab.{u+1} ⥤ ExtrSheafProd.{
   { obj := λ A, tensor M A,
     map := λ A B f,
       ⟨{ app := λ S, AddCommGroup.map_tensor (𝟙 _) f,
-         naturality' := sorry
+         naturality' := λ M N g, begin
+          dsimp [tensor, tensor_presheaf, AddCommGroup.tensor_functor],
+          simp [← AddCommGroup.map_tensor_eq_comp, ← AddCommGroup.map_tensor_eq_comp'],
+         end,
          }⟩,
-    map_id' := sorry,
-    map_comp' := sorry },
+    map_id' := begin
+      intros A,
+      ext S : 3,
+      dsimp, simpa,
+    end,
+    map_comp' := begin
+      intros A B C f g,
+      ext S : 3,
+      dsimp, simp,
+    end },
   map := λ M N f,
   { app := λ A,
     ⟨{ app := λ S, AddCommGroup.map_tensor (f.val.app _) (𝟙 _),
-       naturality' := sorry }⟩,
-    naturality' := sorry },
-  map_id' := sorry,
-  map_comp' := sorry }
+       naturality' := begin
+        intros S T e,
+        dsimp [tensor, tensor_presheaf, AddCommGroup.tensor_functor],
+        simp only [← AddCommGroup.map_tensor_comp_left, nat_trans.naturality],
+       end }⟩,
+    naturality' := begin
+      intros A B g,
+      ext S : 3,
+      dsimp,
+      simp [← AddCommGroup.map_tensor_eq_comp, ← AddCommGroup.map_tensor_eq_comp'],
+    end },
+  map_id' := begin
+    intros X,
+    ext : 5,
+    dsimp,
+    simpa,
+  end,
+  map_comp' := begin
+    intros X Y Z f g,
+    ext : 5,
+    dsimp, simp,
+  end }
 
 end ExtrSheafProd
 
