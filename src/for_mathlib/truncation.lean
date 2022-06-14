@@ -575,12 +575,19 @@ begin
 end
 .
 
+lemma epi_kernel_lift_zero_iff_epi {A B C : 𝓐} (f : A ⟶ B) :
+  epi (kernel.lift (0 : B ⟶ C) f comp_zero) ↔ epi f :=
+begin
+  conv_rhs {rw ← kernel.lift_ι (0 : B ⟶ C) f comp_zero},
+  rw imker.epi_is_iso_comp_iff_epi,
+end
+
 lemma ι_succ_to_imker_ex_π {i n : ℤ} : epi (kernel.lift ((to_imker C (i + 1)).f n)
   ((ι_succ C i).f n) (ι_succ.comp_to_imker_zero C)) :=
 begin
   delta to_imker ι_succ map_of_le, dsimp only,
   by_cases h : n = i,
-  sorry;{ subst h,
+  { subst h,
     -- `simp_rw dif_pos (show n = n + 1 - 1, by ring)` fails so we hack our way around it.
     suffices : epi (kernel.lift ((X_iso_of_lt C _).hom ≫ eq_to_hom _ ≫
       factor_thru_image (C.d (n + 1 - 1) (n + 1)) ≫
@@ -604,7 +611,7 @@ begin
     refine ⟨_, _⟩, -- maybe this is the way to do it? Not sure.
     sorry, sorry,
   },
-  { by_cases hn : n = i + 1,
+  sorry;{ by_cases hn : n = i + 1,
     { apply epi_of_target_iso_zero,
       apply is_zero.iso_zero,
       apply @is_zero_kernel_of_mono _ _ _ _ _ _ _,
@@ -623,8 +630,23 @@ begin
         delta to_imker, dsimp only,
         rw dif_neg (show n ≠ i + 1 - 1, by ring_nf; exact h),
         rw dif_neg hn, },
-      -- epi(kernel.lift 0 f _) ↔ epi(f) is next
-      sorry }, }
+      rw epi_kernel_lift_zero_iff_epi,
+      by_cases hi : n < i,
+      { rw dif_pos hi,
+        apply_instance, },
+      { rw dif_neg hi,
+        rw dif_neg h,
+        apply epi_of_target_iso_zero,
+        apply is_zero.iso_zero,
+        apply is_zero_X_of_lt,
+        -- we've been here before
+        rw not_lt at hi,
+        obtain (hlt | rfl) := lt_or_eq_of_le hi,
+        { rw int.lt_iff_add_one_le at hlt,
+          obtain (hlt' | rfl) := lt_or_eq_of_le hlt,
+          { exact hlt' },
+          { exact hn.elim rfl, }, },
+        { exact h.elim rfl, }, } }, }
 end
 
 lemma ι_succ_to_imker_ι_ex {i n : ℤ} : mono (cokernel.desc ((ι_succ C i).f n)
