@@ -184,7 +184,12 @@ end
 lemma tensor_curry_uncurry {A B C D : AddCommGroup.{u}}
   (e : A ⟶ AddCommGroup.of (B ⟶ C)) (g : C ⟶ D):
   tensor_curry (tensor_uncurry e ≫ g) =
-  e ≫ (preadditive_yoneda.flip.obj (opposite.op B)).map g := sorry
+  e ≫ (preadditive_yoneda.flip.obj (opposite.op B)).map g :=
+begin
+  ext a b,
+  dsimp [tensor_curry, tensor_uncurry, preadditive_yoneda],
+  simp,
+end
 
 @[simps]
 def tensor_functor : AddCommGroup.{u} ⥤ AddCommGroup.{u} ⥤ AddCommGroup.{u} :=
