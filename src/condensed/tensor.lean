@@ -181,6 +181,11 @@ begin
   simp,
 end
 
+lemma tensor_curry_uncurry {A B C D : AddCommGroup.{u}}
+  (e : A ⟶ AddCommGroup.of (B ⟶ C)) (g : C ⟶ D):
+  tensor_curry (tensor_uncurry e ≫ g) =
+  e ≫ (preadditive_yoneda.flip.obj (opposite.op B)).map g := sorry
+
 @[simps]
 def tensor_functor : AddCommGroup.{u} ⥤ AddCommGroup.{u} ⥤ AddCommGroup.{u} :=
 { obj := λ A,
@@ -495,12 +500,34 @@ def tensor_uncurry {A : AddCommGroup.{u+1}} {M N : ExtrSheafProd.{u} Ab.{u+1}}
   (e : M ⟶ half_internal_hom A N) :
   tensor M A ⟶ N := ExtrSheafProd.hom.mk $
 { app := λ S, AddCommGroup.tensor_uncurry $ e.val.app _,
-  naturality' := sorry }
+  naturality' := begin
+    intros X Y f,
+    erw ← AddCommGroup.tensor_uncurry_curry,
+    apply (AddCommGroup.tensor_curry_equiv _ _ _).injective,
+    erw (AddCommGroup.tensor_curry_equiv _ _ _).apply_symm_apply,
+    dsimp [AddCommGroup.tensor_curry_equiv],
+    erw [AddCommGroup.tensor_curry_uncurry, ← nat_trans.naturality,
+      ← AddCommGroup.tensor_curry_equiv_apply,
+      ← AddCommGroup.tensor_curry_equiv_symm_apply,
+      (AddCommGroup.tensor_curry_equiv _ _ _).apply_symm_apply],
+  end }
 
 def tensor_curry {A : AddCommGroup.{u+1}} {M N : ExtrSheafProd.{u} Ab.{u+1}}
   (e : M.tensor A ⟶ N) : M ⟶ half_internal_hom A N := ExtrSheafProd.hom.mk $
 { app := λ S, AddCommGroup.tensor_curry $ e.val.app _,
-  naturality' := sorry }
+  naturality' := begin
+    intros X Y f,
+    dsimp [half_internal_hom],
+    erw [← AddCommGroup.tensor_curry_uncurry],
+    apply (AddCommGroup.tensor_curry_equiv _ _ _).symm.injective,
+    simp_rw ← AddCommGroup.tensor_curry_equiv_apply,
+    rw (AddCommGroup.tensor_curry_equiv _ _ _).symm_apply_apply,
+    rw ← AddCommGroup.tensor_curry_equiv_symm_apply,
+    rw (AddCommGroup.tensor_curry_equiv _ _ _).symm_apply_apply,
+    dsimp,
+    rw [AddCommGroup.tensor_uncurry_curry, ← nat_trans.naturality],
+    refl,
+  end }
 
 end ExtrSheafProd
 
