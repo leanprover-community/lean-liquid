@@ -181,6 +181,16 @@ begin
   simp,
 end
 
+lemma tensor_curry_uncurry {A B C D : AddCommGroup.{u}}
+  (e : A ⟶ AddCommGroup.of (B ⟶ C)) (g : C ⟶ D):
+  tensor_curry (tensor_uncurry e ≫ g) =
+  e ≫ (preadditive_yoneda.flip.obj (opposite.op B)).map g :=
+begin
+  ext a b,
+  dsimp [tensor_curry, tensor_uncurry, preadditive_yoneda],
+  simp,
+end
+
 @[simps]
 def tensor_functor : AddCommGroup.{u} ⥤ AddCommGroup.{u} ⥤ AddCommGroup.{u} :=
 { obj := λ A,
@@ -327,6 +337,9 @@ begin
   apply_instance
 end
 
+def tensor_flip (A B : AddCommGroup.{u}) : A.tensor B ≅ B.tensor A :=
+linear_equiv_to_iso (tensor_product.comm _ _ _)
+
 end AddCommGroup
 
 namespace ExtrSheafProd
@@ -402,6 +415,123 @@ def tensor_functor : ExtrSheafProd.{u} Ab.{u+1} ⥤ Ab.{u+1} ⥤ ExtrSheafProd.{
     intros X Y Z f g,
     ext : 5,
     dsimp, simp,
+  end }
+
+.
+
+@[simps]
+instance hom_has_add {M N : ExtrSheafProd.{u} Ab.{u+1}} : has_add (M ⟶ N) :=
+⟨λ f g, ⟨f.val + g.val⟩⟩
+
+@[simps]
+instance hom_has_zero {M N : ExtrSheafProd.{u} Ab.{u+1}} : has_zero (M ⟶ N) :=
+⟨⟨0⟩⟩
+
+@[simps]
+instance hom_has_neg {M N : ExtrSheafProd.{u} Ab.{u+1}} : has_neg (M ⟶ N) :=
+⟨λ f, ⟨-f.val⟩⟩
+
+@[simps]
+instance hom_has_sub {M N : ExtrSheafProd.{u} Ab.{u+1}} : has_sub (M ⟶ N) :=
+⟨λ f g, ⟨f.val - g.val⟩⟩
+
+instance preadditive : preadditive (ExtrSheafProd.{u} Ab.{u+1}) :=
+{ hom_group := λ P Q,
+  { add_assoc := λ f g h, by { ext1, dsimp, rw add_assoc },
+    zero_add := λ f, by { ext1, dsimp, rw zero_add },
+    add_zero := λ f, by { ext1, dsimp, rw add_zero },
+    nsmul := λ n f, ⟨n • f.val⟩,
+    nsmul_zero' := λ f, by { ext1, dsimp, simp, },
+    nsmul_succ' := λ n f, by { ext1, dsimp, exact succ_nsmul f.val n },
+    sub_eq_add_neg := λ f g, by { ext1, dsimp, exact sub_eq_add_neg f.val g.val },
+    zsmul := λ n f, ⟨n • f.val⟩,
+    zsmul_zero' := λ f, by { ext1, dsimp, simp },
+    zsmul_succ' := λ n f, by { ext1, dsimp, rw [add_zsmul, one_zsmul, add_comm], },
+    zsmul_neg' := λ n f, by { ext1, dsimp, simpa, },
+    add_left_neg := λ f, by { ext1, dsimp, simp },
+    add_comm := λ f g, by { ext1, dsimp, rw add_comm },
+    ..(infer_instance : has_add _),
+    ..(infer_instance : has_neg _),
+    ..(infer_instance : has_zero _),
+    ..(infer_instance : has_sub _) },
+  add_comp' := λ P Q R f f' g, by { ext1, dsimp, simp },
+  comp_add' := λ P Q R f g g', by { ext1, dsimp, simp } }
+
+def evaluation (S : ExtrDisc.{u}) :
+  ExtrSheafProd.{u} Ab.{u+1} ⥤ Ab.{u+1} :=
+ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj (opposite.op S)
+
+instance evaluation_additive (S) : functor.additive (evaluation S) :=
+⟨λ M N f g, rfl⟩
+
+def half_internal_hom (A : AddCommGroup.{u+1}) (M : ExtrSheafProd.{u} Ab.{u+1}) :
+  ExtrSheafProd.{u} Ab.{u+1} :=
+{ val :=
+  { obj := λ S, AddCommGroup.of (A ⟶ M.val.obj S),
+    map := λ X Y f, (preadditive_yoneda.flip.obj (opposite.op A)).map $ M.val.map f,
+    map_id' := begin
+      intros S,
+      dsimp, simpa,
+    end,
+    map_comp' := begin
+      intros R S T f g,
+      dsimp,
+      simp,
+    end },
+  cond := begin
+    introsI α _ X, dsimp,
+    let t := _, change is_iso t,
+    have := M.cond α X, dsimp at this, let e := _, change is_iso e at this, resetI,
+    let q : AddCommGroup.of (A ⟶ M.val.obj (opposite.op (ExtrDisc.sigma X))) ≅
+      AddCommGroup.of (A ⟶ (∏ (λ i, M.val.obj (opposite.op (X i))))) :=
+      (preadditive_yoneda.flip.obj (opposite.op A)).map_iso (as_iso e),
+    let s : AddCommGroup.of (A ⟶ (∏ (λ i, M.val.obj (opposite.op (X i))))) ⟶
+      ∏ (λ i, AddCommGroup.of (A ⟶ M.val.obj (opposite.op (X i)))) :=
+      limits.pi.lift (λ i, (preadditive_yoneda.flip.obj (opposite.op A)).map
+        (limits.pi.π _ i)),
+    have ht : t = q.hom ≫ s,
+    { dsimp [t, q, s, e], ext1,
+      simp only [limits.limit.lift_π, limits.fan.mk_π_app, category.assoc],
+      rw [← nat_trans.comp_app, ← functor.map_comp, limits.limit.lift_π],
+      refl },
+    rw ht, clear ht,
+    suffices : is_iso s,
+    { resetI, apply is_iso.comp_is_iso },
+    -- Now we need to show that `Hom(A,(Π i, X i)) = Π i, Hom(A,X i)`.
+    apply AddCommGroup.is_iso_hom_product_comparison.{u u+1},
+  end }
+
+def tensor_uncurry {A : AddCommGroup.{u+1}} {M N : ExtrSheafProd.{u} Ab.{u+1}}
+  (e : M ⟶ half_internal_hom A N) :
+  tensor M A ⟶ N := ExtrSheafProd.hom.mk $
+{ app := λ S, AddCommGroup.tensor_uncurry $ e.val.app _,
+  naturality' := begin
+    intros X Y f,
+    erw ← AddCommGroup.tensor_uncurry_curry,
+    apply (AddCommGroup.tensor_curry_equiv _ _ _).injective,
+    erw (AddCommGroup.tensor_curry_equiv _ _ _).apply_symm_apply,
+    dsimp [AddCommGroup.tensor_curry_equiv],
+    erw [AddCommGroup.tensor_curry_uncurry, ← nat_trans.naturality,
+      ← AddCommGroup.tensor_curry_equiv_apply,
+      ← AddCommGroup.tensor_curry_equiv_symm_apply,
+      (AddCommGroup.tensor_curry_equiv _ _ _).apply_symm_apply],
+  end }
+
+def tensor_curry {A : AddCommGroup.{u+1}} {M N : ExtrSheafProd.{u} Ab.{u+1}}
+  (e : M.tensor A ⟶ N) : M ⟶ half_internal_hom A N := ExtrSheafProd.hom.mk $
+{ app := λ S, AddCommGroup.tensor_curry $ e.val.app _,
+  naturality' := begin
+    intros X Y f,
+    dsimp [half_internal_hom],
+    erw [← AddCommGroup.tensor_curry_uncurry],
+    apply (AddCommGroup.tensor_curry_equiv _ _ _).symm.injective,
+    simp_rw ← AddCommGroup.tensor_curry_equiv_apply,
+    rw (AddCommGroup.tensor_curry_equiv _ _ _).symm_apply_apply,
+    rw ← AddCommGroup.tensor_curry_equiv_symm_apply,
+    rw (AddCommGroup.tensor_curry_equiv _ _ _).symm_apply_apply,
+    dsimp,
+    rw [AddCommGroup.tensor_uncurry_curry, ← nat_trans.naturality],
+    refl,
   end }
 
 end ExtrSheafProd
