@@ -672,16 +672,45 @@ def tensor_uncurry {A : AddCommGroup.{u+1}} {M N : Condensed.{u} Ab.{u+1}}
   (half_internal_hom_iso _ _).hom) ≫
   ((Condensed_ExtrSheafProd_equiv _).unit_iso.app N).inv
 
-/-
-lemma tensor_uncurry_iso
+lemma tensor_uncurry_eq
   {A : AddCommGroup.{u+1}} {M N : Condensed.{u} Ab.{u+1}}
   (e : M ⟶ half_internal_hom A N) :
-  (Condensed_ExtrSheafProd_equiv _).functor.map (tensor_uncurry e) = _
+  (Condensed_ExtrSheafProd_equiv _).functor.map (tensor_uncurry e) =
+  (tensor_iso _ _).hom ≫
+  ExtrSheafProd.tensor_uncurry
+  ((Condensed_ExtrSheafProd_equiv _).functor.map e ≫ (half_internal_hom_iso _ _).hom) :=
+begin
+  dsimp [tensor_uncurry, half_internal_hom_iso, tensor_iso],
+  simp,
+end
 
 def tensor_curry {A : AddCommGroup.{u+1}} {M N : Condensed.{u} Ab.{u+1}}
   (e : M.tensor A ⟶ N) : M ⟶ half_internal_hom A N :=
-_
--/
+  ((Condensed_ExtrSheafProd_equiv _).unit_iso.app _).hom ≫
+  (Condensed_ExtrSheafProd_equiv _).inverse.map
+  (ExtrSheafProd.tensor_curry $ (tensor_iso M A).inv ≫
+  (Condensed_ExtrSheafProd_equiv Ab).functor.map e)
+
+lemma tensor_curry_eq {A : AddCommGroup.{u+1}} {M N : Condensed.{u} Ab.{u+1}}
+  (e : M.tensor A ⟶ N) :
+  (Condensed_ExtrSheafProd_equiv _).functor.map (tensor_curry e) =
+  ExtrSheafProd.tensor_curry ((tensor_iso _ _).inv ≫
+    (Condensed_ExtrSheafProd_equiv Ab).functor.map e) ≫
+  (half_internal_hom_iso _ _).inv :=
+begin
+  rw iso.eq_comp_inv,
+  dsimp [tensor_curry, half_internal_hom_iso, tensor_iso],
+  simp only [functor.map_comp, equivalence.fun_inv_map, equivalence.equivalence_mk'_counit,
+    category.assoc, iso.inv_hom_id_app],
+  dsimp,
+  simp only [category.comp_id],
+  suffices : (Condensed_ExtrSheafProd_equiv Ab).functor.map
+    ((Condensed_ExtrSheafProd_equiv Ab).unit_iso.hom.app M) ≫
+    (Condensed_ExtrSheafProd_equiv Ab).counit_iso.hom.app
+    ((Condensed_ExtrSheafProd_equiv Ab).functor.obj M) = 𝟙 _,
+  { rw reassoc_of this },
+  simpa,
+end
 
 /-- A variant of the tensor product functor for the endormophism category. -/
 def endo_tensor :
