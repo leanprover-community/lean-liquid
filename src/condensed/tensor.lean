@@ -454,21 +454,53 @@ ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj (opposite.op S)
 instance evaluation_additive (S) : functor.additive (evaluation S) :=
 ⟨λ M N f g, rfl⟩
 
+def half_internal_hom (A : AddCommGroup.{u+1}) (M : ExtrSheafProd.{u} Ab.{u+1}) :
+  ExtrSheafProd.{u} Ab.{u+1} :=
+{ val :=
+  { obj := λ S, AddCommGroup.of (A ⟶ M.val.obj S),
+    map := λ X Y f, (preadditive_yoneda.flip.obj (opposite.op A)).map $ M.val.map f,
+    map_id' := begin
+      intros S,
+      dsimp, simpa,
+    end,
+    map_comp' := begin
+      intros R S T f g,
+      dsimp,
+      simp,
+    end },
+  cond := begin
+    introsI α _ X, dsimp,
+    let t := _, change is_iso t,
+    have := M.cond α X, dsimp at this, let e := _, change is_iso e at this, resetI,
+    let q : AddCommGroup.of (A ⟶ M.val.obj (opposite.op (ExtrDisc.sigma X))) ≅
+      AddCommGroup.of (A ⟶ (∏ (λ i, M.val.obj (opposite.op (X i))))) :=
+      (preadditive_yoneda.flip.obj (opposite.op A)).map_iso (as_iso e),
+    let s : AddCommGroup.of (A ⟶ (∏ (λ i, M.val.obj (opposite.op (X i))))) ⟶
+      ∏ (λ i, AddCommGroup.of (A ⟶ M.val.obj (opposite.op (X i)))) :=
+      limits.pi.lift (λ i, (preadditive_yoneda.flip.obj (opposite.op A)).map
+        (limits.pi.π _ i)),
+    have ht : t = q.hom ≫ s,
+    { dsimp [t, q, s, e], ext1,
+      simp only [limits.limit.lift_π, limits.fan.mk_π_app, category.assoc],
+      rw [← nat_trans.comp_app, ← functor.map_comp, limits.limit.lift_π],
+      refl },
+    rw ht, clear ht,
+    suffices : is_iso s,
+    { resetI, apply is_iso.comp_is_iso },
+    -- Now we need to show that `Hom(A,(Π i, X i)) = Π i, Hom(A,X i)`.
+    sorry
+  end }
+
 def tensor_uncurry {A : AddCommGroup.{u+1}} {M N : ExtrSheafProd.{u} Ab.{u+1}}
-  (e : A ⟶ AddCommGroup.of (M ⟶ N)) :
+  (e : M ⟶ half_internal_hom A N) :
   tensor M A ⟶ N := ExtrSheafProd.hom.mk $
-{ app := λ S, (AddCommGroup.tensor_flip _ _).hom ≫
-    AddCommGroup.tensor_uncurry (e ≫ (evaluation S.unop).map_add_hom),
+{ app := λ S, AddCommGroup.tensor_uncurry $ e.val.app _,
   naturality' := sorry }
 
 def tensor_curry {A : AddCommGroup.{u+1}} {M N : ExtrSheafProd.{u} Ab.{u+1}}
-  (e : M.tensor A ⟶ N) : A ⟶ AddCommGroup.of (M ⟶ N) :=
-{ to_fun := λ a, ExtrSheafProd.hom.mk $
-  { app := λ S, AddCommGroup.tensor_curry
-      ((AddCommGroup.tensor_flip _ _).hom ≫ e.val.app S) a,
-    naturality' := sorry },
-  map_zero' := sorry,
-  map_add' := sorry }
+  (e : M.tensor A ⟶ N) : M ⟶ half_internal_hom A N := ExtrSheafProd.hom.mk $
+{ app := λ S, AddCommGroup.tensor_curry $ e.val.app _,
+  naturality' := sorry }
 
 end ExtrSheafProd
 
