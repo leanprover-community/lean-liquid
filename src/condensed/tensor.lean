@@ -83,6 +83,20 @@ def tensor_curry_equiv (A B C : AddCommGroup.{u}) :
   right_inv := λ f, by { ext, dsimp [tensor_uncurry, tensor_curry], simp, },
   map_add' := λ x y, by { ext, refl } }
 
+.
+
+@[simp]
+lemma tensor_curry_uncurry {A B C : AddCommGroup.{u}}
+  (e : A ⟶ (AddCommGroup.of (B ⟶ C))) :
+  tensor_curry (tensor_uncurry e) = e :=
+(tensor_curry_equiv A B C).apply_symm_apply e
+
+@[simp]
+lemma tensor_uncurry_curry {A B C : AddCommGroup.{u}}
+  (e : tensor A B ⟶ C) :
+  tensor_uncurry (tensor_curry e) = e :=
+(tensor_curry_equiv A B C).symm_apply_apply e
+
 def map_tensor {A A' B B' : AddCommGroup.{u}}
   (f : A ⟶ A') (g : B ⟶ B') : tensor A B ⟶ tensor A' B' :=
 (tensor_product.map f.to_int_linear_map g.to_int_linear_map).to_add_monoid_hom
@@ -171,7 +185,7 @@ begin
   simp,
 end
 
-lemma tensor_uncurry_curry {A B C D : AddCommGroup.{u}} (f : A ⟶ B) (g : B.tensor C ⟶ D) :
+lemma tensor_uncurry_comp_curry {A B C D : AddCommGroup.{u}} (f : A ⟶ B) (g : B.tensor C ⟶ D) :
   tensor_uncurry (f ≫ tensor_curry g) = map_tensor f (𝟙 _) ≫ g :=
 begin
   apply (tensor_curry_equiv _ _ _).injective,
@@ -181,7 +195,7 @@ begin
   simp,
 end
 
-lemma tensor_curry_uncurry {A B C D : AddCommGroup.{u}}
+lemma tensor_curry_uncurry_comp {A B C D : AddCommGroup.{u}}
   (e : A ⟶ AddCommGroup.of (B ⟶ C)) (g : C ⟶ D):
   tensor_curry (tensor_uncurry e ≫ g) =
   e ≫ (preadditive_yoneda.flip.obj (opposite.op B)).map g :=
@@ -277,7 +291,7 @@ begin
   apply direct_sum_hom_ext'.{u u+1}, intros i,
   apply (tensor_curry_equiv _ _ _).symm.injective,
   dsimp,
-  simp_rw tensor_uncurry_curry,
+  simp_rw tensor_uncurry_comp_curry,
   erw [direct_sum_lift_π, ← map_tensor_comp_comp, category.id_comp],
   dsimp only [tensor_explicit_pi_iso],
   erw [← category.assoc], let t := _, change _ = t ≫ _,
@@ -507,11 +521,11 @@ def tensor_uncurry {A : AddCommGroup.{u+1}} {M N : ExtrSheafProd.{u} Ab.{u+1}}
 { app := λ S, AddCommGroup.tensor_uncurry $ e.val.app _,
   naturality' := begin
     intros X Y f,
-    erw ← AddCommGroup.tensor_uncurry_curry,
+    erw ← AddCommGroup.tensor_uncurry_comp_curry,
     apply (AddCommGroup.tensor_curry_equiv _ _ _).injective,
     erw (AddCommGroup.tensor_curry_equiv _ _ _).apply_symm_apply,
     dsimp [AddCommGroup.tensor_curry_equiv],
-    erw [AddCommGroup.tensor_curry_uncurry, ← nat_trans.naturality,
+    erw [AddCommGroup.tensor_curry_uncurry_comp, ← nat_trans.naturality,
       ← AddCommGroup.tensor_curry_equiv_apply,
       ← AddCommGroup.tensor_curry_equiv_symm_apply,
       (AddCommGroup.tensor_curry_equiv _ _ _).apply_symm_apply],
@@ -523,20 +537,38 @@ def tensor_curry {A : AddCommGroup.{u+1}} {M N : ExtrSheafProd.{u} Ab.{u+1}}
   naturality' := begin
     intros X Y f,
     dsimp [half_internal_hom],
-    erw [← AddCommGroup.tensor_curry_uncurry],
+    erw [← AddCommGroup.tensor_curry_uncurry_comp],
     apply (AddCommGroup.tensor_curry_equiv _ _ _).symm.injective,
     simp_rw ← AddCommGroup.tensor_curry_equiv_apply,
     rw (AddCommGroup.tensor_curry_equiv _ _ _).symm_apply_apply,
     rw ← AddCommGroup.tensor_curry_equiv_symm_apply,
     rw (AddCommGroup.tensor_curry_equiv _ _ _).symm_apply_apply,
     dsimp,
-    rw [AddCommGroup.tensor_uncurry_curry, ← nat_trans.naturality],
+    rw [AddCommGroup.tensor_uncurry_comp_curry, ← nat_trans.naturality],
     refl,
   end }
 
+lemma tensor_curry_uncurry {A : AddCommGroup.{u+1}} {M N : ExtrSheafProd.{u} Ab.{u+1}}
+  (e : M ⟶ half_internal_hom A N) :
+  tensor_curry (tensor_uncurry e) = e :=
+begin
+  ext S : 3,
+  dsimp [tensor_curry, tensor_uncurry],
+  simp,
+end
+
+lemma tensor_uncurry_curry {A : AddCommGroup.{u+1}} {M N : ExtrSheafProd.{u} Ab.{u+1}}
+  (e : M.tensor A ⟶ N) :
+  tensor_uncurry (tensor_curry e) = e :=
+begin
+  ext S : 3,
+  dsimp [tensor_curry, tensor_uncurry],
+  simp,
+end
+
 end ExtrSheafProd
 
-namespace condensed
+namespace Condensed
 
 /-- This is the functor that sends `A : Ab` to `M ⊗ A`,
 where `M` is a condensed abelian group, functorial in both `M` and `A`. -/
@@ -549,6 +581,10 @@ def tensor_functor : Condensed.{u} Ab.{u+1} ⥤ Ab.{u+1} ⥤ Condensed.{u} Ab.{u
 /-- This is the tensor product of a condensed abelian group `M` and `A : Ab`. -/
 def tensor (M : Condensed.{u} Ab.{u+1}) (A : Ab.{u+1}) : Condensed.{u} Ab.{u+1} :=
 (tensor_functor.obj M).obj A
+
+example (M : Condensed.{u} Ab.{u+1}) (A : Ab.{u+1}) :
+  M.tensor A = (Condensed_ExtrSheafProd_equiv _).inverse.obj
+    (((Condensed_ExtrSheafProd_equiv _).functor.obj M).tensor A) := rfl
 
 /-- Restrincting to `ExtrDisc` works as expeceted. -/
 def tensor_functor_conj_iso :
@@ -599,15 +635,53 @@ begin
   simp, dsimp, simp,
 end
 
+def tensor_iso (M : Condensed.{u} Ab.{u+1}) (A : Ab.{u+1}) :
+  (Condensed_ExtrSheafProd_equiv _).functor.obj (M.tensor A) ≅
+  ((Condensed_ExtrSheafProd_equiv _).functor.obj M).tensor A :=
+(Condensed_ExtrSheafProd_equiv _).counit_iso.app _
+
 /-- The tensor product behaves in the naive way when evaluated
 on extremally disconnected sets. -/
 def tensor_eval_iso
   (M : Condensed.{u} Ab.{u+1}) (A : Ab.{u+1}) (S : ExtrDisc.{u}) :
   (tensor M A).val.obj (opposite.op S.val) ≅
   AddCommGroup.of (M.val.obj (opposite.op S.val) ⊗[ℤ] A) :=
-let e := (tensor_functor_conj_iso'.app M).app A,
-  e' := (ExtrSheafProd_to_presheaf _).map_iso e in
-e'.app (opposite.op S)
+((ExtrSheafProd_to_presheaf _).map_iso (M.tensor_iso A)).app (opposite.op S)
+
+def half_internal_hom (A : AddCommGroup.{u+1}) (M : Condensed.{u} Ab.{u+1}) :
+  Condensed.{u} Ab.{u+1} :=
+(Condensed_ExtrSheafProd_equiv _).inverse.obj $
+ExtrSheafProd.half_internal_hom A ((Condensed_ExtrSheafProd_equiv _).functor.obj M)
+
+def half_internal_hom_iso (A : AddCommGroup.{u+1}) (M : Condensed.{u} Ab.{u+1}) :
+  (Condensed_ExtrSheafProd_equiv _).functor.obj (half_internal_hom A M) ≅
+  ExtrSheafProd.half_internal_hom A ((Condensed_ExtrSheafProd_equiv _).functor.obj M) :=
+(Condensed_ExtrSheafProd_equiv _).counit_iso.app _
+
+def half_internal_hom_eval_iso (A : AddCommGroup.{u+1}) (M : Condensed.{u} Ab.{u+1})
+  (S : ExtrDisc.{u}) :
+  (half_internal_hom A M).val.obj (opposite.op S.val) ≅
+  AddCommGroup.of (A ⟶ M.val.obj (opposite.op S.val)) :=
+((ExtrSheafProd_to_presheaf _).map_iso (half_internal_hom_iso A M)).app (opposite.op S)
+
+def tensor_uncurry {A : AddCommGroup.{u+1}} {M N : Condensed.{u} Ab.{u+1}}
+  (e : M ⟶ half_internal_hom A N) :
+  tensor M A ⟶ N :=
+(Condensed_ExtrSheafProd_equiv _).inverse.map
+  (ExtrSheafProd.tensor_uncurry $ (Condensed_ExtrSheafProd_equiv Ab).functor.map e ≫
+  (half_internal_hom_iso _ _).hom) ≫
+  ((Condensed_ExtrSheafProd_equiv _).unit_iso.app N).inv
+
+/-
+lemma tensor_uncurry_iso
+  {A : AddCommGroup.{u+1}} {M N : Condensed.{u} Ab.{u+1}}
+  (e : M ⟶ half_internal_hom A N) :
+  (Condensed_ExtrSheafProd_equiv _).functor.map (tensor_uncurry e) = _
+
+def tensor_curry {A : AddCommGroup.{u+1}} {M N : Condensed.{u} Ab.{u+1}}
+  (e : M.tensor A ⟶ N) : M ⟶ half_internal_hom A N :=
+_
+-/
 
 /-- A variant of the tensor product functor for the endormophism category. -/
 def endo_tensor :
@@ -617,4 +691,4 @@ functor.flip $
 { obj := λ A, (tensor_functor.flip.obj A).map_endomorphisms,
   map := λ A B f, nat_trans.map_endomorphisms $ tensor_functor.flip.map f }
 
-end condensed
+end Condensed
