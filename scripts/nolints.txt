@@ -100,6 +100,10 @@ apply_nolint fact_max_pos unused_arguments
 -- for_mathlib/AddCommGroup.lean
 apply_nolint AddCommGroup.index_cat unused_arguments
 
+-- for_mathlib/AddCommGroup/explicit_products.lean
+apply_nolint AddCommGroup.direct_sum_bicone unused_arguments
+apply_nolint AddCommGroup.direct_sum_hom_ext unused_arguments
+
 -- for_mathlib/Gordan.lean
 apply_nolint missing unused_arguments
 
