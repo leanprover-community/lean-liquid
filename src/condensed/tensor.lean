@@ -488,7 +488,7 @@ def half_internal_hom (A : AddCommGroup.{u+1}) (M : ExtrSheafProd.{u} Ab.{u+1}) 
     suffices : is_iso s,
     { resetI, apply is_iso.comp_is_iso },
     -- Now we need to show that `Hom(A,(Π i, X i)) = Π i, Hom(A,X i)`.
-    sorry
+    apply AddCommGroup.is_iso_hom_product_comparison.{u u+1},
   end }
 
 def tensor_uncurry {A : AddCommGroup.{u+1}} {M N : ExtrSheafProd.{u} Ab.{u+1}}

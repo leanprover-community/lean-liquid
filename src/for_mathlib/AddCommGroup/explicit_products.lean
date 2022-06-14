@@ -1,5 +1,8 @@
 import algebra.category.Group.biproducts
+import algebra.category.Group.abelian
 import algebra.direct_sum.basic
+import category_theory.preadditive.yoneda
+import for_mathlib.AddCommGroup.epi
 
 open category_theory
 open category_theory.limits
@@ -51,6 +54,48 @@ def is_limit_pi_fan {α : Type v} (X : α → AddCommGroup.{max v u}) :
     intros i,
     erw [hm, pi_lift_π],
   end }
+
+noncomputable
+def hom_product_comparison
+  {α : Type v}
+  (A : AddCommGroup.{max v u})
+  (X : α → AddCommGroup.{max v u}) :
+  AddCommGroup.of (A ⟶ ∏ X) ⟶ ∏ (λ i, AddCommGroup.of (A ⟶ (X i))) :=
+limits.pi.lift $ λ a, (preadditive_yoneda.flip.obj (opposite.op A)).map (limits.pi.π _ _)
+
+instance is_iso_hom_product_comparison
+  {α : Type v}
+  (A : AddCommGroup.{max v u})
+  (X : α → AddCommGroup.{max v u}) :
+  is_iso (hom_product_comparison A X) :=
+begin
+  --haveI : balanced Ab.{max v u} := AddcommGroup.abelian
+  let t : (∏ λ (i : α), AddCommGroup.of (A ⟶ X i)) ≅ AddCommGroup.of
+    (Π i, AddCommGroup.of (A ⟶ X i)) :=
+    (limits.limit.is_limit _).cone_point_unique_up_to_iso
+    (is_limit_pi_fan (λ i, of (A ⟶ X i))),
+  suffices : is_iso (A.hom_product_comparison X ≫ t.hom),
+  { apply is_iso.of_is_iso_comp_right _ t.hom, exact this },
+  have ht : A.hom_product_comparison X ≫ t.hom =
+    (is_limit_pi_fan (λ i, of (A ⟶ X i))).lift
+    ⟨_, discrete.nat_trans $ λ i, (preadditive_yoneda.flip.obj (opposite.op A)).map
+      (limits.pi.π _ _)⟩,
+  { apply (is_limit_pi_fan _).hom_ext, intros j,
+    simp [hom_product_comparison] },
+  rw ht, clear ht,
+  apply_with is_iso_of_mono_of_epi { instances := ff },
+  apply_instance,
+  { rw mono_iff_injective,
+    intros f g h,
+    ext1 j,
+    apply_fun (λ e, e j) at h,
+    exact h },
+  { rw epi_iff_surjective,
+    intros f,
+    use limits.pi.lift (λ i, f i),
+    dsimp [is_limit_pi_fan, pi_lift],
+    simp [pi_lift_π] }
+end
 
 def direct_sum_π {α : Type v} (X : α → AddCommGroup.{max v u}) (i) :
   AddCommGroup.of (direct_sum α (λ i, X i)) ⟶ X i :=
