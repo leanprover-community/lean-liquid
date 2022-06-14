@@ -327,6 +327,9 @@ begin
   apply_instance
 end
 
+def tensor_flip (A B : AddCommGroup.{u}) : A.tensor B ≅ B.tensor A :=
+linear_equiv_to_iso (tensor_product.comm _ _ _)
+
 end AddCommGroup
 
 namespace ExtrSheafProd
@@ -403,6 +406,69 @@ def tensor_functor : ExtrSheafProd.{u} Ab.{u+1} ⥤ Ab.{u+1} ⥤ ExtrSheafProd.{
     ext : 5,
     dsimp, simp,
   end }
+
+.
+
+@[simps]
+instance hom_has_add {M N : ExtrSheafProd.{u} Ab.{u+1}} : has_add (M ⟶ N) :=
+⟨λ f g, ⟨f.val + g.val⟩⟩
+
+@[simps]
+instance hom_has_zero {M N : ExtrSheafProd.{u} Ab.{u+1}} : has_zero (M ⟶ N) :=
+⟨⟨0⟩⟩
+
+@[simps]
+instance hom_has_neg {M N : ExtrSheafProd.{u} Ab.{u+1}} : has_neg (M ⟶ N) :=
+⟨λ f, ⟨-f.val⟩⟩
+
+@[simps]
+instance hom_has_sub {M N : ExtrSheafProd.{u} Ab.{u+1}} : has_sub (M ⟶ N) :=
+⟨λ f g, ⟨f.val - g.val⟩⟩
+
+instance preadditive : preadditive (ExtrSheafProd.{u} Ab.{u+1}) :=
+{ hom_group := λ P Q,
+  { add_assoc := λ f g h, by { ext1, dsimp, rw add_assoc },
+    zero_add := λ f, by { ext1, dsimp, rw zero_add },
+    add_zero := λ f, by { ext1, dsimp, rw add_zero },
+    nsmul := λ n f, ⟨n • f.val⟩,
+    nsmul_zero' := λ f, by { ext1, dsimp, simp, },
+    nsmul_succ' := λ n f, by { ext1, dsimp, exact succ_nsmul f.val n },
+    sub_eq_add_neg := λ f g, by { ext1, dsimp, exact sub_eq_add_neg f.val g.val },
+    zsmul := λ n f, ⟨n • f.val⟩,
+    zsmul_zero' := λ f, by { ext1, dsimp, simp },
+    zsmul_succ' := λ n f, by { ext1, dsimp, rw [add_zsmul, one_zsmul, add_comm], },
+    zsmul_neg' := λ n f, by { ext1, dsimp, simpa, },
+    add_left_neg := λ f, by { ext1, dsimp, simp },
+    add_comm := λ f g, by { ext1, dsimp, rw add_comm },
+    ..(infer_instance : has_add _),
+    ..(infer_instance : has_neg _),
+    ..(infer_instance : has_zero _),
+    ..(infer_instance : has_sub _) },
+  add_comp' := λ P Q R f f' g, by { ext1, dsimp, simp },
+  comp_add' := λ P Q R f g g', by { ext1, dsimp, simp } }
+
+def evaluation (S : ExtrDisc.{u}) :
+  ExtrSheafProd.{u} Ab.{u+1} ⥤ Ab.{u+1} :=
+ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj (opposite.op S)
+
+instance evaluation_additive (S) : functor.additive (evaluation S) :=
+⟨λ M N f g, rfl⟩
+
+def tensor_uncurry {A : AddCommGroup.{u+1}} {M N : ExtrSheafProd.{u} Ab.{u+1}}
+  (e : A ⟶ AddCommGroup.of (M ⟶ N)) :
+  tensor M A ⟶ N := ExtrSheafProd.hom.mk $
+{ app := λ S, (AddCommGroup.tensor_flip _ _).hom ≫
+    AddCommGroup.tensor_uncurry (e ≫ (evaluation S.unop).map_add_hom),
+  naturality' := sorry }
+
+def tensor_curry {A : AddCommGroup.{u+1}} {M N : ExtrSheafProd.{u} Ab.{u+1}}
+  (e : M.tensor A ⟶ N) : A ⟶ AddCommGroup.of (M ⟶ N) :=
+{ to_fun := λ a, ExtrSheafProd.hom.mk $
+  { app := λ S, AddCommGroup.tensor_curry
+      ((AddCommGroup.tensor_flip _ _).hom ≫ e.val.app S) a,
+    naturality' := sorry },
+  map_zero' := sorry,
+  map_add' := sorry }
 
 end ExtrSheafProd
 
