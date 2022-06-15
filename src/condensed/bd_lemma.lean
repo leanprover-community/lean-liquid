@@ -109,6 +109,27 @@ tensor_uncurry $
   end,
   naturality' := sorry })
 
+def eval_forget_free_eval_to_evaluation_map_eval_freeCond'
+  (M : Condensed.{u} Ab.{u+1}) (S : ExtrDisc.{u}) :
+  (BD.eval $ category_theory.forget _ ⋙ AddCommGroup.free).obj (M.val.obj (op S.val)) ⟶
+  (Condensed.evaluation _ S.val).map_bounded_homotopy_category.obj
+  ((BD.eval freeCond').obj M) :=
+(homotopy_category.quotient _ _).map
+{ f := λ i, begin
+    rcases i with (_|_)|_,
+    { dsimp [package.eval],
+      refine _ ≫ (proetale_topology.to_sheafify _).app _,
+      dsimp,
+      refine AddCommGroup.free.map _,
+      refine (category_theory.forget Ab.{u+1}).map _,
+      exact ((Condensed.evaluation Ab.{u+1} S.val).map_biproduct
+        (λ (i : ulift (fin (BD.data.X 0))), M)).inv },
+    { exact 0 },
+    { sorry } -- similar to the zero case.
+    -- Again, this should be broken up...
+  end,
+  comm' := sorry }
+
 instance is_iso_tensor_to_homology_bd_eval_eval_ExtrDisc
   (M : Condensed.{u} Ab.{u+1}) (i : ℤ) (S : ExtrDisc.{u})
   [no_zero_smul_divisors ℤ (M.val.obj (op S.val))] :
@@ -123,10 +144,11 @@ begin
     tensor_eval_iso M (((BD.eval (forget AddCommGroup ⋙ AddCommGroup.free)).obj
       (AddCommGroup.free.obj punit)).val.as.homology i) S,
   let t₂ : _ ≅ (((BD.eval freeCond').obj M).val.as.homology i).val.obj (op S.val) :=
-    (Condensed.homology_evaluation_iso _ _ _ _).symm,
+    (Condensed.homology_functor_evaluation_iso _ _ _).symm.app _,
   let s := sorry, -- this needs to be of the form `η.app (M.val.obj (op S))` where
     -- `η` is some natural transformation.
   have hs : t = t₁.hom ≫ s ≫ t₂.hom, sorry,
+  dsimp at s,
   suffices : is_iso s,
   { rw hs, resetI, apply_instance },
   sorry,
