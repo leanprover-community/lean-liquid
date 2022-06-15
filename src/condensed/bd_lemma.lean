@@ -1,7 +1,10 @@
 import breen_deligne.main
 import breen_deligne.eg
 import condensed.tensor
+import condensed.evaluation_homology
 import pseudo_normed_group.QprimeFP
+
+.
 
 noncomputable theory
 
@@ -13,6 +16,65 @@ open bounded_homotopy_category
 namespace Condensed
 
 variables (BD : package)
+
+def tensor_to_homology_bd_eval_component (M : Condensed.{u} Ab.{u+1}) (i : ℤ)
+  (S : ExtrDisc.{u}) :
+  M.val.obj (op S.val) ⟶
+  AddCommGroup.of
+    (((BD.eval (forget AddCommGroup ⋙ AddCommGroup.free)).obj
+      (AddCommGroup.free.obj punit)).val.as.homology i ⟶
+      homology ((((BD.eval freeCond').obj M).val.as.d_to i).val.app (op S.val))
+        ((((BD.eval freeCond').obj M).val.as.d_from i).val.app (op S.val)) begin
+          rw [← nat_trans.comp_app, ← Sheaf.hom.comp_val, homological_complex.d_to_comp_d_from],
+          refl,
+        end) :=
+{ to_fun := λ m, homology.desc' _ _ _
+    (homology.lift _ _ _
+    (kernel.ι _ ≫
+    begin
+      rcases i with (_|_)|_,
+      -- (AT): This is the general idea to construct this map.
+      -- this should be pulled out into separate declarations,
+      -- one for i = 0, for i > 0 and for i < 0.
+      refine _ ≫ (proetale_topology.to_sheafify _).app _,
+      dsimp [package.eval],
+      apply AddCommGroup.free.map,
+      let e : (⨁ λ (i : ulift (fin (BD.data.X 0))), M).val.obj (op S.val) ≅
+        ⨁ (λ i : ulift (fin (BD.data.X 0)), M.val.obj (op S.val)) :=
+        (Condensed.evaluation Ab.{u+1} S.val).map_biproduct
+          (λ (i : ulift (fin (BD.data.X 0))), M),
+      refine _ ≫ (category_theory.forget _).map e.inv,
+      apply (category_theory.forget _).map,
+      refine biproduct.map _,
+      intros j,
+      refine (AddCommGroup.adj.hom_equiv _ _).symm _,
+      exact (λ _, m),
+      { sorry },
+      { sorry }
+    end
+    ≫ cokernel.π _) sorry) sorry,
+  map_zero' := sorry,
+  map_add' := sorry }
+
+def tensor_to_homology_bd_eval (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
+  (tensor M $ ((BD.eval $
+    category_theory.forget AddCommGroup ⋙ AddCommGroup.free).obj
+      (AddCommGroup.free.obj punit)).val.as.homology i) ⟶
+  ((BD.eval freeCond').obj M).val.as.homology i :=
+tensor_uncurry $
+((Condensed_ExtrSheafProd_equiv _).unit_iso.app _).hom ≫
+(Condensed_ExtrSheafProd_equiv _).inverse.map
+(ExtrSheafProd.hom.mk
+{ app := λ S, begin
+    dsimp,
+    refine _ ≫ (preadditive_yoneda.flip.obj
+      (opposite.op (((BD.eval (forget AddCommGroup ⋙ AddCommGroup.free)).obj
+      (AddCommGroup.free.obj punit)).val.as.homology i))).map
+      (homology_evaluation_iso _ _ _ _).inv,
+    --now we need to produce some map between two homology groups.
+    exact tensor_to_homology_bd_eval_component BD M i S.unop,
+  end,
+  naturality' := sorry })
 
 -- needs torsion-free condition on `M`
 def homology_bd_eval (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
