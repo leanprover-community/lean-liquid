@@ -25,7 +25,7 @@ lemma evaluation_exact (S : ExtrDisc.{u}) :
   functor.exact (Condensed.evaluation _ S.val : Condensed.{u} Ab.{u+1} ⥤ _) :=
 begin
   intros X Y Z f g h,
-  rw condensed.exact_iff_ExtrDisc at h,
+  rw Condensed.exact_iff_ExtrDisc at h,
   apply h
 end
 
