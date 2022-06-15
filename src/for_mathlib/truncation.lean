@@ -575,6 +575,20 @@ begin
 end
 .
 
+-- image.factor_thru_image_pre_comp
+
+--example {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) [is_iso f] : is_iso (image.pre_comp f g) :=
+--infer_instance
+
+def kernel_factor_thru_image_iso {A B : 𝓐} (f : A ⟶ B) : kernel (factor_thru_image f) ≅ kernel f :=
+(kernel_comp_mono (factor_thru_image f) (image.ι f)).symm.trans (kernel_iso_of_eq (by simp))
+
+-- lemma factor_thru_image_comp {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) :
+-- factor_thru_image (f ≫ g) ≫ (image.pre_comp f g) = f ≫ factor_thru_image g :=
+-- begin
+--   exact image.factor_thru_image_pre_comp f g,
+-- end
+
 lemma epi_kernel_lift_zero_iff_epi {A B C : 𝓐} (f : A ⟶ B) :
   epi (kernel.lift (0 : B ⟶ C) f comp_zero) ↔ epi f :=
 begin
@@ -631,10 +645,20 @@ begin
     to itself and then claim that it is epi because it's the identity
     and then hopefully `ext, simp` will do it.
     -/
-    sorry,
-  },
+    rw ← imker.epi_comp_iso_iff_epi (X_iso_of_eq C rfl).symm,
+    have foo : eq_to_hom _ ≫ C.d (n + 1 - 1) (n + 1) = C.d n (n + 1) := C.eq_to_hom_comp_d
+      (show n + 1 = n + 1, by refl) (show (n + 1 - 1) + 1 = n + 1, by ring),
+    rw ← imker.epi_iso_comp_iff_epi _ (kernel_iso_of_eq (image.factor_thru_image_pre_comp _ _).symm),
+    swap, apply_instance, swap, apply_instance,
+    rw ← imker.epi_iso_comp_iff_epi _ (kernel_comp_is_iso _ _),
+    rw ← imker.epi_iso_comp_iff_epi _ (kernel_factor_thru_image_iso _),
+    rw ← imker.epi_iso_comp_iff_epi _ (kernel_iso_of_eq foo),
+    -- finally there!
+    convert category_struct.id.epi _,
+    ext,
+    simp [kernel_comp_is_iso, kernel_iso_assoc, kernel_factor_thru_image_iso], },
   -- this compiles fine
-  sorry;{ by_cases hn : n = i + 1,
+  { by_cases hn : n = i + 1,
     { apply epi_of_target_iso_zero,
       apply is_zero.iso_zero,
       apply @is_zero_kernel_of_mono _ _ _ _ _ _ _,
