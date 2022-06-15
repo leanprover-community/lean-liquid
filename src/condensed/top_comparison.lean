@@ -204,6 +204,19 @@ instance preserves_colimits_Condensed_evaluation'
   limits.preserves_colimits (Condensed.evaluation C S) :=
 preserves_colimits_Condensed_evaluation ⟨S⟩ _
 
+-- This can be generalized to categories other than `Ab`, but lean is having a really hard time
+-- figuring out all the necessary typeclasses and universe parameters, so I gave up and just used
+-- `Ab`.
+noncomputable
+instance preserves_finite_biproducts_Condensed_evaluation
+  (S : Profinite.{u}) :
+  limits.preserves_finite_biproducts
+  (Condensed.evaluation Ab.{u+1} S : Condensed.{u} Ab.{u+1} ⥤ Ab.{u+1}) :=
+begin
+  constructor, introsI J _ _,
+  apply preserves_biproducts_of_shape_of_preserves_products_of_shape,
+end
+
 -- TODO: Move this
 instance : has_finite_biproducts Ab :=
 has_finite_biproducts.of_has_finite_products

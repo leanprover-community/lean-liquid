@@ -281,6 +281,21 @@ begin
   refl,
 end
 
+@[simp]
+lemma embed_nat_obj_down_up_succ
+  (C : chain_complex 𝒞 ℕ) (i : ℕ) :
+  ((embed complex_shape.embedding.nat_down_int_up).obj C).X (-[1+i]) = C.X (i+1) := rfl
+
+@[simp]
+lemma embed_nat_obj_down_up_zero
+  (C : chain_complex 𝒞 ℕ) :
+  ((embed complex_shape.embedding.nat_down_int_up).obj C).X 0 = C.X 0 := rfl
+
+@[simp]
+lemma embed_nat_obj_down_up_pos
+  (C : chain_complex 𝒞 ℕ) (i : ℕ) :
+  ((embed complex_shape.embedding.nat_down_int_up).obj C).X (i+1) = 0 := rfl
+
 end embedding_change_of_complex
 
 section homotopy
