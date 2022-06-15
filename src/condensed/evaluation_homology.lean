@@ -35,4 +35,12 @@ abbreviation homology_evaluation_iso (S : ExtrDisc.{u}) :
     (by { rw [← f.val.comp_app, ← Sheaf.hom.comp_val, w], refl }) :=
 (Condensed.evaluation Ab.{u+1} _).homology_iso _ _ _ _
 
+.
+
+abbreviation homology_functor_evaluation_iso {M : Type*} (c : complex_shape M)
+  (i : M) (S : ExtrDisc.{u}) :
+  homology_functor (Condensed.{u} Ab.{u+1}) c i ⋙ Condensed.evaluation _ S.val ≅
+  (Condensed.evaluation _ S.val).map_homological_complex _ ⋙ homology_functor Ab.{u+1} c i :=
+(Condensed.evaluation Ab.{u+1} _).homology_functor_iso _ _
+
 end Condensed
