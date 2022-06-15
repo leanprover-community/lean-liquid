@@ -10,7 +10,7 @@ universes u
 open category_theory category_theory.limits breen_deligne opposite
 open bounded_homotopy_category
 
-namespace condensed
+namespace Condensed
 
 variables (BD : package)
 
@@ -49,4 +49,4 @@ begin
   { sorry }
 end
 
-end condensed
+end Condensed
