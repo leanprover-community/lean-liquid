@@ -582,6 +582,14 @@ begin
   rw imker.epi_is_iso_comp_iff_epi,
 end
 
+def kernel_comp_is_iso {X Y Z : 𝓐} (f : X ⟶ Y) (g : Y ⟶ Z) [is_iso g] :
+  kernel (f ≫ g) ≅ kernel f :=
+{ hom := kernel.lift _ (kernel.ι _) (begin rw [← cancel_mono g, category.assoc], simp, end),
+  inv := kernel.lift _ (kernel.ι _) (by simp), }
+
+def kernel_iso_assoc {A B C D : 𝓐} (f : A ⟶ B) (g : B ⟶ C) (h : C ⟶ D) :
+  kernel (f ≫ g ≫ h) ≅ kernel ((f ≫ g) ≫ h) := kernel_iso_of_eq (by rw category.assoc)
+
 lemma ι_succ_to_imker_ex_π {i n : ℤ} : epi (kernel.lift ((to_imker C (i + 1)).f n)
   ((ι_succ C i).f n) (ι_succ.comp_to_imker_zero C)) :=
 begin
@@ -606,11 +614,26 @@ begin
     simp only [zero_lt_one, dif_pos, dif_neg, eq_to_hom_refl, category.id_comp, eq_self_iff_true,
       not_false_iff, eq_to_iso.hom, eq_to_hom_trans, lt_add_iff_pos_right, lt_self_iff_false,
       eq_to_iso.inv],
-    -- show epi from split epi?
-    apply @split_epi.epi _ _ _ _ _ _,
-    refine ⟨_, _⟩, -- maybe this is the way to do it? Not sure.
-    sorry, sorry,
+    -- goal is epi (mess : ker(d)->)
+    rw ← imker.epi_iso_comp_iff_epi _ (kernel_is_iso_comp _ _),
+    -- now knock them off the other end
+    rw ← imker.epi_iso_comp_iff_epi _ (kernel_iso_assoc _ _ _),
+    rw ← imker.epi_iso_comp_iff_epi _ (kernel_comp_is_iso _ _),
+    -- simp now goes down the wrong track
+    /- The goal is now to prove that some monstrous map
+
+    (C.truncation n).X n ⟶ kernel (eq_to_hom _ ≫ factor_thru_image (C.d (n + 1 - 1) (n + 1)))
+
+    is an epimorphism. This map is essentially the identity map
+    from ker C.d n (n+1) to itself, modulo the usual cannonical
+    isomorphisms. My plan is to pre and post compose with some more
+    canonical isomorphisms to actually get a map from an object
+    to itself and then claim that it is epi because it's the identity
+    and then hopefully `ext, simp` will do it.
+    -/
+    sorry,
   },
+  -- this compiles fine
   sorry;{ by_cases hn : n = i + 1,
     { apply epi_of_target_iso_zero,
       apply is_zero.iso_zero,
