@@ -279,6 +279,11 @@ def map_of_le (m n : ℤ) (h : m ≤ n) : C.truncation m ⟶ C.truncation n :=
 def ι_succ (n : ℤ) : C.truncation n ⟶ C.truncation (n+1) :=
 truncation.map_of_le _ _ _ $ by simp only [le_add_iff_nonneg_right, zero_le_one]
 
+lemma ι_succ_f_self {n : ℤ} :
+  (ι_succ C n).f n = (X_iso_of_eq C (rfl : n = n)).hom ≫
+    kernel.ι (C.d n (n + 1)) ≫ (X_iso_of_lt C (by simp)).inv :=
+by simp [ι_succ, map_of_le]
+
 --move
 lemma _root_.homological_complex.d_from_eq_d_comp_X_next_iso_inv {ι V : Type*} [category V]
   [has_zero_morphisms V] {c : complex_shape ι} (C : homological_complex V c) [has_zero_object V]
@@ -390,6 +395,16 @@ def to_imker (n : ℤ) : C.truncation n ⟶ imker C n :=
           rw [zero_comp, comp_zero], } } }
   end }
 .
+
+lemma to_imker_f_succ {n : ℤ} : (to_imker C (n + 1)).f n = (X_iso_of_lt C (by simp)).hom ≫
+factor_thru_image (C.d n (n+1)) ≫ 0 :=
+begin
+  delta to_imker,
+  dsimp only,
+  rw dif_pos (show n = n + 1 - 1, by ring),
+  congr' 1,
+  sorry
+end
 
 -- move!
 lemma lt_of_not_lt_of_ne {a b : ℤ} (h1 : ¬ a < b) (h2 : ¬ a = b) : b < a :=
@@ -719,11 +734,17 @@ begin
   exact (mono_comp_is_iso_iff_mono f g).mp infer_instance,
 end
 
+lemma mono_coker_desc_congr {A B C : 𝓐} {f f' : A ⟶ B} (h : f = f') (g : B ⟶ C) (w : f ≫ g = 0) :
+  mono (cokernel.desc f g w) ↔ mono (cokernel.desc f' g (h ▸ w)) :=
+by subst h
+
 lemma ι_succ_to_imker_ι_ex_aux {n : ℤ} : mono (cokernel.desc ((ι_succ C n).f n) ((to_imker C (n + 1)).f n) (ι_succ.comp_to_imker_zero C)) :=
 begin
+  rw mono_coker_desc_congr (ι_succ_f_self C),
   sorry
 end
 
+#exit
 lemma ι_succ_to_imker_ι_ex {i n : ℤ} : mono (cokernel.desc ((ι_succ C i).f n)
   ((to_imker C (i + 1)).f n) (ι_succ.comp_to_imker_zero C)) :=
 begin

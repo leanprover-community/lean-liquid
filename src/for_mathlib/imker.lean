@@ -77,6 +77,16 @@ eq_to_iso (by {rw [X_def, if_pos rfl]})
   (imker C n).X i ≅ image (C.d_to n) :=
 eq_to_iso (by {rw [X_def, if_pos h]})
 
+def image_iso_of_eq {A B : 𝓐} {f f' : A ⟶ B} (h : f = f') : image f ≅ image f' :=
+eq_to_iso (by rw h)
+
+--@[simps]
+def X_iso_image' (n : ℤ) :
+(C.imker (n + 1)).X n ≅ image (C.d n (n + 1)) :=
+(eq_to_iso (by simp)) ≪≫ (X_iso_image C (n + 1)) ≪≫ sorry--(image_iso_of_eq _)
+
+
+
 @[simps] def X_iso_kernel (n : ℤ) : (imker C n).X n ≅ kernel (C.d_from n) :=
 eq_to_iso (by {rw [X_def, if_neg, if_pos rfl], linarith})
 
