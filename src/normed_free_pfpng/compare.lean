@@ -68,7 +68,7 @@ instance (S : Profinite) : mono ((cond_free_pfpng_to_normed_free_pfpng p).app S)
 begin
   simp only [cond_free_pfpng_to_normed_free_pfpng, condensify_map, condensify_nonstrict],
   rw nonstrict_extend_whisker_right_enlarging,
-  apply condensed.mono_to_Condensed_map,
+  apply Condensed.mono_to_Condensed_map,
   apply exact_with_constant_extend_zero_left,
   intro S,
   apply_with exact_with_constant_of_mono { instances := ff },
@@ -83,7 +83,7 @@ begin
   rw nonstrict_extend_whisker_right_enlarging,
   let κ : ℝ≥0 → ℝ≥0 := λ c, max c (c ^ (p⁻¹ : ℝ)),
   have hκ : id ≤ κ := λ c, le_max_left _ _,
-  apply condensed.epi_to_Condensed_map _ κ,
+  apply Condensed.epi_to_Condensed_map _ κ,
   apply exact_with_constant_extend_zero_right,
   intro S,
   apply exact_with_constant_of_epi _ _ _ hκ,

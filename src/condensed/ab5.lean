@@ -17,7 +17,7 @@ theorem exact_colim_of_exact_of_is_filtered
   (∀ j, exact (η.app j) (γ.app j)) → exact (limits.colim_map η) (limits.colim_map γ) :=
 begin
   intros h,
-  simp_rw condensed.exact_iff_ExtrDisc at *, intros S,
+  simp_rw Condensed.exact_iff_ExtrDisc at *, intros S,
   let eF : (colimit F).val.obj (ExtrDisc_to_Profinite.op.obj (opposite.op S)) ≅
     colimit (F ⋙ Condensed.evaluation _ S.val) :=
     preserves_colimit_iso (Condensed.evaluation _ S.val) _,

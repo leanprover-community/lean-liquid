@@ -1,9 +1,10 @@
 import condensed.projective_resolution
 
-namespace condensed
-
 open category_theory.limits
 open category_theory
+
+namespace Condensed
+
 --TODO: generalize (as needed...)
 universe u
 variables {A B : Condensed.{u} Ab.{u+1}} (f : A ⟶ B)
@@ -66,4 +67,4 @@ begin
   apply category.id_comp,
 end
 
-end condensed
+end Condensed

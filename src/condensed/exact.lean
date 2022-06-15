@@ -610,7 +610,7 @@ end
 
 end CompHausFiltPseuNormGrp₁
 
-namespace condensed
+namespace Condensed
 
 open CompHausFiltPseuNormGrp₁
 
@@ -636,7 +636,8 @@ begin
   apply forall_congr,
   intro S,
   symmetry,
-  rw [← cancel_epi (kernel_iso g S).hom, ← cancel_mono (cokernel_iso f S).hom],
+  rw [← cancel_epi (kernel_iso g S).hom,
+    ← cancel_mono (cokernel_iso f S).hom],
   dsimp only [functor.op_obj, ExtrDisc_to_Profinite_obj],
   simp only [category.assoc, zero_comp, comp_zero],
   erw [kernel_iso_hom_assoc, cokernel_iso_hom],
@@ -711,4 +712,4 @@ begin
   simpa only [to_Condensed_map_zero]
 end
 
-end condensed
+end Condensed
