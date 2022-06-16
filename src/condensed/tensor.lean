@@ -646,7 +646,7 @@ on extremally disconnected sets. -/
 def tensor_eval_iso
   (M : Condensed.{u} Ab.{u+1}) (A : Ab.{u+1}) (S : ExtrDisc.{u}) :
   (tensor M A).val.obj (opposite.op S.val) ≅
-  AddCommGroup.of (M.val.obj (opposite.op S.val) ⊗[ℤ] A) :=
+  ((M.val.obj (opposite.op S.val)).tensor A) :=
 ((ExtrSheafProd_to_presheaf _).map_iso (M.tensor_iso A)).app (opposite.op S)
 
 def half_internal_hom (A : AddCommGroup.{u+1}) (M : Condensed.{u} Ab.{u+1}) :
