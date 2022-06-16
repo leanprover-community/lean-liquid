@@ -396,14 +396,77 @@ def to_imker (n : ℤ) : C.truncation n ⟶ imker C n :=
   end }
 .
 
+example {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) [is_iso f] :
+is_iso (image.pre_comp f g) := infer_instance--; sorry --  image (f ≫ g) ⟶ image g :=
+
+
+example {𝒞 : Type} [category 𝒞] {A B C D E P Q R : 𝒞} (f : A ⟶ B) (g : B ⟶ C) (h : C ⟶ D) (i : D ⟶ E)
+(φ : A ⟶ P) (ψ : P ⟶ Q) (ρ : Q ⟶ R) (σ : R ⟶ D) (commutes : f ≫ g ≫ h = φ ≫ ψ ≫ ρ ≫ σ) :
+f ≫ g ≫ h ≫ i = φ ≫ ψ ≫ ρ ≫ σ ≫ i :=
+by simp [reassoc_of commutes]
+
+--def kernel_comp_is_iso {X Y Z : 𝓐} (f : X ⟶ Y) (g : Y ⟶ Z) [is_iso g] :
+--  kernel (f ≫ g) ≅ kernel f :=
+--{ hom := kernel.lift _ (kernel.ι _) (begin rw [← cancel_mono g, category.assoc], simp, end),
+--  inv := kernel.lift _ (kernel.ι _) (by simp), }
+
+-- image f ⟶ image e ≫ f
+
+def image_comp_is_iso_left {X Y Z : 𝓐} (f : X ⟶ Y) (g : Y ⟶ Z) [is_iso f] : image (f ≫ g) ≅ image g :=
+{ hom := image.lift ({I := image g, m := image.ι g, e := f ≫ factor_thru_image g } : mono_factorisation (f ≫ g)),
+  inv := image.lift ({I := image (f ≫ g), m := image.ι (f ≫ g), e := (inv f) ≫ factor_thru_image (f ≫ g) } : mono_factorisation g),
+  hom_inv_id' := by tidy,
+  inv_hom_id' := by tidy }
+
+lemma image.lift_image_ι {A A' B : 𝓐} (f : A ⟶ B) (f' : A' ⟶ B) (e : A' ⟶ A) [is_iso e] (w : f' = e ≫ f) :
+image.lift ({ I := image f', m := image.ι f', e := factor_thru_image f ≫
+(image_comp_is_iso_left e f).inv ≫ (imker.image_iso_of_eq w.symm).hom,
+fac' := by { subst w, simp [image_comp_is_iso_left, imker.image_iso_of_eq] },
+} : mono_factorisation f) ≫ image.ι f' = image.ι f :=
+begin
+  simp,
+end
+
+--y simpa [← category.assoc] using commutes--set_option pp.notation false
 lemma to_imker_f_succ {n : ℤ} : (to_imker C (n + 1)).f n = (X_iso_of_lt C (by simp)).hom ≫
-factor_thru_image (C.d n (n+1)) ≫ 0 :=
+factor_thru_image (C.d n (n+1)) ≫ (imker.X_iso_image' C n).inv :=
 begin
   delta to_imker,
   dsimp only,
   rw dif_pos (show n = n + 1 - 1, by ring),
+--  delta imker.X_iso_image',
+  simp only [imker.X_iso_image, eq_to_iso.hom, imker.X_iso_image_of_eq_inv, eq_to_hom_trans_assoc, iso.trans_inv, imker.X_iso_image_inv,
+  category.assoc, eq_to_iso.inv, eq_to_hom_trans],
+  simp only [imker.X_iso_image'_inv],
+  --    top is `image (homological_complex.d_to C (n + 1)) ⟶ (C.imker (n + 1)).X n`
+  -- bottom is `image (homological_complex.d_to C (n + 1)) ⟶ (C.imker (n + 1)).X n`
+  simp only [← category.assoc],
   congr' 1,
-  sorry
+  ext,
+  simp only [homological_complex.X_prev_iso_comp_d_to, category.assoc, image.pre_comp_ι,
+  category_theory.limits.eq_to_hom_comp_image.ι, image.fac],
+  have foo : (imker.image.is_iso_comp (C.d n (n + 1))).inv ≫
+  (imker.image_iso_of_eq (C.d_to_eq rfl)).inv ≫ image.ι (homological_complex.d_to C (n + 1)) = (image.ι (C.d n (n+1)) : image (C.d n (n + 1)) ⟶ C.X (n + 1)),
+  { ext, simp,
+    -- is this the right move? Surely?
+    convert image.fac (C.d n (n+1)),
+    rw ← category.assoc,
+    convert image.lift_image_ι _ _ _ (C.d_to_eq rfl), swap, apply_instance,
+    simp [imker.image.is_iso_comp, imker.image_iso_of_eq],
+    library_search,
+    sorry,
+    --simp only [imker.image.is_iso_comp, imker.image_iso_of_eq],
+    --simp_rw homological_complex.d_to_eq,
+    -- this takes us back again
+    --ext, simp, recover, sorry, sorry, sorry, sorry
+    },
+  rw foo,
+  simp,
+  have := C.eq_to_hom_comp_d (rfl : n + 1 = n + 1) (show n + 1 - 1 + 1 = n + 1, by ring),
+  rw ← this,
+  simp only [← category.assoc],
+  congr' 1, clear this foo,
+  simp,
 end
 
 -- move!
