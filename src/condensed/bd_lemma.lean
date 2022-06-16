@@ -84,40 +84,6 @@ nat_iso.of_components
 sorry
 
 /-
-def eval_comparison (M : Condensed.{u} Ab.{u+1}) (S : ExtrDisc.{u}) (m : M.val.obj (op S.val)) :
-  ((BD.eval' (forget AddCommGroup ⋙ AddCommGroup.free)).obj
-    (AddCommGroup.free.obj punit)) ⟶
-  ((evaluation AddCommGroup S.val).map_homological_complex (complex_shape.up ℤ)).obj
-    ((presheaf_to_Condensed_Ab.map_homological_complex (complex_shape.up ℤ)).obj
-       ((BD.eval' freeFunc).obj (Condensed_Ab_to_presheaf.obj M))) :=
-{ f := λ i,
-  match i with
-  | int.of_nat 0 := begin
-      refine _ ≫ (proetale_topology.to_sheafify _).app _,
-      refine AddCommGroup.free.map _,
-      refine (category_theory.forget AddCommGroup).map _,
-      refine _ ≫ (((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj
-        (op S.val)).map_biproduct
-        (λ (i : ulift (fin (BD.data.X 0))), Condensed_Ab_to_presheaf.obj M)).inv,
-      refine limits.biproduct.map (λ j : ulift (fin (BD.data.X 0)), _),
-      refine (AddCommGroup.adj.hom_equiv _ _).symm _,
-      exact (λ _, m), -- maybe change this to `types.pt` or something...
-    end
-  | int.of_nat (i+1) := 0
-  | -[1+i] := begin
-      refine _ ≫ (proetale_topology.to_sheafify _).app _,
-      refine AddCommGroup.free.map _,
-      refine (category_theory.forget AddCommGroup).map _,
-      refine _ ≫ (((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj
-        (op S.val)).map_biproduct
-        (λ (i : ulift (fin (BD.data.X _))), Condensed_Ab_to_presheaf.obj M)).inv,
-      refine limits.biproduct.map (λ j : ulift (fin (BD.data.X _)), _),
-      refine (AddCommGroup.adj.hom_equiv _ _).symm _,
-      exact (λ _, m),
-    end
-  end,
-  comm' := sorry }
-
 def plain_eval_comparison (i : ℤ) :
   AddCommGroup.tensor_functor.flip.obj
   (((BD.eval' (forget AddCommGroup ⋙ AddCommGroup.free)).obj
@@ -175,18 +141,13 @@ def tensor_to_homology (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
 (eval_freeCond'_iso_component _ _).inv
 
 -- Key Lemma
+instance is_iso_tensor_to_homology_aux (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
+  is_iso (ExtrSheafProd.tensor_uncurry (uncurried_tensor_to_homology BD M i)) := sorry
+
 instance is_iso_tensor_to_homology (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
   is_iso (tensor_to_homology BD M i) :=
 begin
-  /-
-  rw is_iso_iff_ExtrDisc, intros S,
-  rw tensor_to_homology_val_eq, simp_rw ← category.assoc,
-  apply_with is_iso.comp_is_iso { instances := ff },
-  swap, { sorry }, -- easy
-  apply_with is_iso.comp_is_iso { instances := ff },
-  swap, { sorry }, -- easy
-  -/
-  sorry
+  apply is_iso.comp_is_iso,
 end
 
 -- needs torsion-free condition on `M`
