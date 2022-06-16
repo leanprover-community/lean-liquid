@@ -95,6 +95,9 @@ Sheaf.category_theory.limits.has_colimits.{(u+2) u (u+1)}
 instance Condensed_Ab_has_limits : has_limits (Condensed.{u} Ab.{u+1}) :=
 Sheaf.category_theory.limits.has_limits.{(u+2) u (u+1)}
 
+instance : abelian (Profinite.{u}ᵒᵖ ⥤ Ab.{u+1}) :=
+category_theory.functor_category_is_abelian.{u+2 u u+1}
+
 instance : abelian (Condensed Ab.{u+1}) :=
 @category_theory.Sheaf.abelian.{(u+2) u (u+1)} Profinite.{u} _
   proetale_topology Ab.{u+1} _ _ _ _ _ _ _ _

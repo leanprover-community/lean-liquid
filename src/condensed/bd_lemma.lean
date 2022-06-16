@@ -2,6 +2,7 @@ import breen_deligne.main
 import breen_deligne.eg
 import condensed.tensor
 import condensed.evaluation_homology
+import condensed.sheafification_homology
 import pseudo_normed_group.QprimeFP
 import for_mathlib.AddCommGroup
 import condensed.is_iso_iff_extrdisc
@@ -19,6 +20,7 @@ namespace Condensed
 
 variables (BD : package)
 
+/-
 def component_aux_pos (M : Condensed.{u} Ab.{u+1}) (i : ℕ) (S : Profinite.{u}) :
   ((BD.eval (forget AddCommGroup ⋙ AddCommGroup.free)).obj
     (AddCommGroup.free.obj punit)).val.as.X (i+1) ⟶
@@ -152,6 +154,127 @@ begin
   rw is_iso_iff_ExtrDisc,
   intros S, apply_instance,
 end
+-/
+
+abbreviation freeFunc : (Profiniteᵒᵖ ⥤ Ab) ⥤ Profiniteᵒᵖ ⥤ Ab :=
+(whiskering_right _ _ _).obj (forget _ ⋙ AddCommGroup.free)
+
+def eval_freeCond'_iso (M : Condensed.{u} Ab.{u+1}) :
+  ((BD.eval freeCond').obj M).val.as ≅
+  (presheaf_to_Condensed_Ab.map_homological_complex _).obj
+  ((BD.eval freeFunc).obj (Condensed_Ab_to_presheaf.obj M)).val.as :=
+homological_complex.hom.iso_of_components
+(λ i,
+match i with
+| int.of_nat 0 := presheaf_to_Condensed_Ab.map_iso begin
+    refine functor.associator _ _ _ ≪≫ _,
+    refine iso_whisker_right _ _,
+    refine (Condensed_Ab_to_presheaf.map_biproduct _),
+  end
+| int.of_nat (i+1) := is_zero.iso (is_zero_zero _) sorry
+| -[1+i] := presheaf_to_Condensed_Ab.map_iso begin
+    refine functor.associator _ _ _ ≪≫ _,
+    refine iso_whisker_right _ _,
+    refine (Condensed_Ab_to_presheaf.map_biproduct _)
+  end
+end )
+sorry
+
+def eval_comparison (M : Condensed.{u} Ab.{u+1}) (S : ExtrDisc.{u}) (m : M.val.obj (op S.val)) :
+  ((BD.eval (forget AddCommGroup ⋙ AddCommGroup.free)).obj
+    (AddCommGroup.free.obj punit)).val.as ⟶
+  ((evaluation AddCommGroup S.val).map_homological_complex (complex_shape.up ℤ)).obj
+    ((presheaf_to_Condensed_Ab.map_homological_complex (complex_shape.up ℤ)).obj
+       ((BD.eval freeFunc).obj (Condensed_Ab_to_presheaf.obj M)).val.as) :=
+{ f := λ i,
+  match i with
+  | int.of_nat 0 := begin
+      refine _ ≫ (proetale_topology.to_sheafify _).app _,
+      refine AddCommGroup.free.map _,
+      refine (category_theory.forget AddCommGroup).map _,
+      refine _ ≫ (((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj
+        (op S.val)).map_biproduct
+        (λ (i : ulift (fin (BD.data.X 0))), Condensed_Ab_to_presheaf.obj M)).inv,
+      refine limits.biproduct.map (λ j : ulift (fin (BD.data.X 0)), _),
+      refine (AddCommGroup.adj.hom_equiv _ _).symm _,
+      exact (λ _, m), -- maybe change this to `types.pt` or something...
+    end
+  | int.of_nat (i+1) := 0
+  | -[1+i] := begin
+      refine _ ≫ (proetale_topology.to_sheafify _).app _,
+      refine AddCommGroup.free.map _,
+      refine (category_theory.forget AddCommGroup).map _,
+      refine _ ≫ (((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj
+        (op S.val)).map_biproduct
+        (λ (i : ulift (fin (BD.data.X _))), Condensed_Ab_to_presheaf.obj M)).inv,
+      refine limits.biproduct.map (λ j : ulift (fin (BD.data.X _)), _),
+      refine (AddCommGroup.adj.hom_equiv _ _).symm _,
+      exact (λ _, m),
+    end
+  end,
+  comm' := sorry }
+
+def curried_tensor_to_homology_ExtrDisc_component_apply'
+  (M : Condensed.{u} Ab.{u+1}) (i : ℤ) (S : ExtrDisc.{u}) (m : M.val.obj (op S.val)) :
+  ((BD.eval (forget AddCommGroup ⋙ AddCommGroup.free)).obj
+    (AddCommGroup.free.obj punit)).val.as.homology i ⟶
+  (((evaluation Ab S.val).map_homological_complex (complex_shape.up ℤ)).obj
+    ((BD.eval freeCond').obj M).val.as).homology i :=
+(homology_functor _ _ _).map (eval_comparison _ _ _ m)
+≫ (homology_functor _ _ _).map
+  (((evaluation _ _).map_homological_complex _).map $ (eval_freeCond'_iso _ _).inv)
+
+def curried_tensor_to_homology_ExtrDisc_component_apply
+  (M : Condensed.{u} Ab.{u+1}) (i : ℤ) (S : ExtrDisc.{u}) (m : M.val.obj (op S.val)) :
+  ((BD.eval (forget AddCommGroup ⋙ AddCommGroup.free)).obj
+    (AddCommGroup.free.obj punit)).val.as.homology i ⟶
+  (((BD.eval freeCond').obj M).val.as.homology i).val.obj (op S.val) :=
+let e := eval_freeCond'_iso BD M in
+curried_tensor_to_homology_ExtrDisc_component_apply' _ _ _ _ m
+≫ (homology_functor_evaluation_iso _ _ _).inv.app _
+
+def curried_tensor_to_homology_ExtrDisc_component (M : Condensed.{u} Ab.{u+1}) (i : ℤ)
+  (S : ExtrDisc.{u}) :
+  M.val.obj (op S.val) ⟶
+  AddCommGroup.of
+    (((BD.eval (forget AddCommGroup ⋙ AddCommGroup.free)).obj
+      (AddCommGroup.free.obj punit)).val.as.homology i ⟶
+      (((BD.eval freeCond').obj M).val.as.homology i).val.obj (op S.val)) :=
+{ to_fun := λ m, curried_tensor_to_homology_ExtrDisc_component_apply _ _ _ _ m,
+  map_zero' := sorry,
+  map_add' := sorry }
+
+def curried_tensor_to_homology_ExtrDisc (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
+(Condensed_ExtrSheafProd_equiv Ab).functor.obj M ⟶
+  ExtrSheafProd.half_internal_hom
+    (((BD.eval (forget AddCommGroup ⋙ AddCommGroup.free)).obj
+      (AddCommGroup.free.obj punit)).val.as.homology i)
+    ((Condensed_ExtrSheafProd_equiv Ab).functor.obj
+      (((BD.eval freeCond').obj M).val.as.homology i)) :=
+ExtrSheafProd.hom.mk $
+{ app := λ S, curried_tensor_to_homology_ExtrDisc_component _ _ _ S.unop,
+  naturality' := sorry }
+
+def curried_tensor_to_homology (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
+  M ⟶
+  half_internal_hom
+    (((BD.eval (forget AddCommGroup ⋙ AddCommGroup.free)).obj
+      (AddCommGroup.free.obj punit)).val.as.homology i)
+    (((BD.eval freeCond').obj M).val.as.homology i) :=
+((Condensed_ExtrSheafProd_equiv _).unit_iso.app _).hom  ≫
+(Condensed_ExtrSheafProd_equiv _).inverse.map
+(curried_tensor_to_homology_ExtrDisc _ _ _)
+
+def tensor_to_homology (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
+  M.tensor (((BD.eval $
+    category_theory.forget AddCommGroup ⋙ AddCommGroup.free).obj
+      (AddCommGroup.free.obj punit)).val.as.homology i) ⟶
+  ((BD.eval freeCond').obj M).val.as.homology i :=
+tensor_uncurry (curried_tensor_to_homology _ _ _)
+
+-- Key Lemma
+instance is_iso_tensor_to_homology (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
+  is_iso (tensor_to_homology BD M i) := sorry
 
 -- needs torsion-free condition on `M`
 def homology_bd_eval (M : Condensed.{u} Ab.{u+1})
@@ -160,7 +283,7 @@ def homology_bd_eval (M : Condensed.{u} Ab.{u+1})
   (tensor M $ ((BD.eval $
     category_theory.forget AddCommGroup ⋙ AddCommGroup.free).obj
       (AddCommGroup.free.obj punit)).val.as.homology i) :=
-(as_iso $ tensor_to_homology_bd_eval BD M i).symm
+(as_iso $ tensor_to_homology BD M i).symm
 
 instance : has_coproducts (endomorphisms (Condensed.{u} Ab.{u+1})) :=
 sorry

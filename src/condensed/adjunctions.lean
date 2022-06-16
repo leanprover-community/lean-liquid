@@ -1,5 +1,6 @@
 import algebra.category.Group.adjunctions
 import category_theory.sites.adjunction
+import category_theory.sites.left_exact
 import algebra.category.Group.abelian
 import algebra.category.Group.filtered_colimits
 
@@ -128,3 +129,6 @@ instance : functor.additive Condensed_Ab_to_presheaf := ⟨⟩
 
 instance : preserves_colimits presheaf_to_Condensed_Ab :=
 Condensed_Ab_presheaf_adjunction.left_adjoint_preserves_colimits
+
+instance : preserves_finite_limits presheaf_to_Condensed_Ab :=
+category_theory.presheaf_to_Sheaf.limits.preserves_finite_limits.{u+2 u u+1}
