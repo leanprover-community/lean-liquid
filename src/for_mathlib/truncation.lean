@@ -887,7 +887,6 @@ end
 lemma first_isomorphism_theorem {A B : 𝓐} (f : A ⟶ B) :
 is_iso (cokernel.desc (kernel.ι f) (factor_thru_image f) (by simp only [kernel_ι_comp_factor_thru_image])) :=
 begin
-  library_search,
   sorry,
 end
 
