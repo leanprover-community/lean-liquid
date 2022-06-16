@@ -397,7 +397,7 @@ def to_imker (n : ℤ) : C.truncation n ⟶ imker C n :=
 .
 
 example {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) [is_iso f] :
-is_iso (image.pre_comp f g) := infer_instance--; sorry --  image (f ≫ g) ⟶ image g :=
+is_iso (image.pre_comp f g) := infer_instance
 
 
 example {𝒞 : Type} [category 𝒞] {A B C D E P Q R : 𝒞} (f : A ⟶ B) (g : B ⟶ C) (h : C ⟶ D) (i : D ⟶ E)
@@ -415,8 +415,20 @@ by simp [reassoc_of commutes]
 def image_comp_is_iso_left {X Y Z : 𝓐} (f : X ⟶ Y) (g : Y ⟶ Z) [is_iso f] : image (f ≫ g) ≅ image g :=
 { hom := image.lift ({I := image g, m := image.ι g, e := f ≫ factor_thru_image g } : mono_factorisation (f ≫ g)),
   inv := image.lift ({I := image (f ≫ g), m := image.ι (f ≫ g), e := (inv f) ≫ factor_thru_image (f ≫ g) } : mono_factorisation g),
-  hom_inv_id' := by tidy,
-  inv_hom_id' := by tidy }
+  hom_inv_id' := by {dsimp at *, ext1, simp at *},
+  inv_hom_id' := by {dsimp at *, ext1, simp at *} }
+
+@[simp] lemma image_comp_is_iso_left_comp_ι {X Y Z : 𝓐} (f : X ⟶ Y) (g : Y ⟶ Z) [is_iso f] :
+  (image_comp_is_iso_left f g).hom ≫ image.ι g = image.ι (f ≫ g) :=
+begin
+  simp [image_comp_is_iso_left],
+end
+
+@[simp] lemma image_comp_is_iso_left_comp_ι' {X Y Z : 𝓐} (f : X ⟶ Y) (g : Y ⟶ Z) [is_iso f] :
+  (image_comp_is_iso_left f g).inv ≫ image.ι (f ≫ g) = image.ι g :=
+begin
+  simp [image_comp_is_iso_left],
+end
 
 lemma image.lift_image_ι {A A' B : 𝓐} (f : A ⟶ B) (f' : A' ⟶ B) (e : A' ⟶ A) [is_iso e] (w : f' = e ≫ f) :
 image.lift ({ I := image f', m := image.ι f', e := factor_thru_image f ≫
@@ -427,7 +439,6 @@ begin
   simp,
 end
 
---y simpa [← category.assoc] using commutes--set_option pp.notation false
 lemma to_imker_f_succ {n : ℤ} : (to_imker C (n + 1)).f n = (X_iso_of_lt C (by simp)).hom ≫
 factor_thru_image (C.d n (n+1)) ≫ (imker.X_iso_image' C n).inv :=
 begin
@@ -450,16 +461,51 @@ begin
   { ext, simp,
     -- is this the right move? Surely?
     convert image.fac (C.d n (n+1)),
+    /-
+    𝓐 : Type u_1,
+    _inst_1 : category 𝓐,
+    _inst_2 : abelian 𝓐,
+    C : cochain_complex 𝓐 ℤ,
+    n : ℤ
+    ⊢ (imker.image.is_iso_comp (C.d n (n + 1))).inv ≫
+          (imker.image_iso_of_eq _).inv ≫ image.ι (homological_complex.d_to C (n + 1)) =
+        image.ι (C.d n (n + 1))
+    -/
+
+
     rw ← category.assoc,
     convert image.lift_image_ι _ _ _ (C.d_to_eq rfl), swap, apply_instance,
     simp [imker.image.is_iso_comp, imker.image_iso_of_eq],
-    library_search,
-    sorry,
-    --simp only [imker.image.is_iso_comp, imker.image_iso_of_eq],
-    --simp_rw homological_complex.d_to_eq,
-    -- this takes us back again
-    --ext, simp, recover, sorry, sorry, sorry, sorry
-    },
+    rw ← is_iso.eq_comp_inv,
+    ext,
+    simp,
+    /-
+    𝓐 : Type u_1,
+    _inst_1 : category 𝓐,
+    _inst_2 : abelian 𝓐,
+    C : cochain_complex 𝓐 ℤ,
+    n : ℤ
+    ⊢ C.d n (n + 1) =
+        factor_thru_image (C.d n (n + 1)) ≫
+          (image_comp_is_iso_left (homological_complex.X_prev_iso C rfl).hom (C.d n (n + 1))).inv ≫
+            (imker.image_iso_of_eq _).hom ≫
+              eq_to_hom _ ≫ image.ι ((homological_complex.X_prev_iso C rfl).hom ≫ C.d n (n + 1))
+    -/
+    convert (image.fac (C.d n (n+1))).symm,
+    /-
+    𝓐 : Type u_1,
+    _inst_1 : category 𝓐,
+    _inst_2 : abelian 𝓐,
+    C : cochain_complex 𝓐 ℤ,
+    n : ℤ
+    ⊢ (image_comp_is_iso_left (homological_complex.X_prev_iso C rfl).hom (C.d n (n + 1))).inv ≫
+          (imker.image_iso_of_eq _).hom ≫
+            eq_to_hom _ ≫ image.ι ((homological_complex.X_prev_iso C rfl).hom ≫ C.d n (n + 1)) =
+        image.ι (C.d n (n + 1))
+    -/
+    convert image_comp_is_iso_left_comp_ι' _ _,
+    delta imker.image_iso_of_eq,
+    simp, },
   rw foo,
   simp,
   have := C.eq_to_hom_comp_d (rfl : n + 1 = n + 1) (show n + 1 - 1 + 1 = n + 1, by ring),
@@ -498,6 +544,11 @@ instance cokernel.desc_iso_of_iso {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) [is
   is_iso (cokernel.desc (f ≫ g) (cokernel.π g) (by simp) : cokernel (f ≫ g) ⟶ cokernel g) :=
 ⟨⟨cokernel.desc _ (cokernel.π (f ≫ g)) (by { rw [← cancel_epi f, ← category.assoc], simp }),
   by {ext, simp}, by {ext, simp}⟩⟩
+
+instance cokernel.desc_iso_of_iso' {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) [is_iso g] :
+  is_iso (cokernel.desc _ (g ≫ cokernel.π _) (by rw [← category.assoc, cokernel.condition]) :
+  cokernel f ⟶ cokernel (f ≫ g)) :=
+⟨⟨cokernel.desc _ ((inv g) ≫ cokernel.π f) (by simp), (by {ext, simp}), (by {ext, simp})⟩⟩
 
 lemma cokernel.π_iso_comp {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) [is_iso f] : cokernel.π (f ≫ g) =
 cokernel.π g ≫ inv (cokernel.desc _ (cokernel.π g) (by simp) : cokernel (f ≫ g) ⟶ cokernel g) :=
@@ -801,13 +852,88 @@ lemma mono_coker_desc_congr {A B C : 𝓐} {f f' : A ⟶ B} (h : f = f') (g : B 
   mono (cokernel.desc f g w) ↔ mono (cokernel.desc f' g (h ▸ w)) :=
 by subst h
 
+lemma cokernel.desc_comp_iso_left {A B C D : 𝓐} {e : A ⟶ B} [is_iso e] (f : B ⟶ C) (g : C ⟶ D) (w : f ≫ g = 0):
+(cokernel.desc (e ≫ f) g (by simp [w])) = cokernel.desc _ (cokernel.π f) (by simp) ≫ cokernel.desc f g w :=
+begin
+  ext,
+  simp,
+end
+
+lemma cokernel.desc_comp_snd_right {A B C D : 𝓐} {e : A ⟶ B} (f : B ⟶ C) (g : C ⟶ D) (w : e ≫ f = 0):
+(cokernel.desc e (f ≫ g) (by rw [← category.assoc, w, zero_comp])) = cokernel.desc e f w ≫ g :=
+begin
+  ext,
+  simp,
+end
+
+lemma yet_another_cokernel_lemma {A B C D : 𝓐} {e : A ⟶ B} (f : B ⟶ C) (g : C ⟶ D) (w : e ≫ f ≫ g = 0):
+(cokernel.desc _ (f ≫ cokernel.π _) (by rw [← category.assoc, cokernel.condition])) ≫ (cokernel.desc (e ≫ f) g (by simp [w])) = cokernel.desc e (f ≫ g) w :=
+begin
+  ext,
+  simp,
+end
+
+lemma meh {A B C D : 𝓐} {f : A ⟶ B} (e : C ≅ B) (g : B ⟶ D) (w : f ≫ g = 0) :
+  mono (cokernel.desc (f ≫ e.inv) (e.hom ≫ g) (by simp [w])) ↔ mono (cokernel.desc f g w) :=
+begin
+  rw ← yet_another_cokernel_lemma,
+  convert mono_comp_is_iso_iff_mono _ _, simp, simp,
+--  rw ← yet_another_cokernel_lemma,
+--  apply @is_iso.comp_is_iso _ _ _ _ _ _ _ infer_instance infer_instance,
+  clear w g,
+  apply cokernel.desc_iso_of_iso',
+end
+
+lemma first_isomorphism_theorem {A B : 𝓐} (f : A ⟶ B) :
+is_iso (cokernel.desc (kernel.ι f) (factor_thru_image f) (by simp only [kernel_ι_comp_factor_thru_image])) :=
+begin
+  library_search,
+  sorry,
+end
+
+
+/-
+instance cokernel.desc_iso_of_iso {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) [is_iso f] :
+  is_iso (cokernel.desc (f ≫ g) (cokernel.π g) (by simp) : cokernel (f ≫ g) ⟶ cokernel g) :=
+  -/
 lemma ι_succ_to_imker_ι_ex_aux {n : ℤ} : mono (cokernel.desc ((ι_succ C n).f n) ((to_imker C (n + 1)).f n) (ι_succ.comp_to_imker_zero C)) :=
 begin
   rw mono_coker_desc_congr (ι_succ_f_self C),
-  sorry
+  /-
+  𝓐 : Type u_1,
+  _inst_1 : category 𝓐,
+  _inst_2 : abelian 𝓐,
+  C : cochain_complex 𝓐 ℤ,
+  n : ℤ
+  ⊢ mono
+      (cokernel.desc ((X_iso_of_eq C rfl).hom ≫ kernel.ι (C.d n (n + 1)) ≫ (X_iso_of_lt C _).inv)
+         ((to_imker C (n + 1)).f n)
+         _)
+  -/
+  simp_rw [to_imker_f_succ C],
+  rw cokernel.desc_comp_iso_left, swap, simp [_root_.category_theory.limits.factor_thru_image_iso_comp],
+  apply @mono_comp _ _ _ _ _ _ _ _ _, apply_instance,
+  rw meh, swap, simp,
+  simp,
+  /-
+  𝓐 : Type u_1,
+  _inst_1 : category 𝓐,
+  _inst_2 : abelian 𝓐,
+  C : cochain_complex 𝓐 ℤ,
+  n : ℤ
+  ⊢ mono
+      (cokernel.desc (kernel.ι (C.d n (n + 1)) ≫ (X_iso_of_lt C _).inv)
+         ((X_iso_of_lt C _).hom ≫ factor_thru_image (C.d n (n + 1)) ≫ (imker.X_iso_image' C n).inv)
+         _)
+  -/
+
+
+  rw cokernel.desc_comp_snd_right, swap, simp,
+  apply @mono_comp _ _ _ _ _ _ _ _ _, swap, apply_instance,
+  apply @is_iso.mono_of_iso _ _ _ _ _ _,
+  apply first_isomorphism_theorem,
 end
 
-#exit
 lemma ι_succ_to_imker_ι_ex {i n : ℤ} : mono (cokernel.desc ((ι_succ C i).f n)
   ((to_imker C (i + 1)).f n) (ι_succ.comp_to_imker_zero C)) :=
 begin
