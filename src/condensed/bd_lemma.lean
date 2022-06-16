@@ -92,6 +92,9 @@ def plain_eval_comparison (i : ℤ) :
 sorry
 -/
 
+/-
+WARNING!!!: I don't think this is the best approach...
+
 def uncurried_tensor_to_homology_component (M : Condensed.{u} Ab.{u+1}) (i : ℤ)
   (S : ExtrDisc.{u}) :
   M.val.obj (op S.val) ⟶
@@ -140,15 +143,32 @@ def tensor_to_homology (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
 (homology_functor (Condensed.{u} Ab.{u+1}) (complex_shape.up ℤ) i).map
 (eval_freeCond'_iso_component _ _).inv
 
+instance is_iso_tensor_to_homology_aux₁ (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
+is_iso ((Condensed_ExtrSheafProd_equiv _).inverse.map
+  (ExtrSheafProd.tensor_uncurry (uncurried_tensor_to_homology BD M i))) := sorry
+
+/-
 -- Key Lemma
 instance is_iso_tensor_to_homology_aux (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
-  is_iso (ExtrSheafProd.tensor_uncurry (uncurried_tensor_to_homology BD M i)) := sorry
+  is_iso (ExtrSheafProd.tensor_uncurry (uncurried_tensor_to_homology BD M i)) :=
+begin
+  suffices : is_iso
+  suffices : is_iso (ExtrSheafProd.tensor_uncurry (uncurried_tensor_to_homology BD M i)).val,
+  { let t := _, change is_iso t,
+    change is_iso ((ExtrSheafProd_to_presheaf _).map t) at this,
+    resetI,
+    apply is_iso_of_fully_faithful (ExtrSheafProd_to_presheaf Ab.{u+1}) },
+  apply_with nat_iso.is_iso_of_is_iso_app { instances := ff },
+  intros S, dsimp [ExtrSheafProd.tensor_uncurry],
+end
+-/
 
 instance is_iso_tensor_to_homology (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
   is_iso (tensor_to_homology BD M i) :=
 begin
   apply is_iso.comp_is_iso,
 end
+-/
 
 -- needs torsion-free condition on `M`
 def homology_bd_eval (M : Condensed.{u} Ab.{u+1})
@@ -157,7 +177,7 @@ def homology_bd_eval (M : Condensed.{u} Ab.{u+1})
   (tensor M $ ((BD.eval $
     category_theory.forget AddCommGroup ⋙ AddCommGroup.free).obj
       (AddCommGroup.free.obj punit)).val.as.homology i) :=
-(as_iso $ tensor_to_homology BD M i).symm
+sorry
 
 instance : has_coproducts (endomorphisms (Condensed.{u} Ab.{u+1})) :=
 sorry
