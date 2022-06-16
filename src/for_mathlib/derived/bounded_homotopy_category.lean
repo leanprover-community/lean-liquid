@@ -16,7 +16,7 @@ noncomputable theory
 open category_theory category_theory.limits category_theory.triangulated
 open homological_complex
 
-universes v u
+universes v v' u u'
 variables {A : Type u} [category.{v} A] [abelian A]
 
 namespace bounded_homotopy_category
@@ -300,3 +300,22 @@ fully_faithful_cancel_right (bounded_homotopy_category.forget A)
 end
 
 end bounded_homotopy_category
+
+namespace category_theory.functor
+
+variables {B : Type u'} [category.{v'} B] [abelian B]
+variables (F : A ⥤ B) [functor.additive F]
+
+instance is_bounded_above_map_homotopy_category_obj (X : bounded_homotopy_category A) :
+  ((functor.map_homotopy_category (complex_shape.up ℤ) F).obj X.val).is_bounded_above := sorry
+
+@[simps]
+def map_bounded_homotopy_category :
+  bounded_homotopy_category A ⥤ bounded_homotopy_category B :=
+{ obj := λ X, bounded_homotopy_category.of $
+    (F.map_homotopy_category _).obj X.val,
+  map := λ X Y f, (F.map_homotopy_category _).map f,
+  map_id' := λ X, (F.map_homotopy_category _).map_id _,
+  map_comp' := λ X Y Z f g, (F.map_homotopy_category _).map_comp _ _ }
+
+end category_theory.functor

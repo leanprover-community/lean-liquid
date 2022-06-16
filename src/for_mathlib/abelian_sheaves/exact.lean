@@ -4,6 +4,7 @@ import category_theory.abelian.homology
 import category_theory.sites.left_exact
 import for_mathlib.chain_complex_exact
 import for_mathlib.homology_iso
+import for_mathlib.exact_functor
 
 universes w v u
 
@@ -88,6 +89,9 @@ begin
     apply exact_of_exact,
     apply h.2 },
 end
+
+lemma sheafification_exact : functor.exact (presheaf_to_Sheaf J A) :=
+λ X Y Z f g h, exact_of_exact _ _ _ _ _ h
 
 end category_theory.Sheaf
 

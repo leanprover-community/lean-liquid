@@ -1,4 +1,5 @@
 import category_theory.abelian.homology
+import algebra.homology.additive
 import for_mathlib.abelian_category
 
 namespace category_theory
@@ -127,6 +128,22 @@ def homology_iso {X Y Z : A} (f : X ⟶ Y) (g : Y ⟶ Z) (w w') :
     F.map (homology.π' _ _ _)) sorry,
   hom_inv_id' := sorry,
   inv_hom_id' := sorry }
+
+def homology_functor_iso {M : Type*} (c : complex_shape M) (i : M) :
+  homology_functor A c i ⋙ F ≅
+  F.map_homological_complex _ ⋙ homology_functor B c i :=
+nat_iso.of_components
+(λ X,
+{ hom := homology.lift _ _ _
+   (F.map (homology.ι _ _ _) ≫ category_theory.inv (cokernel_comparison _ _) ≫
+    cokernel.desc _ (cokernel.π _) sorry) sorry,
+  inv := homology.desc' _ _ _
+    (kernel.lift _ (kernel.ι _) sorry ≫
+    category_theory.inv (kernel_comparison _ _) ≫ F.map (homology.π' _ _ _))
+    sorry,
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry })
+sorry
 
 end functor
 

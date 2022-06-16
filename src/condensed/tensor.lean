@@ -478,6 +478,7 @@ ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj (opposite.op S)
 instance evaluation_additive (S) : functor.additive (evaluation S) :=
 ⟨λ M N f g, rfl⟩
 
+@[simps]
 def half_internal_hom (A : AddCommGroup.{u+1}) (M : ExtrSheafProd.{u} Ab.{u+1}) :
   ExtrSheafProd.{u} Ab.{u+1} :=
 { val :=
