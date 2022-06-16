@@ -109,27 +109,6 @@ tensor_uncurry $
   end,
   naturality' := sorry })
 
-def eval_forget_free_eval_to_evaluation_map_eval_freeCond'
-  (M : Condensed.{u} Ab.{u+1}) (S : ExtrDisc.{u}) :
-  (BD.eval $ category_theory.forget _ ⋙ AddCommGroup.free).obj (M.val.obj (op S.val)) ⟶
-  (Condensed.evaluation _ S.val).map_bounded_homotopy_category.obj
-  ((BD.eval freeCond').obj M) :=
-(homotopy_category.quotient _ _).map
-{ f := λ i, begin
-    rcases i with (_|_)|_,
-    { dsimp [package.eval],
-      refine _ ≫ (proetale_topology.to_sheafify _).app _,
-      dsimp,
-      refine AddCommGroup.free.map _,
-      refine (category_theory.forget Ab.{u+1}).map _,
-      exact ((Condensed.evaluation Ab.{u+1} S.val).map_biproduct
-        (λ (i : ulift (fin (BD.data.X 0))), M)).inv },
-    { exact 0 },
-    { sorry } -- similar to the zero case.
-    -- Again, this should be broken up...
-  end,
-  comm' := sorry }
-
 instance is_iso_tensor_to_homology_bd_eval_eval_ExtrDisc
   (M : Condensed.{u} Ab.{u+1}) (i : ℤ) (S : ExtrDisc.{u})
   [no_zero_smul_divisors ℤ (M.val.obj (op S.val))] :
@@ -143,14 +122,24 @@ begin
     (M.val.obj (op S.val)).tensor _ :=
     tensor_eval_iso M (((BD.eval (forget AddCommGroup ⋙ AddCommGroup.free)).obj
       (AddCommGroup.free.obj punit)).val.as.homology i) S,
-  let t₂ : _ ≅ (((BD.eval freeCond').obj M).val.as.homology i).val.obj (op S.val) :=
-    (Condensed.homology_functor_evaluation_iso _ _ _).symm.app _,
   let s := sorry, -- this needs to be of the form `η.app (M.val.obj (op S))` where
     -- `η` is some natural transformation.
-  have hs : t = t₁.hom ≫ s ≫ t₂.hom, sorry,
-  dsimp at s,
+  have hs : t = t₁.hom ≫ s, sorry,
   suffices : is_iso s,
   { rw hs, resetI, apply_instance },
+  /-
+  Now we need to rewrite `s` as well.
+  Here `s` is essentially supposed to be an isomorphism from
+  `H^i(Q'(ℤ)) ⊗ M(S)` to `H^i(Q'(M))(S)`.
+  Recall, `Q'(M)` is some BD-like complex:
+  `Q'(M) := ⋯ → ℤ[M^n] → ℤ[M^m] → 0`
+  defined essentially as applying sheafification to
+  `Q'(M)' := ⋯ → ℤ[M^n]' → ℤ[M^m]' → 0.`
+  Sheafification is exact so that H^i(Q'(M)) is the sheafification of `H^i(Q'(M)')`, and the
+  natural map
+  `H^i(Q'(ℤ)) ⊗ M(S) → H^i(Q'(M)')(S) = H^i(Q'(M(S))` is indeed an isomorphism.
+
+  -/
   sorry,
   -- Key: Use `AddCommGroup.is_iso_of_preserves_of_is_tensor_unit`
 end
