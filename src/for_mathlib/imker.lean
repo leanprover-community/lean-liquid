@@ -80,12 +80,22 @@ eq_to_iso (by {rw [X_def, if_pos h]})
 def image_iso_of_eq {A B : 𝓐} {f f' : A ⟶ B} (h : f = f') : image f ≅ image f' :=
 eq_to_iso (by rw h)
 
---@[simps]
+def image.is_iso_comp {A B C : 𝓐} {f : A ⟶ B} [is_iso f] (g : B ⟶ C) : image (f ≫ g) ≅ image g :=
+{ hom := image.lift (({ I := _,
+  m := image.ι _,
+  m_mono := infer_instance,
+  e := f ≫ factor_thru_image g,
+  fac' := by simp only [category.assoc, image.fac]} : mono_factorisation _)),
+  inv := image.lift (({ I := _,
+  m := image.ι _,
+  m_mono := infer_instance,
+  e := (inv f) ≫ factor_thru_image (f ≫ g),
+  fac' := by simp only [category.assoc, image.fac, is_iso.inv_hom_id_assoc]} : mono_factorisation _)) }
+
+@[simps]
 def X_iso_image' (n : ℤ) :
 (C.imker (n + 1)).X n ≅ image (C.d n (n + 1)) :=
-(eq_to_iso (by simp)) ≪≫ (X_iso_image C (n + 1)) ≪≫ sorry--(image_iso_of_eq _)
-
-
+(eq_to_iso (by simp)) ≪≫ (X_iso_image C (n + 1)) ≪≫ image_iso_of_eq (C.d_to_eq rfl) ≪≫ image.is_iso_comp _
 
 @[simps] def X_iso_kernel (n : ℤ) : (imker C n).X n ≅ kernel (C.d_from n) :=
 eq_to_iso (by {rw [X_def, if_neg, if_pos rfl], linarith})
