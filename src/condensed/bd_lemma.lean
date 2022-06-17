@@ -170,6 +170,73 @@ begin
 end
 -/
 
+def point {A : Type u} (a : A) : punit.{u+1} ⟶ A := λ _, a
+
+def tensor_to_unsheafified_homology_component_applied
+  (M : Condensed.{u} Ab.{u+1}) (i : ℤ) (S : ExtrDisc.{u}) (m : M.val.obj (op S.val)) :
+  ((BD.eval (forget AddCommGroup ⋙ AddCommGroup.free)).obj
+    (AddCommGroup.free.obj punit)).val.as.homology i ⟶
+  (homological_complex.homology ((BD.eval' freeFunc).obj
+    (Condensed_Ab_to_presheaf.obj M)) i).obj (op S.val) :=
+match i with
+| (int.of_nat 0) := (homology_functor _ _ _).map
+    ((BD.eval' (forget AddCommGroup ⋙ AddCommGroup.free)).map
+      ((AddCommGroup.adj.hom_equiv _ _).symm (point m)) ≫
+      (eval_freeAb_iso_component _ _ _).inv) ≫
+    (((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj
+      (op S.val)).homology_functor_iso _ _).inv.app _
+| (int.of_nat (i+1)) := 0
+| (int.neg_succ_of_nat i) := (homology_functor _ _ _).map
+    ((BD.eval' (forget AddCommGroup ⋙ AddCommGroup.free)).map
+      ((AddCommGroup.adj.hom_equiv _ _).symm (point m)) ≫
+      (eval_freeAb_iso_component _ _ _).inv) ≫
+    (((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj
+      (op S.val)).homology_functor_iso _ _).inv.app _
+end
+
+def tensor_to_unsheafified_homology_component (M : Condensed.{u} Ab.{u+1}) (i : ℤ)
+  (S : ExtrDisc.{u}) :
+  M.val.obj (op S.val) ⟶
+  AddCommGroup.of
+    (((BD.eval (forget AddCommGroup ⋙ AddCommGroup.free)).obj
+      (AddCommGroup.free.obj punit)).val.as.homology i ⟶
+    (homological_complex.homology ((BD.eval' freeFunc).obj
+      (Condensed_Ab_to_presheaf.obj M)) i).obj (op S.val)) :=
+{ to_fun := λ m, tensor_to_unsheafified_homology_component_applied _ _ _ _ m,
+  map_zero' := sorry,
+  map_add' := sorry }
+
+def tensor_to_unsheafified_homology (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
+  (((Condensed_ExtrSheaf_equiv Ab).inverse.obj M).tensor
+    (((BD.eval (forget AddCommGroup ⋙ AddCommGroup.free)).obj
+    (AddCommGroup.free.obj punit)).val.as.homology i)).val ⟶
+  ExtrDisc_to_Profinite.op ⋙ homological_complex.homology
+    ((BD.eval' freeFunc).obj (Condensed_Ab_to_presheaf.obj M)) i :=
+{ app := λ S, AddCommGroup.tensor_uncurry $
+    tensor_to_unsheafified_homology_component _ _ _ _,
+  naturality' := sorry }
+
+def tensor_to_homology_aux (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
+((Condensed_ExtrSheaf_equiv Ab).inverse.obj M).tensor
+  (((BD.eval (forget AddCommGroup ⋙ AddCommGroup.free)).obj
+  (AddCommGroup.free.obj punit)).val.as.homology i) ⟶
+  (presheaf_to_Sheaf ExtrDisc.proetale_topology Ab).obj
+  (ExtrDisc_to_Profinite.op ⋙
+     homological_complex.homology ((BD.eval' freeFunc).obj
+     (Condensed_Ab_to_presheaf.obj M)) i) := Sheaf.hom.mk $
+tensor_to_unsheafified_homology _ _ _ ≫ grothendieck_topology.to_sheafify _ _
+
+def tensor_to_homology (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
+  (tensor M $ ((BD.eval $
+    category_theory.forget AddCommGroup ⋙ AddCommGroup.free).obj
+    (AddCommGroup.free.obj punit)).val.as.homology i) ⟶
+  ((BD.eval freeCond').obj M).val.as.homology i :=
+(Condensed_ExtrSheaf_equiv Ab).functor.map
+  (tensor_to_homology_aux _ _ _ ≫ ExtrDisc_sheafification_iso.hom.app _)
+≫ ((Condensed_ExtrSheaf_equiv _).counit_iso.app _).hom
+≫ (homology_functor_sheafification_iso _ _).hom.app _
+≫ (homology_functor _ _ _).map (eval_freeCond'_iso_component _ _).inv
+
 -- needs torsion-free condition on `M`
 def homology_bd_eval (M : Condensed.{u} Ab.{u+1})
   [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (M.val.obj (op S.val))] (i : ℤ) :
