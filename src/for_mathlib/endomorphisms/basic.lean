@@ -388,6 +388,17 @@ lemma f_epi {X Y : endomorphisms C} (f : X ⟶ Y) [epi f] : epi f.f :=
     dsimp [gg, hh, cofree.lift] at this, simpa using this,
   end }
 
+lemma f_mono {X Y : endomorphisms C} (f : X ⟶ Y) [mono f] : mono f.f :=
+{ right_cancellation := λ Z g h w, begin
+    let gg : free Z ⟶ X := free.desc g,
+    let hh : free Z ⟶ X := free.desc h,
+    have : gg ≫ f = hh ≫ f,
+    { ext, dsimp [gg,hh, free.desc], simpa },
+    rw cancel_mono at this,
+    apply_fun (λ e, sigma.ι ((λ i : ulift.{v} ℕ, Z)) (ulift.up 0) ≫ e.f) at this,
+    dsimp [gg, hh, free.desc] at this, simpa using this
+  end }
+
 instance free.projective (X : C) [projective X] : projective (free X) :=
 { factors := λ E Y f e he, begin
     resetI,
@@ -523,9 +534,47 @@ is_colimit_aux _
 instance has_cokernels : has_cokernels (endomorphisms 𝓐) :=
 ⟨λ X Y f, ⟨⟨⟨endomorphisms.cokernel_cofork _, endomorphisms.is_colimit_cokernel_cofork _⟩⟩⟩⟩
 
-instance [abelian 𝓐] : abelian (endomorphisms 𝓐) :=
-{ normal_mono_of_mono := sorry,
-  normal_epi_of_epi := sorry,
+def kernel_fork_iso :
+  endomorphisms.kernel_fork f ≅ kernel_fork.of_ι (endomorphisms.kernel_ι f)
+  (endomorphisms.kernel_fork f).condition :=
+cones.ext
+(iso.refl _)
+(by { rintro (_|_); tidy })
+
+def is_limit_fork_of_is_limit
+  (hF : is_limit (limits.kernel_fork.of_ι f.f (cokernel.condition _))) :
+  is_limit (limits.kernel_fork.of_ι f (endomorphisms.cokernel_cofork _).condition) :=
+sorry
+
+def is_colimit_cofork_of_is_colimit
+  (hF : is_colimit (limits.cokernel_cofork.of_π f.f (kernel.condition _))) :
+  is_colimit (limits.cokernel_cofork.of_π f (endomorphisms.kernel_fork _).condition) :=
+sorry
+
+instance [has_coproducts_of_shape (ulift.{v} ℕ) 𝓐] [has_products_of_shape (ulift.{v} ℕ) 𝓐]
+  [abelian 𝓐] : abelian (endomorphisms 𝓐) :=
+{ normal_mono_of_mono := begin
+    introsI X Y f _,
+    haveI := f_mono f,
+    let hE : is_limit (kernel_fork.of_ι f.f _) :=
+      category_theory.abelian.mono_is_kernel_of_cokernel _ (colimit.is_colimit _),
+    fconstructor,
+    exact endomorphisms.cokernel_obj f,
+    exact endomorphisms.cokernel_π f,
+    exact (endomorphisms.cokernel_cofork f).condition,
+    apply is_limit_fork_of_is_limit _ hE,
+  end,
+  normal_epi_of_epi := begin
+    introsI X Y f _,
+    haveI := f_epi f,
+    let hE : is_colimit (cokernel_cofork.of_π f.f _) :=
+      category_theory.abelian.epi_is_cokernel_of_kernel _ (limit.is_limit _),
+    fconstructor,
+    exact endomorphisms.kernel_obj f,
+    exact endomorphisms.kernel_ι f,
+    exact (endomorphisms.kernel_fork f).condition,
+    apply is_colimit_cofork_of_is_colimit _ hE,
+  end,
   has_finite_products := begin
     constructor, intros J _ _,
     haveI : has_finite_products 𝓐 := abelian.has_finite_products, -- WHY IS THIS NEEDED!?
