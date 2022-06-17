@@ -40,6 +40,8 @@ end homotopy_category
 namespace bounded_homotopy_category
 
 variables {𝓐 : Type u} [category.{v} 𝓐] [abelian 𝓐]
+variables [has_coproducts_of_shape (ulift.{v} ℕ) 𝓐]
+variables [has_products_of_shape (ulift.{v} ℕ) 𝓐]
 
 variables (X : bounded_homotopy_category (endomorphisms 𝓐))
 

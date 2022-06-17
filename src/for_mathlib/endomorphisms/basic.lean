@@ -602,8 +602,8 @@ begin
     erw hF.fac _ walking_parallel_pair.one, refl }
 end
 
-instance [has_coproducts_of_shape (ulift.{v} ℕ) 𝓐] [has_products_of_shape (ulift.{v} ℕ) 𝓐]
-  [abelian 𝓐] : abelian (endomorphisms 𝓐) :=
+instance [has_coproducts_of_shape (ulift.{v} ℕ) 𝓐] [has_products_of_shape (ulift.{v} ℕ) 𝓐] :
+  abelian (endomorphisms 𝓐) :=
 { normal_mono_of_mono := begin
     introsI X Y f _,
     haveI := f_mono f,
