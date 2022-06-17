@@ -358,11 +358,12 @@ end AddCommGroup
 
 namespace ExtrSheafProd
 
-/-- S ↦ M(S) ⊗ A -/
+@[simps obj map]
 def tensor_presheaf (M : ExtrDisc.{u}ᵒᵖ ⥤ Ab.{u+1}) (A : Ab.{u+1}) :
   ExtrDisc.{u}ᵒᵖ ⥤ Ab.{u+1} :=
 M ⋙ AddCommGroup.tensor_functor.flip.obj A
 
+@[simps val]
 def tensor (M : ExtrSheafProd.{u} Ab.{u+1}) (A : Ab.{u+1}) :
   ExtrSheafProd.{u} Ab.{u+1} :=
 { val := tensor_presheaf M.val A,
@@ -384,6 +385,7 @@ def tensor (M : ExtrSheafProd.{u} Ab.{u+1}) (A : Ab.{u+1}) :
     { rw [← AddCommGroup.map_tensor_comp_left, is_iso.inv_hom_id, AddCommGroup.map_tensor_id], },
   end } -- tensor products commutes with direct sums.
 
+@[simps val_app]
 def map_tensor {M M' : ExtrSheafProd.{u} Ab.{u+1}} {A A' : AddCommGroup.{u+1}}
   (f : M ⟶ M') (g : A ⟶ A') :
   M.tensor A ⟶ M'.tensor A' := ExtrSheafProd.hom.mk $
@@ -395,18 +397,46 @@ def map_tensor {M M' : ExtrSheafProd.{u} Ab.{u+1}} {A A' : AddCommGroup.{u+1}}
       f.val.naturality],
   end }
 
+@[simp]
+lemma map_tensor_id (M : ExtrSheafProd.{u} Ab.{u+1}) (A : AddCommGroup.{u+1}) :
+  map_tensor (𝟙 M) (𝟙 A) = 𝟙 _ :=
+by { ext : 3, dsimp, simp }
+
+@[simp]
+lemma map_tensor_comp {M M' M'' : ExtrSheafProd.{u} Ab.{u+1}}
+  {A A' A'' : AddCommGroup.{u+1}}
+  (f : M ⟶ M') (f' : M' ⟶ M'')
+  (g : A ⟶ A') (g' : A' ⟶ A'') :
+  map_tensor (f ≫ f') (g ≫ g') = map_tensor f g ≫ map_tensor f' g' :=
+by { ext : 3, dsimp, simp }
+
 -- Slow, so probably break into pieces
+@[simps]
 def tensor_functor : ExtrSheafProd.{u} Ab.{u+1} ⥤ Ab.{u+1} ⥤ ExtrSheafProd.{u} Ab.{u+1} :=
 { obj := λ M,
   { obj := λ A, M.tensor A,
     map := λ A A' f, map_tensor (𝟙 _) f,
-    map_id' := sorry,
-    map_comp' := sorry },
+    map_id' := λ X, by simp,
+    map_comp' := λ X Y Z f g, begin
+      nth_rewrite 0 [← category.id_comp (𝟙 M)],
+      rw map_tensor_comp,
+    end },
   map := λ M N f,
   { app := λ A, map_tensor f (𝟙 _),
-    naturality' := sorry },
-  map_id' := sorry,
-  map_comp' := sorry }
+    naturality' := λ A B g, begin
+      dsimp,
+      simp only [← map_tensor_comp, category.id_comp, category.comp_id],
+    end },
+  map_id' := λ M, begin
+    ext : 2,
+    simp,
+  end,
+  map_comp' := λ M N L f g, begin
+    ext x : 2,
+    dsimp,
+    nth_rewrite 0 [← category.comp_id (𝟙 x)],
+    rw [map_tensor_comp],
+  end }
 .
 
 @[simps]
@@ -576,22 +606,51 @@ def tensor_uncurry {A : AddCommGroup.{u+1}} {M N : ExtrSheaf.{u} Ab.{u+1}}
   M.tensor A ⟶ N :=
 ⟨(ExtrSheafProd.tensor_uncurry $ (ExtrSheaf_ExtrSheafProd_equiv _).functor.map e).val⟩
 
+@[simps val]
 def map_tensor {M M' : ExtrSheaf.{u} Ab.{u+1}} {A A' : AddCommGroup.{u+1}}
   (f : M ⟶ M') (g : A ⟶ A') :
   M.tensor A ⟶ M'.tensor A' :=
 ⟨((ExtrSheafProd.map_tensor $ (ExtrSheaf_ExtrSheafProd_equiv _).functor.map f) g).val⟩
 
+@[simp]
+lemma map_tensor_id (M : ExtrSheaf.{u} Ab.{u+1}) (A : AddCommGroup.{u+1}) :
+  map_tensor (𝟙 M) (𝟙 A) = 𝟙 _ :=
+by { ext : 1, dsimp, simpa, }
+
+@[simp]
+lemma map_tensor_comp {M M' M'' : ExtrSheaf.{u} Ab.{u+1}}
+  {A A' A'' : AddCommGroup.{u+1}}
+  (f : M ⟶ M') (f' : M' ⟶ M'')
+  (g : A ⟶ A') (g' : A' ⟶ A'') :
+  map_tensor (f ≫ f') (g ≫ g') = map_tensor f g ≫ map_tensor f' g' :=
+by { ext : 1, dsimp, simp }
+
+@[simps]
 def tensor_functor : ExtrSheaf.{u} Ab.{u+1} ⥤ Ab.{u+1} ⥤ ExtrSheaf.{u} Ab.{u+1} :=
 { obj := λ M,
   { obj := λ A, M.tensor A,
     map := λ A A' f, map_tensor (𝟙 _) f,
-    map_id' := sorry,
-    map_comp' := sorry },
-  map := λ M M' f,
+    map_id' := λ X, by simp,
+    map_comp' := λ X Y Z f g, begin
+      nth_rewrite 0 [← category.id_comp (𝟙 M)],
+      rw map_tensor_comp,
+    end },
+  map := λ M N f,
   { app := λ A, map_tensor f (𝟙 _),
-    naturality' := sorry },
-  map_id' := sorry,
-  map_comp' := sorry }
+    naturality' := λ A B g, begin
+      dsimp,
+      simp only [← map_tensor_comp, category.id_comp, category.comp_id],
+    end },
+  map_id' := λ M, begin
+    ext : 2,
+    simp,
+  end,
+  map_comp' := λ M N L f g, begin
+    ext x : 2,
+    dsimp,
+    nth_rewrite 0 [← category.comp_id (𝟙 x)],
+    rw [map_tensor_comp],
+  end }
 
 end ExtrSheaf
 
@@ -608,19 +667,46 @@ def map_tensor {M M' : Condensed.{u} Ab.{u+1}} {A A' : Ab.{u+1}}
 (Condensed_ExtrSheaf_equiv _).functor.map $
 ExtrSheaf.map_tensor ((Condensed_ExtrSheaf_equiv _).inverse.map f) g
 
+@[simp]
+lemma map_tensor_id (M : Condensed.{u} Ab.{u+1}) (A : AddCommGroup.{u+1}) :
+  map_tensor (𝟙 M) (𝟙 A) = 𝟙 _ :=
+by { dsimp [map_tensor], simpa, }
+
+@[simp]
+lemma map_tensor_comp {M M' M'' : Condensed.{u} Ab.{u+1}}
+  {A A' A'' : AddCommGroup.{u+1}}
+  (f : M ⟶ M') (f' : M' ⟶ M'')
+  (g : A ⟶ A') (g' : A' ⟶ A'') :
+  map_tensor (f ≫ f') (g ≫ g') = map_tensor f g ≫ map_tensor f' g' :=
+by { dsimp [map_tensor], simp, }
+
 /-- This is the functor that sends `A : Ab` to `M ⊗ A`,
 where `M` is a condensed abelian group, functorial in both `M` and `A`. -/
 def tensor_functor : Condensed.{u} Ab.{u+1} ⥤ Ab.{u+1} ⥤ Condensed.{u} Ab.{u+1} :=
 { obj := λ M,
   { obj := λ A, M.tensor A,
     map := λ A A' f, map_tensor (𝟙 _) f,
-    map_id' := sorry,
-    map_comp' := sorry },
-  map := λ M M' f,
+    map_id' := λ X, by simp,
+    map_comp' := λ X Y Z f g, begin
+      nth_rewrite 0 [← category.id_comp (𝟙 M)],
+      rw map_tensor_comp,
+    end },
+  map := λ M N f,
   { app := λ A, map_tensor f (𝟙 _),
-    naturality' := sorry },
-  map_id' := sorry,
-  map_comp' := sorry }
+    naturality' := λ A B g, begin
+      dsimp,
+      simp only [← map_tensor_comp, category.id_comp, category.comp_id],
+    end },
+  map_id' := λ M, begin
+    ext : 2,
+    simp,
+  end,
+  map_comp' := λ M N L f g, begin
+    ext x : 2,
+    dsimp,
+    nth_rewrite 0 [← category.comp_id (𝟙 x)],
+    rw [map_tensor_comp],
+  end }
 
 /-
 /-- Restrincting to `ExtrDisc` works as expeceted. -/
