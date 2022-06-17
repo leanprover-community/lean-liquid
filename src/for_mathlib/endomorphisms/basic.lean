@@ -60,6 +60,7 @@ begin
   { simp only [nat.succ_eq_add_one, pow_succ, End.mul_def, category.assoc, hom.comm, reassoc_of ih] }
 end
 
+@[simps]
 protected def forget (C : Type u) [category.{v} C] : endomorphisms C ⥤ C :=
 { obj := λ X, X.X,
   map := λ X Y f, f.f,
@@ -73,9 +74,250 @@ lemma epi_of_epi_f {X Y : endomorphisms C} (f : X ⟶ Y) [epi f.f] : epi f :=
 
 end category
 
+section limits
+
+variables {C : Type u} [category.{v} C]
+variables {J : Type v} [small_category J]
+
+@[simps]
+def twist_cone {K : J ⥤ endomorphisms C}
+  (S : cone (K ⋙ endomorphisms.forget C)) :
+  cone (K ⋙ endomorphisms.forget C) :=
+{ X := S.X,
+  π :=
+  { app := λ j, S.π.app j ≫ (K.obj j).e,
+    naturality' := begin
+      intros i j f,
+      dsimp,
+      simp only [category.id_comp, category.assoc, hom.comm],
+      erw S.w_assoc,
+    end } }
+
+abbreviation cone_e {K : J ⥤ endomorphisms C}
+  (S : cone (K ⋙ endomorphisms.forget C)) (hS : is_limit S) :
+  S.X ⟶ S.X :=
+@is_limit.lift J _ C _ (K ⋙ endomorphisms.forget C) S hS (twist_cone S)
+
+@[simps]
+protected def cone {K : J ⥤ endomorphisms C}
+  (S : cone (K ⋙ endomorphisms.forget C)) (hS : is_limit S) :
+  cone K :=
+{ X :=
+  { X := S.X,
+    e := cone_e S hS },
+  π :=
+  { app := λ j,
+    { f := S.π.app _,
+      comm := by { dsimp, simp } },
+    naturality' := λ i j f, begin
+      ext, dsimp, simp, erw S.w,
+    end } }
+
+@[simps]
+protected def is_limit_cone {K : J ⥤ endomorphisms C}
+  (S : cone (K ⋙ endomorphisms.forget C)) (hS : is_limit S) :
+  is_limit (endomorphisms.cone S hS) :=
+{ lift := λ S,
+  { f := hS.lift ⟨S.X.X,
+    { app := λ j, (S.π.app _).f,
+      naturality' := begin
+        intros i j f,
+        dsimp,
+        simp [← comp_f],
+      end }⟩,
+    comm := begin
+      apply hS.hom_ext, dsimp, simp,
+    end },
+  fac' := begin
+    intros s j, ext, dsimp, simp,
+  end,
+  uniq' := begin
+    intros s m hm, ext, apply hS.hom_ext,
+    intros j, specialize hm j, apply_fun (λ e, e.f) at hm,
+    dsimp at *, simp [hm],
+  end }
+
+.
+
+protected def cone_iso {K : J ⥤ endomorphisms C} (S : cone K)
+  (hS : is_limit ((endomorphisms.forget C).map_cone S)) :
+  endomorphisms.cone _ hS ≅ S :=
+cones.ext
+({ hom :=
+  { f := 𝟙 _,
+    comm := by { apply hS.hom_ext, intros j, dsimp, simp, erw hS.fac, dsimp, simp, } },
+  inv :=
+  { f := 𝟙 _,
+    comm := by { apply hS.hom_ext, intros j, dsimp, simp, erw hS.fac, dsimp, simp } },
+  hom_inv_id' := by { ext, dsimp, simp },
+  inv_hom_id' := by { ext, dsimp, simp } })
+begin
+  intros j, ext,
+  dsimp, simp,
+end
+
+protected def cone_iso' {K : J ⥤ endomorphisms C}
+  (S : cone (K ⋙ endomorphisms.forget C)) (hS : is_limit S) :
+  (endomorphisms.forget C).map_cone (endomorphisms.cone S hS) ≅ S :=
+cones.ext
+(iso.refl _)
+begin
+  intros j,
+  dsimp,
+  simp,
+end
+
+instance has_limit (K : J ⥤ endomorphisms C) [has_limit (K ⋙ endomorphisms.forget C)] :
+  has_limit K :=
+⟨⟨⟨_, endomorphisms.is_limit_cone _ (limit.is_limit _)⟩⟩⟩
+
+instance has_limits_of_shape [has_limits_of_shape J C] :
+  has_limits_of_shape J (endomorphisms C) := ⟨⟩
+
+instance has_limits [has_limits C] : has_limits (endomorphisms C) := ⟨⟩
+
+instance creates_limit (K : J ⥤ endomorphisms C) : creates_limit K (endomorphisms.forget _) :=
+{ reflects := λ S hS, is_limit.of_iso_limit (endomorphisms.is_limit_cone _ _)
+    (endomorphisms.cone_iso _ hS),
+  lifts := λ S hS,
+  { lifted_cone := endomorphisms.cone _ hS,
+    valid_lift := endomorphisms.cone_iso' _ _ } }
+
+instance preserves_limit (K : J ⥤ endomorphisms C) [has_limit (K ⋙ endomorphisms.forget C)] :
+  preserves_limit K (endomorphisms.forget C) :=
+category_theory.preserves_limit_of_creates_limit_and_has_limit K (endomorphisms.forget C)
+
+instance preserves_limits_of_shape [has_limits_of_shape J C] :
+  preserves_limits_of_shape J (endomorphisms.forget C) := ⟨⟩
+
+instance preserves_limits [has_limits C] : preserves_limits (endomorphisms.forget C) := ⟨⟩
+
+end limits
+
+section colimits
+
+variables {C : Type u} [category.{v} C]
+variables {J : Type v} [small_category J]
+
+@[simps]
+def twist_cocone {K : J ⥤ endomorphisms C}
+  (S : cocone (K ⋙ endomorphisms.forget C)) :
+  cocone (K ⋙ endomorphisms.forget C) :=
+{ X := S.X,
+  ι :=
+  { app := λ j, (K.obj j).e ≫ S.ι.app j,
+    naturality' := begin
+      intros i j f,
+      dsimp,
+      simp only [category.comp_id, ← hom.comm_assoc],
+      erw S.w,
+    end } }
+
+abbreviation cocone_e {K : J ⥤ endomorphisms C}
+  (S : cocone (K ⋙ endomorphisms.forget C)) (hS : is_colimit S) :
+  S.X ⟶ S.X :=
+@is_colimit.desc J _ C _ (K ⋙ endomorphisms.forget C) S hS (twist_cocone S)
+
+@[simps]
+protected def cocone {K : J ⥤ endomorphisms C}
+  (S : cocone (K ⋙ endomorphisms.forget C)) (hS : is_colimit S) :
+  cocone K :=
+{ X :=
+  { X := S.X,
+    e := cocone_e S hS },
+  ι :=
+  { app := λ j,
+    { f := S.ι.app j,
+      comm := by { dsimp, simp } },
+    naturality' := λ i j f, begin
+      ext, dsimp, simp, erw S.w,
+    end } }
+
+@[simps]
+protected def is_colimit_cocone {K : J ⥤ endomorphisms C}
+  (S : cocone (K ⋙ endomorphisms.forget C)) (hS : is_colimit S) :
+  is_colimit (endomorphisms.cocone S hS) :=
+{ desc := λ S,
+  { f := hS.desc ⟨S.X.X,
+    { app := λ j, (S.ι.app j).f,
+      naturality' := begin
+        intros i j f,
+        dsimp,
+        simp [← comp_f],
+      end }⟩,
+    comm := begin
+      apply hS.hom_ext, dsimp, simp,
+    end },
+  fac' := begin
+    intros s j, ext, dsimp, simp,
+  end,
+  uniq' := begin
+    intros s m hm, ext, apply hS.hom_ext,
+    intros j, specialize hm j, apply_fun (λ e, e.f) at hm,
+    dsimp at *, simp [hm],
+  end }
+
+.
+
+protected def cocone_iso {K : J ⥤ endomorphisms C} (S : cocone K)
+  (hS : is_colimit ((endomorphisms.forget C).map_cocone S)) :
+  endomorphisms.cocone _ hS ≅ S :=
+cocones.ext
+({ hom :=
+  { f := 𝟙 _,
+    comm := by { apply hS.hom_ext, intros j, dsimp, simp, erw hS.fac, dsimp, simp, } },
+  inv :=
+  { f := 𝟙 _,
+    comm := by { apply hS.hom_ext, intros j, dsimp, simp, erw hS.fac, dsimp, simp } },
+  hom_inv_id' := by { ext, dsimp, simp },
+  inv_hom_id' := by { ext, dsimp, simp } })
+begin
+  intros j, ext,
+  dsimp, simp,
+end
+
+protected def cocone_iso' {K : J ⥤ endomorphisms C}
+  (S : cocone (K ⋙ endomorphisms.forget C)) (hS : is_colimit S) :
+  (endomorphisms.forget C).map_cocone (endomorphisms.cocone S hS) ≅ S :=
+cocones.ext
+(iso.refl _)
+begin
+  intros j,
+  dsimp,
+  simp,
+end
+
+instance has_colimit (K : J ⥤ endomorphisms C) [has_colimit (K ⋙ endomorphisms.forget C)] :
+  has_colimit K :=
+⟨⟨⟨_, endomorphisms.is_colimit_cocone _ (colimit.is_colimit _)⟩⟩⟩
+
+instance has_colimits_of_shape [has_colimits_of_shape J C] :
+  has_colimits_of_shape J (endomorphisms C) := ⟨⟩
+
+instance has_colimits [has_colimits C] : has_colimits (endomorphisms C) := ⟨⟩
+
+instance creates_colimit (K : J ⥤ endomorphisms C) : creates_colimit K (endomorphisms.forget _) :=
+{ reflects := λ S hS, is_colimit.of_iso_colimit (endomorphisms.is_colimit_cocone _ _)
+    (endomorphisms.cocone_iso _ hS),
+  lifts := λ S hS,
+  { lifted_cocone := endomorphisms.cocone _ hS,
+    valid_lift := endomorphisms.cocone_iso' _ _ } }
+
+instance preserves_colimit (K : J ⥤ endomorphisms C) [has_colimit (K ⋙ endomorphisms.forget C)] :
+  preserves_colimit K (endomorphisms.forget C) :=
+category_theory.preserves_colimit_of_creates_colimit_and_has_colimit K (endomorphisms.forget C)
+
+instance preserves_colimits_of_shape [has_colimits_of_shape J C] :
+  preserves_colimits_of_shape J (endomorphisms.forget C) := ⟨⟩
+
+instance preserves_colimits [has_colimits C] : preserves_colimits (endomorphisms.forget C) := ⟨⟩
+
+end colimits
+
 section projectives
 
-variables {C : Type u} [category.{v} C] [has_coproducts_of_shape (ulift.{v} ℕ) C]
+variables {C : Type u} [category.{v} C]
+  [has_coproducts_of_shape (ulift.{v} ℕ) C]
   [has_products_of_shape (ulift.{v} ℕ) C]
 
 @[simps]
@@ -211,14 +453,84 @@ end preadditive
 
 section abelian
 
-variables (𝓐 : Type u) [category.{v} 𝓐]
+variables {𝓐 : Type u} [category.{v} 𝓐] [abelian 𝓐]
+  {X Y : endomorphisms 𝓐} (f : X ⟶ Y)
+
+@[simps]
+protected def kernel_obj : endomorphisms 𝓐 :=
+{ X := kernel f.f,
+  e := kernel.lift _ (kernel.ι _ ≫ X.e) (by simp) }
+
+@[simps]
+protected def kernel_ι : endomorphisms.kernel_obj f ⟶ X :=
+{ f := kernel.ι _,
+  comm := by { dsimp, simp } }
+
+protected def kernel_fork : kernel_fork f :=
+kernel_fork.of_ι (endomorphisms.kernel_ι f) $ by { ext, dsimp, simp }
+
+@[simp]
+protected lemma kernel_fork_ι_f :
+  (endomorphisms.kernel_fork f).ι.f = kernel.ι _ := rfl
+
+@[simps]
+protected def kernel_lift (s : kernel_fork f) :
+  s.X ⟶ endomorphisms.kernel_obj f :=
+{ f := kernel.lift _ s.ι.f $ by { rw [← comp_f, s.condition, zero_f], },
+  comm := by { ext, dsimp, simp } }
+
+@[simps]
+protected def is_limit_kernel_fork : is_limit (endomorphisms.kernel_fork f) :=
+is_limit_aux _
+(λ s, endomorphisms.kernel_lift f s)
+(λ s, by { ext, dsimp, simp })
+(λ s m hm, by { apply_fun (λ e, e.f) at hm, ext, dsimp at *, simp [hm] } )
+
+instance has_kernels : has_kernels (endomorphisms 𝓐) :=
+⟨λ X Y f, ⟨⟨⟨endomorphisms.kernel_fork _, endomorphisms.is_limit_kernel_fork _⟩⟩⟩⟩
+
+@[simps]
+protected def cokernel_obj : endomorphisms 𝓐 :=
+{ X := cokernel f.f,
+  e := cokernel.desc _ (Y.e ≫ cokernel.π _) $
+    by { simp only [← (reassoc_of f.comm), cokernel.condition, comp_zero] } }
+
+@[simps]
+protected def cokernel_π : Y ⟶ endomorphisms.cokernel_obj f :=
+{ f := cokernel.π _,
+  comm := by simp }
+
+protected def cokernel_cofork : cokernel_cofork f :=
+cokernel_cofork.of_π (endomorphisms.cokernel_π f) $ by { ext, dsimp, simp }
+
+@[simp]
+protected lemma cokernel_cofork_π_f :
+  (endomorphisms.cokernel_cofork f).π.f = cokernel.π _ := rfl
+
+@[simps]
+protected def cokernel_desc (s : cokernel_cofork f) :
+  endomorphisms.cokernel_obj f ⟶ s.X :=
+{ f := cokernel.desc _ s.π.f $ by { rw [← comp_f, s.condition, zero_f] },
+  comm := by { ext, dsimp, simp } }
+
+@[simps]
+protected def is_colimit_cokernel_cofork : is_colimit (endomorphisms.cokernel_cofork f) :=
+is_colimit_aux _
+(λ s, endomorphisms.cokernel_desc f s)
+(λ s, by { ext, dsimp, simp })
+(λ s m hm, by { apply_fun (λ e, e.f) at hm, ext, dsimp at *, simp [hm] })
+
+instance has_cokernels : has_cokernels (endomorphisms 𝓐) :=
+⟨λ X Y f, ⟨⟨⟨endomorphisms.cokernel_cofork _, endomorphisms.is_colimit_cokernel_cofork _⟩⟩⟩⟩
 
 instance [abelian 𝓐] : abelian (endomorphisms 𝓐) :=
 { normal_mono_of_mono := sorry,
   normal_epi_of_epi := sorry,
-  has_finite_products := sorry,
-  has_kernels := sorry,
-  has_cokernels := sorry,
+  has_finite_products := begin
+    constructor, intros J _ _,
+    haveI : has_finite_products 𝓐 := abelian.has_finite_products, -- WHY IS THIS NEEDED!?
+    apply_instance,
+  end,
   .. (_ : preadditive (endomorphisms 𝓐)) }
 
 end abelian
