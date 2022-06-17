@@ -544,12 +544,63 @@ cones.ext
 def is_limit_fork_of_is_limit
   (hF : is_limit (limits.kernel_fork.of_ι f.f (cokernel.condition _))) :
   is_limit (limits.kernel_fork.of_ι f (endomorphisms.cokernel_cofork _).condition) :=
-sorry
+is_limit_aux _
+(λ S,
+{ f := hF.lift (kernel_fork.of_ι S.ι.f begin
+    change _ ≫ (endomorphisms.cokernel_cofork _).π.f = _,
+    erw [← comp_f, S.condition, zero_f],
+  end),
+  comm := begin
+    apply hF.hom_ext, rintro (_|_),
+    { dsimp, simp only [category.assoc, hom.comm], erw hF.fac _ (walking_parallel_pair.zero),
+      erw hF.fac_assoc _ (walking_parallel_pair.zero),
+      dsimp, simp, },
+    { dsimp, simp, }
+  end })
+begin
+  intros S,
+  ext, dsimp, erw hF.fac _ walking_parallel_pair.zero, refl,
+end
+begin
+  intros S m hm,
+  ext, dsimp, apply hF.hom_ext, rintros (_|_),
+  { apply_fun (λ e, e.f) at hm,
+    dsimp at *,
+    simp only [hm],
+    erw hF.fac _ (walking_parallel_pair.zero), refl },
+  { dsimp, simp },
+end
 
 def is_colimit_cofork_of_is_colimit
   (hF : is_colimit (limits.cokernel_cofork.of_π f.f (kernel.condition _))) :
   is_colimit (limits.cokernel_cofork.of_π f (endomorphisms.kernel_fork _).condition) :=
-sorry
+is_colimit_aux _
+(λ S,
+{ f := hF.desc (cokernel_cofork.of_π S.π.f begin
+    change (endomorphisms.kernel_fork _).ι.f ≫ _ = _,
+    erw [← comp_f, S.condition, zero_f]
+  end),
+  comm := begin
+    apply hF.hom_ext, rintro (_|_),
+    { dsimp, simp },
+    { dsimp, erw hF.fac_assoc _ (walking_parallel_pair.one),
+      rw [← hom.comm_assoc],
+      erw hF.fac _ (walking_parallel_pair.one),
+      dsimp, simp }
+  end })
+begin
+  intros S,
+  ext, dsimp, erw hF.fac _ walking_parallel_pair.one, refl,
+end
+begin
+  intros S m hm,
+  ext, dsimp, apply hF.hom_ext, rintros (_|_),
+  { dsimp, simp },
+  { apply_fun (λ e, e.f) at hm,
+    dsimp at *,
+    simp only [hm],
+    erw hF.fac _ walking_parallel_pair.one, refl }
+end
 
 instance [has_coproducts_of_shape (ulift.{v} ℕ) 𝓐] [has_products_of_shape (ulift.{v} ℕ) 𝓐]
   [abelian 𝓐] : abelian (endomorphisms 𝓐) :=
