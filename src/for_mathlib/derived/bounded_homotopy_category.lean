@@ -1,15 +1,15 @@
-
+import category_theory.abelian.projective
 import for_mathlib.homotopy_category_pretriangulated
 import for_mathlib.abelian_category
 import for_mathlib.derived.homological
 import for_mathlib.derived.lemmas
-import category_theory.abelian.projective
 import for_mathlib.snake_lemma3
 import for_mathlib.les_homology
 import for_mathlib.exact_seq3
 import for_mathlib.triangle_shift
 import for_mathlib.homology_iso
 import for_mathlib.projective_replacement
+import for_mathlib.additive_functor
 
 noncomputable theory
 
@@ -307,7 +307,15 @@ variables {B : Type u'} [category.{v'} B] [abelian B]
 variables (F : A ⥤ B) [functor.additive F]
 
 instance is_bounded_above_map_homotopy_category_obj (X : bounded_homotopy_category A) :
-  ((functor.map_homotopy_category (complex_shape.up ℤ) F).obj X.val).is_bounded_above := sorry
+  ((functor.map_homotopy_category (complex_shape.up ℤ) F).obj X.val).is_bounded_above :=
+begin
+  obtain ⟨a, ha⟩ := homotopy_category.is_bounded_above.cond X.val,
+  refine ⟨⟨a, _⟩⟩,
+  intros i hi,
+  apply functor.map_is_zero,
+  apply ha,
+  apply hi,
+end
 
 @[simps]
 def map_bounded_homotopy_category :
