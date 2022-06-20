@@ -262,7 +262,7 @@ begin
   congr' 1,
   refine nonstrict_extend_ext _ _ (r'⁻¹) (1 * (r'⁻¹ * 1)) _ _ _,
   { intro X, apply nonstrict_extend_bound_by },
-  sorry { intro X,
+  { intro X,
     apply comphaus_filtered_pseudo_normed_group_hom.bound_by.comp,
     apply comphaus_filtered_pseudo_normed_group_hom.bound_by.comp,
     { apply strict_comphaus_filtered_pseudo_normed_group_hom.to_chfpsng_hom.bound_by_one },
@@ -271,15 +271,6 @@ begin
   { rw [whisker_left_comp, whisker_left_comp, ← whisker_right_left, ← whisker_right_left,
       extend_commutes_comp_extend_extends', extend_commutes_comp_extend_extends''],
     rw nonstrict_extend_whisker_left,
-
-    -- haveI : Π (X : Profinite.{0}), preserves_limits_of_shape.{0 0 0} (discrete_quotient ↥X) CHFPNG₁_to_CHFPNGₑₗ,
-    -- { sorry },
-    -- haveI : ∀ (X : Profinite.{0}), has_limit
-    --   (X.fintype_diagram ⋙ (Fintype_Lbar.{0 0} r' ⋙ PFPNGT₁_to_CHFPNG₁ₑₗ.{0} r') ⋙ CHFPNG₁_to_CHFPNGₑₗ.{0}),
-    -- { sorry },
-    -- rw [nonstrict_extend_whisker_left,
-    --   ← Profinite.extend_commutes_comp_extend_extends_assoc.{0}],
-    -- rw [whisker_left_comp, whisker_left_comp, ← whisker_right_left, ← whisker_right_left],
 
     ext X : 2,
     simp only [whisker_left_app, whisker_right_app, nat_trans.comp_app,
@@ -290,31 +281,10 @@ begin
 
     simp only [← iso.app_hom, ← iso.app_inv, ← functor.map_iso_hom, ← functor.map_iso_inv,
       category.assoc, iso.eq_inv_comp],
-    delta Tinv_nat_trans, dsimp only,
-    -- dsimp only [iso.app_hom, iso.app_inv, functor.map_iso_hom, functor.map_iso_inv],
-    ext x : 2,
-    -- dsimp only [CHFPNG₁_to_CHFPNGₑₗ_map, PFPNGT₁_to_CHFPNG₁ₑₗ_map_to_fun,
-    --   strict_comphaus_filtered_pseudo_normed_group_hom.to_chfpsng_hom_to_fun],
-    symmetry,
-    have := comphaus_filtered_pseudo_normed_group_with_Tinv_hom.map_Tinv
-      ((Profinite.extend_extends (Fintype_Lbar.{0 0} r')).app X).hom x,
-    sorry; convert this using 1,
 
-
-
-    -- exact this,
-
-    -- have := (Tinv_nat_trans (Profinite.extend (Fintype_Lbar r'))).naturality,
-    -- simp only [← whisker_left_app, ← whisker_right_app, ← nat_trans.comp_app,
-    --   ← iso_whisker_right_hom, ← iso_whisker_right_inv, category.assoc],
-    -- congr' 1,
-    -- rw [iso.eq_inv_comp, ← iso.comp_inv_eq],
-    -- apply Profinite.extend_nat_trans_ext,
-
-    -- rw [nat_trans.comp_app, nat_trans.comp_app, whisker_right_app, whisker_right_app],
-
-
-     }
+    ext x : 1,
+    exact (comphaus_filtered_pseudo_normed_group_with_Tinv_hom.map_Tinv
+      ((Profinite.extend_extends (Fintype_Lbar.{0 0} r')).app X).hom x).symm }
 end
 
 lemma condensify_Tinv_iso' :
