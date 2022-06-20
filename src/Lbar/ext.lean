@@ -505,25 +505,30 @@ lemma Hι1 : ∀ j,
   c₀ r r' eg (λ (n : ℕ), eg.κ r r' n) (eg.κ' r r') (i + 1) ⟨ℤ⟩ ≤ ι' r r' i j :=
 sorry
 
--- SELFCONTAINED
 lemma Hι1' : ∀ j,
   c₀ r r' eg (λ (n : ℕ), eg.κ r r' n) (eg.κ' r r') (i + 1 + 1) ⟨ℤ⟩ ≤ ι' r r' i j :=
 sorry
 
--- SELFCONTAINED
 lemma Hι2a : ∀ j,
   k (eg.κ' r r') i ^ 2 * ι' r r' i j ≤ ι' r r' i (j + 1) :=
-sorry
+begin
+  rintro (rfl | j),
+  all_goals { simp [ι'] }
+end
 
--- SELFCONTAINED
 lemma Hι2b : ∀ j,
   k (eg.κ' r r') (i + 1) ^ 2 * ι' r r' i j ≤ ι' r r' i (j + 1) :=
-sorry
+begin
+  rintro (rfl | j),
+  all_goals { simp [ι'] }
+end
 
--- SELFCONTAINED
 lemma Hι2c : ∀ j,
   k (eg.κ' r r') (i + 1 + 1) ^ 2 * ι' r r' i j ≤ ι' r r' i (j + 1) :=
-sorry
+begin
+  rintro (rfl | j),
+  all_goals { simp [ι'] }
+end
 
 def ι : ulift.{1} ℕ → ℝ≥0 := ι' r r' i ∘ ulift.down
 
