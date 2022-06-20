@@ -212,10 +212,119 @@ def condensify_iso_extend' :
   ((Profinite.extend (Fintype_Lbar.{0 0} r')).obj S).to_Condensed :=
 (condensify_iso_extend r').app S
 
+section move_me
+
+universes v u'
+
+open Profinite
+
+variables {C : Type u} [category.{v} C] (F : Fintype.{v} ⥤ C)
+variables {D : Type u'} [category.{v} D]
+variable [∀ X : Profinite, has_limit (X.fintype_diagram ⋙ F)]
+
+@[reassoc]
+lemma extend_commutes_comp_extend_extends' (G : C ⥤ D)
+  [∀ X : Profinite.{v}, preserves_limits_of_shape (discrete_quotient X) G]
+  [∀ X : Profinite.{v}, has_limit (X.fintype_diagram ⋙ F ⋙ G)] :
+  whisker_left Fintype.to_Profinite (extend_commutes F G).hom =
+  (functor.associator _ _ _).inv ≫ (whisker_right (extend_extends _).hom G) ≫
+    (extend_extends _).inv :=
+by rw [← category.assoc, iso.eq_comp_inv, extend_commutes_comp_extend_extends]
+
+@[reassoc]
+lemma extend_commutes_comp_extend_extends'' (G : C ⥤ D)
+  [∀ X : Profinite.{v}, preserves_limits_of_shape (discrete_quotient X) G]
+  [∀ X : Profinite.{v}, has_limit (X.fintype_diagram ⋙ F ⋙ G)] :
+  whisker_left Fintype.to_Profinite (extend_commutes F G).inv =
+  (extend_extends _).hom ≫ (whisker_right (extend_extends _).inv G) ≫
+    (functor.associator _ _ _).hom :=
+begin
+  rw [← iso.inv_comp_eq, ← iso_whisker_left_inv, iso.comp_inv_eq, iso_whisker_left_hom,
+    extend_commutes_comp_extend_extends', category.assoc, iso.hom_inv_id_assoc,
+    ← iso_whisker_right_hom, ← iso_whisker_right_inv, iso.inv_hom_id_assoc],
+end
+
+end move_me
+
+lemma condensify_Tinv_iso :
+  condensify_Tinv (Fintype_Lbar.{0 0} r') ≫ (condensify_iso_extend r').hom =
+  (condensify_iso_extend r').hom ≫ (@whisker_right _ _ _ _ _ _ _ _ (Tinv_nat_trans _) _) :=
+begin
+  delta Tinv_cond condensify_Tinv condensify_nonstrict condensify_iso_extend' condensify_iso_extend,
+  ext S : 2,
+  rw [iso.symm_hom, iso.app_inv, functor.map_iso_inv, nat_trans.comp_app, nat_trans.comp_app,
+    whiskering_left_map_app_app, ← iso.app_inv, ← functor.map_iso_inv, iso.comp_inv_eq,
+    functor.map_iso_inv, functor.map_iso_hom, functor.comp_map, functor.comp_map,
+    whisker_right_app, whisker_right_app, ← functor.map_comp, ← functor.map_comp],
+  congr' 1,
+  rw [iso.app_inv, iso.app_hom, ← whisker_right_app, ← whisker_right_app,
+    ← nat_trans.comp_app, ← nat_trans.comp_app],
+  congr' 1,
+  refine nonstrict_extend_ext _ _ (r'⁻¹) (1 * (r'⁻¹ * 1)) _ _ _,
+  { intro X, apply nonstrict_extend_bound_by },
+  sorry { intro X,
+    apply comphaus_filtered_pseudo_normed_group_hom.bound_by.comp,
+    apply comphaus_filtered_pseudo_normed_group_hom.bound_by.comp,
+    { apply strict_comphaus_filtered_pseudo_normed_group_hom.to_chfpsng_hom.bound_by_one },
+    { apply Tinv_bound_by },
+    { apply strict_comphaus_filtered_pseudo_normed_group_hom.to_chfpsng_hom.bound_by_one }, },
+  { rw [whisker_left_comp, whisker_left_comp, ← whisker_right_left, ← whisker_right_left,
+      extend_commutes_comp_extend_extends', extend_commutes_comp_extend_extends''],
+    rw nonstrict_extend_whisker_left,
+
+    -- haveI : Π (X : Profinite.{0}), preserves_limits_of_shape.{0 0 0} (discrete_quotient ↥X) CHFPNG₁_to_CHFPNGₑₗ,
+    -- { sorry },
+    -- haveI : ∀ (X : Profinite.{0}), has_limit
+    --   (X.fintype_diagram ⋙ (Fintype_Lbar.{0 0} r' ⋙ PFPNGT₁_to_CHFPNG₁ₑₗ.{0} r') ⋙ CHFPNG₁_to_CHFPNGₑₗ.{0}),
+    -- { sorry },
+    -- rw [nonstrict_extend_whisker_left,
+    --   ← Profinite.extend_commutes_comp_extend_extends_assoc.{0}],
+    -- rw [whisker_left_comp, whisker_left_comp, ← whisker_right_left, ← whisker_right_left],
+
+    ext X : 2,
+    simp only [whisker_left_app, whisker_right_app, nat_trans.comp_app,
+      functor.associator_hom_app, functor.associator_inv_app,
+      category.id_comp, category.comp_id, category.assoc, functor.map_comp],
+    slice_rhs 2 3 {},
+    congr' 2,
+
+    simp only [← iso.app_hom, ← iso.app_inv, ← functor.map_iso_hom, ← functor.map_iso_inv,
+      category.assoc, iso.eq_inv_comp],
+    delta Tinv_nat_trans, dsimp only,
+    -- dsimp only [iso.app_hom, iso.app_inv, functor.map_iso_hom, functor.map_iso_inv],
+    ext x : 2,
+    -- dsimp only [CHFPNG₁_to_CHFPNGₑₗ_map, PFPNGT₁_to_CHFPNG₁ₑₗ_map_to_fun,
+    --   strict_comphaus_filtered_pseudo_normed_group_hom.to_chfpsng_hom_to_fun],
+    symmetry,
+    have := comphaus_filtered_pseudo_normed_group_with_Tinv_hom.map_Tinv
+      ((Profinite.extend_extends (Fintype_Lbar.{0 0} r')).app X).hom x,
+    sorry; convert this using 1,
+
+
+
+    -- exact this,
+
+    -- have := (Tinv_nat_trans (Profinite.extend (Fintype_Lbar r'))).naturality,
+    -- simp only [← whisker_left_app, ← whisker_right_app, ← nat_trans.comp_app,
+    --   ← iso_whisker_right_hom, ← iso_whisker_right_inv, category.assoc],
+    -- congr' 1,
+    -- rw [iso.eq_inv_comp, ← iso.comp_inv_eq],
+    -- apply Profinite.extend_nat_trans_ext,
+
+    -- rw [nat_trans.comp_app, nat_trans.comp_app, whisker_right_app, whisker_right_app],
+
+
+     }
+end
+
 lemma condensify_Tinv_iso' :
   (condensify_Tinv (Fintype_Lbar.{0 0} r')).app S ≫ (condensify_iso_extend' r' S).hom =
   (condensify_iso_extend' r' S).hom ≫ ((Profinite.extend (Fintype_Lbar.{0 0} r')).obj S).Tinv_cond :=
-sorry
+begin
+  have := condensify_Tinv_iso r',
+  apply_fun (λ η, η.app S) at this,
+  exact this,
+end
 
 def useful_commsq (i : ℤ) (ι : ulift.{1} ℕ → ℝ≥0) (hι : monotone ι) [normed_with_aut r V] :=
   shift_sub_id.commsq
