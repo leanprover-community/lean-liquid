@@ -83,7 +83,6 @@ instance Condensed_ExtrSheaf_equiv_additive :
   functor.additive (Condensed_ExtrSheaf_equiv Ab.{u+1}).inverse :=
 by constructor
 
--- SELFCONTAINED
 def whiskering_Cech_comp_iso
   {C : Type*} [category C] {𝓐 : Type*} [category 𝓐] [abelian 𝓐] {𝓑 : Type*} [category 𝓑] [abelian 𝓑]
   (f : arrow C) [∀ (n : ℕ),
@@ -150,7 +149,6 @@ instance presheaf_to_Sheaf_additive :
   (presheaf_to_Sheaf.{u+2 u u+1} ExtrDisc.proetale_topology.{u} Ab.{u+1}).additive :=
 category_theory.Sheaf.presheaf_to_Sheaf_additive
 
--- SELFCONTAINED
 def acyclic_of_exact.induction_step_ex₂_aux
   {C : Type*} [category C] {𝓐 : Type*} [category 𝓐] [abelian 𝓐] {𝓑 : Type*} [category 𝓑] [abelian 𝓑]
   (f : arrow C) [∀ (n : ℕ),

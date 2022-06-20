@@ -14,8 +14,6 @@ namespace chain_complex
 
 variables (C : chain_complex A ℤ)
 
-/- This whole file is SELFCONTAINED -/
-
 lemma _root_.category_theory.is_zero_homology_iff_exact
   {X Y Z : A} (f : X ⟶ Y) (g : Y ⟶ Z) (w : f ≫ g = 0) :
   is_zero (homology f g w) ↔ exact f g :=
