@@ -224,6 +224,24 @@ begin
     { exact auux sq2' }, },
 end
 
+lemma Tinv2_iso_of_bicartesian_aux [normed_with_aut r V]
+  [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]
+  (i : ℤ)
+  (H1 : (shift_sub_id.commsq (ExtQprime.Tinv2 r r' BD.data κ κ₂ M V i) ι hι).bicartesian) :
+  (Ext_Tinv2_commsq (of'_hom (sigma_map (λ (k : ulift ℕ), ι k) (QprimeFP_int.Tinv BD.data κ₂ κ M)))
+  (of'_hom (sigma_map (λ (k : ulift ℕ), ι k) (QprimeFP_int.ι BD.data κ₂ κ M)))
+  (of'_hom (sigma_map (λ (k : ulift ℕ), ι k) (QprimeFP_int.Tinv BD.data κ₂ κ M)))
+  (of'_hom (sigma_map (λ (k : ulift ℕ), ι k) (QprimeFP_int.ι BD.data κ₂ κ M)))
+  (of'_hom (QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD.data κ₂ M)))
+  (of'_hom (QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD.data κ M)))
+  (auux $ commsq_shift_sub_id_Tinv _ _ _ _ _ _)
+  (auux $ commsq_shift_sub_id_ι _ _ _ _ _ _)
+  ((single _ 0).map (Condensed.of_top_ab_map (normed_group_hom.to_add_monoid_hom (normed_with_aut.T.inv : V ⟶ V)) (normed_group_hom.continuous _)))
+  i).bicartesian :=
+begin
+  refine commsq.bicartesian.of_iso _ _ _ _ _ _ _ _ H1;
+  sorry
+end
 
 lemma Tinv2_iso_of_bicartesian [normed_with_aut r V]
   [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]
@@ -249,13 +267,14 @@ begin
     (commsq_shift_sub_id_Tinv BD.data _ _ M ι hι)
     (commsq_sigma_proj_Tinv BD _ _ M ι)
     (commsq_shift_sub_id_ι BD.data _ _ M ι hι)
-    (commsq_sigma_proj_ι BD _ _ M ι),
-  sorry
-  -- have LES₁ := (((Ext_five_term_exact_seq' _ _ i Vc SES₁).drop 2).pair.cons (Ext_five_term_exact_seq' _ _ (i+1) Vc SES₁)),
-  -- replace LES₁ := (((Ext_five_term_exact_seq' _ _ i Vc SES₁).drop 1).pair.cons LES₁).extract 0 4,
-  -- have LES₂ := (((Ext_five_term_exact_seq' _ _ i Vc SES₂).drop 2).pair.cons (Ext_five_term_exact_seq' _ _ (i+1) Vc SES₂)).extract 0 4,
-  -- replace LES₂ := (((Ext_five_term_exact_seq' _ _ i Vc SES₂).drop 1).pair.cons LES₂).extract 0 4,
-  -- refine iso_of_bicartesian_of_bicartesian LES₁ LES₂ _ _ _ _ _ _;
+    (commsq_sigma_proj_ι BD _ _ M ι)
+    Vc ((single _ _).map $ Condensed.of_top_ab_map
+      (normed_group_hom.to_add_monoid_hom normed_with_aut.T.inv) (normed_group_hom.continuous _))
+    _
+    (Tinv2_iso_of_bicartesian_aux _ _ _ _ _ _ _ _ _ H1)
+    (Tinv2_iso_of_bicartesian_aux _ _ _ _ _ _ _ _ _ H2),
+  delta Ext_Tinv2 at this,
+  simpa only [op_id, category_theory.functor.map_id, category.id_comp, nat_trans.id_app],
 end
 
 lemma Tinv2_iso_of_bicartesian' [normed_with_aut r V]
