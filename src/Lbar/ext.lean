@@ -69,7 +69,7 @@ def ExtQprime.Tinv
   (n : ℤ) :
   (QprimeFP r' BD κ M).op ⋙ (Ext n).flip.obj ((single _ 0).obj V.to_Cond) ⟶
   (QprimeFP r' BD κ₂ M).op ⋙ (Ext n).flip.obj ((single _ 0).obj V.to_Cond) :=
-sorry
+whisker_right (nat_trans.op $ QprimeFP.Tinv BD _ _ M) _
 
 /-- The `T_inv` map induced by `V` -/
 def ExtQprime.T_inv [normed_with_aut r V]
@@ -77,7 +77,9 @@ def ExtQprime.T_inv [normed_with_aut r V]
   (n : ℤ) :
   (QprimeFP r' BD κ M).op ⋙ (Ext n).flip.obj ((single _ 0).obj V.to_Cond) ⟶
   (QprimeFP r' BD κ₂ M).op ⋙ (Ext n).flip.obj ((single _ 0).obj V.to_Cond) :=
-sorry
+whisker_right sorry _ ≫ whisker_left _ ((Ext n).flip.map $ (single _ _).map $
+  (Condensed.of_top_ab_map (normed_with_aut.T.inv).to_add_monoid_hom
+  (normed_group_hom.continuous _)))
 
 def ExtQprime.Tinv2 [normed_with_aut r V]
   [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]
@@ -111,6 +113,16 @@ end
 
 section
 
+def _root_.category_theory.functor.map_commsq
+  {C D : Type*} [category C] [abelian C] [category D] [abelian D] (F : C ⥤ D) {X Y Z W : C}
+  {f₁ : X ⟶ Y} {g₁ : X ⟶ Z} {g₂ : Y ⟶ W} {f₂ : Z ⟶ W} (sq : commsq f₁ g₁ g₂ f₂) :
+  commsq (F.map f₁) (F.map g₁) (F.map g₂) (F.map f₂) :=
+commsq.of_eq $ by rw [← F.map_comp, sq.w, F.map_comp]
+
+end
+
+section
+
 variables {r'}
 variables (BD : breen_deligne.package)
 variables (κ κ₂ : ℝ≥0 → ℕ → ℝ≥0)
@@ -127,7 +139,19 @@ def _root_.ProFiltPseuNormGrpWithTinv₁.Tinv_cond : M.to_Condensed ⟶ M.to_Con
 (CompHausFiltPseuNormGrp.to_Condensed.{u}).map
   profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv
 
+-- move me
+instance eval'_is_bounded_above :
+  ((homotopy_category.quotient (Condensed Ab) (complex_shape.up ℤ)).obj
+    ((BD.eval' freeCond').obj M.to_Condensed)).is_bounded_above :=
+by { delta breen_deligne.package.eval', refine ⟨⟨1, _⟩⟩, apply chain_complex.bounded_by_one }
+
 variables (ι : ulift.{u+1} ℕ → ℝ≥0) (hι : monotone ι)
+
+-- move me
+instance sigma_Qprime_int_bounded_above :
+  ((homotopy_category.quotient (Condensed Ab) (complex_shape.up ℤ)).obj
+    (∐ λ (k : ulift ℕ), (QprimeFP_int r' BD.data κ M).obj (ι k))).is_bounded_above :=
+sorry
 
 lemma Tinv2_iso_of_bicartesian [normed_with_aut r V]
   [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]
@@ -140,7 +164,17 @@ lemma Tinv2_iso_of_bicartesian [normed_with_aut r V]
       ((single (Condensed Ab) 0).map
         (Condensed.of_top_ab_map
           (normed_group_hom.to_add_monoid_hom normed_with_aut.T.inv) (normed_group_hom.continuous _)))) :=
-sorry
+begin
+  let Vc := (single (Condensed Ab) 0).obj V.to_Cond,
+  have SES₁ := QprimeFP.short_exact BD κ M ι hι,
+  have SES₂ := QprimeFP.short_exact BD κ₂ M ι hι,
+  have LES₁ := (((Ext_five_term_exact_seq' _ _ i Vc SES₁).drop 2).pair.cons (Ext_five_term_exact_seq' _ _ (i+1) Vc SES₁)),
+  replace LES₁ := (((Ext_five_term_exact_seq' _ _ i Vc SES₁).drop 1).pair.cons LES₁).extract 0 4,
+  have LES₂ := (((Ext_five_term_exact_seq' _ _ i Vc SES₂).drop 2).pair.cons (Ext_five_term_exact_seq' _ _ (i+1) Vc SES₂)).extract 0 4,
+  replace LES₂ := (((Ext_five_term_exact_seq' _ _ i Vc SES₂).drop 1).pair.cons LES₂).extract 0 4,
+  refine iso_of_bicartesian_of_bicartesian LES₁ LES₂ _ _ _ _ _ _;
+  sorry
+end
 
 lemma Tinv2_iso_of_bicartesian' [normed_with_aut r V]
   [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]

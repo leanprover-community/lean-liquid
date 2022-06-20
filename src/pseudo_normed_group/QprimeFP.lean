@@ -96,5 +96,19 @@ sorry
 
 end step4
 
+section step5
+
+variables {r' : ℝ≥0}
+variables (BD : breen_deligne.data)
+variables (κ κ₂ : ℝ≥0 → ℕ → ℝ≥0)
+variables [∀ (c : ℝ≥0), BD.suitable (κ c)] [∀ n, fact (monotone (function.swap κ n))]
+variables [∀ (c : ℝ≥0), BD.suitable (κ₂ c)] [∀ n, fact (monotone (function.swap κ₂ n))]
+variables (M : ProFiltPseuNormGrpWithTinv₁.{u} r')
+
+def QprimeFP.Tinv : (QprimeFP r' BD κ M) ⟶ (QprimeFP r' BD κ₂ M) :=
+sorry
+
+end step5
+
 -- variables (f : ℕ → ℝ≥0)
 -- #check ∐ (λ i, (QprimeFP r' BD κ M).obj (f i))
