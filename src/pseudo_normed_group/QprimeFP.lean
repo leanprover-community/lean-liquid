@@ -105,7 +105,13 @@ variables [∀ (c : ℝ≥0), BD.suitable (κ c)] [∀ n, fact (monotone (functi
 variables [∀ (c : ℝ≥0), BD.suitable (κ₂ c)] [∀ n, fact (monotone (function.swap κ₂ n))]
 variables (M : ProFiltPseuNormGrpWithTinv₁.{u} r')
 
-def QprimeFP.Tinv : (QprimeFP r' BD κ M) ⟶ (QprimeFP r' BD κ₂ M) :=
+def QprimeFP.Tinv [∀ c n, fact (κ c n ≤ r' * κ₂ c n)] :
+  (QprimeFP r' BD κ M) ⟶ (QprimeFP r' BD κ₂ M) :=
+sorry
+
+/-- The natural inclusion map -/
+def QprimeFP.ι [∀ c n, fact (κ c n ≤ κ₂ c n)] :
+  (QprimeFP r' BD κ M) ⟶ (QprimeFP r' BD κ₂ M) :=
 sorry
 
 end step5

@@ -77,7 +77,7 @@ def ExtQprime.T_inv [normed_with_aut r V]
   (n : ℤ) :
   (QprimeFP r' BD κ M).op ⋙ (Ext n).flip.obj ((single _ 0).obj V.to_Cond) ⟶
   (QprimeFP r' BD κ₂ M).op ⋙ (Ext n).flip.obj ((single _ 0).obj V.to_Cond) :=
-whisker_right sorry _ ≫ whisker_left _ ((Ext n).flip.map $ (single _ _).map $
+whisker_right (nat_trans.op $ QprimeFP.ι BD _ _ M) _ ≫ whisker_left _ ((Ext n).flip.map $ (single _ _).map $
   (Condensed.of_top_ab_map (normed_with_aut.T.inv).to_add_monoid_hom
   (normed_group_hom.continuous _)))
 
@@ -153,6 +153,75 @@ instance sigma_Qprime_int_bounded_above :
     (∐ λ (k : ulift ℕ), (QprimeFP_int r' BD.data κ M).obj (ι k))).is_bounded_above :=
 sorry
 
+def Ext_Tinv2
+  {𝓐 : Type*} [category 𝓐] [abelian 𝓐] [enough_projectives 𝓐]
+  {A B V : bounded_homotopy_category 𝓐}
+  (Tinv : A ⟶ B) (ι : A ⟶ B) (T_inv : V ⟶ V) (i : ℤ) :
+  ((Ext i).obj (op B)).obj V ⟶ ((Ext i).obj (op A)).obj V :=
+(((Ext i).map Tinv.op).app V - (((Ext i).map ι.op).app V ≫ ((Ext i).obj _).map T_inv))
+
+def Ext_Tinv2_commsq
+  {𝓐 : Type*} [category 𝓐] [abelian 𝓐] [enough_projectives 𝓐]
+  {A₁ B₁ A₂ B₂ V : bounded_homotopy_category 𝓐}
+  (Tinv₁ : A₁ ⟶ B₁) (ι₁ : A₁ ⟶ B₁)
+  (Tinv₂ : A₂ ⟶ B₂) (ι₂ : A₂ ⟶ B₂)
+  (f : A₁ ⟶ A₂) (g : B₁ ⟶ B₂) (sqT : f ≫ Tinv₂ = Tinv₁ ≫ g) (sqι : f ≫ ι₂ = ι₁ ≫ g)
+  (T_inv : V ⟶ V) (i : ℤ) :
+  commsq
+    (((Ext i).map g.op).app V)
+    (Ext_Tinv2 Tinv₂ ι₂ T_inv i)
+    (Ext_Tinv2 Tinv₁ ι₁ T_inv i)
+    (((Ext i).map f.op).app V) :=
+commsq.of_eq
+begin
+  delta Ext_Tinv2,
+  -- SELFCONTAINED
+  sorry
+end
+
+open category_theory.preadditive
+
+lemma Ext_iso_of_bicartesian_of_bicartesian
+  {𝓐 : Type*} [category 𝓐] [abelian 𝓐] [enough_projectives 𝓐]
+  {A₁ B₁ C A₂ B₂ : cochain_complex 𝓐 ℤ}
+  [((homotopy_category.quotient 𝓐 (complex_shape.up ℤ)).obj A₁).is_bounded_above]
+  [((homotopy_category.quotient 𝓐 (complex_shape.up ℤ)).obj B₁).is_bounded_above]
+  [((homotopy_category.quotient 𝓐 (complex_shape.up ℤ)).obj C).is_bounded_above]
+  [((homotopy_category.quotient 𝓐 (complex_shape.up ℤ)).obj A₂).is_bounded_above]
+  [((homotopy_category.quotient 𝓐 (complex_shape.up ℤ)).obj B₂).is_bounded_above]
+  {f₁ : A₁ ⟶ B₁} {g₁ : B₁ ⟶ C} (w₁ : ∀ n, short_exact (f₁.f n) (g₁.f n))
+  {f₂ : A₂ ⟶ B₂} {g₂ : B₂ ⟶ C} (w₂ : ∀ n, short_exact (f₂.f n) (g₂.f n))
+  (α : A₁ ⟶ A₂) (β : B₁ ⟶ B₂) (γ : C ⟶ C)
+  (ιA : A₁ ⟶ A₂) (ιB : B₁ ⟶ B₂)
+  (sq1 : commsq f₁ α β f₂) (sq2 : commsq g₁ β γ g₂)
+  (sq1' : commsq f₁ ιA ιB f₂) (sq2' : commsq g₁ ιB (𝟙 _) g₂)
+  (V : bounded_homotopy_category 𝓐) (T_inv : V ⟶ V)
+  (i : ℤ)
+  -- SELFCONTAINED
+  -- feel free to add a helper lemma as wrapper
+  (H1 : (Ext_Tinv2_commsq (of'_hom α) (of'_hom ιA) (of'_hom β) (of'_hom ιB) (of'_hom f₁) (of'_hom f₂)
+    sorry sorry T_inv i).bicartesian)
+  (H2 : (Ext_Tinv2_commsq (of'_hom α) (of'_hom ιA) (of'_hom β) (of'_hom ιB) (of'_hom f₁) (of'_hom f₂)
+    sorry sorry T_inv (i+1)).bicartesian) :
+  is_iso (Ext_Tinv2 (of'_hom γ) (𝟙 _) T_inv (i+1)) :=
+begin
+  have LES₁ := (((Ext_five_term_exact_seq' _ _ i V w₁).drop 2).pair.cons (Ext_five_term_exact_seq' _ _ (i+1) V w₁)),
+  replace LES₁ := (((Ext_five_term_exact_seq' _ _ i V w₁).drop 1).pair.cons LES₁).extract 0 4,
+  have LES₂ := (((Ext_five_term_exact_seq' _ _ i V w₂).drop 2).pair.cons (Ext_five_term_exact_seq' _ _ (i+1) V w₂)).extract 0 4,
+  replace LES₂ := (((Ext_five_term_exact_seq' _ _ i V w₂).drop 1).pair.cons LES₂).extract 0 4,
+  refine iso_of_bicartesian_of_bicartesian LES₂ LES₁ _ _ _ _ H1 H2,
+  { apply commsq.of_eq, delta Ext_Tinv2,
+    rw [sub_comp, comp_sub],
+    -- use `Ext_δ_natural`,
+    sorry, },
+  { apply Ext_Tinv2_commsq,
+    -- SELFCONTAINED
+    sorry,
+    -- SELFCONTAINED
+    sorry },
+end
+
+
 lemma Tinv2_iso_of_bicartesian [normed_with_aut r V]
   [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]
   (i : ℤ)
@@ -168,12 +237,13 @@ begin
   let Vc := (single (Condensed Ab) 0).obj V.to_Cond,
   have SES₁ := QprimeFP.short_exact BD κ M ι hι,
   have SES₂ := QprimeFP.short_exact BD κ₂ M ι hι,
-  have LES₁ := (((Ext_five_term_exact_seq' _ _ i Vc SES₁).drop 2).pair.cons (Ext_five_term_exact_seq' _ _ (i+1) Vc SES₁)),
-  replace LES₁ := (((Ext_five_term_exact_seq' _ _ i Vc SES₁).drop 1).pair.cons LES₁).extract 0 4,
-  have LES₂ := (((Ext_five_term_exact_seq' _ _ i Vc SES₂).drop 2).pair.cons (Ext_five_term_exact_seq' _ _ (i+1) Vc SES₂)).extract 0 4,
-  replace LES₂ := (((Ext_five_term_exact_seq' _ _ i Vc SES₂).drop 1).pair.cons LES₂).extract 0 4,
-  refine iso_of_bicartesian_of_bicartesian LES₁ LES₂ _ _ _ _ _ _;
+  have := Ext_iso_of_bicartesian_of_bicartesian SES₁ SES₂,
   sorry
+  -- have LES₁ := (((Ext_five_term_exact_seq' _ _ i Vc SES₁).drop 2).pair.cons (Ext_five_term_exact_seq' _ _ (i+1) Vc SES₁)),
+  -- replace LES₁ := (((Ext_five_term_exact_seq' _ _ i Vc SES₁).drop 1).pair.cons LES₁).extract 0 4,
+  -- have LES₂ := (((Ext_five_term_exact_seq' _ _ i Vc SES₂).drop 2).pair.cons (Ext_five_term_exact_seq' _ _ (i+1) Vc SES₂)).extract 0 4,
+  -- replace LES₂ := (((Ext_five_term_exact_seq' _ _ i Vc SES₂).drop 1).pair.cons LES₂).extract 0 4,
+  -- refine iso_of_bicartesian_of_bicartesian LES₁ LES₂ _ _ _ _ _ _;
 end
 
 lemma Tinv2_iso_of_bicartesian' [normed_with_aut r V]
