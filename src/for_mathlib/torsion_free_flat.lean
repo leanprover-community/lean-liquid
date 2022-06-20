@@ -7,13 +7,13 @@ variables {G : Type} [comm_group G]
 
 open category_theory monoid category_theory.limits
 
-def index_category_of_torsion_free (hG : is_torsion_free G) : Cat := sorry
+def index_category_of_tf (hG : is_torsion_free G) : Cat := sorry
 
-def index_functor_of_torsion_free (hG : is_torsion_free G) :
-  (index_category_of_torsion_free hG) ⥤ CommGroup := sorry
+def index_functor_of_tf (hG : is_torsion_free G) :
+  (index_category_of_tf hG) ⥤ CommGroup := sorry
 
-instance index_concrete [hG : is_torsion_free G] : concrete_category (index_category_of_torsion_free hG) := sorry
+instance index_concrete [hG : is_torsion_free G] : concrete_category (index_category_of_tf hG) := sorry
 
-instance has_colimit_of_torsion_free [hG : is_torsion_free G] : has_colimit (index_functor_of_torsion_free hG) := sorry
+instance has_colimit_of_tf [hG : is_torsion_free G] : has_colimit (index_functor_of_tf hG) := sorry
 
--- lemma colimit_of_torsion_free (hG : is_torsion_free G) : G ≃ colimit(index_functor_of_torsion_free hG) := sorry
+lemma colimit_of_torsion_free (hG : is_torsion_free G) : G ≃* (colimit (index_functor_of_tf hG)).1 := sorry
