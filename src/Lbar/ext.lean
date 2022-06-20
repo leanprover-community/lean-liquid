@@ -249,7 +249,7 @@ end
 theorem is_iso_Tinv_sub [normed_with_aut r V] : ∀ i, is_iso (Tinv_sub r r' S V i) :=
 begin
   refine (Condensed.bd_lemma _ _ _ _).mpr _,
-  rintro ((_|_)|_),
+  rintro ((_|i)|i),
   { sorry },
   { sorry },
   { have : 1 + -[1+ i] ≤ 0,
