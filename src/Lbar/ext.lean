@@ -134,12 +134,6 @@ variables (V : SemiNormedGroup.{u}) [complete_space V] [separated_space V]
 open bounded_homotopy_category
 
 -- move me
-/-- `Tinv : M → M` as hom of condensed abelian groups -/
-def _root_.ProFiltPseuNormGrpWithTinv₁.Tinv_cond : M.to_Condensed ⟶ M.to_Condensed :=
-(CompHausFiltPseuNormGrp.to_Condensed.{u}).map
-  profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv
-
--- move me
 instance eval'_is_bounded_above :
   ((homotopy_category.quotient (Condensed Ab) (complex_shape.up ℤ)).obj
     ((BD.eval' freeCond').obj M.to_Condensed)).is_bounded_above :=
@@ -181,6 +175,19 @@ end
 
 open category_theory.preadditive
 
+-- SELFCONTAINED
+lemma auux
+  {𝓐 : Type*} [category 𝓐] [abelian 𝓐] [enough_projectives 𝓐]
+  {A₁ B₁ A₂ B₂ : cochain_complex 𝓐 ℤ}
+  [((homotopy_category.quotient 𝓐 (complex_shape.up ℤ)).obj A₁).is_bounded_above]
+  [((homotopy_category.quotient 𝓐 (complex_shape.up ℤ)).obj B₁).is_bounded_above]
+  [((homotopy_category.quotient 𝓐 (complex_shape.up ℤ)).obj A₂).is_bounded_above]
+  [((homotopy_category.quotient 𝓐 (complex_shape.up ℤ)).obj B₂).is_bounded_above]
+  {f₁ : A₁ ⟶ B₁} {f₂ : A₂ ⟶ B₂} {α : A₁ ⟶ A₂} {β : B₁ ⟶ B₂}
+  (sq1 : commsq f₁ α β f₂) :
+  of'_hom f₁ ≫ of'_hom β = of'_hom α ≫ of'_hom f₂ :=
+sorry
+
 lemma Ext_iso_of_bicartesian_of_bicartesian
   {𝓐 : Type*} [category 𝓐] [abelian 𝓐] [enough_projectives 𝓐]
   {A₁ B₁ C A₂ B₂ : cochain_complex 𝓐 ℤ}
@@ -197,12 +204,10 @@ lemma Ext_iso_of_bicartesian_of_bicartesian
   (sq1' : commsq f₁ ιA ιB f₂) (sq2' : commsq g₁ ιB (𝟙 _) g₂)
   (V : bounded_homotopy_category 𝓐) (T_inv : V ⟶ V)
   (i : ℤ)
-  -- SELFCONTAINED
-  -- feel free to add a helper lemma as wrapper
   (H1 : (Ext_Tinv2_commsq (of'_hom α) (of'_hom ιA) (of'_hom β) (of'_hom ιB) (of'_hom f₁) (of'_hom f₂)
-    sorry sorry T_inv i).bicartesian)
+    (auux sq1) (auux sq1') T_inv i).bicartesian)
   (H2 : (Ext_Tinv2_commsq (of'_hom α) (of'_hom ιA) (of'_hom β) (of'_hom ιB) (of'_hom f₁) (of'_hom f₂)
-    sorry sorry T_inv (i+1)).bicartesian) :
+    (auux sq1) (auux sq1') T_inv (i+1)).bicartesian) :
   is_iso (Ext_Tinv2 (of'_hom γ) (𝟙 _) T_inv (i+1)) :=
 begin
   have LES₁ := (((Ext_five_term_exact_seq' _ _ i V w₁).drop 2).pair.cons (Ext_five_term_exact_seq' _ _ (i+1) V w₁)),
@@ -215,10 +220,8 @@ begin
     -- use `Ext_δ_natural`,
     sorry, },
   { apply Ext_Tinv2_commsq,
-    -- SELFCONTAINED
-    sorry,
-    -- SELFCONTAINED
-    sorry },
+    { exact auux sq2 },
+    { exact auux sq2' }, },
 end
 
 
@@ -235,9 +238,18 @@ lemma Tinv2_iso_of_bicartesian [normed_with_aut r V]
           (normed_group_hom.to_add_monoid_hom normed_with_aut.T.inv) (normed_group_hom.continuous _)))) :=
 begin
   let Vc := (single (Condensed Ab) 0).obj V.to_Cond,
-  have SES₁ := QprimeFP.short_exact BD κ M ι hι,
-  have SES₂ := QprimeFP.short_exact BD κ₂ M ι hι,
-  have := Ext_iso_of_bicartesian_of_bicartesian SES₁ SES₂,
+  have SES₁ := QprimeFP.short_exact BD κ₂ M ι hι,
+  have SES₂ := QprimeFP.short_exact BD κ M ι hι,
+  have := Ext_iso_of_bicartesian_of_bicartesian SES₁ SES₂
+    (sigma_map _ (QprimeFP_int.Tinv BD.data _ _ M))
+    (sigma_map _ (QprimeFP_int.Tinv BD.data _ _ M))
+    (category_theory.functor.map _ M.Tinv_cond)
+    (sigma_map _ (QprimeFP_int.ι BD.data _ _ M))
+    (sigma_map _ (QprimeFP_int.ι BD.data _ _ M))
+    (commsq_shift_sub_id_Tinv BD.data _ _ M ι hι)
+    (commsq_sigma_proj_Tinv BD _ _ M ι)
+    (commsq_shift_sub_id_ι BD.data _ _ M ι hι)
+    (commsq_sigma_proj_ι BD _ _ M ι),
   sorry
   -- have LES₁ := (((Ext_five_term_exact_seq' _ _ i Vc SES₁).drop 2).pair.cons (Ext_five_term_exact_seq' _ _ (i+1) Vc SES₁)),
   -- replace LES₁ := (((Ext_five_term_exact_seq' _ _ i Vc SES₁).drop 1).pair.cons LES₁).extract 0 4,
