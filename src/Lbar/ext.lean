@@ -154,6 +154,8 @@ def Ext_Tinv2
   ((Ext i).obj (op B)).obj V ⟶ ((Ext i).obj (op A)).obj V :=
 (((Ext i).map Tinv.op).app V - (((Ext i).map ι.op).app V ≫ ((Ext i).obj _).map T_inv))
 
+open category_theory.preadditive
+
 def Ext_Tinv2_commsq
   {𝓐 : Type*} [category 𝓐] [abelian 𝓐] [enough_projectives 𝓐]
   {A₁ B₁ A₂ B₂ V : bounded_homotopy_category 𝓐}
@@ -169,13 +171,12 @@ def Ext_Tinv2_commsq
 commsq.of_eq
 begin
   delta Ext_Tinv2,
-  -- SELFCONTAINED
-  sorry
+  simp only [comp_sub, sub_comp, ← nat_trans.comp_app, ← functor.map_comp, ← op_comp, sqT,
+    ← nat_trans.naturality, ← nat_trans.naturality_assoc, category.assoc, sqι],
 end
 
 open category_theory.preadditive
 
--- SELFCONTAINED
 lemma auux
   {𝓐 : Type*} [category 𝓐] [abelian 𝓐] [enough_projectives 𝓐]
   {A₁ B₁ A₂ B₂ : cochain_complex 𝓐 ℤ}
@@ -186,7 +187,12 @@ lemma auux
   {f₁ : A₁ ⟶ B₁} {f₂ : A₂ ⟶ B₂} {α : A₁ ⟶ A₂} {β : B₁ ⟶ B₂}
   (sq1 : commsq f₁ α β f₂) :
   of_hom f₁ ≫ of_hom β = of_hom α ≫ of_hom f₂ :=
-sorry
+begin
+  have := sq1.w,
+  apply_fun (λ f, (homotopy_category.quotient _ _).map f) at this,
+  simp only [functor.map_comp] at this,
+  exact this,
+end
 
 @[simp] lemma of_hom_id
   {𝓐 : Type*} [category 𝓐] [abelian 𝓐] [enough_projectives 𝓐]
