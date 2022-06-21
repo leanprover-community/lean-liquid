@@ -555,40 +555,40 @@ def ι' : ℕ → ℝ≥0
             (k (eg.κ' r r') (i+1) ^ 2 * ι' j))
             ((k (eg.κ' r r') (i+1+1) ^ 2 * ι' j)))
 
+lemma hι' : monotone (ι' r r' i) :=
+begin
+  apply monotone_nat_of_le_succ,
+  rintro (_|j); apply le_max_left
+end
+
 -- SELFCONTAINED
 lemma Hι1 : ∀ j,
-  c₀ r r' eg (λ (n : ℕ), eg.κ r r' n) (eg.κ' r r') (i + 1) ⟨ℤ⟩ ≤ ι' r r' i j :=
-sorry
+  c₀ r r' eg (λ (n : ℕ), eg.κ r r' n) (eg.κ' r r') (i + 1) ⟨ℤ⟩ ≤ ι' r r' i j
+| 0 := le_max_left _ _
+| (j+1) := (Hι1 j).trans $ by { apply hι', apply nat.le_succ }
 
 lemma Hι1' : ∀ j,
-  c₀ r r' eg (λ (n : ℕ), eg.κ r r' n) (eg.κ' r r') (i + 1 + 1) ⟨ℤ⟩ ≤ ι' r r' i j :=
-sorry
+  c₀ r r' eg (λ (n : ℕ), eg.κ r r' n) (eg.κ' r r') (i + 1 + 1) ⟨ℤ⟩ ≤ ι' r r' i j
+| 0 := le_max_right _ _
+| (j+1) := (Hι1' j).trans $ by { apply hι', apply nat.le_succ }
 
 lemma Hι2a : ∀ j,
   k (eg.κ' r r') i ^ 2 * ι' r r' i j ≤ ι' r r' i (j + 1) :=
-begin
-  rintro (rfl | j),
-  all_goals { simp [ι'] }
-end
+by rintro (_|j); simp only [ι', le_max_iff, le_rfl, true_or, or_true]
 
 lemma Hι2b : ∀ j,
   k (eg.κ' r r') (i + 1) ^ 2 * ι' r r' i j ≤ ι' r r' i (j + 1) :=
-begin
-  rintro (rfl | j),
-  all_goals { simp [ι'] }
-end
+by rintro (_|j); simp only [ι', le_max_iff, le_rfl, true_or, or_true]
 
 lemma Hι2c : ∀ j,
   k (eg.κ' r r') (i + 1 + 1) ^ 2 * ι' r r' i j ≤ ι' r r' i (j + 1) :=
-begin
-  rintro (rfl | j),
-  all_goals { simp [ι'] }
-end
+by rintro (_|j); simp only [ι', le_max_iff, le_rfl, true_or, or_true]
 
 def ι : ulift.{1} ℕ → ℝ≥0 := ι' r r' i ∘ ulift.down
 
 -- SELFCONTAINED
-lemma hι : monotone (ι r r' i) := sorry
+lemma hι : monotone (ι r r' i) :=
+λ j₁ j₂ h, by { delta ι, apply hι', exact h }
 
 /-- Thm 9.4bis of [Analytic]. More precisely: the first observation in the proof 9.4 => 9.1. -/
 theorem is_iso_Tinv_sub [normed_with_aut r V] : ∀ i, is_iso (Tinv_sub r r' S V i) :=
