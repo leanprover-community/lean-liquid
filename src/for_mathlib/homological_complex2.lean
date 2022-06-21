@@ -25,4 +25,37 @@ def functor_eval : X ⥤ homological_complex (X ⥤ 𝒜) c ⥤ homological_comp
   map_id' := by { intros, ext, dsimp, rw [category_theory.functor.map_id], },
   map_comp' := by { intros, ext, dsimp, rw [category_theory.functor.map_comp], } }
 
+.
+
+-- SELFCONTAINED
+@[simps]
+def eval_functor.obj (F : X ⥤ homological_complex 𝒜 c) : homological_complex (X ⥤ 𝒜) c :=
+{ X := λ i, F ⋙ homological_complex.eval _ _ i,
+  d := λ i j, whisker_left _ $
+  { app := λ T, T.d _ _,
+    naturality' := sorry },
+  shape' := sorry,
+  d_comp_d' := sorry }
+
+-- SELFCONTAINED
+@[simps]
+def eval_functor : (X ⥤ homological_complex 𝒜 c) ⥤ homological_complex (X ⥤ 𝒜) c :=
+{ obj := λ F, eval_functor.obj F,
+  map := λ F G η,
+  { f := λ i, whisker_right η _,
+    comm' := sorry },
+  map_id' := sorry,
+  map_comp' := sorry }
+
+-- SELFCONTAINED
+def eval_functor_equiv : (X ⥤ homological_complex 𝒜 c) ≌ homological_complex (X ⥤ 𝒜) c :=
+equivalence.mk
+eval_functor
+functor_eval.flip
+(nat_iso.of_components (λ F, nat_iso.of_components (λ x,
+  homological_complex.hom.iso_of_components (λ i, iso.refl _) sorry) sorry) sorry)
+(nat_iso.of_components (λ T, homological_complex.hom.iso_of_components
+  (λ i, nat_iso.of_components (λ x, iso.refl _) sorry) sorry) sorry)
+
+
 end homological_complex

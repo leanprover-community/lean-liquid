@@ -158,7 +158,7 @@ lemma tensor_to_unsheafified_homology_app_eq
   (homology_functor _ _ _).map
   ((eval_freeAb_iso_component _ _ _).inv) ≫
   (((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj
-    (op S.val)).homology_functor_iso _ _).inv.app _  := sorry
+    (op S.val)).homology_functor_iso _ _).inv.app _  := sorry --- possibly challenging
 
 def tensor_to_homology_aux (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
 ((Condensed_ExtrSheaf_equiv Ab).inverse.obj M).tensor
@@ -183,6 +183,29 @@ def tensor_to_homology (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
 
 .
 
+instance preserves_filtered_colimits_tensor_flip_eval' (i : ℤ) :
+  preserves_filtered_colimits
+  (AddCommGroup.tensor_functor.flip.obj (homological_complex.homology
+    ((BD.eval' (forget AddCommGroup.{u+1} ⋙ AddCommGroup.free)).obj
+    (AddCommGroup.free.obj punit)) i)) := sorry
+
+instance additive_tensor_flip_eval' (i : ℤ) : functor.additive
+  (AddCommGroup.tensor_functor.flip.obj (homological_complex.homology
+    ((BD.eval' (forget AddCommGroup.{u+1} ⋙ AddCommGroup.free)).obj
+    (AddCommGroup.free.obj punit)) i)) := sorry
+
+instance preserves_filtered_colimits_eval'_forget_free (i : ℤ) :
+  preserves_filtered_colimits
+  (BD.eval' (forget AddCommGroup.{u+1} ⋙ AddCommGroup.free) ⋙
+    homology_functor AddCommGroup.{u+1} (complex_shape.up ℤ) i) := sorry
+
+instance additive_eval'_forget_free (i : ℤ) : functor.additive
+  (BD.eval' (forget AddCommGroup.{u+1} ⋙ AddCommGroup.free) ⋙
+    homology_functor AddCommGroup.{u+1} (complex_shape.up ℤ) i) := sorry
+
+instance (i : ℤ) : is_iso ((plain_eval_comparison BD i).app
+  (AddCommGroup.free.obj (punit : Type (u+1)))) := sorry
+
 instance is_iso_map_tensor_to_homology_aux_comp (M : Condensed.{u} Ab.{u+1}) (i : ℤ)
   [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (M.val.obj (op S.val))] :
   is_iso (tensor_to_homology_aux BD M i) :=
@@ -195,27 +218,6 @@ begin
   rw tensor_to_unsheafified_homology_app_eq,
   suffices : is_iso ((plain_eval_comparison BD i).app (M.val.obj (op S.val))),
   { resetI, apply is_iso.comp_is_iso },
-  haveI : preserves_filtered_colimits
-    (AddCommGroup.tensor_functor.flip.obj
-  (homological_complex.homology
-     ((BD.eval' (forget AddCommGroup ⋙ AddCommGroup.free)).obj (AddCommGroup.free.obj punit))
-     i)) := sorry,
-  haveI : preserves_filtered_colimits
-    (AddCommGroup.tensor_functor.flip.obj (homological_complex.homology
-      ((BD.eval' (forget AddCommGroup.{u+1} ⋙ AddCommGroup.free)).obj
-        (AddCommGroup.free.obj punit)) i)) := sorry,
-  haveI : functor.additive
-    (AddCommGroup.tensor_functor.flip.obj (homological_complex.homology
-      ((BD.eval' (forget AddCommGroup.{u+1} ⋙ AddCommGroup.free)).obj
-        (AddCommGroup.free.obj punit)) i)) := sorry,
-  haveI : preserves_filtered_colimits
-    (BD.eval' (forget AddCommGroup.{u+1} ⋙ AddCommGroup.free) ⋙
-      homology_functor AddCommGroup.{u+1} (complex_shape.up ℤ) i) := sorry,
-  haveI : functor.additive
-    (BD.eval' (forget AddCommGroup.{u+1} ⋙ AddCommGroup.free) ⋙
-      homology_functor AddCommGroup.{u+1} (complex_shape.up ℤ) i) := sorry,
-  haveI : is_iso ((plain_eval_comparison BD i).app
-    (AddCommGroup.free.obj (punit : Type (u+1)))) := sorry,
   apply AddCommGroup.is_iso_of_preserves_of_is_tensor_unit.{u+1 u+2} _ _
     (plain_eval_comparison BD i) (AddCommGroup.free.obj punit),
   sorry
@@ -238,11 +240,11 @@ def homology_bd_eval (M : Condensed.{u} Ab.{u+1})
       (AddCommGroup.free.obj punit)).val.as.homology i) :=
 (as_iso (tensor_to_homology BD M i)).symm
 
-instance : has_coproducts (endomorphisms (Condensed.{u} Ab.{u+1})) :=
-sorry
+--instance : has_coproducts (endomorphisms (Condensed.{u} Ab.{u+1})) :=
+--infer_instance
 
 instance : AB4 (endomorphisms (Condensed.{u} Ab.{u+1})) :=
-sorry
+sorry -- We need that `endomorphisms.forget` "creates" exactness.
 
 def eval_freeCond_homology_zero :
   ((data.eval_functor freeCond').obj breen_deligne.eg.data) ⋙ homology_functor _ _ 0 ≅ 𝟭 _ :=
