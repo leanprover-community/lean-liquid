@@ -124,10 +124,22 @@ def mk_bo_ha_ca_single (X : 𝓐) (f : X ⟶ X) :
 bounded_homotopy_category.mk_iso
 begin
   dsimp only [mk_bo_ho_ca, single],
-  refine homotopy_category.iso_of_homotopy_equiv _,
-  refine ⟨_, _, _, _⟩;
-  -- dsimp,
-  sorry
+  refine (homotopy_category.quotient _ _).map_iso _,
+  refine homological_complex.hom.iso_of_components _ _,
+  { intro i,
+    refine endomorphisms.mk_iso _ _,
+    { dsimp, split_ifs, { exact iso.refl _ },
+      { refine (is_zero_zero _).iso _, have := is_zero_zero (endomorphisms 𝓐),
+        rw is_zero_iff_id_eq_zero at this ⊢, apply_fun (λ a, a.f) at this, exact this } },
+    { dsimp, erw quot_out_single_map, dsimp, split_ifs with hi,
+      { subst i, dsimp, erw [iso.refl_hom], simp only [category.id_comp, category.comp_id],
+        convert rfl, },
+      { apply is_zero.eq_of_src, rw [if_neg hi], exact is_zero_zero _ } } },
+  { rintro i j (rfl : _ = _),
+    by_cases hi : i = 0,
+    { apply is_zero.eq_of_tgt, dsimp, rw [if_neg], exact is_zero_zero _, linarith only [hi] },
+    { apply is_zero.eq_of_src, dsimp, rw [is_zero_iff_id_eq_zero], ext, dsimp, rw [if_neg hi],
+      apply (is_zero_zero _).eq_of_src } }
 end
 
 lemma Ext_is_zero_iff (X Y : bounded_homotopy_category (endomorphisms 𝓐)) :

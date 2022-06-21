@@ -72,6 +72,12 @@ lemma epi_of_epi_f {X Y : endomorphisms C} (f : X ⟶ Y) [epi f.f] : epi f :=
     ext, rw [← cancel_epi f.f, ← comp_f, w, comp_f],
   end }
 
+def mk_iso {X Y : endomorphisms C} (e : X.X ≅ Y.X) (h : X.e ≫ e.hom = e.hom ≫ Y.e) : X ≅ Y :=
+{ hom := ⟨e.hom, h⟩,
+  inv := ⟨e.inv, by rw [e.comp_inv_eq, category.assoc, e.eq_inv_comp, h]⟩,
+  hom_inv_id' := by { ext, simp only [comp_f, iso.hom_inv_id, id_f] },
+  inv_hom_id' := by { ext, simp only [comp_f, iso.inv_hom_id, id_f] } }
+
 end category
 
 section limits
