@@ -349,6 +349,12 @@ section
 variables [has_coproducts_of_shape (ulift.{v} ℕ) 𝓐]
 variables [has_products_of_shape (ulift.{v} ℕ) 𝓐]
 
+open category_theory.preadditive
+
+def Pow_X (X : endomorphisms 𝓐) (n : ℕ) :
+  ((Pow n).obj X).X ≅ (Pow n).obj X.X :=
+sorry
+
 def mk_bo_ha_ca_Q (X : 𝓐) (f : X ⟶ X) :
   endomorphisms.mk_bo_ho_ca ((BD.eval F).obj X) ((BD.eval F).map f) ≅
   (BD.eval F.map_endomorphisms).obj ⟨X, f⟩ :=
@@ -357,13 +363,10 @@ begin
   refine homological_complex.hom.iso_of_components _ _,
   { intro i,
     refine endomorphisms.mk_iso _ _,
-    { dsimp only [breen_deligne.package.eval, functor.comp_obj,
-        chain_complex.to_bounded_homotopy_category_obj_val,
-        homotopy_category.quotient_obj_as],
-      rcases i with ((_|i)|i),
-      { sorry },
+    { rcases i with ((_|i)|i),
+      { refine F.map_iso _, symmetry, refine (Pow_X _ _) },
       { refine (is_zero_zero _).iso _, apply endomorphisms.is_zero_X, exact is_zero_zero _ },
-      { sorry } },
+      { refine F.map_iso _, symmetry, refine (Pow_X _ _) } },
     { sorry } },
   { rintro i j (rfl : _ = _),
     sorry }
