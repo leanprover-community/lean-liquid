@@ -4,8 +4,22 @@ import category_theory.limits.has_limits
 import group_theory.torsion
 
 /--
-The main result is the final `theorem flat_of_tf` stating that a torsion-free abelian group (
+The main result is the final `theorem flat_of_tf` stating that tensoring with a torsion-free abelian
+group (implemented as a `add_comm_group G` satisfying `no_zero_smul_divisors ℤ G`) preserves
+injections.
+## Main Constructions
+* an index category `index_category_of_tf` attached to every torsion-free group `G`
+* a functor `index_functor_of_tf` from `index_category_of_tf` to `AddCommGroup` such that for all
+ `j` in the index category, the corresponding `add_comm_group` is finitely generated and free (see
+ `fg_free_of_index_range`)
+* an isomorphism `iso_colimit_of_torsion_free` between the colimit of the above functor and `G`
 
+## Main Results
+* `flat_of_fg_free` says that tensoring with a finitely generated, free abelian group preserves
+  injections
+* `colimit_left_exact` says that given a family of injections `φⱼ : Mⱼ → Nⱼ` in a setting where both
+  `{Mⱼ}` and `{Nⱼ}` admit colimits, the colimit `colim φⱼ` is also an injection
+* `flat_of_tf`says that tensoring with a torsion-free module preseves injections
 -/
 
 noncomputable theory
@@ -21,13 +35,16 @@ def index_category_of_tf (hG : no_zero_smul_divisors ℤ G) : Cat := sorry
 def index_functor_of_tf (hG : no_zero_smul_divisors ℤ G) :
   (index_category_of_tf hG) ⥤ AddCommGroup := sorry
 
+lemma fg_free_of_index_range (hG : no_zero_smul_divisors ℤ G) (j : index_category_of_tf hG) :
+  Σ (k : ℕ), basis (fin k) ℤ ((index_functor_of_tf hG).obj j).1 := sorry
+
 instance index_concrete [hG : no_zero_smul_divisors ℤ G] : concrete_category
  (index_category_of_tf hG) := sorry
 
 instance has_colimit_of_tf [hG : no_zero_smul_divisors ℤ G] :
  has_colimit (index_functor_of_tf hG) := sorry
 
-lemma colimit_of_torsion_free (hG : no_zero_smul_divisors ℤ G) : G ≃+
+lemma iso_colimit_of_torsion_free (hG : no_zero_smul_divisors ℤ G) : G ≃+
  (colimit (index_functor_of_tf hG)).1 := sorry
 
 end tf_colimit
