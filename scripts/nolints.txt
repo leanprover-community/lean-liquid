@@ -2,10 +2,13 @@ import .all
 run_cmd tactic.skip
 
 -- Lbar/ext.lean
+apply_nolint ExtQprime.T_inv unused_arguments
+apply_nolint ExtQprime.Tinv unused_arguments
 apply_nolint ExtQprime_iso_aux_system_aux unused_arguments ge_or_gt
 apply_nolint Lbar.Tinv_sub unused_arguments
 apply_nolint Lbar.condensed unused_arguments
-apply_nolint ProFiltPseuNormGrpWithTinv₁.Tinv_cond unused_arguments
+apply_nolint Lbar.condensify_iso_extend unused_arguments
+apply_nolint eval'_is_bounded_above unused_arguments
 
 -- Lbar/functor.lean
 apply_nolint Lbar.map_add unused_arguments
@@ -447,6 +450,12 @@ apply_nolint LCFP.T unused_arguments
 apply_nolint LCFP.Tinv unused_arguments
 apply_nolint LCFP.obj.normed_with_aut fails_quickly
 apply_nolint breen_deligne.universal_map.norm_eval_LCFP_le unused_arguments
+
+-- pseudo_normed_group/QprimeFP.lean
+apply_nolint commsq_shift_sub_id_Tinv def_lemma
+apply_nolint commsq_shift_sub_id_ι def_lemma
+apply_nolint commsq_sigma_proj_Tinv def_lemma
+apply_nolint commsq_sigma_proj_ι def_lemma
 
 -- pseudo_normed_group/Tinv.lean
 apply_nolint CLCFPTinv₂ unused_arguments
