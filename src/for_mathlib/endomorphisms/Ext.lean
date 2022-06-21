@@ -96,9 +96,39 @@ def mk_bo_ho_ca (X : bounded_homotopy_category 𝓐) (f : X ⟶ X) :
   end }
 .
 
+lemma quot_out_single_map {X Y : 𝓐} (f : X ⟶ Y) (i : ℤ) :
+  ((homotopy_category.single 𝓐 i).map f).out = (homological_complex.single 𝓐 _ i).map f :=
+begin
+  have h := homotopy_category.homotopy_out_map
+    ((homological_complex.single 𝓐 (complex_shape.up ℤ) i).map f),
+  ext k,
+  erw h.comm k,
+  suffices : (d_next k) h.hom + (prev_d k) h.hom = 0, { rw [this, zero_add] },
+  obtain (hki|rfl) := ne_or_eq k i,
+  { apply limits.is_zero.eq_of_src,
+    show is_zero (ite (k = i) X _), rw [if_neg hki], apply is_zero_zero },
+  { have hk1 : (complex_shape.up ℤ).rel (k-1) k := sub_add_cancel _ _,
+    have hk2 : (complex_shape.up ℤ).rel k (k+1) := rfl,
+    rw [prev_d_eq _ hk1, d_next_eq _ hk2],
+    have aux1 : h.hom (k + 1) k = 0,
+    { apply limits.is_zero.eq_of_src, show is_zero (ite _ X _), rw if_neg, apply is_zero_zero,
+      linarith },
+    have aux2 : h.hom k (k - 1) = 0,
+    { apply limits.is_zero.eq_of_tgt, show is_zero (ite _ Y _), rw if_neg, apply is_zero_zero,
+      linarith },
+    rw [aux1, aux2, comp_zero, zero_comp, add_zero], }
+end
+
 def mk_bo_ha_ca_single (X : 𝓐) (f : X ⟶ X) :
   mk_bo_ho_ca ((single _ 0).obj X) ((single _ 0).map f) ≅ (single _ 0).obj ⟨X, f⟩ :=
-sorry
+bounded_homotopy_category.mk_iso
+begin
+  dsimp only [mk_bo_ho_ca, single],
+  refine homotopy_category.iso_of_homotopy_equiv _,
+  refine ⟨_, _, _, _⟩;
+  -- dsimp,
+  sorry
+end
 
 lemma Ext_is_zero_iff (X Y : bounded_homotopy_category (endomorphisms 𝓐)) :
   (∀ i, is_zero (((Ext i).obj (op $ X)).obj $ Y)) ↔

@@ -40,7 +40,7 @@ begin
   { apply Ext'_is_zero_of_neg, linarith only [hj, hij] }
 end
 
-lemma IH_0_aux (C : bounded_homotopy_category 𝓐) (hC : C.val.bounded_by 1) :
+def IH_0_aux (C : bounded_homotopy_category 𝓐) (hC : C.val.bounded_by 1) :
   ((Ext' 0).flip.obj B).obj (op (C.val.as.homology 0)) ≅
   ((Ext 0).obj (op C)).obj ((single 𝓐 0).obj B) :=
 sorry
