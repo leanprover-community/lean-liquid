@@ -165,7 +165,13 @@ bdd_step₅_aux'' _ _ $ shift_equiv _ k
 
 def bdd_step₅_aux (X Y : bounded_homotopy_category 𝓐) (k : ℤ) :
   (Ext0.obj (op X)).obj Y ≅ (Ext0.obj (op $ X⟦k⟧)).obj (Y⟦k⟧) :=
-sorry
+begin
+  delta Ext0, dsimp only,
+  refine bdd_step₅_aux' _ _ k ≪≫
+    (preadditive_yoneda.obj ((shift_functor (bounded_homotopy_category 𝓐) k).obj Y)).map_iso _,
+  refine iso.op _,
+  exact bounded_homotopy_category.replacement_iso _ _ (X⟦k⟧) (X⟦k⟧).π (X.π⟦k⟧'),
+end
 
 lemma bdd_step₅ (k i : ℤ) :
   is_zero (((Ext i).obj (op ((single 𝓐 k).obj A))).obj ((single 𝓐 0).obj B)) ↔
