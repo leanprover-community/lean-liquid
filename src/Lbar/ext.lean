@@ -145,7 +145,11 @@ variables (ι : ulift.{u+1} ℕ → ℝ≥0) (hι : monotone ι)
 instance sigma_Qprime_int_bounded_above :
   ((homotopy_category.quotient (Condensed Ab) (complex_shape.up ℤ)).obj
     (∐ λ (k : ulift ℕ), (QprimeFP_int r' BD.data κ M).obj (ι k))).is_bounded_above :=
-sorry
+begin
+  -- first pull the `∐` through the quotient functor
+  sorry,
+  -- refine ⟨⟨1, _⟩⟩,
+end
 
 def Ext_Tinv2
   {𝓐 : Type*} [category 𝓐] [abelian 𝓐] [enough_projectives 𝓐]
