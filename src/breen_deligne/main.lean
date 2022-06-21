@@ -401,8 +401,10 @@ begin
   rw [← endomorphisms.Ext'_is_zero_iff' A B f g],
   rw [← endomorphisms.Ext_is_zero_iff'],
   refine (main_lemma.is_zero BD F.map_endomorphisms _ _ _ T hT0 @hT hTA).trans _,
-  { -- use `hH0`
-    sorry },
+  { refine endomorphisms.mk_iso _ _,
+    { refine _ ≪≫ hH0.app A,
+      sorry },
+    { sorry } },
   apply forall_congr, intro i,
   apply iso.is_zero_iff,
   refine functor.map_iso _ _ ≪≫ iso.app (functor.map_iso _ _) _,
