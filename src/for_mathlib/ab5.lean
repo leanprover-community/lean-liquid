@@ -18,16 +18,34 @@ class AB5 : Prop :=
 (cond [] : ∀ (J : Type v) [small_category J] [is_filtered J],
   functor.exact (limits.colim : (J ⥤ A) ⥤ A))
 
-lemma AB5.colim_exact [AB5 A] (J : Type v) [small_category J] [is_filtered J] :
+variables (J : Type v) [small_category J] [is_filtered J]
+
+lemma AB5.colim_exact [AB5 A] :
   functor.exact (limits.colim : (J ⥤ A) ⥤ A) :=
 AB5.cond A J
 
-instance homology_functor_preserves_filtered_colimit
+variables
+  [preserves_finite_limits (limits.colim : (J ⥤ A) ⥤ A)]
+  [preserves_finite_colimits (limits.colim : (J ⥤ A) ⥤ A)]
+
+noncomputable
+def colimit_homology_functor_iso
+  {M : Type} (c : complex_shape M) (i : M) :
+  homology_functor (J ⥤ A) c i ⋙ limits.colim ≅
+  (limits.colim.map_homological_complex _) ⋙ homology_functor _ _ i :=
+functor.homology_functor_iso _ _ _
+
+noncomputable! -- UUUUGGGGHHH
+def homology_functor_preserves_filtered_colimit
   {M : Type} (c : complex_shape M) (i : M)
-  (J : Type v) [small_category J] [is_filtered J]
   (F : J ⥤ homological_complex A c) :
   preserves_colimit F (homology_functor A c i) :=
 begin
+  let F' := homological_complex.eval_functor_equiv.functor.obj F,
+  let q := (colimit_homology_functor_iso A J c i).app F',
+  dsimp at q,
+  apply preserves_colimit_of_preserves_colimit_cocone (colimit.is_colimit F),
+  let e : F ⋙ homology_functor A c i ≅ F'.homology i := sorry,
   sorry
 end
 
