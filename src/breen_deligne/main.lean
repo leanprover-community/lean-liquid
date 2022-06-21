@@ -197,14 +197,26 @@ lemma bdd_step₆_free₀ (A : Ab) :
   ∃ (F₁ F₀ : Ab) (h₁ : module.free ℤ F₁) (h₀ : module.free ℤ F₀) (f : F₁ ⟶ F₀) (g : F₀ ⟶ A),
   short_exact f g :=
 begin
-  let g := (finsupp.total A A ℤ id).to_add_monoid_hom,
+  let g := finsupp.total A A ℤ id,
   let F := g.ker,
   let f := F.subtype,
   let F₀ : Ab := AddCommGroup.of (↥A →₀ ℤ),
   let F₁ : Ab := AddCommGroup.of F,
-  refine ⟨F₁, F₀, _⟩,
-  -- let f' : F₁ ⟶ F₀ := by { exact f },
-  sorry
+  refine ⟨F₁, F₀, _, _, f.to_add_monoid_hom, g.to_add_monoid_hom, _⟩,
+  { dsimp [F₁, F],
+    exact submodule.free_of_pid_of_free, },
+  { exact module.free.finsupp.free ℤ },
+  { apply_with short_exact.mk {instances:=ff},
+    { rw AddCommGroup.mono_iff_injective, apply subtype.val_injective },
+    { rw AddCommGroup.epi_iff_surjective, apply finsupp.total_id_surjective },
+    { rw AddCommGroup.exact_iff,
+      ext x,
+      dsimp only [f, F, F₁, AddCommGroup.coe_of],
+      simp only [add_monoid_hom.mem_range, linear_map.to_add_monoid_hom_coe,
+        submodule.subtype_apply],
+      refine ⟨_, _⟩,
+      { rintro ⟨y, rfl⟩, exact y.2 },
+      { intro h, exact ⟨⟨x, h⟩, rfl⟩ } } }
 end
 
 include hT1
@@ -344,6 +356,11 @@ sorry
 
 variables [has_coproducts (endomorphisms 𝓐)]
 variables [AB4 (endomorphisms 𝓐)]
+
+-- def eval_map_endomorphisms_homology (A : 𝓐) (f : A ⟶ A)
+--   (hH0 : ((data.eval_functor F).obj BD.data) ⋙ homology_functor _ _ 0 ≅ 𝟭 _) :
+--   ((BD.eval F.map_endomorphisms).obj ⟨A,f⟩).val.as.homology 0 ≅ ⟨A,f⟩ :=
+-- by admit
 
 lemma main_lemma (A : 𝓐) (B : 𝓐) (f : A ⟶ A) (g : B ⟶ B)
   (hH0 : ((data.eval_functor F).obj BD.data) ⋙ homology_functor _ _ 0 ≅ 𝟭 _)
