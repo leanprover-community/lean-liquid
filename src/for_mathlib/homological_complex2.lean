@@ -72,6 +72,7 @@ noncomputable theory
 
 set_option pp.universes true
 
+-- SELFCONTAINED
 def eval_functor_homology_iso (F : X ⥤ homological_complex 𝒜 c) (i) :
   F ⋙ homology_functor _ c i ≅ (eval_functor.obj F).homology i :=
 { hom := homology.lift _ _ _
