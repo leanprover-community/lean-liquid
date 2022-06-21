@@ -502,7 +502,13 @@ lemma bicartesian_of_is_zero {𝓒 : Type*} [category 𝓒] [abelian 𝓒]
   {A B C D : 𝓒} (f₁ : A ⟶ B) (g₁ : A ⟶ C) (g₂ : B ⟶ D) (f₂ : C ⟶ D) (h : commsq f₁ g₁ g₂ f₂)
   (hA : is_zero A) (hB : is_zero B) (hC : is_zero C) (hD : is_zero D) :
   h.bicartesian :=
-sorry
+begin
+  delta commsq.bicartesian,
+  apply_with short_exact.mk {instances:=ff},
+  { refine ⟨λ X f g h, _⟩, apply hA.eq_of_tgt },
+  { refine ⟨λ X f g h, _⟩, apply hD.eq_of_src },
+  { apply exact_of_is_zero ((is_zero_biprod _ _ hB hC).of_iso (h.sum.iso (sum_str.biprod _ _))), }
+end
 
 lemma is_zero_pi {𝓒 : Type*} [category 𝓒] [abelian 𝓒] {ι : Type*} (f : ι → 𝓒) [has_product f]
   (hf : ∀ i, is_zero (f i)) :
