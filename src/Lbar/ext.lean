@@ -188,6 +188,13 @@ lemma auux
   of_hom f₁ ≫ of_hom β = of_hom α ≫ of_hom f₂ :=
 sorry
 
+@[simp] lemma of_hom_id
+  {𝓐 : Type*} [category 𝓐] [abelian 𝓐] [enough_projectives 𝓐]
+  {A : cochain_complex 𝓐 ℤ}
+  [((homotopy_category.quotient 𝓐 (complex_shape.up ℤ)).obj A).is_bounded_above] :
+  of_hom (𝟙 A) = 𝟙 _ :=
+by { delta of_hom, rw [category_theory.functor.map_id], refl }
+
 lemma Ext_iso_of_bicartesian_of_bicartesian
   {𝓐 : Type*} [category 𝓐] [abelian 𝓐] [enough_projectives 𝓐]
   {A₁ B₁ C A₂ B₂ : cochain_complex 𝓐 ℤ}
@@ -216,10 +223,15 @@ begin
   replace LES₂ := (((Ext_five_term_exact_seq' _ _ i V w₂).drop 1).pair.cons LES₂).extract 0 4,
   refine iso_of_bicartesian_of_bicartesian LES₂ LES₁ _ _ _ _ H1 H2,
   { apply commsq.of_eq, delta Ext_Tinv2, clear LES₁ LES₂,
-    rw [sub_comp, comp_sub, op_id, category_theory.functor.map_id, nat_trans.id_app,
-      category.id_comp, ← functor.flip_obj_map, ← functor.flip_obj_map, ← functor.flip_obj_map],
-    rw ← Ext_δ_natural i V _ _ _ _ α β γ _ _ w₁ w₂;
-    -- use `Ext_δ_natural`,
+    rw [sub_comp, comp_sub, ← functor.flip_obj_map, ← functor.flip_obj_map],
+    rw ← Ext_δ_natural i V _ _ _ _ α β γ sq1.w sq2.w w₁ w₂,
+    congr' 1,
+    rw [← nat_trans.naturality, ← functor.flip_obj_map, category.assoc,
+      Ext_δ_natural i V _ _ _ _ ιA ιB (𝟙 _) sq1'.w sq2'.w w₁ w₂],
+    simp only [op_id, category_theory.functor.map_id, nat_trans.id_app,
+      category.id_comp, of_hom_id, category.comp_id],
+    erw [category.id_comp],
+    -- this needs naturality of `Ext_δ` in `V`
     sorry, },
   { apply Ext_Tinv2_commsq,
     { exact auux sq2 },
