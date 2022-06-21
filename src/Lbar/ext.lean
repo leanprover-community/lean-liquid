@@ -185,7 +185,7 @@ lemma auux
   [((homotopy_category.quotient 𝓐 (complex_shape.up ℤ)).obj B₂).is_bounded_above]
   {f₁ : A₁ ⟶ B₁} {f₂ : A₂ ⟶ B₂} {α : A₁ ⟶ A₂} {β : B₁ ⟶ B₂}
   (sq1 : commsq f₁ α β f₂) :
-  of'_hom f₁ ≫ of'_hom β = of'_hom α ≫ of'_hom f₂ :=
+  of_hom f₁ ≫ of_hom β = of_hom α ≫ of_hom f₂ :=
 sorry
 
 lemma Ext_iso_of_bicartesian_of_bicartesian
@@ -204,19 +204,21 @@ lemma Ext_iso_of_bicartesian_of_bicartesian
   (sq1' : commsq f₁ ιA ιB f₂) (sq2' : commsq g₁ ιB (𝟙 _) g₂)
   (V : bounded_homotopy_category 𝓐) (T_inv : V ⟶ V)
   (i : ℤ)
-  (H1 : (Ext_Tinv2_commsq (of'_hom α) (of'_hom ιA) (of'_hom β) (of'_hom ιB) (of'_hom f₁) (of'_hom f₂)
+  (H1 : (Ext_Tinv2_commsq (of_hom α) (of_hom ιA) (of_hom β) (of_hom ιB) (of_hom f₁) (of_hom f₂)
     (auux sq1) (auux sq1') T_inv i).bicartesian)
-  (H2 : (Ext_Tinv2_commsq (of'_hom α) (of'_hom ιA) (of'_hom β) (of'_hom ιB) (of'_hom f₁) (of'_hom f₂)
+  (H2 : (Ext_Tinv2_commsq (of_hom α) (of_hom ιA) (of_hom β) (of_hom ιB) (of_hom f₁) (of_hom f₂)
     (auux sq1) (auux sq1') T_inv (i+1)).bicartesian) :
-  is_iso (Ext_Tinv2 (of'_hom γ) (𝟙 _) T_inv (i+1)) :=
+  is_iso (Ext_Tinv2 (of_hom γ) (𝟙 _) T_inv (i+1)) :=
 begin
   have LES₁ := (((Ext_five_term_exact_seq' _ _ i V w₁).drop 2).pair.cons (Ext_five_term_exact_seq' _ _ (i+1) V w₁)),
   replace LES₁ := (((Ext_five_term_exact_seq' _ _ i V w₁).drop 1).pair.cons LES₁).extract 0 4,
   have LES₂ := (((Ext_five_term_exact_seq' _ _ i V w₂).drop 2).pair.cons (Ext_five_term_exact_seq' _ _ (i+1) V w₂)).extract 0 4,
   replace LES₂ := (((Ext_five_term_exact_seq' _ _ i V w₂).drop 1).pair.cons LES₂).extract 0 4,
   refine iso_of_bicartesian_of_bicartesian LES₂ LES₁ _ _ _ _ H1 H2,
-  { apply commsq.of_eq, delta Ext_Tinv2,
-    rw [sub_comp, comp_sub],
+  { apply commsq.of_eq, delta Ext_Tinv2, clear LES₁ LES₂,
+    rw [sub_comp, comp_sub, op_id, category_theory.functor.map_id, nat_trans.id_app,
+      category.id_comp, ← functor.flip_obj_map, ← functor.flip_obj_map, ← functor.flip_obj_map],
+    rw ← Ext_δ_natural i V _ _ _ _ α β γ _ _ w₁ w₂;
     -- use `Ext_δ_natural`,
     sorry, },
   { apply Ext_Tinv2_commsq,
@@ -224,22 +226,32 @@ begin
     { exact auux sq2' }, },
 end
 
+def pi_Ext_iso_Ext_sigma (i : ℤ) :
+  (∏ λ (k : ulift ℕ), ((QprimeFP r' BD.data κ₂ M).op ⋙
+    (Ext i).flip.obj ((single (Condensed Ab) 0).obj V.to_Cond)).obj (op (ι k))) ≅
+  ((Ext i).obj (op (of' (∐ λ (k : ulift ℕ), (QprimeFP_int r' BD.data κ₂ M).obj (ι k))))).obj
+    ((single (Condensed Ab) 0).obj (Condensed.of_top_ab ↥V)) :=
+sorry
+
 lemma Tinv2_iso_of_bicartesian_aux [normed_with_aut r V]
   [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]
   (i : ℤ)
   (H1 : (shift_sub_id.commsq (ExtQprime.Tinv2 r r' BD.data κ κ₂ M V i) ι hι).bicartesian) :
-  (Ext_Tinv2_commsq (of'_hom (sigma_map (λ (k : ulift ℕ), ι k) (QprimeFP_int.Tinv BD.data κ₂ κ M)))
-  (of'_hom (sigma_map (λ (k : ulift ℕ), ι k) (QprimeFP_int.ι BD.data κ₂ κ M)))
-  (of'_hom (sigma_map (λ (k : ulift ℕ), ι k) (QprimeFP_int.Tinv BD.data κ₂ κ M)))
-  (of'_hom (sigma_map (λ (k : ulift ℕ), ι k) (QprimeFP_int.ι BD.data κ₂ κ M)))
-  (of'_hom (QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD.data κ₂ M)))
-  (of'_hom (QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD.data κ M)))
+  (Ext_Tinv2_commsq (of_hom (sigma_map (λ (k : ulift ℕ), ι k) (QprimeFP_int.Tinv BD.data κ₂ κ M)))
+  (of_hom (sigma_map (λ (k : ulift ℕ), ι k) (QprimeFP_int.ι BD.data κ₂ κ M)))
+  (of_hom (sigma_map (λ (k : ulift ℕ), ι k) (QprimeFP_int.Tinv BD.data κ₂ κ M)))
+  (of_hom (sigma_map (λ (k : ulift ℕ), ι k) (QprimeFP_int.ι BD.data κ₂ κ M)))
+  (of_hom (QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD.data κ₂ M)))
+  (of_hom (QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD.data κ M)))
   (auux $ commsq_shift_sub_id_Tinv _ _ _ _ _ _)
   (auux $ commsq_shift_sub_id_ι _ _ _ _ _ _)
   ((single _ 0).map (Condensed.of_top_ab_map (normed_group_hom.to_add_monoid_hom (normed_with_aut.T.inv : V ⟶ V)) (normed_group_hom.continuous _)))
   i).bicartesian :=
 begin
-  refine commsq.bicartesian.of_iso _ _ _ _ _ _ _ _ H1;
+  refine commsq.bicartesian.of_iso
+    (pi_Ext_iso_Ext_sigma _ _ _ _ _ _) (pi_Ext_iso_Ext_sigma _ _ _ _ _ _)
+    (pi_Ext_iso_Ext_sigma _ _ _ _ _ _) (pi_Ext_iso_Ext_sigma _ _ _ _ _ _)
+    _ _ _ _ H1;
   sorry
 end
 
