@@ -497,7 +497,6 @@ begin
     intro c, dsimp, apply_instance, }
 end
 
--- SELFCONTAINED
 lemma bicartesian_of_is_zero {𝓒 : Type*} [category 𝓒] [abelian 𝓒]
   {A B C D : 𝓒} (f₁ : A ⟶ B) (g₁ : A ⟶ C) (g₂ : B ⟶ D) (f₂ : C ⟶ D) (h : commsq f₁ g₁ g₂ f₂)
   (hA : is_zero A) (hB : is_zero B) (hC : is_zero C) (hD : is_zero D) :
@@ -567,7 +566,6 @@ begin
   rintro (_|j); apply le_max_left
 end
 
--- SELFCONTAINED
 lemma Hι1 : ∀ j,
   c₀ r r' eg (λ (n : ℕ), eg.κ r r' n) (eg.κ' r r') (i + 1) ⟨ℤ⟩ ≤ ι' r r' i j
 | 0 := le_max_left _ _
@@ -592,7 +590,6 @@ by rintro (_|j); simp only [ι', le_max_iff, le_rfl, true_or, or_true]
 
 def ι : ulift.{1} ℕ → ℝ≥0 := ι' r r' i ∘ ulift.down
 
--- SELFCONTAINED
 lemma hι : monotone (ι r r' i) :=
 λ j₁ j₂ h, by { delta ι, apply hι', exact h }
 
