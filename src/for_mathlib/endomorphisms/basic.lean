@@ -1,4 +1,5 @@
 import category_theory.abelian.projective
+import for_mathlib.abelian_category
 
 noncomputable theory
 
@@ -465,6 +466,9 @@ instance : preadditive (endomorphisms 𝓐) :=
   comp_add' := by { intros, ext, dsimp, rw comp_add } }
 
 instance forget_additive : (endomorphisms.forget 𝓐).additive := {}
+
+lemma is_zero_X {X : endomorphisms 𝓐} (h : is_zero X) : is_zero X.X :=
+by { rw is_zero_iff_id_eq_zero at h ⊢, apply_fun (λ a, a.f) at h, exact h }
 
 end preadditive
 
