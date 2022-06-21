@@ -145,9 +145,23 @@ end
 
 open bounded_homotopy_category (Ext0)
 
+-- move me
+def bdd_step₅_aux'' (X Y : bounded_homotopy_category 𝓐)
+  (e : bounded_homotopy_category 𝓐 ≌ bounded_homotopy_category 𝓐)
+  [e.functor.additive] :
+  (preadditive_yoneda.obj X).obj (op Y) ≅
+    (preadditive_yoneda.obj (e.functor.obj X)).obj (op (e.functor.obj Y)) :=
+add_equiv.to_AddCommGroup_iso $
+{ map_add' := λ f g, e.functor.map_add,
+  .. equiv_of_fully_faithful e.functor }
+
+instance shift_equiv_functor_additive (k : ℤ) :
+  (shift_equiv (bounded_homotopy_category 𝓐) k).functor.additive :=
+bounded_homotopy_category.shift_functor_additive k
+
 def bdd_step₅_aux' (X Y : bounded_homotopy_category 𝓐) (k : ℤ) :
   (preadditive_yoneda.obj X).obj (op Y) ≅ (preadditive_yoneda.obj (X⟦k⟧)).obj (op (Y⟦k⟧)) :=
-sorry
+bdd_step₅_aux'' _ _ $ shift_equiv _ k
 
 def bdd_step₅_aux (X Y : bounded_homotopy_category 𝓐) (k : ℤ) :
   (Ext0.obj (op X)).obj Y ≅ (Ext0.obj (op $ X⟦k⟧)).obj (Y⟦k⟧) :=
