@@ -240,7 +240,7 @@ lemma Ext_δ_natural'
   [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Z)]
   (w : ∀ i, short_exact (f.f i) (g.f i)) :
   ((Ext i).obj _).map e ≫ Ext_δ f g i W₂ w =
-  Ext_δ f g i W₁ w ≫ ((Ext i).obj _).map e :=
+  Ext_δ f g i W₁ w ≫ ((Ext (i+1)).obj _).map e :=
 begin
   sorry
 end
