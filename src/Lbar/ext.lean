@@ -241,8 +241,8 @@ begin
     simp only [op_id, category_theory.functor.map_id, nat_trans.id_app,
       category.id_comp, of_hom_id, category.comp_id],
     erw [category.id_comp],
-    -- this needs naturality of `Ext_δ` in `V`
-    sorry, },
+    symmetry,
+    apply Ext_δ_natural', },
   { apply Ext_Tinv2_commsq,
     { exact auux sq2 },
     { exact auux sq2' }, },
