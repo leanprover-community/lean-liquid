@@ -1,4 +1,5 @@
 import for_mathlib.exact_filtered_colimits
+import for_mathlib.colim_preserves_colimits
 import condensed.exact
 import condensed.top_comparison
 
@@ -63,5 +64,17 @@ begin
   apply exact_colim_of_exact_of_is_filtered,
   exact (nat_trans.exact_iff_forall.{(u+2) (u+1) (u+1)} f g).1 h,
 end
+
+-- I think it would be better to use ExtrDisc equiv as opposed to the constructor from AB5.
+instance preserves_finite_limits
+  (J : Type.{u+1}) [small_category J] [is_filtered J] :
+  preserves_finite_limits (colim : (J ⥤ Condensed.{u} Ab.{u+1}) ⥤ _) :=
+sorry
+
+noncomputable
+instance preserves_colimits
+  (J : Type.{u+1}) [small_category J] :
+  preserves_colimits (colim : (J ⥤ Condensed.{u} Ab.{u+1}) ⥤ _) :=
+category_theory.limits.colim_preserves_colimits.{u+1 u+2} _ _
 
 end Condensed
