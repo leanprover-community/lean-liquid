@@ -242,6 +242,24 @@ lemma Ext_δ_natural'
   ((Ext i).obj _).map e ≫ Ext_δ f g i W₂ w =
   Ext_δ f g i W₁ w ≫ ((Ext (i+1)).obj _).map e :=
 begin
+  delta Ext_δ,
+  dsimp [connecting_hom'],
+  simp only [quiver.hom.unop_op, unop_inv],
+  simp_rw ← category.assoc,
+  rw is_iso.comp_inv_eq,
+  simp_rw category.assoc,
+  let t := _, change _ = _ ≫ _ ≫ t,
+  have ht : t = ((Ext (i + 1)).obj _).map e,
+  { dsimp only [t],
+    rw [is_iso.inv_comp_eq, nat_trans.naturality] },
+  rw ht, clear ht t,
+  rw iso.eq_inv_comp,
+  rw ← nat_trans.naturality,
+  simp only [← category.assoc],
+  congr' 1,
+  rw iso.comp_inv_eq,
+  dsimp [shift_iso],
+  -- Should use an analogue of `shift_iso_conj` but for the second variable.
   sorry
 end
 
