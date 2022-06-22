@@ -253,7 +253,14 @@ def pi_Ext_iso_Ext_sigma (i : ℤ) :
     (Ext i).flip.obj ((single (Condensed Ab) 0).obj V.to_Cond)).obj (op (ι k))) ≅
   ((Ext i).obj (op (of' (∐ λ (k : ulift ℕ), (QprimeFP_int r' BD.data κ₂ M).obj (ι k))))).obj
     ((single (Condensed Ab) 0).obj (Condensed.of_top_ab ↥V)) :=
-sorry
+(Ext_coproduct_iso
+  (λ k : ulift ℕ, (QprimeFP r' BD.data κ₂ M).obj (ι k)) i
+  ((single (Condensed Ab) 0).obj V.to_Cond)).symm ≪≫
+  ((Ext i).flip.obj ((single (Condensed Ab) 0).obj V.to_Cond)).map_iso
+(iso.op $
+  (by exact iso.refl _ ) ≪≫
+  (bounded_homotopy_category.is_colimit_cofan _).cocone_point_unique_up_to_iso
+  (colimit.is_colimit _))
 
 lemma Tinv2_iso_of_bicartesian_aux [normed_with_aut r V]
   [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]
