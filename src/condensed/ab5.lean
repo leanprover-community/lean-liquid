@@ -65,6 +65,7 @@ begin
   exact (nat_trans.exact_iff_forall.{(u+2) (u+1) (u+1)} f g).1 h,
 end
 
+-- I think it would be better to use ExtrDisc equiv as opposed to the constructor from AB5.
 instance preserves_finite_limits
   (J : Type.{u+1}) [small_category J] [is_filtered J] :
   preserves_finite_limits (colim : (J ⥤ Condensed.{u} Ab.{u+1}) ⥤ _) :=
