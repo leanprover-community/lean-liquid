@@ -72,9 +72,10 @@ instance preserves_finite_limits
 sorry
 
 noncomputable
-instance preserves_colimits
+example
   (J : Type.{u+1}) [small_category J] :
   preserves_colimits (colim : (J ⥤ Condensed.{u} Ab.{u+1}) ⥤ _) :=
-category_theory.limits.colim_preserves_colimits.{u+1 u+2} _ _
+by apply_instance
+--category_theory.limits.colim_preserves_colimits _ _
 
 end Condensed
