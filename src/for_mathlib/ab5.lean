@@ -39,7 +39,6 @@ def colimit_homology_functor_iso
   (limits.colim.map_homological_complex _) ⋙ homology_functor _ _ i :=
 functor.homology_functor_iso _ _ _
 
--- SELFCONTAINED
 noncomputable
 def eval_functor_colimit_iso
   {M : Type} (c : complex_shape M)
@@ -48,9 +47,10 @@ def eval_functor_colimit_iso
   (homological_complex.eval_functor.obj F) :=
 homological_complex.hom.iso_of_components
 (λ i, preserves_colimit_iso (homological_complex.eval A c i) _)
-sorry
+begin
+  intros i j hij, sorry
+end
 
--- SELFCONTAINED
 noncomputable! -- UUUUGGGGHHH
 instance homology_functor_preserves_filtered_colimit
   {M : Type} (c : complex_shape M) (i : M)
@@ -72,7 +72,9 @@ begin
   refine cocones.ext (q ≪≫ _) _,
   { apply (homology_functor A c i).map_iso,
     exact (eval_functor_colimit_iso _ _ _ _).symm },
-  { sorry }
+  { intro j,
+    dsimp,
+    sorry }
 end
 
 noncomputable
