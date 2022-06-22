@@ -11,6 +11,7 @@ import for_mathlib.homology
 import for_mathlib.exact_lift_desc
 import for_mathlib.additive_functor
 import for_mathlib.homotopy_category_lemmas
+import for_mathlib.homology_lift_desc
 
 .
 
@@ -461,19 +462,6 @@ lemma functor.map_map' {𝓐 : Type*} [category 𝓐] {𝓑 : Type*}
   (φ : a₁ ⟶ a₂) : G.map (F.map φ) = (F ⋙ G).map φ :=
 rfl
 
-lemma homology.lift_desc (X Y Z : 𝓐) (f : X ⟶ Y) (g : Y ⟶ Z) (w)
-  (U : 𝓐) (e : _ ⟶ U) (he : f ≫ e = 0) (V : 𝓐) (t : V ⟶ _) (ht : t ≫ g = 0) :
-  homology.lift f g w (t ≫ cokernel.π _) (by { simp [ht] } ) ≫
-  homology.desc' _ _ _ (kernel.ι _ ≫ e) (by { simp [he] }) =
-  t ≫ e :=
-begin
-  let s := _, change s ≫ _ = _,
-  have hs : s = kernel.lift _ t ht ≫ homology.π' _ _ _,
-  { apply homology.hom_to_ext,
-    simp only [homology.lift_ι, category.assoc, projective.homology.π'_ι, kernel.lift_ι_assoc] },
-  simp [hs],
-end
-
 namespace Ext_compute_with_acyclic_aux₃_naturality_helpers
 
 variables (C₁ C₂ : cochain_complex 𝓐 ℤ)
@@ -722,30 +710,6 @@ lemma Ext_compute_with_acylic_inv_eq (B : 𝓐)
   ( kernel_yoneda_complex_to_morphism_to_single C B (-i) ≫
     Ext_compute_with_acyclic_inv_eq_aux C B i)
 admit := admit
-
-lemma homology.lift_desc (X Y Z : 𝓐) (f : X ⟶ Y) (g : Y ⟶ Z) (w)
-  (U : 𝓐) (e : _ ⟶ U) (he : f ≫ e = 0) (V : 𝓐) (t : V ⟶ _) (ht : t ≫ g = 0) :
-  homology.lift f g w (t ≫ cokernel.π _) (by { simp [ht] } ) ≫
-  homology.desc' _ _ _ (kernel.ι _ ≫ e) (by { simp [he] }) =
-  t ≫ e :=
-begin
-  let s := _, change s ≫ _ = _,
-  have hs : s = kernel.lift _ t ht ≫ homology.π' _ _ _,
-  { apply homology.hom_to_ext,
-    simp only [homology.lift_ι, category.assoc, projective.homology.π'_ι, kernel.lift_ι_assoc] },
-  simp [hs],
-end
-
-lemma homology.lift_desc' (X Y Z : 𝓐) (f : X ⟶ Y) (g : Y ⟶ Z) (w)
-  (U : 𝓐) (e : Y ⟶ U) (he : f ≫ e = 0) (V : 𝓐) (t : V ⟶ Y) (ht : t ≫ g = 0)
-  (u v) (hu : u = t ≫ cokernel.π _) (hv : v = kernel.ι _ ≫ e) :
-  homology.lift f g w u (by simpa [hu] ) ≫ homology.desc' _ _ _ v (by simpa [hv]) = t ≫ e :=
-begin
-  subst hu,
-  subst hv,
-  apply homology.lift_desc,
-  assumption'
-end
 
 -- Replacing some `End` with `cend` fixes my bracket pair colorizer!
 -- notation `cend` := category_theory.End
