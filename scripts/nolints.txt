@@ -8,7 +8,9 @@ apply_nolint ExtQprime_iso_aux_system_aux unused_arguments ge_or_gt
 apply_nolint Lbar.Tinv_sub unused_arguments
 apply_nolint Lbar.condensed unused_arguments
 apply_nolint Lbar.condensify_iso_extend unused_arguments
+apply_nolint auux unused_arguments
 apply_nolint eval'_is_bounded_above unused_arguments
+apply_nolint of_hom_id unused_arguments
 
 -- Lbar/functor.lean
 apply_nolint Lbar.map_add unused_arguments
@@ -28,10 +30,11 @@ apply_nolint breen_deligne.FreeMat.kronecker_map_reindex_right unused_arguments
 apply_nolint breen_deligne.data.homological_complex.functor_eval_flip_preserves_colimits_of_shape unused_arguments
 
 -- breen_deligne/main.lean
-apply_nolint breen_deligne.package.main_lemma.IH_0_aux def_lemma
 apply_nolint breen_deligne.package.main_lemma.IH_neg unused_arguments
 apply_nolint breen_deligne.package.main_lemma.bdd_step unused_arguments
 apply_nolint breen_deligne.package.main_lemma.bdd_step₂ unused_arguments
+apply_nolint breen_deligne.package.main_lemma.bdd_step₅_aux'' unused_arguments
+apply_nolint breen_deligne.package.main_lemma.shift_equiv_functor_additive unused_arguments
 
 -- breen_deligne/suitable.lean
 apply_nolint breen_deligne.basic_universal_map.suitable class_structure
@@ -126,6 +129,9 @@ apply_nolint category_theory.eval_next_iso_of_some unused_arguments
 apply_nolint category_theory.eval_prev_iso_of_some unused_arguments
 apply_nolint category_theory.sigma_cokernel_cofork unused_arguments
 
+-- for_mathlib/ab5.lean
+apply_nolint category_theory.colimit_homology_functor_iso unused_arguments
+
 -- for_mathlib/abelian_category.lean
 apply_nolint category_theory.limits.is_zero_of_iso_of_zero unused_arguments
 apply_nolint category_theory.limits.preserves_zero_of_preserves_initial instance_priority
@@ -204,6 +210,7 @@ apply_nolint category_theory.functor.left_derived.β unused_arguments
 
 -- for_mathlib/endomorphisms/Ext.lean
 apply_nolint category_theory.endomorphisms.mk_bo_ho_ca unused_arguments
+apply_nolint category_theory.endomorphisms.quot_out_single_map unused_arguments
 
 -- for_mathlib/endomorphisms/basic.lean
 apply_nolint category_theory.endomorphisms.cofree unused_arguments
