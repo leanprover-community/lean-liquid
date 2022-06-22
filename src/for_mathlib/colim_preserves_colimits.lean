@@ -6,7 +6,7 @@ open category_theory
 namespace category_theory.limits
 
 universes v u
-variables (J : Type v) [small_category J] (C : Type v)
+variables (J : Type v) [small_category J] (C : Type u)
   [category.{v} C] [has_colimits C]
 
 noncomputable
