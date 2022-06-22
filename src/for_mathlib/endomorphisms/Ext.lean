@@ -45,6 +45,9 @@ variables [has_products_of_shape (ulift.{v} ℕ) 𝓐]
 
 variables (X : bounded_homotopy_category (endomorphisms 𝓐))
 
+/-- `unEnd` is the "forget the endomorphism" map from the category whose objects are complexes
+of pairs `(Aⁱ,eⁱ)` with morphisms defined up to homotopy, to the category whose objects are
+complexes of objects `Aⁱ` with morphisms defined up to homotopy.  -/
 def unEnd : bounded_homotopy_category 𝓐 :=
 of $ ((endomorphisms.forget _).map_homotopy_category _).obj X.val
 
@@ -164,7 +167,8 @@ begin
 end
 
 def single_unEnd (X : endomorphisms 𝓐) : ((single _ 0).obj X).unEnd ≅ (single _ 0).obj X.X :=
-sorry
+iso.refl X.X
+
 
 lemma single_unEnd_e (X : endomorphisms 𝓐) :
   (single_unEnd X).hom ≫ (single _ 0).map X.e = ((single _ 0).obj X).e ≫ (single_unEnd X).hom :=
