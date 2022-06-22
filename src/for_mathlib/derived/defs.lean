@@ -16,6 +16,8 @@ variables {ι : Type*} {c : complex_shape ι}
 
 local notation `𝒦` := homotopy_category A c
 
+/-- Say `c` is a complex shape on an index type `ι`. An object of `homotopy_category A c`
+is acyclic if the homology of this object is 0 at all indices `i : ι`. -/
 class is_acyclic (X : 𝒦) : Prop :=
 (cond [] : ∀ i, is_zero ((homotopy_category.homology_functor _ _ i).obj X))
 
@@ -29,6 +31,8 @@ begin
   apply is_acyclic.cond X i,
 end
 
+/-- An object of `homotopy_category A c` is "K-projective" if the only map from
+that object to any acyclic object is the zero map. -/
 class is_K_projective (X : 𝒦) : Prop :=
 (cond [] : ∀ (Y : 𝒦) [is_acyclic Y] (f : X ⟶ Y), f = 0)
 
@@ -44,6 +48,8 @@ namespace homotopy_category
 local notation `𝒦` := homotopy_category A (complex_shape.up ℤ)
 local notation `HH` := homotopy_category.homology_functor A (complex_shape.up ℤ) 0
 
+/-- An object `(Cⁱ)` of `homotopy_category A ℤ↑` is bounded_by `n : ℕ` if the all the objects
+`Cⁱ` for `i ≥ n` in the complex are zero -/
 def bounded_by (X : 𝒦) (n : ℤ) : Prop :=
 ∀ i, n ≤ i → is_zero (X.as.X i)
 
@@ -64,6 +70,9 @@ end homotopy_category
 
 variables (A)
 
+/-- The category `bounded_homotopy_category A` has objects the complexes indexed by `ℤ↑`
+which are bounded above, i.e. the objects in the complex are equal to zero for sufficiently
+large indices. Morphisms are homotopy classes of maps. -/
 structure bounded_homotopy_category :=
 (val : homotopy_category A (complex_shape.up ℤ))
 [bdd : homotopy_category.is_bounded_above val]
