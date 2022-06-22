@@ -438,6 +438,7 @@ def shift_of_eq {C : Type u} [category.{v} C] [has_shift C ℤ] (i j : ℤ) (h :
   X⟦i⟧ ≅ X⟦j⟧ :=
 by { rw h }
 
+@[simps]
 def shift_iso_aux {C : Type u} [category.{v} C] [preadditive C] [has_shift C ℤ]
   [∀ (n : ℤ), (category_theory.shift_functor C n).additive]
   (n m : ℤ) (X Y : C) :

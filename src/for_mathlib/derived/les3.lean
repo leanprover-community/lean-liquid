@@ -47,6 +47,18 @@ lemma Ext_map_Ext_iso' [enough_projectives A]
     (Ext_iso i _ X₂ Y X₂.π).hom ≫ (preadditive_yoneda.obj (Y⟦i⟧)).map (lift (X₁.π ≫ φ) X₂.π).op :=
 Ext_map_Ext_iso _ _ _ _ _ _ _ _ _ _ $ by rw [lift_lifts]
 
+lemma Ext_iso_naturality_snd_component
+  [enough_projectives A]
+  (i : ℤ) (P X Y₁ Y₂ : bounded_homotopy_category A)
+  [is_K_projective P.val]
+  (f : P ⟶ X) [is_quasi_iso f] (g : Y₁ ⟶ Y₂) :
+  ((Ext i).obj _).map g ≫ (Ext_iso i P X _ f).hom =
+  (Ext_iso i P X _ f).hom ≫ (preadditive_yoneda.flip.obj (opposite.op P)).map (g⟦i⟧') :=
+begin
+  dsimp only [Ext_iso, Ext, Ext0], ext t,
+  dsimp, simp only [comp_apply], dsimp, simp,
+end
+
 end
 
 def shift_iso [enough_projectives A]
@@ -98,6 +110,40 @@ begin
     add_equiv.coe_mk],
   erw [preadditive_yoneda_obj_map_apply, preadditive_yoneda_obj_map_apply],
   simp only [← category.assoc, quiver.hom.unop_op, ← category_theory.functor.map_comp],
+end
+
+--attribute [simps] shift_iso_aux
+lemma shift_iso_conj'
+  (n : ℤ)
+  [enough_projectives A]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)]
+  (W₁ W₂ : bounded_homotopy_category A) (f : W₁ ⟶ W₂) :
+  (shift_iso n X W₁).inv ≫ ((Ext (n+1)).obj _).map f ≫ (shift_iso n X _).hom =
+  ((Ext n).obj _).map f :=
+begin
+  dsimp only [shift_iso, iso.trans_hom, iso.trans_inv, iso.symm_hom, iso.symm_inv],
+  simp only [category.assoc],
+  slice_lhs 4 5 { rw Ext_iso_naturality_snd_component },
+  simp only [category.assoc, iso.inv_hom_id_assoc, category.id_comp],
+  rw ← iso.eq_inv_comp,
+  simp_rw ← category.assoc,
+  rw iso.comp_inv_eq,
+  simp_rw category.assoc,
+  rw Ext_iso_naturality_snd_component,
+  rw iso.inv_hom_id_assoc,
+  ext t,
+  dsimp,
+  simp only [comp_apply],
+  dsimp,
+  simp only [add_zero, unit_of_tensor_iso_unit_inv_app, opaque_eq_to_iso_inv,
+    discrete.functor_map_id, nat_trans.id_app, category.id_comp, category.assoc,
+    nat_trans.naturality, functor.comp_map, μ_hom_inv_app_assoc, functor.map_comp,
+    ε_inv_app_obj, discrete.right_unitor_def, eq_to_iso.hom, eq_to_hom_map,
+    eq_to_hom_app, μ_naturality_assoc, μ_inv_hom_app_assoc],
+  erw ← nat_trans.naturality_assoc,
+  erw ← nat_trans.naturality_assoc,
+  dsimp, let s := _, change _ ≫ _ ≫ s = _, rw ← category.assoc, convert category.comp_id _,
+  dsimp [s], simp,
 end
 
 @[reassoc] lemma shift_iso_Ext_map
@@ -257,10 +303,7 @@ begin
   rw ← nat_trans.naturality,
   simp only [← category.assoc],
   congr' 1,
-  rw iso.comp_inv_eq,
-  dsimp [shift_iso],
-  -- Should use an analogue of `shift_iso_conj` but for the second variable.
-  sorry
+  rw [iso.comp_inv_eq, ← shift_iso_conj', iso.hom_inv_id_assoc],
 end
 
 lemma Ext_five_term_exact_seq'
