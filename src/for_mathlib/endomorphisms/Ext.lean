@@ -167,7 +167,8 @@ begin
 end
 
 def single_unEnd (X : endomorphisms 𝓐) : ((single _ 0).obj X).unEnd ≅ (single _ 0).obj X.X :=
-iso.refl X.X
+sorry
+--iso.refl X.X
 
 
 lemma single_unEnd_e (X : endomorphisms 𝓐) :
