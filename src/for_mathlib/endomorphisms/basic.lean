@@ -9,6 +9,8 @@ open category_theory category_theory.limits
 
 namespace category_theory
 
+/-- `endomorphisms C` is the category whose objects are an object of `C` equipped with an
+endomorphism. Morphisms are morphisms between objects which intertwine the endomorphisms. -/
 structure endomorphisms (C : Type u) [category.{v} C] :=
 (X : C)
 (e : End X)
