@@ -227,6 +227,24 @@ begin
   { simp, }
 end
 
+.
+
+lemma Ext_δ_natural'
+  (i : ℤ)
+  [enough_projectives A]
+  (W₁ W₂ : bounded_homotopy_category A)
+  (e : W₁ ⟶ W₂)
+  {X Y Z : cochain_complex A ℤ} (f : X ⟶ Y) (g : Y ⟶ Z)
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Y)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Z)]
+  (w : ∀ i, short_exact (f.f i) (g.f i)) :
+  ((Ext i).obj _).map e ≫ Ext_δ f g i W₂ w =
+  Ext_δ f g i W₁ w ≫ ((Ext i).obj _).map e :=
+begin
+  sorry
+end
+
 lemma Ext_five_term_exact_seq'
   (n : ℤ)
   [enough_projectives A]
