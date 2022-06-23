@@ -298,7 +298,86 @@ begin
 end
 .
 
+open_locale classical
+
 set_option pp.universes true
+
+lemma QprimeFP.mono (n : ℤ) :
+  mono ((QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD.data κ M)).f n) :=
+begin
+  let Q := QprimeFP_int r' BD.data κ M,
+  let t := QprimeFP.shift_sub_id ι hι Q,
+  let S := ∐ λ (k : ulift ℕ), (Q.obj (ι k)).X n,
+  let e : (∐ λ (k : ulift ℕ), Q.obj (ι k)).X n ≅ S :=
+    preserves_colimit_iso
+      (homological_complex.eval (Condensed.{u} Ab.{u+1}) (complex_shape.up ℤ) n)
+      (discrete.functor $ λ k, Q.obj (ι k)) ≪≫
+      (has_colimit.iso_of_nat_iso $ discrete.nat_iso $ λ _, iso.refl _),
+  let f : S ⟶ S := QprimeFP.shift_sub_id ι hι
+    (Q ⋙ (homological_complex.eval (Condensed.{u} Ab.{u+1}) (complex_shape.up ℤ) n)),
+  have htf : t.f n = e.hom ≫ f ≫ e.inv,
+  { dsimp only [t, f, QprimeFP.shift_sub_id],
+    simp only [comp_sub, sub_comp, homological_complex.sub_f_apply],
+    erw [category.id_comp, e.hom_inv_id],
+    refine congr_arg2 _ _ rfl,
+    refine (is_colimit_of_preserves
+      (homological_complex.eval (Condensed.{u} Ab.{u+1}) (complex_shape.up ℤ) n)
+      (colimit.is_colimit _)).hom_ext _,
+    rintro j,
+    erw [← homological_complex.comp_f, colimit.ι_desc],
+    dsimp [sigma_shift, sigma_shift', sigma_shift_cone],
+    slice_rhs 1 2
+    { erw (is_colimit_of_preserves
+        (homological_complex.eval (Condensed.{u} Ab.{u+1}) (complex_shape.up ℤ) n)
+        (colimit.is_colimit _)).fac },
+    dsimp,
+    erw [colimit.ι_desc], dsimp,
+    erw [category.id_comp, colimit.ι_desc], dsimp,
+    slice_rhs 2 3 { erw [colimit.ι_desc] }, dsimp,
+    erw [category.id_comp, colimit.ι_desc], refl, },
+  suffices : mono f, { resetI, rw htf, apply_instance }, clear htf t e,
+  rw mono_iff_ExtrDisc,
+  intro T,
+  let φ : ulift.{u+1} ℕ → Ab.{u+1} := λ k, ((Q.obj (ι k)).X n).val.obj (op T.val),
+  let D := AddCommGroup.direct_sum_cofan.{u+1 u+1} φ,
+  let hD := AddCommGroup.is_colimit_direct_sum_cofan.{u+1 u+1} φ,
+  let e : S.val.obj (op T.val) ≅ D.X,
+  { refine preserves_colimit_iso (Condensed.evaluation _ T.val) _ ≪≫ _,
+    refine _ ≪≫ (colimit.is_colimit _).cocone_point_unique_up_to_iso hD,
+    refine (has_colimit.iso_of_nat_iso $ discrete.nat_iso $ λ _, iso.refl _), },
+  let g : D.X ⟶ D.X := sigma_shift'.{u u+2 u+1} _ hι (Q ⋙ (homological_complex.eval (Condensed.{u} Ab.{u+1}) (complex_shape.up ℤ) n) ⋙ Condensed.evaluation _ T.val) D hD,
+  have he : f.val.app (ExtrDisc_to_Profinite.op.obj (op T)) = e.hom ≫ (g - 𝟙 _) ≫ e.inv,
+  { sorry },
+  suffices : mono (g - 𝟙 _), { resetI, rw he, apply_instance }, clear he e f S,
+  rw [AddCommGroup.mono_iff_injective, injective_iff_map_eq_zero],
+  intros x hx,
+  erw [sub_eq_zero, id_apply] at hx,
+  ext ⟨i⟩,
+  classical,
+  induction i with i IH,
+  { rw ← hx,
+    dsimp [g, sigma_shift', sigma_shift_cone, hD, AddCommGroup.is_colimit_direct_sum_cofan,
+      AddCommGroup.direct_sum_desc, discrete.nat_trans, direct_sum.to_add_monoid],
+    rw [dfinsupp.sum_add_hom_apply, dfinsupp.sum_apply],
+    apply finset.sum_eq_zero,
+    rintro ⟨j⟩ -,
+    convert dif_neg _,
+    rw [finset.mem_singleton],
+    intro H, rw ulift.ext_iff at H, revert H, apply nat.no_confusion, },
+  { rw ← hx,
+    classical,
+    dsimp [g, sigma_shift', sigma_shift_cone, hD, AddCommGroup.is_colimit_direct_sum_cofan,
+      AddCommGroup.direct_sum_desc, discrete.nat_trans, direct_sum.to_add_monoid],
+    rw [dfinsupp.sum_add_hom_apply, dfinsupp.sum_apply],
+    rw dfinsupp.zero_apply at IH,
+    convert finset.sum_eq_single (ulift.up $ i) _ _,
+    { rw [IH, add_monoid_hom.map_zero, dfinsupp.zero_apply], },
+    { rintro ⟨j⟩ - hj, convert dif_neg _, rw [finset.mem_singleton],
+      intro H, apply hj, rw ulift.ext_iff at H ⊢, change i+1 = j+1 at H, change j = i, linarith only [H] },
+    { intro, rw [IH, add_monoid_hom.map_zero, dfinsupp.zero_apply], }, },
+  recover, all_goals { classical; apply_instance }
+end
+.
 
 lemma QprimeFP.short_exact (n : ℤ) :
   short_exact
@@ -306,58 +385,7 @@ lemma QprimeFP.short_exact (n : ℤ) :
     ((QprimeFP_sigma_proj BD κ M ι).f n) :=
 begin
   apply_with short_exact.mk {instances:=ff},
-  { let Q := QprimeFP_int r' BD.data κ M,
-    let t := QprimeFP.shift_sub_id ι hι Q,
-    let S := ∐ λ (k : ulift ℕ), (Q.obj (ι k)).X n,
-    let e : (∐ λ (k : ulift ℕ), Q.obj (ι k)).X n ≅ S :=
-      preserves_colimit_iso
-        (homological_complex.eval (Condensed.{u} Ab.{u+1}) (complex_shape.up ℤ) n)
-        (discrete.functor $ λ k, Q.obj (ι k)) ≪≫
-        (has_colimit.iso_of_nat_iso $ discrete.nat_iso $ λ _, iso.refl _),
-    let f : S ⟶ S := QprimeFP.shift_sub_id ι hι
-      (Q ⋙ (homological_complex.eval (Condensed.{u} Ab.{u+1}) (complex_shape.up ℤ) n)),
-    have htf : t.f n = e.hom ≫ f ≫ e.inv,
-    { sorry },
-    suffices : mono f, { resetI, rw htf, apply_instance }, clear htf t e,
-    rw mono_iff_ExtrDisc,
-    intro T,
-    let φ : ulift.{u+1} ℕ → Ab.{u+1} := λ k, ((Q.obj (ι k)).X n).val.obj (op T.val),
-    let D := AddCommGroup.direct_sum_cofan.{u+1 u+1} φ,
-    let hD := AddCommGroup.is_colimit_direct_sum_cofan.{u+1 u+1} φ,
-    let e : S.val.obj (op T.val) ≅ D.X,
-    { refine preserves_colimit_iso (Condensed.evaluation _ T.val) _ ≪≫ _,
-      refine _ ≪≫ (colimit.is_colimit _).cocone_point_unique_up_to_iso hD,
-      refine (has_colimit.iso_of_nat_iso $ discrete.nat_iso $ λ _, iso.refl _), },
-    let g : D.X ⟶ D.X := sigma_shift'.{u u+2 u+1} _ hι (Q ⋙ (homological_complex.eval (Condensed.{u} Ab.{u+1}) (complex_shape.up ℤ) n) ⋙ Condensed.evaluation _ T.val) D hD,
-    have he : f.val.app (ExtrDisc_to_Profinite.op.obj (op T)) = e.hom ≫ (g - 𝟙 _) ≫ e.inv,
-    { sorry },
-    suffices : mono (g - 𝟙 _), { resetI, rw he, apply_instance }, clear he e f S,
-    rw [AddCommGroup.mono_iff_injective, injective_iff_map_eq_zero],
-    intros x hx,
-    erw [sub_eq_zero, id_apply] at hx,
-    ext ⟨i⟩,
-    classical,
-    induction i with i IH,
-    { rw ← hx,
-      dsimp [g, sigma_shift', sigma_shift_cone, hD, AddCommGroup.is_colimit_direct_sum_cofan,
-        AddCommGroup.direct_sum_desc, discrete.nat_trans, direct_sum.to_add_monoid],
-      rw [dfinsupp.sum_add_hom_apply, dfinsupp.sum_apply],
-      apply finset.sum_eq_zero,
-      rintro ⟨j⟩ -,
-      convert dif_neg _,
-      rw [finset.mem_singleton],
-      intro H, rw ulift.ext_iff at H, revert H, apply nat.no_confusion, },
-    { rw ← hx,
-      classical,
-      dsimp [g, sigma_shift', sigma_shift_cone, hD, AddCommGroup.is_colimit_direct_sum_cofan,
-        AddCommGroup.direct_sum_desc, discrete.nat_trans, direct_sum.to_add_monoid],
-      rw [dfinsupp.sum_add_hom_apply, dfinsupp.sum_apply],
-      rw dfinsupp.zero_apply at IH,
-      convert finset.sum_eq_single (ulift.up $ i) _ _,
-      { rw [IH, add_monoid_hom.map_zero, dfinsupp.zero_apply], },
-      { rintro ⟨j⟩ - hj, convert dif_neg _, rw [finset.mem_singleton],
-        intro H, apply hj, rw ulift.ext_iff at H ⊢, change i+1 = j+1 at H, change j = i, linarith only [H] },
-      { intro, rw [IH, add_monoid_hom.map_zero, dfinsupp.zero_apply], }, } },
+  { apply QprimeFP.mono },
   { rw is_epi_iff_forall_surjective,
     intro S,
     sorry },
