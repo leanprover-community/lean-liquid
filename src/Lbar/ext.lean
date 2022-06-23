@@ -147,8 +147,8 @@ instance sigma_Qprime_int_bounded_above :
     (∐ λ (k : ulift ℕ), (QprimeFP_int r' BD.data κ M).obj (ι k))).is_bounded_above :=
 begin
   -- first pull the `∐` through the quotient functor
+  -- then use something about `uniformly_bounded`??
   sorry,
-  -- refine ⟨⟨1, _⟩⟩,
 end
 
 def Ext_Tinv2
@@ -352,11 +352,6 @@ def Tinv_sub (S : Profinite.{u}) (V : SemiNormedGroup.{u}) [normed_with_aut r V]
 ((Ext' i).map ((condensify_Tinv _).app S).op).app _ -
 ((Ext' i).obj _).map (Condensed.of_top_ab_map (normed_with_aut.T.inv).to_add_monoid_hom
   (normed_group_hom.continuous _))
-
--- move me
--- instance Condensed_Ab_free_preserves_filtered_colimits :
---   preserves_filtered_colimits (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_Condensed_Ab) :=
--- sorry
 
 -- move me
 @[simp] lemma _root_.category_theory.op_nsmul

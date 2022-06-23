@@ -53,11 +53,44 @@ def _root_.ProFiltPseuNormGrpWithTinv₁.Tinv_cond : M.to_Condensed ⟶ M.to_Con
 (CompHausFiltPseuNormGrp.to_Condensed.{u}).map
   profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv
 
+local attribute [instance] type_pow
+
+set_option pp.universes true
+
+def QprimeFP_incl_aux'' (c : ℝ≥0) (n : ℕ) (M : ProFiltPseuNormGrpWithTinv.{u} r') (i : fin n) :
+  (FiltrationPow r' c n).obj M ⟶ ((Filtration r').obj c).obj M :=
+((Filtration r').obj c).map $
+  profinitely_filtered_pseudo_normed_group_with_Tinv.pi_proj _ _ i
+
+def QprimeFP_incl_aux'
+  (c : ℝ≥0) (n : ℕ) (i : (fin n)) (S : Profinite.{u}ᵒᵖ) :
+  ulift_functor.{u+1 u}.obj (opposite.unop.{u+2} S ⟶ pseudo_normed_group.filtration_obj.{u} (M ^ n) c) ⟶
+  ulift_functor.{u+1 u}.obj ((CompHausFiltPseuNormGrp.of.{u} ↥((PFPNGT₁_to_PFPNG₁ₑₗ.{u} r').obj M)).presheaf (opposite.unop.{u+2} S)) :=
+ulift_functor.map $ λ f, ⟨subtype.val ∘ QprimeFP_incl_aux'' c n ⟨M⟩ i ∘ f,
+  by refine ⟨_, _, continuous.comp _ _, rfl⟩; apply continuous_map.continuous⟩
+
+instance (n : ℕ) : preserves_limit.{u+1 u+1 u+1 u+1 u+2 u+2}
+    (discrete.functor.{u+1 u+1 u+2} (λ (i : ulift.{u+1 0} (fin n)), M.to_Condensed))
+    (Condensed_Ab_to_CondensedSet.{u} ⋙ CondensedSet_to_presheaf) :=
+sorry -- this should follow directly from the adjunction stuff
+
+def QprimeFP_incl_aux (c : ℝ≥0) (n : ℕ) :
+  (pseudo_normed_group.filtration_obj (M ^ n) c).to_Condensed ⟶
+  (Condensed_Ab_to_CondensedSet.obj (⨁ λ (i : ulift (fin n)), M.to_Condensed)) :=
+begin
+  let x := biproduct.is_limit (λ (i : ulift (fin n)), M.to_Condensed),
+  let y := is_limit_of_preserves (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf) x,
+  refine ⟨y.lift ⟨_, ⟨λ i, ⟨_, _⟩, _⟩⟩⟩,
+  { refine QprimeFP_incl_aux' _ _ _ i.down, },
+  { sorry },
+  { sorry }
+end
+
 def QprimeFP_incl (c : ℝ≥0) :
   (QprimeFP_int r' BD.data κ M).obj c ⟶
   (BD.eval' freeCond').obj M.to_Condensed :=
 (homological_complex.embed complex_shape.embedding.nat_down_int_up).map
-{ f := λ n, CondensedSet_to_Condensed_Ab.map sorry,
+{ f := λ n, CondensedSet_to_Condensed_Ab.map $ QprimeFP_incl_aux _ _ _,
   comm' := sorry }
 
 variables (ι : ulift.{u+1} ℕ → ℝ≥0) (hι : monotone ι)
