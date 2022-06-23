@@ -11,6 +11,7 @@ apply_nolint Lbar.condensify_iso_extend unused_arguments
 apply_nolint auux unused_arguments
 apply_nolint eval'_is_bounded_above unused_arguments
 apply_nolint of_hom_id unused_arguments
+apply_nolint pi_Ext_iso_Ext_sigma unused_arguments
 
 -- Lbar/functor.lean
 apply_nolint Lbar.map_add unused_arguments
