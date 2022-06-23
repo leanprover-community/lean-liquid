@@ -112,7 +112,7 @@ end step4
 
 section step5
 
-variables {r' : ℝ≥0}
+variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)]
 variables (BD : breen_deligne.data)
 variables (κ κ₂ : ℝ≥0 → ℕ → ℝ≥0)
 variables [∀ (c : ℝ≥0), BD.suitable (κ c)] [∀ n, fact (monotone (function.swap κ n))]
@@ -122,7 +122,7 @@ variables (ι : ulift.{u+1} ℕ → ℝ≥0) (hι : monotone ι)
 
 def QprimeFP_nat.Tinv [∀ c n, fact (κ c n ≤ r' * κ₂ c n)] :
   (QprimeFP_nat r' BD κ M) ⟶ (QprimeFP_nat r' BD κ₂ M) :=
-sorry
+whisker_right (FPsystem.Tinv.{u} r' BD ⟨M⟩ _ _) _
 
 def QprimeFP_int.Tinv [∀ c n, fact (κ c n ≤ r' * κ₂ c n)] :
   (QprimeFP_int r' BD κ M) ⟶ (QprimeFP_int r' BD κ₂ M) :=
@@ -136,7 +136,7 @@ whisker_right (QprimeFP_nat.Tinv _ _ _ _) chain_complex.to_bounded_homotopy_cate
 /-- The natural inclusion map -/
 def QprimeFP_nat.ι [∀ c n, fact (κ c n ≤ κ₂ c n)] :
   (QprimeFP_nat r' BD κ M) ⟶ (QprimeFP_nat r' BD κ₂ M) :=
-sorry
+whisker_right (FPsystem.res r' BD ⟨M⟩ _ _) _
 
 /-- The natural inclusion map -/
 def QprimeFP_int.ι [∀ c n, fact (κ c n ≤ κ₂ c n)] :
@@ -149,25 +149,41 @@ def QprimeFP.ι [∀ c n, fact (κ c n ≤ κ₂ c n)] :
   (QprimeFP r' BD κ M) ⟶ (QprimeFP r' BD κ₂ M) :=
 whisker_right (QprimeFP_nat.ι _ _ _ _) chain_complex.to_bounded_homotopy_category
 
+open category_theory.preadditive
+
 lemma commsq_shift_sub_id_Tinv [∀ (c : ℝ≥0) (n : ℕ), fact (κ₂ c n ≤ r' * κ c n)] :
   commsq (QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD κ₂ M))
   (sigma_map (λ (k : ulift ℕ), ι k) (QprimeFP_int.Tinv BD κ₂ κ M))
   (sigma_map (λ (k : ulift ℕ), ι k) (QprimeFP_int.Tinv BD κ₂ κ M))
   (QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD κ M)) :=
-sorry
+commsq.of_eq begin
+  delta QprimeFP.shift_sub_id,
+  rw [sub_comp, comp_sub, category.id_comp, category.comp_id],
+  refine congr_arg2 _ _ rfl,
+  apply colimit.hom_ext, intro j,
+  simp only [sigma_shift, sigma_map, colimit.ι_desc_assoc, colimit.ι_desc,
+    cofan.mk_ι_app, category.assoc, nat_trans.naturality_assoc],
+end
 
 lemma commsq_shift_sub_id_ι [∀ (c : ℝ≥0) (n : ℕ), fact (κ₂ c n ≤ κ c n)] :
   commsq (QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD κ₂ M))
   (sigma_map (λ (k : ulift ℕ), ι k) (QprimeFP_int.ι BD κ₂ κ M))
   (sigma_map (λ (k : ulift ℕ), ι k) (QprimeFP_int.ι BD κ₂ κ M))
   (QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD κ M)) :=
-sorry
+commsq.of_eq begin
+  delta QprimeFP.shift_sub_id,
+  rw [sub_comp, comp_sub, category.id_comp, category.comp_id],
+  refine congr_arg2 _ _ rfl,
+  apply colimit.hom_ext, intro j,
+  simp only [sigma_shift, sigma_map, colimit.ι_desc_assoc, colimit.ι_desc,
+    cofan.mk_ι_app, category.assoc, nat_trans.naturality_assoc],
+end
 
 end step5
 
 section step6
 
-variables {r' : ℝ≥0}
+variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)]
 variables (BD : breen_deligne.package)
 variables (κ κ₂ : ℝ≥0 → ℕ → ℝ≥0)
 variables [∀ (c : ℝ≥0), BD.data.suitable (κ c)] [∀ n, fact (monotone (function.swap κ n))]
@@ -175,17 +191,30 @@ variables [∀ (c : ℝ≥0), BD.data.suitable (κ₂ c)] [∀ n, fact (monotone
 variables (M : ProFiltPseuNormGrpWithTinv₁.{u} r')
 variables (ι : ulift.{u+1} ℕ → ℝ≥0) (hι : monotone ι)
 
+open category_theory.preadditive
+
 lemma commsq_sigma_proj_Tinv [∀ (c : ℝ≥0) (n : ℕ), fact (κ₂ c n ≤ r' * κ c n)] :
   commsq (QprimeFP_sigma_proj BD κ₂ M ι) (sigma_map (λ (k : ulift ℕ), ι k)
     (QprimeFP_int.Tinv BD.data κ₂ κ M))
   ((BD.eval' freeCond').map M.Tinv_cond)
   (QprimeFP_sigma_proj BD κ M ι) :=
-sorry
+commsq.of_eq begin
+  apply colimit.hom_ext, intro j,
+  simp only [QprimeFP_sigma_proj, sigma_map, colimit.ι_desc_assoc, colimit.ι_desc,
+    cofan.mk_ι_app, category.assoc, nat_trans.naturality_assoc],
+  sorry
+end
 
 lemma commsq_sigma_proj_ι [∀ (c : ℝ≥0) (n : ℕ), fact (κ₂ c n ≤ κ c n)] :
   commsq (QprimeFP_sigma_proj BD κ₂ M ι) (sigma_map (λ (k : ulift ℕ), ι k)
     (QprimeFP_int.ι BD.data κ₂ κ M)) (𝟙 _) (QprimeFP_sigma_proj BD κ M ι) :=
-sorry
+commsq.of_eq begin
+  simp only [category.comp_id],
+  apply colimit.hom_ext, intro j,
+  simp only [QprimeFP_sigma_proj, sigma_map, colimit.ι_desc_assoc, colimit.ι_desc,
+    cofan.mk_ι_app, category.assoc, nat_trans.naturality_assoc],
+  sorry
+end
 
 end step6
 
