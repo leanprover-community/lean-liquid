@@ -174,16 +174,37 @@ variables [∀ c, BD.data.suitable (κ c)] [∀ n, fact (monotone (function.swap
 variables (M : ProFiltPseuNormGrpWithTinv₁.{u} r')
 variables (ι : ulift.{u+1} ℕ → ℝ≥0) (hι : monotone ι)
 
+open opposite category_theory.preadditive
+
+lemma short_exact_iff_ExtrDisc {A B C : Condensed.{u} Ab.{u+1}} (f : A ⟶ B) (g : B ⟶ C) :
+  short_exact f g ↔ ∀ S : ExtrDisc, short_exact
+      (f.1.app $ ExtrDisc_to_Profinite.op.obj (op S))
+      (g.1.app $ ExtrDisc_to_Profinite.op.obj (op S)) :=
+begin
+  split,
+  { intros H S,
+    apply_with short_exact.mk {instances:=ff},
+    { sorry },
+    { rw AddCommGroup.epi_iff_surjective,
+      revert S, erw ← is_epi_iff_forall_surjective, exact H.epi, },
+    { revert S, rw ← Condensed.exact_iff_ExtrDisc, exact H.exact } },
+  { intro H,
+    apply_with short_exact.mk {instances:=ff},
+    { sorry },
+    { simp only [is_epi_iff_forall_surjective, ← AddCommGroup.epi_iff_surjective],
+      intro S, exact (H S).epi, },
+    { rw Condensed.exact_iff_ExtrDisc, intro S, exact (H S).exact } }
+end
+
 lemma QprimeFP.short_exact (n : ℤ) :
   short_exact ((QprimeFP.shift_sub_id _ hι _).f n) ((QprimeFP_sigma_proj BD κ M ι).f n) :=
 begin
-  -- before continuing, we should apply a lemma that says it is sufficient to check this
-  -- pointwise on extr.disc.s
-  sorry
-  -- apply_with short_exact.mk {instances:=ff},
-  -- { sorry },
-  -- { sorry },
-  -- { sorry }
+  rw short_exact_iff_ExtrDisc,
+  intro S,
+  apply_with short_exact.mk {instances:=ff},
+  { sorry },
+  { sorry },
+  { sorry }
 end
 
 end step4
