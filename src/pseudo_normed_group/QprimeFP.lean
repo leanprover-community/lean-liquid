@@ -74,6 +74,12 @@ instance (n : ℕ) : preserves_limit.{u+1 u+1 u+1 u+1 u+2 u+2}
     (Condensed_Ab_to_CondensedSet.{u} ⋙ CondensedSet_to_presheaf) :=
 sorry -- this should follow directly from the adjunction stuff
 
+universe v
+
+lemma _root_.Ab.ulift_map_apply {A B : Ab.{u}} (f : A ⟶ B) :
+  ⇑(Ab.ulift.{v}.map f) = ulift_functor.map f :=
+by { ext, refl }
+
 def QprimeFP_incl_aux (c : ℝ≥0) (n : ℕ) :
   (pseudo_normed_group.filtration_obj (M ^ n) c).to_Condensed ⟶
   (Condensed_Ab_to_CondensedSet.obj (⨁ λ (i : ulift (fin n)), M.to_Condensed)) :=
@@ -82,8 +88,29 @@ begin
   let y := is_limit_of_preserves (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf) x,
   refine ⟨y.lift ⟨_, ⟨λ i, ⟨_, _⟩, _⟩⟩⟩,
   { refine QprimeFP_incl_aux' _ _ _ i.down, },
-  { sorry },
-  { sorry }
+  { intros S T f,
+    dsimp [QprimeFP_incl_aux', ProFiltPseuNormGrpWithTinv₁.to_Condensed],
+    rw [← ulift_functor.map_comp, Ab.ulift_map_apply, ← ulift_functor.map_comp],
+    congr' 1, },
+  { clear y x,
+    rintros ⟨i⟩ ⟨j⟩ ⟨⟨⟨⟩⟩⟩,
+    ext S : 2,
+    dsimp [QprimeFP_incl_aux', ProFiltPseuNormGrpWithTinv₁.to_Condensed],
+    simp only [discrete.functor_map_id, category.id_comp],
+    symmetry, apply category.comp_id, }
+end
+.
+
+set_option pp.universes false
+
+lemma map_FreeAb_comp_map {X Y Z : Type*} [category X] [category Y] [category Z]
+  (F : X ⥤ Y) (G : Y ⥤ Z) {α β : FreeAb X} (f : α ⟶ β) :
+  (F ⋙ G).map_FreeAb.map f = G.map_FreeAb.map (F.map_FreeAb.map f) :=
+begin
+  dsimp only [functor.map_FreeAb, functor.comp_map],
+  rw [← add_monoid_hom.comp_apply], congr' 1, clear f,
+  ext f,
+  simp only [free_abelian_group.map_of_apply, functor.comp_map, add_monoid_hom.coe_comp, function.comp_app],
 end
 
 def QprimeFP_incl (c : ℝ≥0) :
@@ -91,7 +118,17 @@ def QprimeFP_incl (c : ℝ≥0) :
   (BD.eval' freeCond').obj M.to_Condensed :=
 (homological_complex.embed complex_shape.embedding.nat_down_int_up).map
 { f := λ n, CondensedSet_to_Condensed_Ab.map $ QprimeFP_incl_aux _ _ _,
-  comm' := sorry }
+  comm' := begin
+    rintro i j (rfl : _ = _),
+    dsimp only [data.eval_functor, functor.comp_obj, functor.flip_obj_obj,
+      homological_complex.functor_eval_obj, homological_complex.functor_eval.obj_obj_d,
+      data.eval_functor'_obj_d, universal_map.eval_Pow],
+    dsimp only [QprimeFP_nat, FPsystem, functor.comp_obj, functor.map_homological_complex_obj_d],
+    rw [chain_complex.of_d],
+    delta freeCond freeCond',
+    rw [functor.comp_map, map_FreeAb_comp_map],
+    sorry
+  end }
 
 variables (ι : ulift.{u+1} ℕ → ℝ≥0) (hι : monotone ι)
 
@@ -235,6 +272,15 @@ commsq.of_eq begin
   apply colimit.hom_ext, intro j,
   simp only [QprimeFP_sigma_proj, sigma_map, colimit.ι_desc_assoc, colimit.ι_desc,
     cofan.mk_ι_app, category.assoc, nat_trans.naturality_assoc],
+  dsimp only [QprimeFP_incl, QprimeFP_int.Tinv, whisker_right_app,
+    package.eval', functor.comp_map],
+  rw [← functor.map_comp, ← functor.map_comp],
+  refine congr_arg _ _,
+  ext n : 2,
+  dsimp only [homological_complex.comp_f, data.eval_functor, functor.comp_obj, functor.flip_obj_map,
+    homological_complex.functor_eval_map_app_f, data.eval_functor'_obj_X_map, functor.comp_map,
+    QprimeFP_nat.Tinv, whisker_right_app, functor.map_homological_complex_map_f],
+  rw [map_FreeAb_comp_map],
   sorry
 end
 
