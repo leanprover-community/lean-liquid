@@ -302,53 +302,80 @@ open_locale classical
 
 set_option pp.universes true
 
+.
+
+def coproduct_eval_iso
+  {α : Type (u+1)} (X : α → homological_complex (Condensed.{u} Ab.{u+1}) (complex_shape.up ℤ))
+  (n : ℤ) (T : ExtrDisc.{u}) :
+  ((∐ X).X n).val.obj (op T.val) ≅
+  AddCommGroup.of (direct_sum α (λ a, ((X a).X n).val.obj (op T.val))) :=
+begin
+  refine preserves_colimit_iso
+    ((homological_complex.eval (Condensed.{u} Ab.{u+1}) (complex_shape.up ℤ) n
+    ⋙ Condensed.evaluation Ab.{u+1} T.val)) _ ≪≫ _,
+  refine _ ≪≫ (colimit.is_colimit $ discrete.functor
+    (λ a, ((X a).X n).val.obj (op T.val))).cocone_point_unique_up_to_iso
+    (AddCommGroup.is_colimit_direct_sum_cofan.{u+1 u+1} (λ a, ((X a).X n).val.obj (op T.val))),
+  refine has_colimit.iso_of_nat_iso (discrete.nat_iso _),
+  intros i, exact iso.refl _,
+end
+
+lemma sigma_ι_coproduct_eval_iso
+  {α : Type (u+1)} (X : α → homological_complex (Condensed.{u} Ab.{u+1}) (complex_shape.up ℤ))
+  (n : ℤ) (T : ExtrDisc.{u}) (a : α) :
+  ((sigma.ι X a : X a ⟶ _).f n).val.app (op T.val) ≫
+  (coproduct_eval_iso _ _ _).hom =
+  direct_sum.of ((λ a, ((X a).X n).val.obj (op T.val))) a :=
+begin
+  dsimp only [coproduct_eval_iso],
+  erw (is_colimit_of_preserves (homological_complex.eval.{u+1 u+2 0}
+    (Condensed.{u u+1 u+2} Ab.{u+1}) (complex_shape.up.{0} ℤ) n ⋙
+    Condensed.evaluation.{u+2 u+1 u} Ab.{u+1} T.val) _).fac_assoc,
+  dsimp,
+  erw colimit.ι_desc_assoc,
+  dsimp, simpa only [category.id_comp, colimit.comp_cocone_point_unique_up_to_iso_hom],
+end
+
 lemma QprimeFP.mono (n : ℤ) :
   mono ((QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD.data κ M)).f n) :=
 begin
+  rw mono_iff_ExtrDisc, intros T,
+  let e : ((∐ λ (k : ulift.{u+1 0} ℕ), (QprimeFP_int.{u} r' BD.data κ M).obj (ι k)).X n).val.obj
+    (op T.val) ≅ _ := coproduct_eval_iso _ _ _,
   let Q := QprimeFP_int r' BD.data κ M,
-  let t := QprimeFP.shift_sub_id ι hι Q,
-  let S := ∐ λ (k : ulift ℕ), (Q.obj (ι k)).X n,
-  let e : (∐ λ (k : ulift ℕ), Q.obj (ι k)).X n ≅ S :=
-    preserves_colimit_iso
-      (homological_complex.eval (Condensed.{u} Ab.{u+1}) (complex_shape.up ℤ) n)
-      (discrete.functor $ λ k, Q.obj (ι k)) ≪≫
-      (has_colimit.iso_of_nat_iso $ discrete.nat_iso $ λ _, iso.refl _),
-  let f : S ⟶ S := QprimeFP.shift_sub_id ι hι
-    (Q ⋙ (homological_complex.eval (Condensed.{u} Ab.{u+1}) (complex_shape.up ℤ) n)),
-  have htf : t.f n = e.hom ≫ f ≫ e.inv,
-  { dsimp only [t, f, QprimeFP.shift_sub_id],
-    simp only [comp_sub, sub_comp, homological_complex.sub_f_apply],
-    erw [category.id_comp, e.hom_inv_id],
-    refine congr_arg2 _ _ rfl,
-    refine (is_colimit_of_preserves
-      (homological_complex.eval (Condensed.{u} Ab.{u+1}) (complex_shape.up ℤ) n)
-      (colimit.is_colimit _)).hom_ext _,
-    rintro j,
-    erw [← homological_complex.comp_f, colimit.ι_desc],
-    dsimp [sigma_shift, sigma_shift', sigma_shift_cone],
-    slice_rhs 1 2
-    { erw (is_colimit_of_preserves
-        (homological_complex.eval (Condensed.{u} Ab.{u+1}) (complex_shape.up ℤ) n)
-        (colimit.is_colimit _)).fac },
-    dsimp,
-    erw [colimit.ι_desc], dsimp,
-    erw [category.id_comp, colimit.ι_desc], dsimp,
-    slice_rhs 2 3 { erw [colimit.ι_desc] }, dsimp,
-    erw [category.id_comp, colimit.ι_desc], refl, },
-  suffices : mono f, { resetI, rw htf, apply_instance }, clear htf t e,
-  rw mono_iff_ExtrDisc,
-  intro T,
   let φ : ulift.{u+1} ℕ → Ab.{u+1} := λ k, ((Q.obj (ι k)).X n).val.obj (op T.val),
   let D := AddCommGroup.direct_sum_cofan.{u+1 u+1} φ,
   let hD := AddCommGroup.is_colimit_direct_sum_cofan.{u+1 u+1} φ,
-  let e : S.val.obj (op T.val) ≅ D.X,
-  { refine preserves_colimit_iso (Condensed.evaluation _ T.val) _ ≪≫ _,
-    refine _ ≪≫ (colimit.is_colimit _).cocone_point_unique_up_to_iso hD,
-    refine (has_colimit.iso_of_nat_iso $ discrete.nat_iso $ λ _, iso.refl _), },
-  let g : D.X ⟶ D.X := sigma_shift'.{u u+2 u+1} _ hι (Q ⋙ (homological_complex.eval (Condensed.{u} Ab.{u+1}) (complex_shape.up ℤ) n) ⋙ Condensed.evaluation _ T.val) D hD,
-  have he : f.val.app (ExtrDisc_to_Profinite.op.obj (op T)) = e.hom ≫ (g - 𝟙 _) ≫ e.inv,
-  { sorry },
-  suffices : mono (g - 𝟙 _), { resetI, rw he, apply_instance }, clear he e f S,
+  let g : D.X ⟶ D.X := sigma_shift'.{u u+2 u+1} _ hι (Q ⋙ (homological_complex.eval
+    (Condensed.{u} Ab.{u+1}) (complex_shape.up ℤ) n) ⋙ Condensed.evaluation _ T.val) D hD,
+  let f := _, change mono f,
+  have hf : f = e.hom ≫ (g - 𝟙 _) ≫ e.inv,
+  { rw [← category.assoc, iso.eq_comp_inv],
+    dsimp [f, QprimeFP.shift_sub_id],
+    change (_ - _) ≫ _ = _,
+    simp only [comp_sub, sub_comp, category.id_comp, category.comp_id, Sheaf.hom.id_val,
+      nat_trans.id_app], congr' 1,
+    refine ((is_colimit_of_preserves (homological_complex.eval.{u+1 u+2 0}
+      (Condensed.{u u+1 u+2} Ab.{u+1}) (complex_shape.up.{0} ℤ) n ⋙
+      Condensed.evaluation.{u+2 u+1 u} Ab.{u+1} T.val) (colimit.is_colimit _))).hom_ext (λ j, _),
+    dsimp [sigma_shift],
+    slice_lhs 1 2
+    { erw [← nat_trans.comp_app, ← Sheaf.hom.comp_val, ← homological_complex.comp_f,
+        colimit.ι_desc] },
+    slice_rhs 1 2
+    { erw sigma_ι_coproduct_eval_iso },
+    dsimp [sigma_shift_cone],
+    rw category.assoc,
+    slice_lhs 2 3
+    { erw sigma_ι_coproduct_eval_iso },
+    erw hD.fac, refl },
+  suffices : mono (g - 𝟙 _),
+  { rw hf,
+    apply_with mono_comp { instances := ff },
+    apply_instance,
+    apply_with mono_comp { instances := ff },
+    exact this,
+    apply_instance },
   rw [AddCommGroup.mono_iff_injective, injective_iff_map_eq_zero],
   intros x hx,
   erw [sub_eq_zero, id_apply] at hx,
@@ -373,7 +400,8 @@ begin
     convert finset.sum_eq_single (ulift.up $ i) _ _,
     { rw [IH, add_monoid_hom.map_zero, dfinsupp.zero_apply], },
     { rintro ⟨j⟩ - hj, convert dif_neg _, rw [finset.mem_singleton],
-      intro H, apply hj, rw ulift.ext_iff at H ⊢, change i+1 = j+1 at H, change j = i, linarith only [H] },
+      intro H, apply hj, rw ulift.ext_iff at H ⊢, change i+1 = j+1 at H,
+      change j = i, linarith only [H] },
     { intro, rw [IH, add_monoid_hom.map_zero, dfinsupp.zero_apply], }, },
   recover, all_goals { classical; apply_instance }
 end
