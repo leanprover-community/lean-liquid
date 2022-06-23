@@ -176,7 +176,15 @@ variables (ι : ulift.{u+1} ℕ → ℝ≥0) (hι : monotone ι)
 
 lemma QprimeFP.short_exact (n : ℤ) :
   short_exact ((QprimeFP.shift_sub_id _ hι _).f n) ((QprimeFP_sigma_proj BD κ M ι).f n) :=
-sorry
+begin
+  -- before continuing, we should apply a lemma that says it is sufficient to check this
+  -- pointwise on extr.disc.s
+  sorry
+  -- apply_with short_exact.mk {instances:=ff},
+  -- { sorry },
+  -- { sorry },
+  -- { sorry }
+end
 
 end step4
 
