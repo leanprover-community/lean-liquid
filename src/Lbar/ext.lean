@@ -146,9 +146,12 @@ instance sigma_Qprime_int_bounded_above :
   ((homotopy_category.quotient (Condensed Ab) (complex_shape.up ℤ)).obj
     (∐ λ (k : ulift ℕ), (QprimeFP_int r' BD.data κ M).obj (ι k))).is_bounded_above :=
 begin
-  -- first pull the `∐` through the quotient functor
-  -- then use something about `uniformly_bounded`??
-  sorry,
+  refine ⟨⟨1, _⟩⟩,
+  intros a ha,
+  refine is_zero.of_iso _ (homotopy_category.coproduct_iso _ _),
+  apply category_theory.is_zero_colimit,
+  intro,
+  exact chain_complex.bounded_by_one _ _ ha,
 end
 
 def Ext_Tinv2
