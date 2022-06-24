@@ -460,10 +460,14 @@ apply_nolint LCFP.obj.normed_with_aut fails_quickly
 apply_nolint breen_deligne.universal_map.norm_eval_LCFP_le unused_arguments
 
 -- pseudo_normed_group/QprimeFP.lean
+apply_nolint QprimeFP_nat.Tinv unused_arguments
+apply_nolint QprimeFP_nat.ι unused_arguments
 apply_nolint commsq_shift_sub_id_Tinv def_lemma
 apply_nolint commsq_shift_sub_id_ι def_lemma
 apply_nolint commsq_sigma_proj_Tinv def_lemma
 apply_nolint commsq_sigma_proj_ι def_lemma
+apply_nolint sigma_map unused_arguments
+apply_nolint sigma_shift_cone unused_arguments
 
 -- pseudo_normed_group/Tinv.lean
 apply_nolint CLCFPTinv₂ unused_arguments
