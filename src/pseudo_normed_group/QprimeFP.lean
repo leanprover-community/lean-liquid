@@ -179,6 +179,8 @@ begin
   simp only [free_abelian_group.map_of_apply, functor.comp_map, add_monoid_hom.coe_comp, function.comp_app],
 end
 
+open category_theory.preadditive
+
 def QprimeFP_incl (c : ℝ≥0) :
   (QprimeFP_int r' BD.data κ M).obj c ⟶
   (BD.eval' freeCond').obj M.to_Condensed :=
@@ -197,9 +199,20 @@ def QprimeFP_incl (c : ℝ≥0) :
       universal_map.eval_FP2],
     simp only [whisker_right_app, free_abelian_group.lift_map, function.comp.left_id,
       nat_trans.app_sum, map_sum, basic_universal_map.eval_Pow_app,
-      nat_trans.app_zsmul, basic_universal_map.eval_FP2],
-    rw [free_abelian_group.lift_eq_sum],
-    sorry
+      nat_trans.app_zsmul, basic_universal_map.eval_FP2, map_zsmul],
+    dsimp only [FreeAb.of_functor],
+    simp only [free_abelian_group.lift.of, function.comp_app],
+    rw [free_abelian_group.lift_eq_sum, comp_sum, sum_comp, ← finset.sum_coe_sort],
+    apply finset.sum_congr rfl,
+    rintro x -,
+    rw [comp_zsmul, zsmul_comp], refine congr_arg2 _ rfl _,
+    rw [functor.comp_map, ← functor.map_comp, ← functor.map_comp],
+    congr' 1,
+    ext S : 3,
+    sorry,
+    -- dsimp only [QprimeFP_incl_aux],
+    -- erw [nat_trans.comp_app, nat_trans.comp_app],
+    -- dsimp,
   end }
 
 variables (ι : ulift.{u+1} ℕ → ℝ≥0) (hι : monotone ι)
@@ -420,7 +433,6 @@ begin
   { rw Condensed.exact_iff_ExtrDisc,
     intro S,
     sorry },
-  recover, all_goals { classical; apply_instance }
 end
 
 end step4
