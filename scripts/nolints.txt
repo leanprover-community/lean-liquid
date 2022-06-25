@@ -12,6 +12,7 @@ apply_nolint auux unused_arguments
 apply_nolint eval'_is_bounded_above unused_arguments
 apply_nolint of_hom_id unused_arguments
 apply_nolint pi_Ext_iso_Ext_sigma unused_arguments
+apply_nolint sigma_Qprime_int_bounded_above unused_arguments
 
 -- Lbar/functor.lean
 apply_nolint Lbar.map_add unused_arguments
@@ -132,6 +133,7 @@ apply_nolint category_theory.sigma_cokernel_cofork unused_arguments
 
 -- for_mathlib/ab5.lean
 apply_nolint category_theory.colimit_homology_functor_iso unused_arguments
+apply_nolint category_theory.eval_functor_colimit_iso unused_arguments
 
 -- for_mathlib/abelian_category.lean
 apply_nolint category_theory.limits.is_zero_of_iso_of_zero unused_arguments
