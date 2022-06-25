@@ -166,10 +166,49 @@ begin
   refl,
 end
 
-def single_unEnd (X : endomorphisms 𝓐) : ((single _ 0).obj X).unEnd ≅ (single _ 0).obj X.X :=
-sorry
---iso.refl X.X
+open_locale zero_object
 
+def single_unEnd (X : endomorphisms 𝓐) : ((single _ 0).obj X).unEnd ≅ (single _ 0).obj X.X :=
+{ hom := quot.mk _
+  { f := λ i, show (ite (i = 0) X 0).X ⟶ ite (i = 0) X.X 0,
+    from if hi : i = 0 then eq_to_hom (by { simp only [if_pos hi] })
+      else 0,
+    comm' := begin
+      rintros i j _,
+      change _ ≫ 0 = 0 ≫ _, simp, end },
+  inv := quot.mk _ {
+    f := λ i, show ite (i = 0) X.X 0 ⟶ (ite (i = 0) X 0).X,
+    from if hi : i = 0 then eq_to_hom (by { simp only [if_pos hi] })
+      else 0,
+    comm' := begin
+      rintros i j (rfl : _ = _),
+      change _ ≫ 0 = 0 ≫ _, simp, end },
+  hom_inv_id' := begin
+    change quot.mk _ (_ ≫ _) = quot.mk _ _,
+    apply congr_arg,
+    ext i,
+    simp only [homological_complex.comp_f, homological_complex.id_f],
+    split_ifs,
+    { simp },
+    { rw [comp_zero, eq_comm, ← limits.is_zero.iff_id_eq_zero],
+      change is_zero (ite (i = 0) X 0).X,
+      rw if_neg h,
+      apply is_zero_X,
+      apply is_zero_zero,
+    },
+  end,
+  inv_hom_id' := begin
+    change quot.mk _ (_ ≫ _) = quot.mk _ _,
+    apply congr_arg,
+    ext i,
+    simp only [homological_complex.comp_f, homological_complex.id_f],
+    split_ifs,
+    { simp },
+    { rw [comp_zero, eq_comm, ← limits.is_zero.iff_id_eq_zero],
+      change is_zero (ite (i = 0) X.X 0),
+      rw if_neg h,
+      apply is_zero_zero, },
+  end }
 
 lemma single_unEnd_e (X : endomorphisms 𝓐) :
   (single_unEnd X).hom ≫ (single _ 0).map X.e = ((single _ 0).obj X).e ≫ (single_unEnd X).hom :=
