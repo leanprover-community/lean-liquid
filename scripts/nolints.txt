@@ -12,6 +12,7 @@ apply_nolint auux unused_arguments
 apply_nolint eval'_is_bounded_above unused_arguments
 apply_nolint of_hom_id unused_arguments
 apply_nolint pi_Ext_iso_Ext_sigma unused_arguments
+apply_nolint sigma_Qprime_int_bounded_above unused_arguments
 
 -- Lbar/functor.lean
 apply_nolint Lbar.map_add unused_arguments
@@ -132,6 +133,7 @@ apply_nolint category_theory.sigma_cokernel_cofork unused_arguments
 
 -- for_mathlib/ab5.lean
 apply_nolint category_theory.colimit_homology_functor_iso unused_arguments
+apply_nolint category_theory.eval_functor_colimit_iso unused_arguments
 
 -- for_mathlib/abelian_category.lean
 apply_nolint category_theory.limits.is_zero_of_iso_of_zero unused_arguments
@@ -460,10 +462,14 @@ apply_nolint LCFP.obj.normed_with_aut fails_quickly
 apply_nolint breen_deligne.universal_map.norm_eval_LCFP_le unused_arguments
 
 -- pseudo_normed_group/QprimeFP.lean
+apply_nolint QprimeFP_nat.Tinv unused_arguments
+apply_nolint QprimeFP_nat.ι unused_arguments
 apply_nolint commsq_shift_sub_id_Tinv def_lemma
 apply_nolint commsq_shift_sub_id_ι def_lemma
 apply_nolint commsq_sigma_proj_Tinv def_lemma
 apply_nolint commsq_sigma_proj_ι def_lemma
+apply_nolint sigma_map unused_arguments
+apply_nolint sigma_shift_cone unused_arguments
 
 -- pseudo_normed_group/Tinv.lean
 apply_nolint CLCFPTinv₂ unused_arguments

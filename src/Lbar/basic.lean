@@ -189,6 +189,26 @@ instance : add_comm_group (Lbar r' S) :=
       add_mul, one_mul, neg_add_rev, int.neg_succ_of_nat_coe, neg_mul, one_mul],
   end }
 
+lemma zero_apply (s : S) (n : ℕ) : (0 : Lbar r' S) s n = 0 := rfl
+
+lemma zmul_apply (F : Lbar r' S) (c : ℤ) : (((c • F) : (Lbar r' S)) : S → ℕ → ℤ) = λ s n, c • (F s n) := rfl
+
+instance : no_zero_smul_divisors ℤ (Lbar r' S) :=
+begin
+  fconstructor,
+  intros c F hF,
+  by_cases hc : c = 0,
+  { apply (or.intro_left), exact hc},
+  { apply or.intro_right,
+    ext s n,
+    rw [ext_iff, zmul_apply, function.funext_iff] at hF,
+    specialize hF s,
+    rw function.funext_iff at hF,
+    specialize hF n,
+    simp only [smul_eq_zero, hc, false_or, zero_apply] at hF ⊢,
+    exact hF }
+end
+
 /-- The `coeff s n` is the additive homomorphism that sends `x : Lbar r' S`
 to the coefficient `x_{s,n}`. -/
 @[simps]

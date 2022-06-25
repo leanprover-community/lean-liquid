@@ -57,11 +57,20 @@ def ExtQprime_iso_aux_system_obj (c : ℝ≥0) (n : ℕ) :
 Ext_compute_with_acyclic _ _ (ExtQprime_iso_aux_system_aux r' BD κ M V c) _ ≪≫
   sorry
 
+attribute [reassoc] Ext_compute_with_acyclic_naturality
+
 def ExtQprime_iso_aux_system (n : ℕ) :
   (QprimeFP r' BD κ M).op ⋙ (Ext n).flip.obj ((single _ 0).obj V.to_Cond) ≅
   aux_system r' BD ⟨M⟩ (SemiNormedGroup.ulift.{u+1}.obj V) κ ⋙
     (forget₂ _ Ab).map_homological_complex _ ⋙ homology_functor _ _ n :=
-sorry
+nat_iso.of_components (λ c, ExtQprime_iso_aux_system_obj r' BD κ M V (unop c) n)
+begin
+  intros c₁ c₂ h,
+  dsimp only [ExtQprime_iso_aux_system_obj, iso.trans_hom],
+  rw [functor.comp_map],
+  -- rw [Ext_compute_with_acyclic_naturality_assoc],
+  sorry
+end
 
 /-- The `Tinv` map induced by `M` -/
 def ExtQprime.Tinv
@@ -146,9 +155,12 @@ instance sigma_Qprime_int_bounded_above :
   ((homotopy_category.quotient (Condensed Ab) (complex_shape.up ℤ)).obj
     (∐ λ (k : ulift ℕ), (QprimeFP_int r' BD.data κ M).obj (ι k))).is_bounded_above :=
 begin
-  -- first pull the `∐` through the quotient functor
-  -- then use something about `uniformly_bounded`??
-  sorry,
+  refine ⟨⟨1, _⟩⟩,
+  intros a ha,
+  refine is_zero.of_iso _ (homotopy_category.coproduct_iso _ _),
+  apply category_theory.is_zero_colimit,
+  intro,
+  exact chain_complex.bounded_by_one _ _ ha,
 end
 
 def Ext_Tinv2

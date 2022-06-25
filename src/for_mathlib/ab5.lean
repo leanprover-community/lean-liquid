@@ -48,8 +48,20 @@ def eval_functor_colimit_iso
 homological_complex.hom.iso_of_components
 (λ i, preserves_colimit_iso (homological_complex.eval A c i) _)
 begin
-  intros i j hij, sorry
+  intros i j hij,
+  rw ←iso.eq_inv_comp,
+  apply colimit.hom_ext,
+  intro k,
+  dsimp,
+  simp only [colimit.ι_map, whisker_left_app, ι_preserves_colimits_iso_inv_assoc,
+    homological_complex.eval_map, homological_complex.hom.comm_assoc],
+  congr,
+  rw [preserves_colimit_iso, ← limits.colimit.iso_colimit_cocone_ι_inv
+    ⟨_, preserves_colimit.preserves (colimit.is_colimit F)⟩],
+  refl
 end
+
+local attribute [reassoc] nat_trans.comp_app
 
 noncomputable! -- UUUUGGGGHHH
 instance homology_functor_preserves_filtered_colimit
@@ -74,6 +86,20 @@ begin
     exact (eval_functor_colimit_iso _ _ _ _).symm },
   { intro j,
     dsimp,
+
+    -- Not sure if the following is a sensible approach...
+    rw [←iso.app_inv, iso.eq_inv_comp],
+    ext,
+    simp only [homology.map_ι, category.assoc],
+    rw [homology.π'_ι_assoc, cokernel.π_desc],
+    dsimp,
+    dsimp [colimit_homology_functor_iso, colim.homology_functor_iso],
+    erw [homology.lift_ι_assoc],
+    slice_lhs 3 4 { rw colimit.ι_map, },
+    simp only [category.assoc],
+    simp only [←preserves_cokernel.iso_inv],
+    rw [is_iso.iso.inv_inv],
+
     sorry }
 end
 
