@@ -212,7 +212,19 @@ def single_unEnd (X : endomorphisms 𝓐) : ((single _ 0).obj X).unEnd ≅ (sing
 
 lemma single_unEnd_e (X : endomorphisms 𝓐) :
   (single_unEnd X).hom ≫ (single _ 0).map X.e = ((single _ 0).obj X).e ≫ (single_unEnd X).hom :=
-sorry
+begin
+  change quot.mk _ (_ ≫ _) = quot.mk _ _,
+  apply congr_arg,
+  ext i,
+  change dite _ _ _ ≫ dite _ _ _ = _ ≫ dite _ _ _,
+  split_ifs,
+  { subst h,
+    rw [eq_to_hom_trans_assoc, ← category.assoc],
+    congr',
+    simp,
+    refl, },
+  { simp, },
+end
 
 lemma single_e (X : endomorphisms 𝓐) :
   (single_unEnd X).hom ≫ (single _ 0).map X.e ≫ (single_unEnd X).inv = ((single _ 0).obj X).e :=
