@@ -2,6 +2,7 @@ import category_theory.abelian.homology
 import algebra.homology.additive
 import for_mathlib.abelian_category
 import for_mathlib.equalizers
+import for_mathlib.kernel_comparison
 
 namespace category_theory
 
@@ -164,9 +165,13 @@ variables [preserves_finite_limits F] [preserves_finite_colimits F]
 def homology_iso {X Y Z : A} (f : X ⟶ Y) (g : Y ⟶ Z) (w w') :
   F.obj (homology f g w) ≅ homology (F.map f) (F.map g) w' :=
 { hom := homology.lift _ _ _ (F.map (homology.ι _ _ _) ≫
-    category_theory.inv (cokernel_comparison _ _)) sorry,
+    category_theory.inv (cokernel_comparison _ _))
+      (by rw [category.assoc, inv_cokernel_comparison_desc_map f F w, ← F.map_comp,
+          homology.condition_ι, functor.map_zero]),
   inv := homology.desc' _ _ _ (category_theory.inv (kernel_comparison _ _) ≫
-    F.map (homology.π' _ _ _)) sorry,
+    F.map (homology.π' _ _ _))
+      (by rw [lift_map_inv_kernel_comparison_assoc _ _ w, ← F.map_comp,
+        homology.condition_π', functor.map_zero]),
   hom_inv_id' := sorry,
   inv_hom_id' := sorry }
 
