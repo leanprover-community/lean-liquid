@@ -1,4 +1,5 @@
 import breen_deligne.eval2
+import breen_deligne.apply_Pow
 import for_mathlib.derived.K_projective
 import for_mathlib.endomorphisms.Ext
 import for_mathlib.endomorphisms.functor
@@ -353,7 +354,7 @@ open category_theory.preadditive
 
 def Pow_X (X : endomorphisms 𝓐) (n : ℕ) :
   ((Pow n).obj X).X ≅ (Pow n).obj X.X :=
-sorry
+(apply_Pow (endomorphisms.forget 𝓐) n).app X
 
 def mk_bo_ha_ca_Q (X : 𝓐) (f : X ⟶ X) :
   endomorphisms.mk_bo_ho_ca ((BD.eval F).obj X) ((BD.eval F).map f) ≅
