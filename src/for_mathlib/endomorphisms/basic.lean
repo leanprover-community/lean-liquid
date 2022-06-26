@@ -329,6 +329,8 @@ variables {C : Type u} [category.{v} C]
   [has_coproducts_of_shape (ulift.{v} ℕ) C]
   [has_products_of_shape (ulift.{v} ℕ) C]
 
+/-- `free X` is ⨁ₙX, the direct sum over the naturals, equipped with the endomorphism
+sending `(a : X)` in degree `n` to `a` in degree `n+1`. -/
 @[simps]
 def free (X : C) : endomorphisms C :=
 { X := ∐ (λ i : ulift.{v} ℕ, X),
@@ -351,6 +353,8 @@ begin
   exact ih,
 end
 
+/-- The map `free T ⟶ A` in `endomorphisms C` induced by a map `T ⟶ A.X` in `C`. Here `A.X`
+is the forgetful functor forgetting the endomorphism. -/
 @[simps]
 def free.desc {X : C} {A : endomorphisms C} (f : X ⟶ A.X) : free X ⟶ A :=
 { f := sigma.desc $ λ i, f ≫ (A.e ^ i.down : End A.X),
@@ -367,6 +371,24 @@ begin
   simp only [colimit.ι_desc_assoc, cofan.mk_ι_app, colimit.ι_desc, category.assoc, pow_comm],
 end
 
+def free.map {X Y : C} (f : X ⟶ Y) : free X ⟶ free Y :=
+{ f := sigma.desc $ λ i, f ≫ sigma.ι (λ i : ulift.{v} ℕ, Y) i,
+  comm := begin
+    ext1 ⟨i⟩,
+    dsimp,
+    simp only [colimit.ι_desc_assoc, cofan.mk_ι_app, colimit.ι_desc, category.assoc],
+  end }
+
+def functor.free : C ⥤ endomorphisms C :=
+{ obj := free,
+  map := λ _ _, free.map,
+  map_id' := λ X, begin ext, dsimp, simp only [free.map, category.id_comp, colimit.ι_desc,
+    cofan.mk_ι_app, category.comp_id], end,
+  map_comp' := λ X Y Z f g, begin ext, dsimp, simp only [free.map, category.assoc, colimit.ι_desc,
+    cofan.mk_ι_app, colimit.ι_desc_assoc], end }
+
+/-- `cofree X` is ∏ₙX, the product over the naturals, equipped with the endomorphism
+sending `(a : X)` in degree `n` to `a` in degree `n+1`. -/
 def cofree (X : C) : endomorphisms C :=
 { X := ∏ (λ i : ulift.{v} ℕ, X),
   e := pi.lift $ λ i, pi.π _ ⟨i.down + 1⟩ }
