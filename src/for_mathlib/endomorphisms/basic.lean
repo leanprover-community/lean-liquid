@@ -326,8 +326,10 @@ end colimits
 section projectives
 
 variables {C : Type u} [category.{v} C]
-  [has_coproducts_of_shape (ulift.{v} ℕ) C]
-  [has_products_of_shape (ulift.{v} ℕ) C]
+
+section free
+
+variable [has_coproducts_of_shape (ulift.{v} ℕ) C]
 
 /-- `free X` is ⨁ₙX, the direct sum over the naturals, equipped with the endomorphism
 sending `(a : X)` in degree `n` to `a` in degree `n+1`. -/
@@ -379,6 +381,8 @@ def free.map {X Y : C} (f : X ⟶ Y) : free X ⟶ free Y :=
     simp only [colimit.ι_desc_assoc, cofan.mk_ι_app, colimit.ι_desc, category.assoc],
   end }
 
+variable (C)
+
 def functor.free : C ⥤ endomorphisms C :=
 { obj := free,
   map := λ _ _, free.map,
@@ -386,6 +390,13 @@ def functor.free : C ⥤ endomorphisms C :=
     cofan.mk_ι_app, category.comp_id], end,
   map_comp' := λ X Y Z f g, begin ext, dsimp, simp only [free.map, category.assoc, colimit.ι_desc,
     cofan.mk_ι_app, colimit.ι_desc_assoc], end }
+
+end free
+
+section cofree
+
+variable {C}
+variable [has_products_of_shape (ulift.{v} ℕ) C]
 
 /-- `cofree X` is ∏ₙX, the product over the naturals, equipped with the endomorphism
 sending `(a : X)` in degree `n` to `a` in degree `n+1`. -/
@@ -406,6 +417,10 @@ def cofree.lift {X : C} {A : endomorphisms C} (f : A.X ⟶ X) :
     { simp only [End.mul_def, pow_succ] at *,
       simp [reassoc_of hj] }
   end }
+
+end cofree
+
+variables [has_products_of_shape (ulift.{v} ℕ) C] [has_coproducts_of_shape (ulift.{v} ℕ) C]
 
 lemma f_epi {X Y : endomorphisms C} (f : X ⟶ Y) [epi f] : epi f.f :=
 { left_cancellation := λ Z g h w, begin
@@ -490,6 +505,10 @@ instance : preadditive (endomorphisms 𝓐) :=
   comp_add' := by { intros, ext, dsimp, rw comp_add } }
 
 instance forget_additive : (endomorphisms.forget 𝓐).additive := {}
+
+instance functor.free_additive [has_coproducts_of_shape (ulift.{v} ℕ) 𝓐] :
+  (functor.free 𝓐).additive := ⟨λ X Y f g, by { delta functor.free free.map,
+    ext, simp, }⟩
 
 lemma is_zero_X {X : endomorphisms 𝓐} (h : is_zero X) : is_zero X.X :=
 by { rw is_zero_iff_id_eq_zero at h ⊢, apply_fun (λ a, a.f) at h, exact h }
