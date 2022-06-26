@@ -83,7 +83,7 @@ begin
   rwa cancel_epi at h,
 end
 
-lemma preserves_coequalizers_of_exact (hh : F.exact) {X Y : A} (f g : X ⟶ Y) :
+def preserves_coequalizers_of_exact (hh : F.exact) {X Y : A} (f g : X ⟶ Y) :
   preserves_colimit (parallel_pair f g) F :=
 preserves_colimit_of_preserves_colimit_cocone (cofork_of_cokernel_is_colimit _ _)
 begin
@@ -98,7 +98,7 @@ begin
   tidy,
 end
 
-lemma preserves_finite_colimits_of_exact (hh : F.exact) : preserves_finite_colimits F :=
+def preserves_finite_colimits_of_exact (hh : F.exact) : preserves_finite_colimits F :=
 begin
   apply_with preserves_finite_colimits_of_preserves_coequalizers_and_finite_coproducts
     { instances := ff },
@@ -129,7 +129,7 @@ begin
   apply this.epi_lift,
 end
 
-lemma preserves_equalizers_of_exact (hh : F.exact) {X Y : A} (f g : X ⟶ Y) :
+def preserves_equalizers_of_exact (hh : F.exact) {X Y : A} (f g : X ⟶ Y) :
   preserves_limit (parallel_pair f g) F :=
 preserves_limit_of_preserves_limit_cone (fork_of_kernel_is_limit _ _)
 begin
@@ -145,7 +145,7 @@ begin
   tidy,
 end
 
-lemma preserves_finite_limits_of_exact (h : F.exact) : preserves_finite_limits F :=
+def preserves_finite_limits_of_exact (h : F.exact) : preserves_finite_limits F :=
 begin
   apply_with preserves_finite_limits_of_preserves_equalizers_and_finite_products
     { instances := ff },
