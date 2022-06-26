@@ -1,6 +1,7 @@
 import category_theory.abelian.homology
 import algebra.homology.additive
 import for_mathlib.abelian_category
+import for_mathlib.equalizers
 
 namespace category_theory
 
@@ -82,12 +83,31 @@ begin
   rwa cancel_epi at h,
 end
 
+lemma preserves_coequalizers_of_exact (hh : F.exact) {X Y : A} (f g : X ⟶ Y) :
+  preserves_colimit (parallel_pair f g) F :=
+preserves_colimit_of_preserves_colimit_cocone (cofork_of_cokernel_is_colimit _ _)
+begin
+  let e : parallel_pair f g ⋙ F ≅ parallel_pair (F.map f) (F.map g) :=
+    diagram_iso_parallel_pair _,
+  equiv_rw (is_colimit.precompose_inv_equiv e _).symm,
+  apply is_colimit.of_iso_colimit (cofork_of_cokernel_is_colimit (F.map f) (F.map g)),
+  haveI := is_iso_cokernel_comparison_of_exact F hh (f-g),
+  refine cocones.ext (cokernel.map_iso (F.map f - F.map g) (F.map (f-g))
+    (iso.refl _) (iso.refl _) (by simp) ≪≫ as_iso (cokernel_comparison (f-g) F)) _,
+  rintro (_|_),
+  tidy,
+end
+
 lemma preserves_finite_colimits_of_exact (hh : F.exact) : preserves_finite_colimits F :=
 begin
   apply_with preserves_finite_colimits_of_preserves_coequalizers_and_finite_coproducts
     { instances := ff },
   any_goals { apply_instance },
-  { sorry }, -- use cokernel iso above
+  { constructor,
+    intro K,
+    apply_with preserves_colimit_of_iso_diagram { instances := ff },
+    exact (diagram_iso_parallel_pair K).symm,
+    apply preserves_coequalizers_of_exact F hh, },
   { introsI J hI,
     apply preserves_coproducts_of_shape_of_preserves_biproducts_of_shape }
 end
@@ -109,11 +129,32 @@ begin
   apply this.epi_lift,
 end
 
+lemma preserves_equalizers_of_exact (hh : F.exact) {X Y : A} (f g : X ⟶ Y) :
+  preserves_limit (parallel_pair f g) F :=
+preserves_limit_of_preserves_limit_cone (fork_of_kernel_is_limit _ _)
+begin
+  let e : parallel_pair f g ⋙ F ≅ parallel_pair (F.map f) (F.map g) :=
+    diagram_iso_parallel_pair _,
+  equiv_rw (is_limit.postcompose_hom_equiv e _).symm,
+  apply is_limit.of_iso_limit (fork_of_kernel_is_limit (F.map f) (F.map g)),
+  haveI := is_iso_kernel_comparison_of_exact F hh (f-g),
+  symmetry,
+  refine cones.ext (as_iso (kernel_comparison (f-g) F) ≪≫
+    kernel.map_iso (F.map (f-g)) (F.map f - F.map g) (iso.refl _) (iso.refl _) (by simp)) _,
+  rintro (_|_),
+  tidy,
+end
+
 lemma preserves_finite_limits_of_exact (h : F.exact) : preserves_finite_limits F :=
 begin
-  apply_with preserves_finite_limits_of_preserves_equalizers_and_finite_products { instances := ff },
+  apply_with preserves_finite_limits_of_preserves_equalizers_and_finite_products
+    { instances := ff },
   any_goals { apply_instance },
-  { sorry }, -- use kernel iso above
+  { constructor,
+    intro K,
+    apply_with preserves_limit_of_iso_diagram { instances := ff },
+    exact (diagram_iso_parallel_pair K).symm,
+    apply preserves_equalizers_of_exact F h, },
   { introsI J hJ,
     apply preserves_products_of_shape_of_preserves_biproducts_of_shape }
 end
