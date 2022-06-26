@@ -214,6 +214,7 @@ apply_nolint category_theory.functor.left_derived.β unused_arguments
 -- for_mathlib/endomorphisms/Ext.lean
 apply_nolint category_theory.endomorphisms.mk_bo_ho_ca unused_arguments
 apply_nolint category_theory.endomorphisms.quot_out_single_map unused_arguments
+apply_nolint category_theory.endomorphisms.single_unEnd unused_arguments
 
 -- for_mathlib/endomorphisms/basic.lean
 apply_nolint category_theory.endomorphisms.cofree unused_arguments
