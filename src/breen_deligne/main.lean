@@ -352,6 +352,7 @@ variables [has_products_of_shape (ulift.{v} ℕ) 𝓐]
 
 open category_theory.preadditive
 
+@[simps, nolint unused_arguments]
 def Pow_X (X : endomorphisms 𝓐) (n : ℕ) :
   ((Pow n).obj X).X ≅ (Pow n).obj X.X :=
 (apply_Pow (endomorphisms.forget 𝓐) n).app X
@@ -369,7 +370,17 @@ begin
       { refine (is_zero_zero _).iso _, apply endomorphisms.is_zero_X, exact is_zero_zero _ },
       { refine F.map_iso _, symmetry, refine (Pow_X _ _) } },
     { rcases i with ((_|i)|i),
-      { dsimp, /- jmc: not sure if this is provable -/ sorry },
+      { dsimp, /- jmc: not sure if this is provable -/
+        /- J. Riou: Indeed, the `(quot.out ((BD.eval F).map f)).f 0` term seems problematic;
+          shouldn't the equality be obtained for a more canonical choice of chain morphism
+          in the homotopy class? Then, I am not sure defining `mk_bo_ho_ca` with arguments
+          in the homotopy category is a good idea; anyway, practically speaking it seems
+          you always apply it to a quite explicit complex. I would suggest redefining
+          `mk_bo_ho_ca` by using as an input a real endomorphism `f` of a chain complex
+          rather than a homotopy class. This would make `quot_out_single_map`
+          unnecessary, and both lemmas `mk_bo_ha_ca_single` and `mk_bo_ha_ca_Q`
+          would become trivial! -/
+        sorry, },
       { apply is_zero.eq_of_tgt, apply endomorphisms.is_zero_X, exact is_zero_zero _ },
       { dsimp, /- jmc: not sure if this is provable -/ sorry }, } },
   { rintro i j (rfl : _ = _), ext, rcases i with ((_|i)|i),

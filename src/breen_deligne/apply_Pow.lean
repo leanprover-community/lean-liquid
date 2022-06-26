@@ -11,6 +11,7 @@ universes v
 variables {C D : Type*} [category.{v} C] [category.{v} D] [preadditive C] [preadditive D]
   [has_finite_biproducts C] [has_finite_biproducts D] (F : C ⥤ D) [functor.additive F] (n : ℕ)
 
+@[simps]
 def apply_Pow : Pow n ⋙ F ≅ F ⋙ Pow n := nat_iso.of_components (λ A,
   { hom := biproduct.lift (λ i, F.map (biproduct.π _ i)),
     inv := biproduct.desc (λ i, F.map (biproduct.ι _ i)),
