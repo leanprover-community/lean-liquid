@@ -173,7 +173,16 @@ def homology_iso {X Y Z : A} (f : X ⟶ Y) (g : Y ⟶ Z) (w w') :
       (by rw [lift_map_inv_kernel_comparison_assoc _ _ w, ← F.map_comp,
         homology.condition_π', functor.map_zero]),
   hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+  inv_hom_id' := begin
+    apply homology.hom_to_ext,
+    apply homology.hom_from_ext,
+    rw [← cancel_mono (cokernel_comparison f F), ← cancel_epi (kernel_comparison g F),
+      category.assoc, category.assoc, category.assoc, homology.π'_desc'_assoc,
+      category.assoc, is_iso.hom_inv_id_assoc, category.id_comp, homology.π'_ι,
+      homology.lift_ι_assoc, category.assoc, ← F.map_comp_assoc, homology.π'_ι,
+      is_iso.inv_hom_id, category.comp_id, category.assoc, π_comp_cokernel_comparison,
+      kernel_comparison_comp_ι_assoc, F.map_comp],
+  end }
 
 def homology_functor_iso {M : Type*} (c : complex_shape M) (i : M) :
   homology_functor A c i ⋙ F ≅
