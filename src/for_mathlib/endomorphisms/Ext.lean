@@ -84,19 +84,24 @@ variables {𝓐 : Type u} [category.{v} 𝓐] [abelian 𝓐] [enough_projectives
 variables [has_coproducts_of_shape (ulift.{v} ℕ) 𝓐]
 variables [has_products_of_shape (ulift.{v} ℕ) 𝓐]
 
-def mk_bo_ho_ca (X : bounded_homotopy_category 𝓐) (f : X ⟶ X) :
+def mk_bo_ho_ca' (X : cochain_complex 𝓐 ℤ)
+  [((homotopy_category.quotient 𝓐 (complex_shape.up ℤ)).obj X).is_bounded_above] (f : X ⟶ X) :
   bounded_homotopy_category (endomorphisms 𝓐) :=
 { val := { as :=
-  { X := λ i, ⟨X.val.as.X i, f.out.f i⟩,
-    d := λ i j, ⟨X.val.as.d i j, f.out.comm _ _⟩,
-    shape' := λ i j h, by { ext, exact X.val.as.shape i j h, },
+  { X := λ i, ⟨X.X i, f.f i⟩,
+    d := λ i j, ⟨X.d i j, f.comm _ _⟩,
+    shape' := λ i j h, by { ext, exact X.shape i j h, },
     d_comp_d' := λ i j k hij hjk, by { ext, apply homological_complex.d_comp_d } } },
   bdd := begin
-    obtain ⟨a, ha⟩ := X.bdd,
+    obtain ⟨a, ha⟩ := homotopy_category.is_bounded_above.cond ((homotopy_category.quotient 𝓐 (complex_shape.up ℤ)).obj X),
     refine ⟨⟨a, λ i hi, _⟩⟩,
     rw is_zero_iff_id_eq_zero, ext, dsimp, rw ← is_zero_iff_id_eq_zero,
     exact ha i hi,
   end }
+
+def mk_bo_ho_ca (X : bounded_homotopy_category 𝓐) (f : X ⟶ X) :
+  bounded_homotopy_category (endomorphisms 𝓐) :=
+@mk_bo_ho_ca' _ _ _ _ _ _ X.val.as (by { cases X with X hX, cases X, exact hX }) f.out
 .
 
 lemma quot_out_single_map {X Y : 𝓐} (f : X ⟶ Y) (i : ℤ) :
@@ -120,6 +125,28 @@ begin
     { apply limits.is_zero.eq_of_tgt, show is_zero (ite _ Y _), rw if_neg, apply is_zero_zero,
       linarith },
     rw [aux1, aux2, comp_zero, zero_comp, add_zero], }
+end
+
+def mk_bo_ha_ca'_single (X : 𝓐) (f : X ⟶ X) :
+  mk_bo_ho_ca' ((homological_complex.single _ _ 0).obj X) (functor.map _ f) ≅ (single _ 0).obj ⟨X, f⟩ :=
+bounded_homotopy_category.mk_iso
+begin
+  refine (homotopy_category.quotient _ _).map_iso _,
+  refine homological_complex.hom.iso_of_components _ _,
+  { intro i,
+    refine endomorphisms.mk_iso _ _,
+    { dsimp, split_ifs, { exact iso.refl _ },
+      { refine (is_zero_zero _).iso _, apply endomorphisms.is_zero_X,
+        exact is_zero_zero (endomorphisms 𝓐), } },
+    { dsimp, split_ifs with hi,
+      { subst i, dsimp, erw [iso.refl_hom], simp only [category.id_comp, category.comp_id],
+        convert rfl, },
+      { apply is_zero.eq_of_src, rw [if_neg hi], exact is_zero_zero _ } } },
+  { rintro i j (rfl : _ = _),
+    by_cases hi : i = 0,
+    { apply is_zero.eq_of_tgt, dsimp, rw [if_neg], exact is_zero_zero _, linarith only [hi] },
+    { apply is_zero.eq_of_src, dsimp, rw [is_zero_iff_id_eq_zero], ext, dsimp, rw [if_neg hi],
+      apply (is_zero_zero _).eq_of_src } }
 end
 
 def mk_bo_ha_ca_single (X : 𝓐) (f : X ⟶ X) :
@@ -152,14 +179,15 @@ begin
   sorry
 end
 
-lemma Ext_is_zero_iff' (X Y : bounded_homotopy_category 𝓐) (f : X ⟶ X) (g : Y ⟶ Y) :
-  (∀ i, is_zero (((Ext i).obj (op $ mk_bo_ho_ca X f)).obj $ mk_bo_ho_ca Y g)) ↔
-  (∀ i, is_iso $ ((Ext i).map f.op).app Y - ((Ext i).obj (op X)).map g) :=
+lemma Ext_is_zero_iff' (X Y : cochain_complex 𝓐 ℤ)
+  [((homotopy_category.quotient 𝓐 (complex_shape.up ℤ)).obj X).is_bounded_above]
+  [((homotopy_category.quotient 𝓐 (complex_shape.up ℤ)).obj Y).is_bounded_above]
+  (f : X ⟶ X) (g : Y ⟶ Y) :
+  (∀ i, is_zero (((Ext i).obj (op $ mk_bo_ho_ca' X f)).obj $ mk_bo_ho_ca' Y g)) ↔
+  (∀ i, is_iso $ ((Ext i).map (of_hom f).op).app _ - ((Ext i).obj (op _)).map (of_hom g)) :=
 begin
-  rw Ext_is_zero_iff,
-  conv_rhs { rw [← homotopy_category.quotient_map_out f, ← homotopy_category.quotient_map_out g] },
-  cases X with X hX, cases X with X hX', cases X with X Xd hXs hXd2,
-  cases Y with Y hY, cases Y with Y hY', cases Y with Y Yd hYs hYd2,
+  rw Ext_is_zero_iff, apply forall_congr, intro i,
+  unfreezingI { cases X with X Xd hXs hXd2, cases Y with Y Yd hYs hYd2, },
   dsimp [bounded_homotopy_category.unEnd, bounded_homotopy_category.e,
     mk_bo_ho_ca, functor.map_homological_complex, homological_complex.e,
     homotopy_category.quotient, quotient.functor],
