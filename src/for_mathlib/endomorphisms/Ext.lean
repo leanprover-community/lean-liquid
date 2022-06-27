@@ -147,11 +147,61 @@ end
 
 lemma Ext_is_zero_iff (X Y : bounded_homotopy_category (endomorphisms 𝓐)) :
   (∀ i, is_zero (((Ext i).obj (op $ X)).obj $ Y)) ↔
-  (∀ i, is_iso $ ((Ext i).map (quiver.hom.op X.e)).app Y.unEnd - ((Ext i).obj (op X.unEnd)).map Y.e) :=
+  (∀ i, is_iso $
+    ((Ext i).map (quiver.hom.op X.e)).app Y.unEnd - ((Ext i).obj (op X.unEnd)).map Y.e) :=
 begin
-  sorry
+  -- this might be refactored out
+  obtain ⟨P, _inst, f, h1, h2⟩ := exists_K_projective_replacement X.unEnd,
+  resetI,
+  let fP := (functor.map_homological_complex (functor.free 𝓐) (complex_shape.up ℤ)).obj P.val.as,
+  obtain ⟨N, hN⟩ := P.bdd,
+  have hfPbdd : homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj fP),
+  { exact ⟨⟨N, λ i hNi, (functor.free 𝓐).map_is_zero (hN i hNi)⟩⟩, },
+  haveI hproj : ∀ i, projective (fP.X i),
+  { intro i,
+    apply free.projective, },
+  let fP' : bounded_homotopy_category (endomorphisms 𝓐) :=
+    { val := (homotopy_category.quotient _ _).obj fP,
+      bdd := hfPbdd },
+  /-
+  * Then use an argument similar to the proof of this lemma
+    https://github.com/leanprover-community/lean-liquid/blob/0e192c63da9d578301d4ca75c778abe342f7474f/src/for_mathlib/derived/lemmas.lean#L536
+    to see that the complex you have obtained is a K_projective
+    replacement of A and of A.unEnd.
+  -/
+  haveI : ((homotopy_category.quotient _ _).obj fP).is_K_projective,
+  { refine ⟨_⟩,
+    intros Y hY f,
+    convert homotopy_category.eq_of_homotopy _ _
+      (projective.null_homotopic_of_projective_to_acyclic f.out N _ _ hY.1),
+    --(projective.null_homotopic_of_projective_to_acyclic f.out N
+    --  (projective.replacement_is_projective fP N _)
+    --  (hfPbdd)
+    --  hY.1),
+    --simp
+    sorry, sorry, sorry },
+  /-
+  * Use Ext_iso to calculate both Ext(A,B) and Ext(A.unEnd, B.unEnd) with this replacement.
+  -/
+  sorry,
 end
 
+--#check exists_K_projective_replacement
+/-
+
+Maths notes
+
+/-- An object of `homotopy_category 𝓐 c` is "K-projective" if the only map from
+that object to any acyclic object is the zero map. -/
+
+`theorem exists_K_projective_replacement` says that if 𝓐 is an abelian category
+with enough projectives and `X` is a bounded complex up to homotopy, then
+there exists a bounded complex `P` up to homotopy which is quasi-isomorphic to X
+such that P is K-projective in the category of not necessarily bounded complexes
+and furthermore all the objects of P are projective in 𝓐.
+
+Apply this theorem to `X.unend` in the lemma to get a complex
+-/
 lemma Ext_is_zero_iff' (X Y : bounded_homotopy_category 𝓐) (f : X ⟶ X) (g : Y ⟶ Y) :
   (∀ i, is_zero (((Ext i).obj (op $ mk_bo_ho_ca X f)).obj $ mk_bo_ho_ca Y g)) ↔
   (∀ i, is_iso $ ((Ext i).map f.op).app Y - ((Ext i).obj (op X)).map g) :=
