@@ -182,14 +182,18 @@ begin
   resetI,
   let fP := (functor.map_homological_complex (functor.free 𝓐) (complex_shape.up ℤ)).obj P.val.as,
   obtain ⟨N, hN⟩ := P.bdd,
+  have hN' : ∀ (i : ℤ), N ≤ i →
+    is_zero (((homotopy_category.quotient (endomorphisms 𝓐) (complex_shape.up ℤ)).obj fP).as.X i),
+  { exact λ i hNi, (functor.free 𝓐).map_is_zero (hN i hNi), },
   have hfPbdd : homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj fP),
-  { exact ⟨⟨N, λ i hNi, (functor.free 𝓐).map_is_zero (hN i hNi)⟩⟩, },
+  { exact ⟨⟨N, hN'⟩⟩, },
   haveI hproj : ∀ i, projective (fP.X i),
   { intro i,
     apply free.projective, },
   let fP' : bounded_homotopy_category (endomorphisms 𝓐) :=
     { val := (homotopy_category.quotient _ _).obj fP,
       bdd := hfPbdd },
+
   /-
   * Then use an argument similar to the proof of this lemma
     https://github.com/leanprover-community/lean-liquid/blob/0e192c63da9d578301d4ca75c778abe342f7474f/src/for_mathlib/derived/lemmas.lean#L536
@@ -200,13 +204,8 @@ begin
   { refine ⟨_⟩,
     intros Y hY f,
     convert homotopy_category.eq_of_homotopy _ _
-      (projective.null_homotopic_of_projective_to_acyclic f.out N _ _ hY.1),
-    --(projective.null_homotopic_of_projective_to_acyclic f.out N
-    --  (projective.replacement_is_projective fP N _)
-    --  (hfPbdd)
-    --  hY.1),
-    --simp
-    sorry, sorry, sorry },
+      (projective.null_homotopic_of_projective_to_acyclic f.out N hproj hN' hY.1),
+    { simp }, },
   /-
   * Use Ext_iso to calculate both Ext(A,B) and Ext(A.unEnd, B.unEnd) with this replacement.
   -/
