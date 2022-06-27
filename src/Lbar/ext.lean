@@ -135,7 +135,12 @@ def ExtQprime_iso_aux_system_obj (c : ℝ≥0) (n : ℕ) :
   ((aux_system r' BD ⟨M⟩ (SemiNormedGroup.ulift.{u+1}.obj V) κ).to_AbH n).obj (op c) :=
 Ext_compute_with_acyclic _ _ (ExtQprime_iso_aux_system_aux r' BD κ M V c) _ ≪≫
 begin
-  refine (homology_functor _ _ (-n:ℤ)).map_iso _ ≪≫ _;
+  refine (homology_functor _ _ (-n:ℤ)).map_iso _ ≪≫ _,
+  { let C := ((preadditive_yoneda.obj V.to_Cond).right_op.map_homological_complex _).obj
+      (((QprimeFP_nat r' BD κ M).obj c)),
+    exact ((homological_complex.embed complex_shape.embedding.nat_down_int_up).obj C).unop, },
+  { refine (homological_complex.unop_functor.right_op.map_iso _).unop,
+    symmetry, refine (map_homological_complex_embed _).app _, },
   sorry
 end
 
