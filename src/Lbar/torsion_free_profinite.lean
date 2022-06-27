@@ -2,7 +2,7 @@ import for_mathlib.Profinite.extend
 import Lbar.basic
 import Lbar.functor
 
-universe u
+universes u v
 
 open_locale nnreal
 
@@ -13,11 +13,20 @@ set_option pp.universes true
 
 open Lbar Profinite
 
+noncomputable
+example : add_comm_group ((extend (Fintype_Lbar.{u u} r')).obj S) :=
+begin
+  -- haveI : category_theory.small_category.{u+1} Fintype.{u}, sorry,
+  -- have := @category_theory.limits.concrete.to_product_injective_of_is_limit
+  --   (ProFiltPseuNormGrpWithTinv₁.{u} r') _ _ (Fintype.{u}) _ (Fintype_Lbar.{u u} r'),
+  apply_instance,
+end
+
 lemma torsion_free_profinite (n : ℤ) (x : (extend (Fintype_Lbar.{u u} r')).obj S) :
   n • x = 0 → n = 0 ∨ x = 0:=
 begin
   intro hx,
-  dsimp at x,
+  dsimp at x,--[FAE] look at `Lbar.basic.lean`, l. 445 the map `map` for the def'n of transitionss
   sorry,
 end
 

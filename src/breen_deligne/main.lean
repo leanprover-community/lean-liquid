@@ -1,4 +1,5 @@
 import breen_deligne.eval2
+import breen_deligne.apply_Pow
 import for_mathlib.derived.K_projective
 import for_mathlib.endomorphisms.Ext
 import for_mathlib.endomorphisms.functor
@@ -351,12 +352,17 @@ variables [has_products_of_shape (ulift.{v} ℕ) 𝓐]
 
 open category_theory.preadditive
 
+@[simps, nolint unused_arguments]
 def Pow_X (X : endomorphisms 𝓐) (n : ℕ) :
   ((Pow n).obj X).X ≅ (Pow n).obj X.X :=
-sorry
+(apply_Pow (endomorphisms.forget 𝓐) n).app X
+.
 
-def mk_bo_ha_ca_Q (X : 𝓐) (f : X ⟶ X) :
-  endomorphisms.mk_bo_ho_ca ((BD.eval F).obj X) ((BD.eval F).map f) ≅
+instance eval'_bounded_above (X : 𝓐) : ((homotopy_category.quotient 𝓐 (complex_shape.up ℤ)).obj ((BD.eval' F).obj X)).is_bounded_above :=
+((BD.eval F).obj X).bdd
+
+def mk_bo_ha_ca'_Q (X : 𝓐) (f : X ⟶ X) :
+  endomorphisms.mk_bo_ho_ca' ((BD.eval' F).obj X) ((BD.eval' F).map f) ≅
   (BD.eval F.map_endomorphisms).obj ⟨X, f⟩ :=
 bounded_homotopy_category.mk_iso $ (homotopy_category.quotient _ _).map_iso
 begin
@@ -368,9 +374,10 @@ begin
       { refine (is_zero_zero _).iso _, apply endomorphisms.is_zero_X, exact is_zero_zero _ },
       { refine F.map_iso _, symmetry, refine (Pow_X _ _) } },
     { rcases i with ((_|i)|i),
-      { dsimp, /- jmc: not sure if this is provable -/ sorry },
+      { dsimp,
+        sorry, },
       { apply is_zero.eq_of_tgt, apply endomorphisms.is_zero_X, exact is_zero_zero _ },
-      { dsimp, /- jmc: not sure if this is provable -/ sorry }, } },
+      { dsimp, sorry }, } },
   { rintro i j (rfl : _ = _), ext, rcases i with ((_|i)|i),
     { dsimp, sorry },
     { apply is_zero.eq_of_tgt, apply endomorphisms.is_zero_X, exact is_zero_zero _ },
@@ -399,7 +406,7 @@ lemma main_lemma (A : 𝓐) (B : 𝓐) (f : A ⟶ A) (g : B ⟶ B)
     ((Ext i).obj (op $ (BD.eval F).obj A)).map ((single _ 0).map g)) :=
 begin
   rw [← endomorphisms.Ext'_is_zero_iff' A B f g],
-  rw [← endomorphisms.Ext_is_zero_iff'],
+  erw [← endomorphisms.Ext_is_zero_iff'],
   refine (main_lemma.is_zero BD F.map_endomorphisms _ _ _ T hT0 @hT hTA).trans _,
   { refine endomorphisms.mk_iso _ _,
     { refine _ ≪≫ hH0.app A,
@@ -408,8 +415,8 @@ begin
   apply forall_congr, intro i,
   apply iso.is_zero_iff,
   refine functor.map_iso _ _ ≪≫ iso.app (functor.map_iso _ _) _,
-  { exact (endomorphisms.mk_bo_ha_ca_single _ _).symm },
-  { refine (mk_bo_ha_ca_Q _ _ _ _).op, },
+  { exact (endomorphisms.mk_bo_ha_ca'_single _ _).symm, },
+  { refine (mk_bo_ha_ca'_Q _ _ _ _).op, },
 end
 
 end
