@@ -6,6 +6,7 @@ import for_mathlib.endomorphisms.functor
 import for_mathlib.truncation_Ext
 import for_mathlib.single_coproducts
 import category_theory.limits.opposites
+import for_mathlib.free_abelian_group2
 
 .
 
@@ -374,14 +375,22 @@ begin
       { refine (is_zero_zero _).iso _, apply endomorphisms.is_zero_X, exact is_zero_zero _ },
       { refine F.map_iso _, symmetry, refine (Pow_X _ _) } },
     { rcases i with ((_|i)|i),
-      { dsimp,
-        sorry, },
+      { show F.map _ ≫ F.map _ = F.map _ ≫ F.map _,
+        rw [← F.map_comp, ← F.map_comp], congr' 1,
+        apply biproduct.hom_ext', intro j,
+        dsimp only [Pow, Pow_X_hom, Pow_X_inv, iso.symm_hom],
+        rw [biproduct.ι_map_assoc, biproduct.ι_desc, biproduct.ι_desc_assoc, ← endomorphisms.hom.comm], },
       { apply is_zero.eq_of_tgt, apply endomorphisms.is_zero_X, exact is_zero_zero _ },
-      { dsimp, sorry }, } },
-  { rintro i j (rfl : _ = _), ext, rcases i with ((_|i)|i),
-    { dsimp, sorry },
+      { show F.map _ ≫ F.map _ = F.map _ ≫ F.map _,
+        rw [← F.map_comp, ← F.map_comp], congr' 1,
+        apply biproduct.hom_ext', intro j,
+        dsimp only [Pow, Pow_X_hom, Pow_X_inv, iso.symm_hom],
+        rw [biproduct.ι_map_assoc, biproduct.ι_desc, biproduct.ι_desc_assoc, ← endomorphisms.hom.comm], } } },
+  { rintro i j (rfl : _ = _), ext, rcases i with (i|(_|i)),
     { apply is_zero.eq_of_tgt, apply endomorphisms.is_zero_X, exact is_zero_zero _ },
-    { dsimp, sorry }, }
+    { change F.map _ ≫ _ = _ ≫ F.map _,
+      dsimp only, sorry },
+    { sorry }, }
 end
 
 variables [has_coproducts (endomorphisms 𝓐)]
