@@ -178,7 +178,16 @@ preserves_coproducts_aux _
 (λ X, single_sigma_iso i X)
 begin
   intros X a,
-  sorry
+  let f : _ := _, show _ = f,
+  apply (forget A).map_injective, rw [functor.map_comp],
+  dsimp only [single_sigma_iso, forget, mk_iso, iso.trans_hom, iso.symm_hom, _root_.id, single],
+  simp_rw [← category.assoc], rw [iso.comp_inv_eq],
+  change _ = (forget A).map f ≫ _,
+  erw ι_preserves_colimits_iso_hom,
+  erw ι_preserves_colimits_iso_hom,
+  rw has_colimit.iso_of_nat_iso_ι_hom,
+  simp only [discrete.nat_iso_hom_app, iso.refl_hom, category.id_comp],
+  refl,
 end
 
 variables [enough_projectives A]
@@ -191,7 +200,6 @@ instance preserves_coproducts_Ext' {α : Type v} (i : ℤ) (Y : A) [AB4 A] :
   ((Ext' i).flip.obj Y).right_op :=
 preserves_coproducts_aux _
 (λ X, begin
-  dsimp [Ext'],
   let e₁ : (single A 0).obj (∐ X) ≅ ∐ _ := single_sigma_iso _ _,
   let e₂ : ((Ext i).obj (opposite.op ((single A 0).obj (∐ X)))).obj ((single A 0).obj Y) ≅
     ((Ext i).obj (opposite.op (∐ _))).obj ((single A 0).obj Y) :=
@@ -200,11 +208,11 @@ preserves_coproducts_aux _
     ((single A 0).obj Y) ≅ ∏ _ := Ext_coproduct_iso _ _ _,
   let e₄ : opposite.op (∏ λ (a : α), ((Ext i).obj (opposite.op ((single A 0).obj (X a)))).obj ((single A 0).obj Y)) ≅
     ∐ _ := op_product_iso _,
-  refine _ ≪≫ e₄,
-  refine iso.op _,
-  refine e₃.symm ≪≫ _,
-  exact e₂.symm,
+  refine (e₃.symm ≪≫ e₂.symm).op ≪≫ e₄,
 end)
-sorry
+begin
+  intros X a, dsimp only [iso.trans_hom, iso.symm_hom, iso.op_hom, Ext'],
+  sorry
+end
 
 end bounded_homotopy_category
