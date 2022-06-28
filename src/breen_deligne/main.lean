@@ -8,6 +8,7 @@ import for_mathlib.single_coproducts
 import category_theory.limits.opposites
 import for_mathlib.free_abelian_group2
 import for_mathlib.has_homology_aux
+import for_mathlib.exact_functor
 
 .
 
@@ -439,7 +440,20 @@ variables [AB4 (endomorphisms 𝓐)]
 --   ((BD.eval F.map_endomorphisms).obj ⟨A,f⟩).val.as.homology 0 ≅ ⟨A,f⟩ :=
 -- by admit
 
-lemma main_lemma (A : 𝓐) (B : 𝓐) (f : A ⟶ A) (g : B ⟶ B)
+-- move this
+instance [has_finite_limits 𝓐] : preserves_finite_limits (endomorphisms.forget 𝓐) :=
+begin
+  constructor, introsI J hJ1 hJ2, apply_instance
+end
+
+-- move this
+instance [has_finite_colimits 𝓐] : preserves_finite_colimits (endomorphisms.forget 𝓐) :=
+begin
+  constructor, introsI J hJ1 hJ2, apply_instance
+end
+
+lemma main_lemma [has_finite_limits 𝓐] [has_finite_colimits 𝓐]
+  (A : 𝓐) (B : 𝓐) (f : A ⟶ A) (g : B ⟶ B)
   (hH0 : ((data.eval_functor F).obj BD.data) ⋙ homology_functor _ _ 0 ≅ 𝟭 _)
   (T : Ab.{v} ⥤ endomorphisms 𝓐) [Π (α : Type v), preserves_colimits_of_shape (discrete α) T]
   (hT0 : T.obj (AddCommGroup.of (punit →₀ ℤ)) ≅ ⟨A, f⟩)
@@ -457,8 +471,13 @@ begin
   refine (main_lemma.is_zero BD F.map_endomorphisms _ _ _ T hT0 @hT hTA).trans _,
   { refine endomorphisms.mk_iso _ _,
     { refine _ ≪≫ hH0.app A,
+      refine (endomorphisms.forget 𝓐).map_iso (homology_iso' _ (-1) 0 1 rfl rfl) ≪≫ _,
+      refine (endomorphisms.forget 𝓐).homology_iso _ _ _ _ ≪≫ _,
+      { rw [← functor.map_comp, homological_complex.d_comp_d, functor.map_zero], },
       refine has_homology.iso _ (chain_complex_nat_has_homology_0 _),
-      -- this can probably profit from `endomorphisms.forget` preserving/creating exactness
+      -- ugh
+      dsimp only [package.eval, chain_complex.to_bounded_homotopy_category, functor.comp_obj,
+        homotopy_category.quotient_obj_as],
       sorry },
     { sorry } },
   apply forall_congr, intro i,
