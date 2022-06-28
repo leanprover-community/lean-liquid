@@ -160,7 +160,20 @@ begin
   { rintro j - hj, rw [biproduct.ι_π_ne_assoc, zero_comp], exact hj.symm }
 end
 
-instance {X} {A : Condensed.{u} Ab.{u+1}} :
+instance group_of_sections (A B : Condensed.{u} Ab.{u+1}) (S : Profinite.{u}ᵒᵖ) :
+  add_comm_group
+  (((Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).obj A).obj S ⟶
+    ((Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).obj B).obj S) :=
+-- generated using `show_term {dsimp, apply_instance}` with `pp.implicit true`
+@pi.add_comm_group
+  ↥((@Sheaf.val Profinite Profinite.category proetale_topology Ab AddCommGroup.large_category A).obj S)
+  (λ (ᾰ : ↥((@Sheaf.val Profinite Profinite.category proetale_topology Ab AddCommGroup.large_category A).obj S)),
+     ↥((@Sheaf.val Profinite Profinite.category proetale_topology Ab AddCommGroup.large_category B).obj S))
+  (λ (i : ↥((@Sheaf.val Profinite Profinite.category proetale_topology Ab AddCommGroup.large_category A).obj S)),
+     AddCommGroup.add_comm_group_instance
+       ((@Sheaf.val Profinite Profinite.category proetale_topology Ab AddCommGroup.large_category B).obj S))
+
+instance group_of_homs (X) (A : Condensed.{u} Ab.{u+1}) :
   add_comm_group (X ⟶ (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).obj A) :=
 sorry
 
