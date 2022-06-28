@@ -4,6 +4,7 @@ import for_mathlib.abelian_category
 import for_mathlib.equalizers
 import for_mathlib.homology_iso_datum
 import for_mathlib.kernel_comparison
+import for_mathlib.homological_complex_map_d_to_d_from
 
 namespace category_theory
 
@@ -171,17 +172,19 @@ def homology_functor_iso {M : Type*} (c : complex_shape M) (i : M) :
   homology_functor A c i ⋙ F ≅
   F.map_homological_complex _ ⋙ homology_functor B c i :=
 nat_iso.of_components
-(λ X,
-{ hom := homology.lift _ _ _
-   (F.map (homology.ι _ _ _) ≫ category_theory.inv (cokernel_comparison _ _) ≫
-    cokernel.desc _ (cokernel.π _) sorry) sorry,
-  inv := homology.desc' _ _ _
-    (kernel.lift _ (kernel.ι _) sorry ≫
-    category_theory.inv (kernel_comparison _ _) ≫ F.map (homology.π' _ _ _))
-    sorry,
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry })
-sorry
+(λ X, begin
+  refine F.homology_iso (X.d_to i) (X.d_from i) (X.d_to_comp_d_from i) (by simp [← F.map_comp]) ≪≫
+    (homology.map_iso _ _ (map_d_to F X i) (map_d_from F X i) _),
+  rcases h : c.prev i with _ | ⟨j, hij⟩;
+  rcases h' : c.next i with _ | ⟨k, hik⟩,
+  { simpa only [map_d_to_eq₁ _ _ _ h, map_d_from_eq₁ _ _ _ h'], },
+  { simpa only [map_d_to_eq₁ _ _ _ h, map_d_from_eq₂ _ _ _ _ hik], },
+  { simpa only [map_d_to_eq₂ _ _ _ _ hij, map_d_from_eq₁ _ _ _ h'], },
+  { simpa only [map_d_to_eq₂ _ _ _ _ hij, map_d_from_eq₂ _ _ _ _ hik], },
+end)
+(λ X Y φ, begin
+  sorry,
+end)
 
 end functor
 

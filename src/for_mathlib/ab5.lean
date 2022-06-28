@@ -93,12 +93,15 @@ begin
     simp only [homology.map_ι, category.assoc],
     rw [homology.π'_ι_assoc, cokernel.π_desc],
     dsimp,
-    dsimp [colimit_homology_functor_iso, colim.homology_functor_iso],
-    erw [homology.lift_ι_assoc],
-    slice_lhs 3 4 { rw colimit.ι_map, },
-    simp only [category.assoc],
-    simp only [←preserves_cokernel.iso_inv],
-    rw [is_iso.iso.inv_inv],
+  -- J. Riou: what follows was broken by the new definition of homology_functor_iso
+  -- A more basic approach to the proof of this instance should be possible.
+  --
+  --  dsimp [colimit_homology_functor_iso, colim.homology_functor_iso],
+  --  erw [homology.lift_ι_assoc],
+  --  slice_lhs 3 4 { rw colimit.ι_map, },
+  --  simp only [category.assoc],
+  --  simp only [←preserves_cokernel.iso_inv],
+  --  rw [is_iso.iso.inv_inv],
 
     sorry }
 end

@@ -123,37 +123,6 @@ by { dsimp, simp only [c.next_eq_some h], }
 
 end preadditive
 
-/-
-section abelian
-
-variables {C D : Type*} [category.{v} C] [abelian C] [category.{v} D] [abelian D]
-  [has_zero_object C] [has_zero_object D] {M : Type*} {c : complex_shape M}
-  (F : C ⥤ D) [functor.additive F]
-  [preserves_finite_limits F] [preserves_finite_colimits F]
-  (X : homological_complex C c)
-
-def homology_functor_iso {M : Type*} (c : complex_shape M) (i : M) :
-  homology_functor C c i ⋙ F ≅
-  F.map_homological_complex _ ⋙ homology_functor D c i :=
-nat_iso.of_components
-begin
-  intro X,
-  refine (homology_iso' (X.d_to i) (X.d_from i) (X.d_to_comp_d_from i) F).symm ≪≫
-    (homology.map_iso _ _ (map_d_to F X i) (map_d_from F X i) _),
-  rcases h : c.prev i with _ | ⟨j, hij⟩;
-  rcases h' : c.next i with _ | ⟨k, hik⟩,
-  { simpa only [map_d_to_eq₁ _ _ _ h, map_d_from_eq₁ _ _ _ h'], },
-  { simpa only [map_d_to_eq₁ _ _ _ h, map_d_from_eq₂ _ _ _ _ hik], },
-  { simpa only [map_d_to_eq₂ _ _ _ _ hij, map_d_from_eq₁ _ _ _ h'], },
-  { simpa only [map_d_to_eq₂ _ _ _ _ hij, map_d_from_eq₂ _ _ _ _ hik], },
-end
-begin
-  intros X Y φ,
-  sorry,
-end
-
-end abelian-/
-
 end functor
 
 end category_theory
