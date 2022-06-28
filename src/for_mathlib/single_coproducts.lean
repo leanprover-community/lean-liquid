@@ -116,7 +116,17 @@ instance preserves_coproducts_single {α : Type v} (i : ℤ) :
   preserves_colimits_of_shape (discrete α) (single A (complex_shape.up ℤ) i) :=
 preserves_coproducts_aux _ (λ X, single_sigma_iso _ _) $ λ X a,
 begin
-  sorry
+  ext j,
+  simp only [comp_f, single_map_f, single_sigma_iso],
+  split_ifs with hj,
+  { subst j,
+    simp only [category.assoc, eq_to_hom_trans_assoc, eq_to_hom_refl, eq_to_iso_refl,
+      iso.trans_inv, iso.refl_inv, category.comp_id,
+      sigma_single_component,
+      category.id_comp, colimit.ι_desc, cofan.mk_ι_app, sigma_single_component_of_eq], },
+  { apply is_zero.eq_of_tgt,
+    apply is_zero.of_iso _ ((homological_complex.eval _ _ j).map_iso $ single_sigma_iso _ _).symm,
+    dsimp, rw if_neg hj, apply limits.is_zero_zero }
 end
 
 end homological_complex
@@ -126,12 +136,8 @@ namespace homotopy_category
 noncomputable
 instance preserves_coproducts_single {α : Type v} (i : ℤ) :
   preserves_colimits_of_shape (discrete α) (single A i) :=
-preserves_coproducts_aux _
-(λ X, (quotient _ _).map_iso
-  (homological_complex.single_sigma_iso _ _) ≪≫
-  preserves_colimit_iso (quotient _ _) _ ≪≫ has_colimit.iso_of_nat_iso
-    (discrete.nat_iso $ λ a, iso.refl _))
-sorry
+limits.comp_preserves_colimits_of_shape (homological_complex.single A (complex_shape.up ℤ) i)
+  (quotient A (complex_shape.up ℤ))
 
 end homotopy_category
 
@@ -170,7 +176,10 @@ instance preserves_coproducts_single {α : Type v}
   preserves_colimits_of_shape (discrete α) (single A i) :=
 preserves_coproducts_aux _
 (λ X, single_sigma_iso i X)
-sorry
+begin
+  intros X a,
+  sorry
+end
 
 variables [enough_projectives A]
 
