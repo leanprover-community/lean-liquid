@@ -32,6 +32,7 @@ apply_nolint breen_deligne.FreeMat.kronecker_map_reindex_right unused_arguments
 apply_nolint breen_deligne.data.homological_complex.functor_eval_flip_preserves_colimits_of_shape unused_arguments
 
 -- breen_deligne/main.lean
+apply_nolint breen_deligne.package.eval'_bounded_above unused_arguments
 apply_nolint breen_deligne.package.main_lemma.IH_neg unused_arguments
 apply_nolint breen_deligne.package.main_lemma.bdd_step unused_arguments
 apply_nolint breen_deligne.package.main_lemma.bdd_step₂ unused_arguments
@@ -212,7 +213,7 @@ apply_nolint category_theory.functor.left_derived.α unused_arguments
 apply_nolint category_theory.functor.left_derived.β unused_arguments
 
 -- for_mathlib/endomorphisms/Ext.lean
-apply_nolint category_theory.endomorphisms.mk_bo_ho_ca unused_arguments
+apply_nolint category_theory.endomorphisms.mk_bo_ho_ca' unused_arguments
 apply_nolint category_theory.endomorphisms.quot_out_single_map unused_arguments
 apply_nolint category_theory.endomorphisms.single_unEnd unused_arguments
 
