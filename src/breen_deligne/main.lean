@@ -7,6 +7,7 @@ import for_mathlib.truncation_Ext
 import for_mathlib.single_coproducts
 import category_theory.limits.opposites
 import for_mathlib.free_abelian_group2
+import for_mathlib.has_homology_aux
 
 .
 
@@ -456,6 +457,8 @@ begin
   refine (main_lemma.is_zero BD F.map_endomorphisms _ _ _ T hT0 @hT hTA).trans _,
   { refine endomorphisms.mk_iso _ _,
     { refine _ ≪≫ hH0.app A,
+      refine has_homology.iso _ (chain_complex_nat_has_homology_0 _),
+      -- this can probably profit from `endomorphisms.forget` preserving/creating exactness
       sorry },
     { sorry } },
   apply forall_congr, intro i,
