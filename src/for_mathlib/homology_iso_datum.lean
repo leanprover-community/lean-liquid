@@ -82,6 +82,34 @@ def apply_functor {D : Type*} [category D] [abelian D] (F : C ⥤ D) [F.additive
   π := F.map h.π,
   zero₂' := by simp only [← F.map_comp, zero₂, F.map_zero], }
 
+include h
+
+@[simps]
+def map_iso {X' Y' Z' : C} (f' : X' ⟶ Y') (g' : Y' ⟶ Z') (e₁ : arrow.mk f ≅ arrow.mk f')
+  (e₂ : arrow.mk g ≅ arrow.mk g') (eq : e₁.hom.right = e₂.hom.left) :
+  homology_iso_predatum f' g' H :=
+begin
+  have comm₁ : e₁.hom.left ≫ f' = f ≫ e₁.hom.right := arrow.w e₁.hom,
+  have comm₂ : e₂.hom.left ≫ g' = g ≫ e₂.hom.right := arrow.w e₂.hom,
+  have h₁ : e₁.inv.left ≫ e₁.hom.left = 𝟙 X',
+  { rw [← comma.comp_left, e₁.inv_hom_id, arrow.id_left], refl, },
+  exact
+  { w := by { rw [← cancel_epi e₁.hom.left, ← category.assoc, comm₁, eq, category.assoc, comm₂,
+      ← category.assoc, h.w, zero_comp, comp_zero], },
+    K := h.K,
+    ι := h.ι ≫ e₁.hom.right,
+    f' := e₁.inv.left ≫ h.f',
+    fac' := begin
+      slice_lhs 2 3 { rw h.fac', },
+      rw [← comm₁, ← category.assoc, h₁, category.id_comp],
+    end,
+    zero₁' := by rw [eq, category.assoc, comm₂, ← category.assoc, h.zero₁', zero_comp],
+    π := h.π,
+    zero₂' := by rw [category.assoc, h.zero₂', comp_zero], }
+end
+
+omit h
+
 end homology_iso_predatum
 
 @[nolint has_inhabited_instance]
@@ -112,6 +140,33 @@ def tautological' : homology_iso_datum f g (homology f g w) :=
   end, }
 
 variables {f g} (h : homology_iso_datum f g H)
+
+def map_iso {X' Y' Z' : C} (f' : X' ⟶ Y') (g' : Y' ⟶ Z') (e₁ : arrow.mk f ≅ arrow.mk f')
+  (e₂ : arrow.mk g ≅ arrow.mk g') (eq : e₁.hom.right = e₂.hom.left) :
+  homology_iso_datum f' g' H :=
+{ to_homology_iso_predatum := h.to_homology_iso_predatum.map_iso f' g' e₁ e₂ eq,
+  fork_is_limit := begin
+    refine (is_limit.equiv_of_nat_iso_of_iso _ _ _ _).to_fun h.fork_is_limit,
+    { refine parallel_pair.ext (arrow.right_func.map_iso e₁) (arrow.right_func.map_iso e₂)
+       _ (by simp),
+      have h₂ := arrow.w e₂.hom,
+      dsimp at h₂ ⊢,
+      rw [eq, h₂], },
+    { refine cones.ext (iso.refl _) _,
+      rintro (_|_),
+      tidy, },
+  end,
+  cofork_is_colimit := begin
+    refine (is_colimit.equiv_of_nat_iso_of_iso _ _ _ _).to_fun h.cofork_is_colimit,
+    { refine parallel_pair.ext ((arrow.left_func.map_iso e₁)) (iso.refl _) _ (by tidy),
+      { dsimp,
+        have h₁ : e₁.hom.left ≫ e₁.inv.left = 𝟙 X,
+        { rw [← comma.comp_left, e₁.hom_inv_id, arrow.id_left], refl, },
+        rw [category.comp_id, ← category.assoc, h₁, category.id_comp], }, },
+    { refine cocones.ext (iso.refl _) _,
+      rintro (_|_),
+      tidy, },
+  end, }
 
 def iso₁ : h.K ≅ kernel g :=
 is_limit.cone_point_unique_up_to_iso h.fork_is_limit (limit_cone.is_limit _)
@@ -333,7 +388,46 @@ def apply_exact_functor : homology_iso_datum (F.map f) (F.map g) (F.obj H) :=
 
 end apply_exact_functor
 
-/-include h
+section homological_complex
+
+variables {A : Type*} [category A] [abelian A]
+variables {M : Type*} {c : complex_shape M}
+
+def of_homological_complex (X : homological_complex A c) (i j k : M)
+  (hij : c.rel i j) (hjk : c.rel j k) :
+  homology_iso_datum (X.d i j) (X.d j k) (X.homology j) :=
+begin
+  refine (homology_iso_datum.tautological' (X.d_to j) (X.d_from j)
+    (X.d_to_comp_d_from j)).map_iso _ _ _ _ _,
+  { refine arrow.iso_mk (X.X_prev_iso hij) (iso.refl _) _,
+    dsimp,
+    simp only [X.d_to_eq hij, category.comp_id], },
+  { refine arrow.iso_mk (iso.refl _) (X.X_next_iso hjk) _,
+    dsimp,
+    simp only [X.d_from_eq hjk, category.id_comp, category.assoc, iso.inv_hom_id,
+      category.comp_id], },
+  { refl, },
+end
+
+open_locale zero_object
+
+def of_homological_complex_of_next_eq_none (X : homological_complex A c) (i j : M)
+  (hij : c.rel i j) (hj : c.next j = none) :
+  homology_iso_datum (X.d i j) (0 : _ ⟶ 0) (X.homology j) :=
+begin
+  refine (homology_iso_datum.tautological' (X.d_to j) (X.d_from j)
+    (X.d_to_comp_d_from j)).map_iso _ _ _ _ _,
+  { refine arrow.iso_mk (X.X_prev_iso hij) (iso.refl _) _,
+    dsimp,
+    simp only [X.d_to_eq hij, category.comp_id], },
+  { refine arrow.iso_mk (iso.refl _) (X.X_next_iso_zero hj) _,
+    simp only [arrow.mk_hom, comp_zero, homological_complex.d_from_comp_X_next_iso_zero], },
+  { refl, },
+end
+
+end homological_complex
+
+/-
 def has_homology : has_homology f g H :=
 { w := h.w,
   π := h.iso₁.inv ≫ h.π,
