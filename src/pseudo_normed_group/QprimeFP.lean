@@ -85,6 +85,26 @@ lemma _root_.Ab.ulift_map_apply {A B : Ab.{u}} (f : A ⟶ B) :
   ⇑(Ab.ulift.{v}.map f) = ulift_functor.map f :=
 by { ext, refl }
 
+-- def QprimeFP_incl_aux_foo (c : ℝ≥0) (n : ℕ) :
+--   (pseudo_normed_group.filtration_obj (M ^ n) c).to_Condensed ⟶
+--   (Condensed_Ab_to_CondensedSet.obj (⨁ λ (i : ulift (fin n)), M.to_Condensed)) :=
+-- begin
+--   let x := biproduct.is_bilimit (λ (i : ulift (fin n)), M.to_Condensed),
+--   let y := is_bilimit_of_preserves Condensed_Ab_to_presheaf x,
+--   refine ⟨y.is_limit.lift ⟨_, ⟨λ i, ⟨_, _⟩, _⟩⟩⟩,
+--   { refine QprimeFP_incl_aux' _ _ _ i.down, },
+--   { intros S T f,
+--     dsimp [QprimeFP_incl_aux', ProFiltPseuNormGrpWithTinv₁.to_Condensed],
+--     rw [← ulift_functor.map_comp, Ab.ulift_map_apply, ← ulift_functor.map_comp],
+--     congr' 1, },
+--   { clear y x,
+--     rintros ⟨i⟩ ⟨j⟩ ⟨⟨⟨⟩⟩⟩,
+--     ext S : 2,
+--     dsimp [QprimeFP_incl_aux', ProFiltPseuNormGrpWithTinv₁.to_Condensed],
+--     simp only [discrete.functor_map_id, category.id_comp],
+--     symmetry, apply category.comp_id, }
+-- end
+
 def QprimeFP_incl_aux (c : ℝ≥0) (n : ℕ) :
   (pseudo_normed_group.filtration_obj (M ^ n) c).to_Condensed ⟶
   (Condensed_Ab_to_CondensedSet.obj (⨁ λ (i : ulift (fin n)), M.to_Condensed)) :=
@@ -128,6 +148,30 @@ begin
 end
 
 open category_theory.preadditive
+open_locale big_operators
+
+lemma biproduct.desc_eq_sum {𝓐 ι : Type*} [category 𝓐] [abelian 𝓐] [fintype ι] [decidable_eq ι]
+  (M : ι → 𝓐) (X : 𝓐) (f : Π i, M i ⟶ X) :
+  biproduct.desc f = ∑ i : ι, (biproduct.π _ _) ≫ (f i) :=
+begin
+  ext i, simp only [biproduct.ι_desc, comp_sum],
+  rw finset.sum_eq_single_of_mem i (finset.mem_univ _),
+  { rw [biproduct.ι_π_assoc, dif_pos rfl, eq_to_hom_refl, category.id_comp], },
+  { rintro j - hj, rw [biproduct.ι_π_ne_assoc, zero_comp], exact hj.symm }
+end
+
+instance {X} {A : Condensed.{u} Ab.{u+1}} :
+  add_comm_group (X ⟶ (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).obj A) :=
+sorry
+
+lemma QprimeFP_incl_aux1 {A B : Condensed.{u} Ab.{u+1}} {ι : Type*} {X}
+  (f : X ⟶ (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).obj A)
+  (s : finset ι) (n : ι → ℤ) (g : ι → (A ⟶ B)) :
+  f ≫ (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).map (∑ i in s, n i • g i) =
+  ∑ i in s, n i • (f ≫ (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).map (g i)) :=
+begin
+  sorry
+end
 
 def QprimeFP_incl (c : ℝ≥0) :
   (QprimeFP_int r' BD.data κ M).obj c ⟶
@@ -135,10 +179,9 @@ def QprimeFP_incl (c : ℝ≥0) :
 (homological_complex.embed complex_shape.embedding.nat_down_int_up).map
 { f := λ n, CondensedSet_to_Condensed_Ab.map $ QprimeFP_incl_aux _ _ _,
   comm' := begin
-    rintro i j (rfl : _ = _),
-    dsimp only [data.eval_functor, functor.comp_obj, functor.flip_obj_obj,
-      homological_complex.functor_eval_obj, homological_complex.functor_eval.obj_obj_d,
-      data.eval_functor'_obj_d, universal_map.eval_Pow],
+    rintro _ n (rfl : _ = _),
+    rw [package.eval_functor_obj_d],
+    dsimp only [universal_map.eval_Pow],
     dsimp only [QprimeFP_nat, FPsystem, functor.comp_obj, functor.map_homological_complex_obj_d],
     rw [chain_complex.of_d],
     delta freeCond freeCond',
@@ -156,11 +199,27 @@ def QprimeFP_incl (c : ℝ≥0) :
     rw [comp_zsmul, zsmul_comp], refine congr_arg2 _ rfl _,
     rw [functor.comp_map, ← functor.map_comp, ← functor.map_comp],
     congr' 1,
-    ext S : 3,
-    sorry,
-    -- dsimp only [QprimeFP_incl_aux],
-    -- erw [nat_trans.comp_app, nat_trans.comp_app],
+    ext1,
+    let x := λ n, biproduct.is_limit (λ (i : ulift (fin (BD.data.X n))), M.to_Condensed),
+    let y := λ n, is_limit_of_preserves (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf) (x n),
+    apply (y _).hom_ext, intro j,
+    rw [← CondensedSet_to_presheaf_map, ← CondensedSet_to_presheaf_map, functor.map_comp,
+      ← functor.comp_map, category.assoc, functor.map_comp, category.assoc],
+    erw [← functor.map_comp, biproduct.matrix_π],
+    dsimp only [QprimeFP_incl_aux, CondensedSet_to_presheaf_map],
+    rw (y _).fac,
+    simp only [biproduct.desc_eq_sum, comp_zsmul, category.comp_id],
+    rw [QprimeFP_incl_aux1],
+    have help : ∀ n i,
+      ((Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).map_cone
+        (biproduct.bicone (λ (i : ulift (fin (BD.data.X n))), M.to_Condensed)).to_cone).π.app i =
+      (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).map
+        (biproduct.π (λ (i : ulift (fin (BD.data.X n))), M.to_Condensed) i),
+    { intros, refl },
+    simp only [← help, (y _).fac],
+    ext S : 2,
     -- dsimp,
+    sorry,
   end }
 
 variables (ι : ulift.{u+1} ℕ → ℝ≥0) (hι : monotone ι)
@@ -186,7 +245,6 @@ variables {C : Type*} [category C] [preadditive C]
 variables (A B : ℝ≥0 ⥤ C)
 variables [has_coproduct (λ (k : ulift ℕ), A.obj (ι k))]
 variables [has_coproduct (λ (k : ulift ℕ), B.obj (ι k))]
--- variables [uniformly_bounded (λ k, A.obj (ι k))]
 
 def sigma_shift_cone (c : cofan (λ k, A.obj (ι k))) :
   cofan (λ k, A.obj (ι k)) :=

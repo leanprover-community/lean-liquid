@@ -42,8 +42,8 @@ lemma eval'_obj_d (X : 𝒜) (m n : ℕ) :
     (universal_map.eval_Pow F (BD.data.d (m+1) (n+1))).app X := rfl
 
 lemma eval'_obj_d_0 (X : 𝒜) (n : ℕ) :
-  ((BD.eval' F).obj X).d (-(1:ℕ)+1:ℤ) (-(n+1:ℕ):ℤ) =
-    (universal_map.eval_Pow F (BD.data.d 0 (n+1))).app X := rfl
+  ((BD.eval' F).obj X).d (-(n+1:ℕ):ℤ) (-(1:ℕ)+1:ℤ) =
+    (universal_map.eval_Pow F (BD.data.d (n+1) 0)).app X := rfl
 
 end package
 end breen_deligne
