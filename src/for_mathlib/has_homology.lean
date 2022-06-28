@@ -37,6 +37,12 @@ structure has_homology (f : A ⟶ B) (g : B ⟶ C) (H : 𝓐) :=
 [epi_π : epi π]
 [mono_ι : mono ι]
 
+-- move me
+instance (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0) : epi (homology.π' f g w) := epi_comp _ _
+-- move me
+instance (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0) : mono (homology.ι f g w) := mono_comp _ _
+
+
 /-- If `f ≫ g = 0` then `homology f g w` can be identified with the homology of the three
 term exact sequence coming from `f` and `g`. -/
 def homology.has (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0) :
@@ -55,8 +61,8 @@ def homology.has (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0) :
     rw exact_iso_comp,
     exact exact_kernel_ι
   end,
-  epi_π := by { delta homology.π', apply epi_comp },
-  mono_ι := by { delta homology.ι, apply mono_comp } }
+  epi_π := by apply_instance,
+  mono_ι := by apply_instance }
 
 lemma homology.has_π {f : A ⟶ B} {g : B ⟶ C} (w : f ≫ g = 0) :
   (homology.has f g w).π = homology.π' f g w := rfl
