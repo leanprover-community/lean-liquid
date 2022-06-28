@@ -427,15 +427,81 @@ end
 
 end homological_complex
 
-/-
+section has_homology
+
+variables (f g)
+
+lemma homology_iso_cokernel_lift_comp_ι :
+  (homology_iso_cokernel_lift f g w).inv ≫ homology.ι f g w =
+  cokernel.map _ _ (𝟙 X) (kernel.ι g) (by simp only [kernel.lift_ι, category.id_comp]) :=
+begin
+  ext,
+  dsimp [homology_iso_cokernel_lift, homology.ι,
+    homology_iso_cokernel_image_to_kernel', homology_iso_kernel_desc],
+  simp only [cokernel_iso_of_eq_inv_comp_desc, category.assoc, cokernel.π_desc_assoc, cokernel.π_desc,
+    cokernel_iso_of_eq_hom_comp_desc_assoc, kernel.lift_ι, kernel_subobject_arrow_assoc,
+    kernel_subobject_arrow'_assoc],
+end
+
+lemma homology_ι_eq :
+  homology.ι f g w = (homology_iso_cokernel_lift f g w).hom ≫
+    cokernel.map _ _ (𝟙 X) (kernel.ι g) (by simp only [kernel.lift_ι, category.id_comp]) :=
+by simp only [← homology_iso_cokernel_lift_comp_ι, iso.hom_inv_id_assoc]
+
+variables {f g}
+
+lemma iso_hom_homology_ι_eq_iso₂_hom_cokernel_map :
+  h.iso.hom ≫ homology.ι f g h.w = h.iso₂.hom ≫ cokernel.map h.f' f (𝟙 X) h.ι (by simp) :=
+begin
+  dsimp only [iso, iso₂, iso₃],
+  simp only [homology_ι_eq f g h.w, iso.refl_hom, iso.trans_hom, cokernel.map_iso_hom,
+    iso.symm_hom, category.assoc, iso.inv_hom_id_assoc, iso.cancel_iso_hom_left],
+  ext,
+  simp only [cokernel.π_desc_assoc, category.assoc, cokernel.π_desc, iso₁_hom_kernel_ι_assoc],
+end
+
+lemma homology_π'_eq :
+  homology.π' f g h.w = h.iso₁.inv ≫ h.π ≫ h.iso.hom :=
+begin
+  rw ← cancel_mono (homology.ι f g h.w),
+  dsimp only [iso],
+  simp only [homology.π'_ι, category.assoc, iso.trans_hom, iso.symm_hom,
+    homology_iso_cokernel_lift_comp_ι, ← cokernel_π_iso₂_inv, iso.inv_hom_id_assoc,
+    cokernel_π_iso₃_hom_assoc, cokernel.π_desc],
+end
+
 def has_homology : has_homology f g H :=
 { w := h.w,
   π := h.iso₁.inv ≫ h.π,
   ι := h.iso₂.hom ≫ cokernel.map h.f' f (𝟙 X) h.ι (by simp),
-  π_ι := begin sorry, end,
-  ex_π := begin sorry, end,
-  ι_ex := begin sorry, end,
+  π_ι := by simp only [category.assoc, ← cokernel_π_iso₂_inv_assoc, iso.inv_hom_id_assoc,
+      cokernel.π_desc, ← h.iso₁_hom_kernel_ι],
+  ex_π := begin
+    refine preadditive.exact_of_iso_of_exact (kernel.lift g f h.w)
+      (cokernel.π (kernel.lift g f h.w)) _ _ (iso.refl _) _ _ (abelian.exact_cokernel _),
+    { refine arrow.iso_mk (iso.refl _) (h.iso₃.symm ≪≫ h.iso₂.symm) _,
+      dsimp,
+      simp only [← cancel_mono h.iso₂.hom, ← cancel_mono h.iso₃.hom,
+        category.id_comp, category.assoc, ← cokernel_π_iso₂_inv,
+        iso.inv_hom_id_assoc, cokernel_π_iso₃_hom,
+        iso.inv_hom_id, category.comp_id], },
+    { refl, },
+  end,
+  ι_ex := begin
+    refine preadditive.exact_of_iso_of_exact (homology.ι f g h.w) (cokernel.desc f g h.w)
+      _ _ _ (iso.refl _) _ (homology.has f g h.w).ι_ex,
+    { refine arrow.iso_mk h.iso.symm (iso.refl _) _,
+      dsimp,
+      simp only [← h.iso_hom_homology_ι_eq_iso₂_hom_cokernel_map,
+        iso.inv_hom_id_assoc, category.comp_id], },
+    { refl, },
+  end,
   epi_π := epi_comp _ _,
-  mono_ι := sorry, }-/
+  mono_ι := begin
+    rw ← iso_hom_homology_ι_eq_iso₂_hom_cokernel_map,
+    apply_instance,
+  end, }
+
+end has_homology
 
 end homology_iso_datum

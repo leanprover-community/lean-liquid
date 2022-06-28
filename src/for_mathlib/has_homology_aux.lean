@@ -1,5 +1,6 @@
 import for_mathlib.has_homology
 import for_mathlib.complex_extend
+import for_mathlib.homology_iso_datum
 
 noncomputable theory
 
@@ -16,25 +17,12 @@ variables (C : homological_complex 𝓐 c)
 def chain_complex_nat_has_homology_0
   (C : chain_complex 𝓐 ℕ) :
   has_homology (C.d 1 0) (0 : _ ⟶ 0) (C.homology 0) :=
-{ w := comp_zero,
-  π := sorry, --(kernel.map_iso _ _ (iso.refl _) _ _).hom ≫ homology.π' _ _ sorry,
-  ι := homology.ι _ _ _ ≫ (cokernel.map_iso _ _ (C.X_prev_iso rfl) (iso.refl _) (by sorry; simp [← iso.inv_comp_eq])).hom,
-  π_ι := sorry,
-  ex_π := sorry,
-  ι_ex := sorry,
-  epi_π := sorry,
-  mono_ι := sorry }
+(homology_iso_datum.of_homological_complex_of_next_eq_none C 1 0 rfl
+  chain_complex.next_nat_zero).has_homology
 
 def homological_complex_has_homology (i j k : ι) (hij : c.rel i j) (hjk : c.rel j k) :
   has_homology (C.d i j) (C.d j k) (C.homology j) :=
-{ w := homological_complex.d_comp_d _ _ _ _,
-  π := (kernel.map_iso _ _ (iso.refl _) (C.X_next_iso hjk).symm (by sorry; simp [iso.comp_inv_eq])).hom ≫ homology.π' _ _ _,
-  ι := homology.ι _ _ _ ≫ (cokernel.map_iso _ _ (C.X_prev_iso hij) (iso.refl _) (by sorry; simp [← iso.inv_comp_eq])).hom,
-  π_ι := by { simp only [category.assoc, homology.π'_ι_assoc, kernel.map_iso_hom, iso.refl_hom, cokernel.map_iso_hom, cokernel.π_desc, category.id_comp, kernel.lift_ι_assoc, category.comp_id] },
-  ex_π := by { rw has_homology.exact_iso_comp_snd_iff_exact_comp_iso_fst_iff, simp only [iso.symm_hom, iso.refl_hom, kernel.map_iso_hom], sorry },
-  ι_ex := sorry,
-  epi_π := epi_comp _ _,
-  mono_ι := mono_comp _ _ }
+(homology_iso_datum.of_homological_complex C i j k hij hjk).has_homology
 
 abbreviation chain_complex_nat_has_homology {𝓐 : Type*} [category 𝓐] [abelian 𝓐]
   (C : chain_complex 𝓐 ℕ) (n : ℕ) :
