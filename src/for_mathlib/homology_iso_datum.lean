@@ -439,17 +439,3 @@ def has_homology : has_homology f g H :=
   mono_ι := sorry, }-/
 
 end homology_iso_datum
-
-namespace category_theory
-
-namespace functor
-
-variables [preserves_finite_limits F] [preserves_finite_colimits F]
-
-def homology_iso' : homology (F.map f) (F.map g)
-  (by rw [← F.map_comp, w, F.map_zero]) ≅ F.obj (homology f g w) :=
-((homology_iso_datum.tautological' f g w).apply_exact_functor F).iso.symm
-
-end functor
-
-end category_theory

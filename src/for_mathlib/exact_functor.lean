@@ -2,6 +2,7 @@ import category_theory.abelian.homology
 import algebra.homology.additive
 import for_mathlib.abelian_category
 import for_mathlib.equalizers
+import for_mathlib.homology_iso_datum
 import for_mathlib.kernel_comparison
 
 namespace category_theory
@@ -164,25 +165,7 @@ variables [preserves_finite_limits F] [preserves_finite_colimits F]
 
 def homology_iso {X Y Z : A} (f : X ⟶ Y) (g : Y ⟶ Z) (w w') :
   F.obj (homology f g w) ≅ homology (F.map f) (F.map g) w' :=
-{ hom := homology.lift _ _ _ (F.map (homology.ι _ _ _) ≫
-    category_theory.inv (cokernel_comparison _ _))
-      (by rw [category.assoc, inv_cokernel_comparison_desc_map f F w, ← F.map_comp,
-          homology.condition_ι, functor.map_zero]),
-  inv := homology.desc' _ _ _ (category_theory.inv (kernel_comparison _ _) ≫
-    F.map (homology.π' _ _ _))
-      (by rw [lift_map_inv_kernel_comparison_assoc _ _ w, ← F.map_comp,
-        homology.condition_π', functor.map_zero]),
-  hom_inv_id' := sorry,
-  inv_hom_id' := begin
-    apply homology.hom_to_ext,
-    apply homology.hom_from_ext,
-    rw [← cancel_mono (cokernel_comparison f F), ← cancel_epi (kernel_comparison g F),
-      category.assoc, category.assoc, category.assoc, homology.π'_desc'_assoc,
-      category.assoc, is_iso.hom_inv_id_assoc, category.id_comp, homology.π'_ι,
-      homology.lift_ι_assoc, category.assoc, ← F.map_comp_assoc, homology.π'_ι,
-      is_iso.inv_hom_id, category.comp_id, category.assoc, π_comp_cokernel_comparison,
-      kernel_comparison_comp_ι_assoc, F.map_comp],
-  end }
+((homology_iso_datum.tautological' f g w).apply_exact_functor F).iso
 
 def homology_functor_iso {M : Type*} (c : complex_shape M) (i : M) :
   homology_functor A c i ⋙ F ≅
@@ -203,5 +186,4 @@ sorry
 end functor
 
 -- TODO: Exact iff preserves finite limits and colimits
-
 end category_theory
