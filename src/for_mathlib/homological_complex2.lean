@@ -74,30 +74,103 @@ noncomputable theory
 
 .
 
-set_option pp.universes true
+-- set_option pp.universes true
 
 def eval_functor_homology_iso (F : X ⥤ homological_complex 𝒜 c) (i) :
   F ⋙ homology_functor _ c i ≅ (eval_functor.obj F).homology i :=
 { hom := homology.lift _ _ _
   { app := λ t, homology.desc' _ _ _ (kernel.ι ((F.obj t).d_from i) ≫ cokernel.π (((eval_functor.obj.{0 v u v v} F).d_to i).app t))
       begin
+        sorry {
         rw [kernel.lift_ι_assoc],
-        sorry
+        by_cases hi : c.prev i = none,
+        { rw [d_to_eq_zero _ hi, d_to_eq_zero _ hi, zero_comp], },
+        rw [option.eq_none_iff_forall_not_mem, not_forall] at hi,
+        obtain ⟨⟨j, hji⟩, -⟩ := hi,
+        rw [d_to_eq _ hji, d_to_eq _ hji],
+        have := cokernel.condition (((eval_functor.obj F).X_prev_iso hji).hom.app t ≫ (F.obj t).d j i),
+        simp only [category.assoc, preadditive.is_iso.comp_left_eq_zero] at this ⊢,
+        rwa [nat_trans.comp_app, eval_functor.obj_d, whisker_left_app],
+        } -- !!! END OF SORRY BLOCK
       end ≫ (nat_trans.cokernel_obj_iso.{u v v} _ t).inv,
-    naturality' := begin
-      intros, dsimp, sorry
+    naturality' := by sorry; begin
+      intros x y f, dsimp only [functor.comp_map],
+      ext,
+      simp only [category.assoc],
+      erw [homology.π'_map_assoc, homology.π'_desc'_assoc, homology.π'_desc'_assoc],
+      simp only [category.assoc],
+      have h1 := @nat_trans.cokernel_obj_iso_π_inv.{_ _ v} _ _ _ _ (_root_.id _) _ _ _ ((eval_functor.obj F).d_to i) y,
+      have h2 := @nat_trans.cokernel_obj_iso_π_inv_assoc.{_ _ v} _ _ _ _ (_root_.id _) _ _ _ ((eval_functor.obj F).d_to i) x,
+      erw [h1, h2],
+      simp only [hom.sq_to_right, kernel.lift_ι_assoc, category.assoc, ← nat_trans.naturality],
+      refl,
     end }
-    sorry,
+    begin
+      sorry {
+      ext t, dsimp only [nat_trans.comp_app, nat_trans.app_zero],
+      simp only [homology.π'_desc'_assoc, category.assoc, comp_zero],
+      have h1 := @nat_trans.cokernel_obj_iso_π_inv_assoc.{_ _ v} _ _ _ _ (_root_.id _) _ _ _ ((eval_functor.obj F).d_to i) t,
+      erw h1,
+      rw [← nat_trans.comp_app, cokernel.π_desc],
+      by_cases hi : c.next i = none,
+      { rw [d_from_eq_zero _ hi, d_from_eq_zero _ hi, nat_trans.app_zero, comp_zero], },
+      rw [option.eq_none_iff_forall_not_mem, not_forall] at hi,
+      obtain ⟨⟨j, hij⟩, -⟩ := hi,
+      rw [d_from_eq _ hij, d_from_eq _ hij],
+      have := kernel.condition ((F.obj t).d i j ≫ ((F.obj t).X_next_iso hij).inv),
+      simp only [nat_trans.comp_app, ← category.assoc, preadditive.is_iso.comp_right_eq_zero] at this ⊢,
+      rwa [eval_functor.obj_d, whisker_left_app],
+      } -- !!! END OF SORRY BLOCK
+    end,
   inv := homology.desc' _ _ _
   { app := λ t, (nat_trans.kernel_obj_iso.{u v v} _ t).hom ≫
       (homology.lift _ _ _
       (kernel.ι _ ≫ cokernel.π _) begin
+        sorry {
         rw [category.assoc, cokernel.π_desc],
-        sorry
+        by_cases hi : c.next i = none,
+        { rw [d_from_eq_zero _ hi, d_from_eq_zero _ hi, comp_zero], },
+        rw [option.eq_none_iff_forall_not_mem, not_forall] at hi,
+        obtain ⟨⟨j, hij⟩, -⟩ := hi,
+        rw [d_from_eq _ hij, d_from_eq _ hij],
+        have := kernel.condition (((eval_functor.obj F).d i j ≫ ((eval_functor.obj F).X_next_iso hij).inv).app t),
+        simp only [nat_trans.comp_app, ← category.assoc, preadditive.is_iso.comp_right_eq_zero] at this ⊢,
+        rwa [eval_functor.obj_d],
+        } -- !!! END OF SORRY BLOCK
       end),
-    naturality' := sorry }
-    sorry,
-  hom_inv_id' := by { sorry; rw homology.lift_desc', },
+    naturality' := by sorry; begin
+      intros x y f, dsimp only [functor.comp_map],
+      ext,
+      simp only [category.assoc],
+      erw [homology.lift_ι, homology.map_ι, homology.lift_ι_assoc],
+      simp only [category.assoc],
+      have h1 := @nat_trans.kernel_obj_iso_hom_ι_assoc.{_ _ v} _ _ _ _ (_root_.id _) _ _ _ ((eval_functor.obj F).d_from i) x,
+      have h2 := @nat_trans.kernel_obj_iso_hom_ι_assoc.{_ _ v} _ _ _ _ (_root_.id _) _ _ _ ((eval_functor.obj F).d_from i) y,
+      erw [h1, h2],
+      simp only [arrow.w_mk_right, arrow.mk_hom, eq_self_iff_true, nat_trans.naturality_assoc,
+        hom.sq_from_left, hom.sq_to_left, cokernel.π_desc],
+      refl,
+    end }
+    begin
+      sorry {
+      ext t, dsimp only [nat_trans.comp_app, nat_trans.app_zero],
+      simp only [homology.lift_ι, category.assoc, zero_comp],
+      have h1 := @nat_trans.kernel_obj_iso_hom_ι_assoc.{_ _ v} _ _ _ _ (_root_.id _) _ _ _ ((eval_functor.obj F).d_from i) t,
+      erw h1,
+      rw [← category.assoc, ← nat_trans.comp_app, kernel.lift_ι],
+      by_cases hi : c.prev i = none,
+      { rw [d_to_eq_zero _ hi, d_to_eq_zero _ hi, nat_trans.app_zero, zero_comp], },
+      rw [option.eq_none_iff_forall_not_mem, not_forall] at hi,
+      obtain ⟨⟨j, hji⟩, -⟩ := hi,
+      rw [d_to_eq _ hji, d_to_eq _ hji],
+      have := cokernel.condition (((F.obj t).X_prev_iso hji).hom ≫ (F.obj t).d j i),
+      simp only [nat_trans.comp_app, category.assoc, preadditive.is_iso.comp_left_eq_zero] at this ⊢,
+      rwa [eval_functor.obj_d, whisker_left_app],
+      } -- !!! END OF SORRY BLOCK
+    end,
+  hom_inv_id' := begin
+    sorry
+  end,
   inv_hom_id' := sorry }
 
 end homological_complex
