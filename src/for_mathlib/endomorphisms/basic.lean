@@ -201,6 +201,9 @@ instance preserves_limits_of_shape [has_limits_of_shape J C] :
 
 instance preserves_limits [has_limits C] : preserves_limits (endomorphisms.forget C) := ⟨⟩
 
+instance [has_finite_limits C] : preserves_finite_limits (endomorphisms.forget C) :=
+by { constructor, introsI J hJ1 hJ2, apply_instance }
+
 end limits
 
 section colimits
@@ -320,6 +323,9 @@ instance preserves_colimits_of_shape [has_colimits_of_shape J C] :
   preserves_colimits_of_shape J (endomorphisms.forget C) := ⟨⟩
 
 instance preserves_colimits [has_colimits C] : preserves_colimits (endomorphisms.forget C) := ⟨⟩
+
+instance [has_finite_colimits C] : preserves_finite_colimits (endomorphisms.forget C) :=
+by { constructor, introsI J hJ1 hJ2, apply_instance }
 
 end colimits
 

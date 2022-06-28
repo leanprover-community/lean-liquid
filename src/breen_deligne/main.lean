@@ -440,18 +440,6 @@ variables [AB4 (endomorphisms 𝓐)]
 --   ((BD.eval F.map_endomorphisms).obj ⟨A,f⟩).val.as.homology 0 ≅ ⟨A,f⟩ :=
 -- by admit
 
--- move this
-instance [has_finite_limits 𝓐] : preserves_finite_limits (endomorphisms.forget 𝓐) :=
-begin
-  constructor, introsI J hJ1 hJ2, apply_instance
-end
-
--- move this
-instance [has_finite_colimits 𝓐] : preserves_finite_colimits (endomorphisms.forget 𝓐) :=
-begin
-  constructor, introsI J hJ1 hJ2, apply_instance
-end
-
 lemma main_lemma [has_finite_limits 𝓐] [has_finite_colimits 𝓐]
   (A : 𝓐) (B : 𝓐) (f : A ⟶ A) (g : B ⟶ B)
   (hH0 : ((data.eval_functor F).obj BD.data) ⋙ homology_functor _ _ 0 ≅ 𝟭 _)
