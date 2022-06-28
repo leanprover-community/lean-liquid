@@ -3,7 +3,7 @@ import breen_deligne.eval
 
 noncomputable theory
 
-open category_theory
+open category_theory category_theory.preadditive
 
 namespace breen_deligne
 namespace package
@@ -25,6 +25,25 @@ begin
   rw [← functor.map_add],
   exact homological_complex.embed_homotopy _ _ (eval_functor_homotopy F BD A) _,
 end
+
+lemma eval_functor_obj_X (X : 𝒜) (n : ℕ) :
+  (((data.eval_functor F).obj BD.data).obj X).X n = F.obj ((Pow (BD.data.X n)).obj X) := rfl
+
+lemma eval_functor_obj_d (X : 𝒜) (m n : ℕ) :
+  (((data.eval_functor F).obj BD.data).obj X).d m n =
+    (universal_map.eval_Pow F (BD.data.d m n)).app X := rfl
+
+lemma eval'_obj_X (X : 𝒜) (n : ℕ) :
+  ((BD.eval' F).obj X).X (-n:ℤ) = F.obj ((Pow (BD.data.X n)).obj X) :=
+by { cases n; apply eval_functor_obj_X }
+
+lemma eval'_obj_d (X : 𝒜) (m n : ℕ) :
+  ((BD.eval' F).obj X).d (-(m+1:ℕ):ℤ) (-(n+1:ℕ):ℤ) =
+    (universal_map.eval_Pow F (BD.data.d (m+1) (n+1))).app X := rfl
+
+lemma eval'_obj_d_0 (X : 𝒜) (n : ℕ) :
+  ((BD.eval' F).obj X).d (-(1:ℕ)+1:ℤ) (-(n+1:ℕ):ℤ) =
+    (universal_map.eval_Pow F (BD.data.d 0 (n+1))).app X := rfl
 
 end package
 end breen_deligne
