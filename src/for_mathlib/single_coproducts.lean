@@ -211,8 +211,22 @@ preserves_coproducts_aux _
   refine (e₃.symm ≪≫ e₂.symm).op ≪≫ e₄,
 end)
 begin
-  intros X a, dsimp only [iso.trans_hom, iso.symm_hom, iso.op_hom, Ext'],
-  sorry
+  intros X a, dsimp only [iso.trans_hom, iso.symm_hom, iso.op_hom, Ext',
+    op_comp, ← iso.op_inv],
+  simp only [← category.assoc],
+  rw [← iso.eq_comp_inv, iso.comp_inv_eq],
+  dsimp only [op_product_iso],
+  erw colimit.ι_desc,
+  dsimp,
+  simp_rw ← op_comp,
+  rw ι_Ext_coproduct_iso',
+  rw [← nat_trans.comp_app, ← functor.map_comp, ← op_comp],
+  congr' 4,
+  dsimp [single_sigma_iso], simp only [category.assoc],
+  dsimp [preserves_colimit_iso, is_colimit.cocone_point_unique_up_to_iso],
+  erw (preserves_colimit.preserves (colimit.is_colimit (discrete.functor X))).fac_assoc,
+  erw colimit.ι_desc_assoc,
+  dsimp, simpa,
 end
 
 end bounded_homotopy_category

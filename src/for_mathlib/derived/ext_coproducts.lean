@@ -155,6 +155,42 @@ Ext_iso i _ _ _ (uniform_π X) ≪≫
 category_theory.preadditive_yoneda_coproduct_iso (replace_uniformly X) (Y⟦i⟧) ≪≫
 category_theory.pi_iso _ _ (λ a, (Ext_iso i _ _ _ (π_uniformly X a)).symm)
 
+lemma ι_Ext_coprodut_iso
+  [AB4 A]
+  {α : Type v}
+  (X : α → bounded_homotopy_category A)
+  [uniformly_bounded X]
+  (i : ℤ) (Y) (j) :
+  (Ext_coproduct_iso X i Y).inv ≫
+  ((Ext i).map (sigma.ι X j : X j ⟶ ∐ X).op).app Y =
+  pi.π _ _ :=
+begin
+  rw iso.inv_comp_eq,
+  dsimp [Ext_coproduct_iso, pi_iso],
+  simp only [category.assoc, limit.lift_π, fan.mk_π_app],
+  simp only [← category.assoc], rw iso.eq_comp_inv,
+  dsimp [Ext, Ext_iso], --ext t, simp only [comp_apply],
+  dsimp [preadditive_yoneda_coproduct_iso, preadditive_yoneda_coproduct_to_product],
+  simp only [category.assoc, limit.lift_π],
+  ext t, simp only [comp_apply], dsimp,
+  simp only [← category.assoc], congr' 1,
+  apply lift_ext (∐ X).π, swap, apply_instance,
+  dsimp [uniform_π],
+  simp,
+end
+
+lemma ι_Ext_coproduct_iso'
+  [AB4 A]
+  {α : Type v}
+  (X : α → bounded_homotopy_category A)
+  [uniformly_bounded X]
+  (i : ℤ) (Y) (j) :
+  (Ext_coproduct_iso X i Y).hom ≫  pi.π _ _ =
+  ((Ext i).map (sigma.ι X j : X j ⟶ ∐ X).op).app Y :=
+begin
+  rw [← iso.eq_inv_comp, ι_Ext_coprodut_iso],
+end
+
 lemma Ext_coproduct_iso_naturality
   [AB4 A]
   {α : Type v}
