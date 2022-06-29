@@ -31,6 +31,7 @@ local attribute [simp, reassoc] fac₁ fac₂ fac₃
 variables (φ : S₁ ⟶ S₂) {η : H₁ ⟶ H₂}
 variable (μ : homology_map_datum φ η)
 
+@[simps]
 def tautological' (zero₁ : S₁.zero) (zero₂ : S₂.zero) :
   homology_map_datum φ
     (homology.map zero₁ zero₂ (arrow.hom_mk φ.comm₁₂.symm) (arrow.hom_mk φ.comm₂₃.symm) rfl) :=
@@ -52,6 +53,7 @@ variable {φ}
 
 include μ
 
+@[simps]
 def map_exact_functor (F : C ⥤ D) [F.additive]
   [preserves_finite_limits F] [preserves_finite_colimits F] :
   homology_map_datum (F.map_composable_morphisms.map φ) (F.map η) :=

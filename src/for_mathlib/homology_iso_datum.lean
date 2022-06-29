@@ -349,6 +349,7 @@ end change
 
 variables (f g)
 
+@[simp]
 lemma tautological'_iso : (tautological' f g w).iso = iso.refl _ :=
 begin
   ext1,
