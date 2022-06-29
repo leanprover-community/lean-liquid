@@ -314,6 +314,7 @@ apply_nolint extended_le_span unused_arguments
 apply_nolint category_theory.grothendieck_topology.eq_zero_of_exists unused_arguments
 
 -- for_mathlib/single_coproducts.lean
+apply_nolint bounded_homotopy_category.preserves_coproducts_single unused_arguments
 apply_nolint bounded_homotopy_category.uniformly_bounded_single unused_arguments
 
 -- for_mathlib/snake_lemma.lean
