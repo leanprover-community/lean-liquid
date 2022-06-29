@@ -177,6 +177,7 @@ lemma Ext_is_zero_iff (X Y : bounded_homotopy_category (endomorphisms 𝓐)) :
   (∀ i, is_iso $
     ((Ext i).map (quiver.hom.op X.e)).app Y.unEnd - ((Ext i).obj (op X.unEnd)).map Y.e) :=
 begin
+  -- update: this proof plan might well not work.
   -- this might be refactored out
   obtain ⟨P, _inst, f, h1, h2⟩ := exists_K_projective_replacement X.unEnd,
   resetI,
