@@ -189,19 +189,43 @@ instance preserves_filtered_colimits_tensor_flip_eval' (i : ℤ) :
     ((BD.eval' (forget AddCommGroup.{u+1} ⋙ AddCommGroup.free)).obj
     (AddCommGroup.free.obj punit)) i)) := sorry
 
+set_option pp.universes true
+
+instance additive_tensor_flip (A : AddCommGroup.{u}) : functor.additive
+  (AddCommGroup.tensor_functor.flip.obj A) :=
+{ map_add' := λ X Y f g, begin
+    dsimp [AddCommGroup.map_tensor], ext x,
+    dsimp only [linear_map.to_add_monoid_hom_coe, add_monoid_hom.add_apply],
+    rw [← linear_map.add_apply],
+    congr' 1, apply tensor_product.ext', intros x y,
+    apply tensor_product.add_tmul,
+  end }
+
 instance additive_tensor_flip_eval' (i : ℤ) : functor.additive
   (AddCommGroup.tensor_functor.flip.obj (homological_complex.homology
     ((BD.eval' (forget AddCommGroup.{u+1} ⋙ AddCommGroup.free)).obj
-    (AddCommGroup.free.obj punit)) i)) := sorry
+    (AddCommGroup.free.obj punit)) i)) :=
+Condensed.additive_tensor_flip _
 
 instance preserves_filtered_colimits_eval'_forget_free (i : ℤ) :
   preserves_filtered_colimits
   (BD.eval' (forget AddCommGroup.{u+1} ⋙ AddCommGroup.free) ⋙
     homology_functor AddCommGroup.{u+1} (complex_shape.up ℤ) i) := sorry
 
+instance _root_.bounded_homotopy_category.forget_additive (𝓐 : Type*) [category 𝓐] [abelian 𝓐] :
+  (bounded_homotopy_category.forget 𝓐).additive :=
+{ map_add' := λ X Y f g, rfl }
+
 instance additive_eval'_forget_free (i : ℤ) : functor.additive
   (BD.eval' (forget AddCommGroup.{u+1} ⋙ AddCommGroup.free) ⋙
-    homology_functor AddCommGroup.{u+1} (complex_shape.up ℤ) i) := sorry
+    homology_functor AddCommGroup.{u+1} (complex_shape.up ℤ) i) :=
+begin
+  show functor.additive (
+    (BD.eval (forget AddCommGroup.{u+1} ⋙ AddCommGroup.free) ⋙ bounded_homotopy_category.forget _) ⋙
+      homotopy_category.homology_functor _ _ i),
+  exact functor.comp.additive (package.eval BD (forget AddCommGroup ⋙ AddCommGroup.free) ⋙ forget AddCommGroup)
+  (homotopy_category.homology_functor AddCommGroup (complex_shape.up ℤ) i)
+end
 
 instance (i : ℤ) : is_iso ((plain_eval_comparison BD i).app
   (AddCommGroup.free.obj (punit : Type (u+1)))) := sorry
@@ -240,11 +264,7 @@ def homology_bd_eval (M : Condensed.{u} Ab.{u+1})
       (AddCommGroup.free.obj punit)).val.as.homology i) :=
 (as_iso (tensor_to_homology BD M i)).symm
 
---instance : has_coproducts (endomorphisms (Condensed.{u} Ab.{u+1})) :=
---infer_instance
-
-instance : AB4 (endomorphisms (Condensed.{u} Ab.{u+1})) :=
-sorry -- We need that `endomorphisms.forget` "creates" exactness.
+instance : AB4.{u+1 u+2} (endomorphisms (Condensed.{u} Ab.{u+1})) := sorry
 
 def eval_freeCond_homology_zero :
   ((data.eval_functor freeCond').obj breen_deligne.eg.data) ⋙ homology_functor _ _ 0 ≅ 𝟭 _ :=
