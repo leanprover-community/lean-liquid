@@ -8,6 +8,8 @@ namespace category_theory.limits
 variables {C D : Type*} [category.{v} C] [category.{v} D]
   [has_zero_morphisms C] [has_zero_morphisms D]
 
+/- These two lemmas are no longer used. -/
+
 @[simp, reassoc]
 lemma lift_map_inv_kernel_comparison {X Y Z : C} (f : Y ⟶ Z) [has_kernel f] (G : C ⥤ D)
   [G.preserves_zero_morphisms] [has_kernel (G.map f)] [is_iso (kernel_comparison f G)]

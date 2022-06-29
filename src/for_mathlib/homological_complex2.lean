@@ -4,6 +4,7 @@ import category_theory.preadditive.functor_category
 import for_mathlib.abelian_sheaves.functor_category
 import for_mathlib.homology_lift_desc
 import for_mathlib.has_homology
+import for_mathlib.exact_functor
 
 open category_theory category_theory.limits
 
@@ -77,7 +78,7 @@ noncomputable theory
 
 attribute [reassoc] homology.lift_desc'
 
-def eval_functor_homology_iso (F : X ⥤ homological_complex 𝒜 c) (i) :
+def eval_functor_homology_iso_old_version (F : X ⥤ homological_complex 𝒜 c) (i) :
   F ⋙ homology_functor _ c i ≅ (eval_functor.obj F).homology i :=
 { hom := homology.lift _ _ _
   { app := λ t, homology.desc' _ _ _ (kernel.ι ((F.obj t).d_from i) ≫ cokernel.π (((eval_functor.obj.{0 v u v v} F).d_to i).app t))
@@ -224,5 +225,23 @@ def eval_functor_homology_iso (F : X ⥤ homological_complex 𝒜 c) (i) :
       simp only [nat_trans.comp_app, category.assoc, preadditive.is_iso.comp_left_eq_zero] at this ⊢,
       rwa [eval_functor.obj_d] at this, },
   end }
+
+instance (x : X) : preserves_finite_limits ((evaluation X 𝒜).obj x) :=
+⟨by { intro J, introI, introI, apply limits.evaluation_preserves_limits_of_shape, }⟩
+
+instance (x : X) : preserves_finite_colimits ((evaluation X 𝒜).obj x) :=
+⟨by { intro J, introI, introI, apply limits.evaluation_preserves_colimits_of_shape, }⟩
+
+def functor_eval_homology_iso (G : homological_complex (X ⥤ 𝒜) c) (i) :
+  G.homology i ≅ functor_eval.flip.obj G ⋙ homology_functor _ c i :=
+nat_iso.of_components (λ x, (functor.homology_functor_iso ((evaluation X 𝒜).obj x) c i).app G)
+begin
+  sorry,
+end
+
+def eval_functor_homology_iso (F : X ⥤ homological_complex 𝒜 c) (i) :
+  F ⋙ homology_functor _ c i ≅ (eval_functor.obj F).homology i :=
+iso_whisker_right (eval_functor_equiv.unit_iso.app F) (homology_functor 𝒜 c i)
+  ≪≫ (functor_eval_homology_iso ((@eval_functor _ X 𝒜 _ _ _ c).obj F) i).symm
 
 end homological_complex
