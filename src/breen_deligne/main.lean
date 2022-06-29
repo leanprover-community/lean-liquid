@@ -448,21 +448,6 @@ def eval'_homology :
   (data.eval_functor F).obj BD.data ⋙ homology_functor 𝓐 (complex_shape.down ℕ) 0 :=
 sorry
 
-def hH0_endo₄ :
-  (BD.eval' F.map_endomorphisms ⋙
-     (endomorphisms.forget 𝓐).map_homological_complex (complex_shape.up ℤ) ⋙
-       homology_functor 𝓐 (complex_shape.up ℤ) 0) ≅
-  (endomorphisms.forget _ ⋙ (data.eval_functor F).obj BD.data ⋙ homology_functor 𝓐 (complex_shape.down ℕ) 0) :=
-sorry
-
-def hH0_endo₃ :
-  (BD.eval' F.map_endomorphisms ⋙ (endomorphisms.forget 𝓐).map_homological_complex (complex_shape.up ℤ) ⋙
-    homology_functor 𝓐 (complex_shape.up ℤ) 0).obj X ≅ X.X :=
-(hH0_endo₄ _ _).app _ ≪≫ hH0.app _
--- (iso_whisker_left (BD.eval' F.map_endomorphisms)
---         ((endomorphisms.forget 𝓐).homology_functor_iso (complex_shape.up ℤ) 0)).app X ≪≫
--- (hH0_endo₃ _ _ hH0 X)
-
 def hH0_endo₁_a :
   BD.eval' F.map_endomorphisms ⋙ homology_functor _ _ 0 ⋙ endomorphisms.forget 𝓐 ≅
   (data.eval_functor F.map_endomorphisms).obj BD.data ⋙ homology_functor _ _ 0 ⋙ endomorphisms.forget 𝓐 :=
@@ -477,9 +462,7 @@ def hH0_endo₁_b :
 def hH0_endo₁_c :
   (data.eval_functor F.map_endomorphisms).obj BD.data ⋙ (endomorphisms.forget 𝓐).map_homological_complex _ ⋙ homology_functor _ _ 0 ≅
   endomorphisms.forget _ ⋙ (data.eval_functor F).obj BD.data ⋙ homology_functor _ _ 0 :=
-let e := (forget_eval BD F).symm,
-    φ := ((whiskering_right _ _ _).obj (homology_functor 𝓐 (complex_shape.down ℕ) 0)).map_iso e
-in sorry
+(((whiskering_right _ _ _).obj (homology_functor 𝓐 (complex_shape.down ℕ) 0)).map_iso (forget_eval BD F).symm : _)
 
 def hH0_endo₁ :
   BD.eval' F.map_endomorphisms ⋙ homology_functor (endomorphisms 𝓐) _ 0 ⋙ endomorphisms.forget 𝓐 ≅
@@ -495,6 +478,8 @@ def hH0_endo :
 endomorphisms.mk_iso (hH0_endo₂ _ _ hH0 X)
 begin
   dsimp only [hH0_endo₂, iso.trans_hom, iso_whisker_left_hom, iso.app_hom, whisker_left_app],
+  have := hH0.hom.naturality X.e, simp only [functor.id_map] at this,
+  simp only [category.assoc], erw [← this], simp only [← category.assoc], refine congr_arg2 _ _ rfl,
   -- let e := ((endomorphisms.forget 𝓐).homology_functor_iso (complex_shape.up ℤ) 0).hom,
   -- have := e.naturality,
   sorry
