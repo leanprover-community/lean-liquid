@@ -165,21 +165,27 @@ end
 variables [preserves_finite_limits F] [preserves_finite_colimits F]
 
 @[simps]
+def homology_iso' (S : composable_morphisms A) (w : S.zero) :
+  F.obj (w.homology) ≅ (w.map_functor F).homology :=
+((homology_iso_datum.tautological' S.f S.g w).apply_exact_functor F).iso
+
+@[simps]
 def homology_iso {X Y Z : A} (f : X ⟶ Y) (g : Y ⟶ Z) (w w') :
   F.obj (homology f g w) ≅ homology (F.map f) (F.map g) w' :=
-((homology_iso_datum.tautological' f g w).apply_exact_functor F).iso
+F.homology_iso' (composable_morphisms.mk f g) w
 
 lemma homology_iso_naturality {S₁ S₂ : composable_morphisms A} (φ : S₁ ⟶ S₂)
   (w₁ : S₁.zero) (w₂ : S₂.zero) :
-    homology.map (w₁.map_functor F) (w₂.map_functor F)
-      (arrow.hom_mk (F.map_composable_morphisms.map φ).comm₁₂.symm)
-      (arrow.hom_mk (F.map_composable_morphisms.map φ).comm₂₃.symm) rfl =
-  (F.homology_iso S₁.f S₁.g w₁ (w₁.map_functor F)).inv ≫
-  F.map (homology.map w₁ w₂ (arrow.hom_mk φ.comm₁₂.symm) (arrow.hom_mk φ.comm₂₃.symm) rfl) ≫
-    (F.homology_iso S₂.f S₂.g w₂ (w₂.map_functor F)).hom :=
-by simpa only [homology_map_datum.homology_map, homology_iso_datum.tautological'_iso,
-  iso.refl_inv, iso.refl_hom] using
-  ((homology_map_datum.tautological' φ w₁ w₂).map_exact_functor F).homology_map_eq
+    F.map (homology.map_short_complex φ w₁ w₂) ≫ (F.homology_iso' S₂ w₂).hom =
+    (F.homology_iso' S₁ w₁).hom ≫
+      homology.map_short_complex (F.map_composable_morphisms.map φ) (w₁.map_functor F) (w₂.map_functor F) :=
+begin
+  erw [((homology_map_datum.tautological' φ w₁ w₂).map_exact_functor F).homology_map_eq,
+    (homology_map_datum.tautological' φ w₁ w₂).homology_map_eq, iso.hom_inv_id_assoc],
+  congr,
+  simp only [homology_iso_datum.tautological'_iso, iso.refl_inv, iso.refl_hom, category.comp_id],
+  erw category.id_comp,
+end
 
 def homology_functor_iso {M : Type*} (c : complex_shape M) (i : M) :
   homology_functor A c i ⋙ F ≅

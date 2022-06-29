@@ -1,4 +1,5 @@
 import category_theory.limits.preserves.shapes.zero
+import category_theory.abelian.homology
 
 open category_theory category_theory.category category_theory.limits
 
@@ -7,6 +8,9 @@ variables {C D : Type*} [category C] [category D]
 namespace category_theory
 
 variable (C)
+
+/- TODO : define the subcategory of complexes with 3 objects, and consider
+functor to this category, etc. -/
 
 structure composable_morphisms := {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z)
 
@@ -61,6 +65,13 @@ lemma comp_eq {S₁ S₂ S₃ : composable_morphisms C} (φ : S₁ ⟶ S₂) (ψ
   φ ≫ ψ = hom.comp φ ψ := rfl
 
 def zero (S : composable_morphisms C) [has_zero_morphisms C] : Prop := S.f ≫ S.g = 0
+
+namespace zero
+
+noncomputable
+def homology {S : composable_morphisms C} [abelian C] (hS : S.zero) : C := homology S.f S.g hS
+
+end zero
 
 end composable_morphisms
 
