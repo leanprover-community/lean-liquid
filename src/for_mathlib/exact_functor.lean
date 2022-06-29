@@ -164,15 +164,19 @@ end
 
 variables [preserves_finite_limits F] [preserves_finite_colimits F]
 
+
+
 @[simps]
-def homology_iso' (S : composable_morphisms A) (w : S.zero) :
-  F.obj (w.homology) ≅ (w.map_functor F).homology :=
-((homology_iso_datum.tautological' S.f S.g w).apply_exact_functor F).iso
+def homology_iso' (S : short_complex A) :
+  F.obj (S.homology) ≅ (F.map_short_complex.obj S).homology :=
+((homology_iso_datum.tautological' S.1.f S.1.g S.2).apply_exact_functor F).iso
 
 @[simps]
 def homology_iso {X Y Z : A} (f : X ⟶ Y) (g : Y ⟶ Z) (w w') :
   F.obj (homology f g w) ≅ homology (F.map f) (F.map g) w' :=
-F.homology_iso' (composable_morphisms.mk f g) w
+F.homology_iso' (short_complex.mk f g w)
+
+/- TODO :  make homology_iso' a nat_iso to get some compatibilities
 
 lemma homology_iso_naturality {S₁ S₂ : composable_morphisms A} (φ : S₁ ⟶ S₂)
   (w₁ : S₁.zero) (w₂ : S₂.zero) :
@@ -185,7 +189,7 @@ begin
   congr,
   simp only [homology_iso_datum.tautological'_iso, iso.refl_inv, iso.refl_hom, category.comp_id],
   erw category.id_comp,
-end
+end-/
 
 def homology_functor_iso {M : Type*} (c : complex_shape M) (i : M) :
   homology_functor A c i ⋙ F ≅
