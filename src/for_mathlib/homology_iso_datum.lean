@@ -411,19 +411,24 @@ end
 
 open_locale zero_object
 
-def of_homological_complex_of_next_eq_none (X : homological_complex A c) (i j : M)
-  (hij : c.rel i j) (hj : c.next j = none) :
-  homology_iso_datum (X.d i j) (0 : _ ⟶ 0) (X.homology j) :=
+def of_homological_complex_of_next_eq_none' (X : homological_complex A c) (i j : M)
+  (hij : c.rel i j) (hj : c.next j = none) {Z : A} (hZ : is_zero Z) (f : _ ⟶ Z) (hf : f = 0) :
+  homology_iso_datum (X.d i j) f (X.homology j) :=
 begin
   refine (homology_iso_datum.tautological' (X.d_to j) (X.d_from j)
     (X.d_to_comp_d_from j)).map_iso _ _ _ _ _,
   { refine arrow.iso_mk (X.X_prev_iso hij) (iso.refl _) _,
     dsimp,
     simp only [X.d_to_eq hij, category.comp_id], },
-  { refine arrow.iso_mk (iso.refl _) (X.X_next_iso_zero hj) _,
-    simp only [arrow.mk_hom, comp_zero, homological_complex.d_from_comp_X_next_iso_zero], },
+  { refine arrow.iso_mk (iso.refl _) (X.X_next_iso_zero hj ≪≫ _) (hZ.eq_of_tgt _ _),
+    refine is_zero.iso (is_zero_zero _) hZ, },
   { refl, },
 end
+
+def of_homological_complex_of_next_eq_none (X : homological_complex A c) (i j : M)
+  (hij : c.rel i j) (hj : c.next j = none) :
+  homology_iso_datum (X.d i j) (0 : _ ⟶ 0) (X.homology j) :=
+of_homological_complex_of_next_eq_none' _ _ _ hij hj (is_zero_zero _) 0 rfl
 
 end homological_complex
 

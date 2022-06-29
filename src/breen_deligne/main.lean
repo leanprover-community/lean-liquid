@@ -432,13 +432,111 @@ begin
       { rintro k - hk, rw [biproduct.ι_π_ne _ hk, comp_zero], } }, }
 end
 
+section
+
+variables [has_finite_limits 𝓐] [has_finite_colimits 𝓐]
+variables (hH0 : ((data.eval_functor F).obj BD.data) ⋙ homology_functor _ _ 0 ≅ 𝟭 _)
+variables (X : endomorphisms 𝓐)
+
+def forget_eval :
+  endomorphisms.forget _ ⋙ (data.eval_functor F).obj BD.data ≅
+  (data.eval_functor F.map_endomorphisms).obj BD.data ⋙ (endomorphisms.forget 𝓐).map_homological_complex _ :=
+sorry
+
+def eval'_homology :
+  BD.eval' F ⋙ homology_functor 𝓐 (complex_shape.up ℤ) 0 ≅
+  (data.eval_functor F).obj BD.data ⋙ homology_functor 𝓐 (complex_shape.down ℕ) 0 :=
+sorry
+
+def hH0_endo₄ :
+  (BD.eval' F.map_endomorphisms ⋙
+     (endomorphisms.forget 𝓐).map_homological_complex (complex_shape.up ℤ) ⋙
+       homology_functor 𝓐 (complex_shape.up ℤ) 0) ≅
+  (endomorphisms.forget _ ⋙ (data.eval_functor F).obj BD.data ⋙ homology_functor 𝓐 (complex_shape.down ℕ) 0) :=
+sorry
+
+def hH0_endo₃ :
+  (BD.eval' F.map_endomorphisms ⋙ (endomorphisms.forget 𝓐).map_homological_complex (complex_shape.up ℤ) ⋙
+    homology_functor 𝓐 (complex_shape.up ℤ) 0).obj X ≅ X.X :=
+(hH0_endo₄ _ _).app _ ≪≫ hH0.app _
+-- (iso_whisker_left (BD.eval' F.map_endomorphisms)
+--         ((endomorphisms.forget 𝓐).homology_functor_iso (complex_shape.up ℤ) 0)).app X ≪≫
+-- (hH0_endo₃ _ _ hH0 X)
+
+def hH0_endo₁_a :
+  BD.eval' F.map_endomorphisms ⋙ homology_functor _ _ 0 ⋙ endomorphisms.forget 𝓐 ≅
+  (data.eval_functor F.map_endomorphisms).obj BD.data ⋙ homology_functor _ _ 0 ⋙ endomorphisms.forget 𝓐 :=
+((whiskering_right _ _ _).obj (endomorphisms.forget 𝓐)).map_iso (eval'_homology _ _)
+
+def hH0_endo₁_b :
+  (data.eval_functor F.map_endomorphisms).obj BD.data ⋙ homology_functor _ _ 0 ⋙ endomorphisms.forget 𝓐 ≅
+  (data.eval_functor F.map_endomorphisms).obj BD.data ⋙ (endomorphisms.forget 𝓐).map_homological_complex _ ⋙ homology_functor _ _ 0 :=
+((whiskering_left _ _ _).obj ((data.eval_functor _).obj BD.data)).map_iso
+  ((endomorphisms.forget 𝓐).homology_functor_iso _ 0)
+
+def hH0_endo₁_c :
+  (data.eval_functor F.map_endomorphisms).obj BD.data ⋙ (endomorphisms.forget 𝓐).map_homological_complex _ ⋙ homology_functor _ _ 0 ≅
+  endomorphisms.forget _ ⋙ (data.eval_functor F).obj BD.data ⋙ homology_functor _ _ 0 :=
+let e := (forget_eval BD F).symm,
+    φ := ((whiskering_right _ _ _).obj (homology_functor 𝓐 (complex_shape.down ℕ) 0)).map_iso e
+in sorry
+
+def hH0_endo₁ :
+  BD.eval' F.map_endomorphisms ⋙ homology_functor (endomorphisms 𝓐) _ 0 ⋙ endomorphisms.forget 𝓐 ≅
+  endomorphisms.forget _ ⋙ (data.eval_functor F).obj BD.data ⋙ homology_functor 𝓐 _ 0 :=
+hH0_endo₁_a _ _ ≪≫ hH0_endo₁_b _ _ ≪≫ hH0_endo₁_c _ _
+
+def hH0_endo₂ :
+  ((BD.eval' F.map_endomorphisms ⋙ homology_functor (endomorphisms 𝓐) (complex_shape.up ℤ) 0).obj X).X ≅ X.X :=
+(hH0_endo₁ _ _).app _ ≪≫ hH0.app _
+
+def hH0_endo :
+  (BD.eval' F.map_endomorphisms ⋙ homology_functor (endomorphisms 𝓐) (complex_shape.up ℤ) 0).obj X ≅ X :=
+endomorphisms.mk_iso (hH0_endo₂ _ _ hH0 X)
+begin
+  dsimp only [hH0_endo₂, iso.trans_hom, iso_whisker_left_hom, iso.app_hom, whisker_left_app],
+  -- let e := ((endomorphisms.forget 𝓐).homology_functor_iso (complex_shape.up ℤ) 0).hom,
+  -- have := e.naturality,
+  sorry
+end
+
+/-
+
+  { refine endomorphisms.mk_iso _ _,
+    { refine _ ≪≫ hH0.app A,
+      let e := iso_whisker_left (BD.eval' F.map_endomorphisms)
+        ((endomorphisms.forget 𝓐).homology_functor_iso (complex_shape.up ℤ) 0),
+      refine (e.app ⟨A,f⟩) ≪≫ _, clear e,
+      sorry
+      -- refine (endomorphisms.forget 𝓐).map_iso (homology_iso' _ (-1) 0 1 rfl rfl) ≪≫ _,
+      -- refine (endomorphisms.forget 𝓐).homology_iso _ _ _ _ ≪≫ _,
+      -- { rw [← functor.map_comp, homological_complex.d_comp_d, functor.map_zero], },
+      -- refine (homology_iso_datum.iso _).symm,
+      -- refine (homology_iso_datum.tautological' _ _ _).map_iso _ _ _ _ _,
+      -- { refine arrow.iso_mk _ _ _,
+      --   { refine homological_complex.X_prev_iso _ rfl ≪≫ F.map_iso _,
+      --     exact (Pow_X ⟨A,f⟩ (BD.data.X 1)).symm, },
+      --   { refine F.map_iso (Pow_X ⟨A,f⟩ _).symm, },
+      --   { sorry } },
+      -- { refine arrow.iso_mk _ _ _,
+      --   { refine F.map_iso (Pow_X ⟨A,f⟩ _).symm, },
+      --   { apply is_zero.iso,
+      --     { apply homological_complex.X_next_is_zero, apply chain_complex.next_nat_zero, },
+      --     { dsimp, apply endomorphisms.is_zero_X, apply is_zero_zero } },
+      --   { sorry } },
+      -- { refl },
+       },
+    { dsimp only [iso.trans_hom, iso.app_hom],
+      have := hH0.hom.naturality f, simp only [functor.id_map] at this,
+      simp only [category.assoc, ← this], simp only [← category.assoc], refine congr_arg2 _ _ rfl,
+      sorry } },
+
+-/
+
+end
+
 variables [has_coproducts (endomorphisms 𝓐)]
 variables [AB4 (endomorphisms 𝓐)]
-
--- def eval_map_endomorphisms_homology (A : 𝓐) (f : A ⟶ A)
---   (hH0 : ((data.eval_functor F).obj BD.data) ⋙ homology_functor _ _ 0 ≅ 𝟭 _) :
---   ((BD.eval F.map_endomorphisms).obj ⟨A,f⟩).val.as.homology 0 ≅ ⟨A,f⟩ :=
--- by admit
 
 lemma main_lemma [has_finite_limits 𝓐] [has_finite_colimits 𝓐]
   (A : 𝓐) (B : 𝓐) (f : A ⟶ A) (g : B ⟶ B)
@@ -457,17 +555,7 @@ begin
   rw [← endomorphisms.Ext'_is_zero_iff' A B f g],
   erw [← endomorphisms.Ext_is_zero_iff'],
   refine (main_lemma.is_zero BD F.map_endomorphisms _ _ _ T hT0 @hT hTA).trans _,
-  { refine endomorphisms.mk_iso _ _,
-    { refine _ ≪≫ hH0.app A,
-      refine (endomorphisms.forget 𝓐).map_iso (homology_iso' _ (-1) 0 1 rfl rfl) ≪≫ _,
-      refine (endomorphisms.forget 𝓐).homology_iso _ _ _ _ ≪≫ _,
-      { rw [← functor.map_comp, homological_complex.d_comp_d, functor.map_zero], },
-      refine has_homology.iso _ (chain_complex_nat_has_homology_0 _),
-      -- ugh
-      dsimp only [package.eval, chain_complex.to_bounded_homotopy_category, functor.comp_obj,
-        homotopy_category.quotient_obj_as],
-      sorry },
-    { sorry } },
+  { exact hH0_endo _ _ hH0 _ },
   apply forall_congr, intro i,
   apply iso.is_zero_iff,
   refine functor.map_iso _ _ ≪≫ iso.app (functor.map_iso _ _) _,
