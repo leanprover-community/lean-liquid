@@ -189,7 +189,9 @@ instance preserves_filtered_colimits_tensor_flip_eval' (i : ℤ) :
     ((BD.eval' (forget AddCommGroup.{u+1} ⋙ AddCommGroup.free)).obj
     (AddCommGroup.free.obj punit)) i)) := sorry
 
-instance additive_tensor_flip (A : AddCommGroup) : functor.additive
+set_option pp.universes true
+
+instance additive_tensor_flip (A : AddCommGroup.{u}) : functor.additive
   (AddCommGroup.tensor_functor.flip.obj A) :=
 { map_add' := λ X Y f g, begin
     dsimp [AddCommGroup.map_tensor], ext x,
@@ -261,6 +263,8 @@ def homology_bd_eval (M : Condensed.{u} Ab.{u+1})
     category_theory.forget AddCommGroup ⋙ AddCommGroup.free).obj
       (AddCommGroup.free.obj punit)).val.as.homology i) :=
 (as_iso (tensor_to_homology BD M i)).symm
+
+instance : AB4.{u+1 u+2} (endomorphisms (Condensed.{u} Ab.{u+1})) := sorry
 
 def eval_freeCond_homology_zero :
   ((data.eval_functor freeCond').obj breen_deligne.eg.data) ⋙ homology_functor _ _ 0 ≅ 𝟭 _ :=
