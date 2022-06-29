@@ -171,6 +171,7 @@ begin
     { apply is_zero.eq_of_src, dsimp, rw [is_zero_iff_id_eq_zero], ext, dsimp, rw [if_neg hi],
       apply (is_zero_zero _).eq_of_src } }
 end
+.
 
 lemma Ext_is_zero_iff (X Y : bounded_homotopy_category (endomorphisms 𝓐)) :
   (∀ i, is_zero (((Ext i).obj (op $ X)).obj $ Y)) ↔
