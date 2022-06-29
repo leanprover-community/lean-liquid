@@ -1,8 +1,8 @@
-import category_theory.functor.category
+import category_theory.limits.preserves.shapes.zero
 
-open category_theory category_theory.category
+open category_theory category_theory.category category_theory.limits
 
-variables {C D: Type*} [category C] [category D]
+variables {C D : Type*} [category C] [category D]
 
 namespace category_theory
 
@@ -60,10 +60,13 @@ lemma id_eq (S : composable_morphisms C) : 𝟙 S = hom.id S := rfl
 lemma comp_eq {S₁ S₂ S₃ : composable_morphisms C} (φ : S₁ ⟶ S₂) (ψ : S₂ ⟶ S₃) :
   φ ≫ ψ = hom.comp φ ψ := rfl
 
+def zero (S : composable_morphisms C) [has_zero_morphisms C] : Prop := S.f ≫ S.g = 0
+
 end composable_morphisms
 
 namespace functor
 
+@[simps]
 def map_composable_morphisms (F : C ⥤ D) :
   composable_morphisms C ⥤ composable_morphisms D :=
 { obj := λ S, { f := F.map S.f, g := F.map S.g, },
@@ -75,5 +78,23 @@ def map_composable_morphisms (F : C ⥤ D) :
     comm₂₃' := by { dsimp, simp only [← F.map_comp, φ.comm₂₃], }, }, }
 
 end functor
+
+namespace composable_morphisms
+
+@[simps]
+def apply_functor (S : composable_morphisms C) (F : C ⥤ D) := F.map_composable_morphisms.obj S
+
+namespace zero
+
+lemma map_functor {S : composable_morphisms C} [has_zero_morphisms C] [has_zero_morphisms D]
+  (z : S.zero) (F : C ⥤ D) [F.preserves_zero_morphisms] : (S.apply_functor F).zero :=
+begin
+  dsimp [zero, apply_functor] at ⊢ z,
+  rw [← F.map_comp, z, F.map_zero],
+end
+
+end zero
+
+end composable_morphisms
 
 end category_theory

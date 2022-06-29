@@ -5,6 +5,7 @@ import for_mathlib.equalizers
 import for_mathlib.homology_iso_datum
 import for_mathlib.kernel_comparison
 import for_mathlib.homological_complex_map_d_to_d_from
+import for_mathlib.composable_morphisms
 
 namespace category_theory
 
@@ -167,6 +168,18 @@ variables [preserves_finite_limits F] [preserves_finite_colimits F]
 def homology_iso {X Y Z : A} (f : X ⟶ Y) (g : Y ⟶ Z) (w w') :
   F.obj (homology f g w) ≅ homology (F.map f) (F.map g) w' :=
 ((homology_iso_datum.tautological' f g w).apply_exact_functor F).iso
+
+lemma homology_iso_naturality {S₁ S₂ : composable_morphisms A} (φ : S₁ ⟶ S₂)
+  (w₁ : S₁.zero) (w₂ : S₂.zero) :
+  (F.homology_iso S₁.f S₁.g w₁ (w₁.map_functor F)).hom ≫
+    homology.map (w₁.map_functor F) (w₂.map_functor F)
+      (arrow.hom_mk (F.map_composable_morphisms.map φ).comm₁₂.symm)
+      (arrow.hom_mk (F.map_composable_morphisms.map φ).comm₂₃.symm) rfl =
+  F.map (homology.map w₁ w₂ (arrow.hom_mk φ.comm₁₂.symm) (arrow.hom_mk φ.comm₂₃.symm) rfl) ≫
+    (F.homology_iso S₂.f S₂.g w₂ (w₂.map_functor F)).hom :=
+begin
+  sorry
+end
 
 def homology_functor_iso {M : Type*} (c : complex_shape M) (i : M) :
   homology_functor A c i ⋙ F ≅

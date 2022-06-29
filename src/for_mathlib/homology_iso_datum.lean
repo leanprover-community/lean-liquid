@@ -13,8 +13,6 @@ variables {D : Type*} [category.{v} D] [abelian D]
 
 variables {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) (H : C) (w : f ≫ g = 0)
 
-variables (F : C ⥤ D) [functor.additive F]
-
 /-- This structure expresses that there is a candidate `H` for the
 homology of composable maps `f : X ⟶ Y` and `g : Y ⟶ Z`.
 When `0 ⟶ K ⟶ Y ⟶ Z` and `X ⟶ K ⟶ Q ⟶ 0` are exact, this
@@ -363,8 +361,11 @@ variables {f g}
 
 section apply_exact_functor
 
+variables (F : C ⥤ D) [functor.additive F]
+
 variables [preserves_finite_limits F] [preserves_finite_colimits F]
 
+@[simps]
 def apply_exact_functor : homology_iso_datum (F.map f) (F.map g) (F.obj H) :=
 { to_homology_iso_predatum := h.to_homology_iso_predatum.apply_functor F,
   fork_is_limit := begin
