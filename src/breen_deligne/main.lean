@@ -446,7 +446,14 @@ sorry
 def eval'_homology :
   BD.eval' F ⋙ homology_functor 𝓐 (complex_shape.up ℤ) 0 ≅
   (data.eval_functor F).obj BD.data ⋙ homology_functor 𝓐 (complex_shape.down ℕ) 0 :=
-sorry
+nat_iso.of_components (λ X, homology_embed_iso _ 0 : _)
+begin
+  intros X Y f, dsimp only [functor.comp_map, homology_embed_iso],
+  ext, simp only [category.assoc],
+  erw [homology.π'_map_assoc, homology.map_ι],
+  show _ ≫ _ ≫ has_homology.map _ _ _ _ ≫ _ = _,
+  sorry
+end
 
 def hH0_endo₁_a :
   BD.eval' F.map_endomorphisms ⋙ homology_functor _ _ 0 ⋙ endomorphisms.forget 𝓐 ≅
@@ -479,44 +486,16 @@ endomorphisms.mk_iso (hH0_endo₂ _ _ hH0 X)
 begin
   dsimp only [hH0_endo₂, iso.trans_hom, iso_whisker_left_hom, iso.app_hom, whisker_left_app],
   have := hH0.hom.naturality X.e, simp only [functor.id_map] at this,
-  simp only [category.assoc], erw [← this], simp only [← category.assoc], refine congr_arg2 _ _ rfl,
+  simp only [category.assoc], erw [← this], clear this, simp only [← category.assoc],
+  refine congr_arg2 _ _ rfl,
+  let φ : X ⟶ X := ⟨X.e, rfl⟩,
+  have := (hH0_endo₁ BD F).hom.naturality φ, erw [← this], clear this,
+  refine congr_arg2 _ _ rfl,
+  dsimp only [functor.comp_map, endomorphisms.forget_map],
   -- let e := ((endomorphisms.forget 𝓐).homology_functor_iso (complex_shape.up ℤ) 0).hom,
   -- have := e.naturality,
   sorry
 end
-
-/-
-
-  { refine endomorphisms.mk_iso _ _,
-    { refine _ ≪≫ hH0.app A,
-      let e := iso_whisker_left (BD.eval' F.map_endomorphisms)
-        ((endomorphisms.forget 𝓐).homology_functor_iso (complex_shape.up ℤ) 0),
-      refine (e.app ⟨A,f⟩) ≪≫ _, clear e,
-      sorry
-      -- refine (endomorphisms.forget 𝓐).map_iso (homology_iso' _ (-1) 0 1 rfl rfl) ≪≫ _,
-      -- refine (endomorphisms.forget 𝓐).homology_iso _ _ _ _ ≪≫ _,
-      -- { rw [← functor.map_comp, homological_complex.d_comp_d, functor.map_zero], },
-      -- refine (homology_iso_datum.iso _).symm,
-      -- refine (homology_iso_datum.tautological' _ _ _).map_iso _ _ _ _ _,
-      -- { refine arrow.iso_mk _ _ _,
-      --   { refine homological_complex.X_prev_iso _ rfl ≪≫ F.map_iso _,
-      --     exact (Pow_X ⟨A,f⟩ (BD.data.X 1)).symm, },
-      --   { refine F.map_iso (Pow_X ⟨A,f⟩ _).symm, },
-      --   { sorry } },
-      -- { refine arrow.iso_mk _ _ _,
-      --   { refine F.map_iso (Pow_X ⟨A,f⟩ _).symm, },
-      --   { apply is_zero.iso,
-      --     { apply homological_complex.X_next_is_zero, apply chain_complex.next_nat_zero, },
-      --     { dsimp, apply endomorphisms.is_zero_X, apply is_zero_zero } },
-      --   { sorry } },
-      -- { refl },
-       },
-    { dsimp only [iso.trans_hom, iso.app_hom],
-      have := hH0.hom.naturality f, simp only [functor.id_map] at this,
-      simp only [category.assoc, ← this], simp only [← category.assoc], refine congr_arg2 _ _ rfl,
-      sorry } },
-
--/
 
 end
 
