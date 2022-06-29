@@ -170,13 +170,23 @@ def eval_functor_homology_iso (F : X ⥤ homological_complex 𝒜 c) (i) :
       } -- !!! END OF SORRY BLOCK
     end,
   hom_inv_id' := begin
-    sorry
-    -- ext x : 4,
-    -- simp only [nat_trans.id_app, category.id_comp, category.comp_id],
-    -- rw homology.lift_desc',
-    -- -- rw homology.lift_desc' _ _ _ _ _ _ _
-    -- --   (cokernel.π ((eval_functor.obj F).d_to i)) _ _
-    -- --   (kernel.ι ((eval_functor.obj F).d_from i)),
+    let φ : (eval_functor.obj F).X i ⟶ F ⋙ homology_functor 𝒜 c i :=
+      ⟨λ x, homology.lift _ _ _ (cokernel.π ((F.obj x).d_to i)) _, _⟩,
+    let ψ : F ⋙ homology_functor 𝒜 c i ⟶ (eval_functor.obj F).X i :=
+      ⟨λ x, homology.desc' _ _ _ (kernel.ι ((F.obj x).d_from i)) _, _⟩,
+    rw homology.lift_desc' _ _ _ _ _ _ _ φ _ _ ψ,
+    { sorry },
+    { sorry },
+    { ext x, dsimp only [nat_trans.comp_app],
+      have := @nat_trans.cokernel_obj_iso_π_inv.{_ _ v} _ _ _ _ (_root_.id _) _ _ _ ((eval_functor.obj F).d_to i) x,
+      rw [homology.π'_desc'_assoc, homology.π'_desc'_assoc, category.assoc, this], },
+    { ext x, dsimp only [nat_trans.comp_app],
+      have := @nat_trans.kernel_obj_iso_hom_ι_assoc.{_ _ v} _ _ _ _ (_root_.id _) _ _ _ ((eval_functor.obj F).d_from i) x,
+      rw [category.assoc, homology.lift_ι, category.assoc, homology.lift_ι, this], },
+    { sorry },
+    { sorry },
+    { sorry },
+    recover, all_goals { sorry },
   end,
   inv_hom_id' := by sorry; begin
     ext : 2,
