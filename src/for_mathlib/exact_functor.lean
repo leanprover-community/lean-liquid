@@ -3,7 +3,6 @@ import algebra.homology.additive
 import for_mathlib.abelian_category
 import for_mathlib.equalizers
 import for_mathlib.homology_map_datum
-import for_mathlib.homological_complex_map_d_to_d_from
 import for_mathlib.short_complex
 
 namespace category_theory
@@ -176,25 +175,30 @@ def homology_iso {X Y Z : A} (f : X ⟶ Y) (g : Y ⟶ Z) (w w') :
   F.obj (homology f g w) ≅ homology (F.map f) (F.map g) w' :=
 F.homology_nat_iso.app (short_complex.mk f g w)
 
-/- this definition shall be slightly changed to use more of `homology_nat_iso`
-and `short_complex.functor_homological_complex` -/
 def homology_functor_iso {M : Type*} (c : complex_shape M) (i : M) :
   homology_functor A c i ⋙ F ≅
   F.map_homological_complex _ ⋙ homology_functor B c i :=
-nat_iso.of_components
-(λ X, begin
-  refine F.homology_iso (X.d_to i) (X.d_from i) (X.d_to_comp_d_from i) (by simp [← F.map_comp]) ≪≫
-    (homology.map_iso _ _ (map_d_to F X i) (map_d_from F X i) _),
-  rcases h : c.prev i with _ | ⟨j, hij⟩;
-  rcases h' : c.next i with _ | ⟨k, hik⟩,
-  { simpa only [map_d_to_eq₁ _ _ _ h, map_d_from_eq₁ _ _ _ h'], },
-  { simpa only [map_d_to_eq₁ _ _ _ h, map_d_from_eq₂ _ _ _ _ hik], },
-  { simpa only [map_d_to_eq₂ _ _ _ _ hij, map_d_from_eq₁ _ _ _ h'], },
-  { simpa only [map_d_to_eq₂ _ _ _ _ hij, map_d_from_eq₂ _ _ _ _ hik], },
-end)
-(λ X Y φ, begin
-  sorry,
-end)
+begin
+  calc homology_functor A c i ⋙ F ≅
+    (short_complex.functor_homological_complex A c i ⋙ short_complex.homology_functor) ⋙ F : _
+  ... ≅ short_complex.functor_homological_complex A c i ⋙ short_complex.homology_functor ⋙ F : _
+  ... ≅ short_complex.functor_homological_complex A c i ⋙ F.map_short_complex ⋙
+    short_complex.homology_functor : _
+  ... ≅ (short_complex.functor_homological_complex A c i ⋙ F.map_short_complex) ⋙
+    short_complex.homology_functor : _
+  ... ≅ (F.map_homological_complex _ ⋙ short_complex.functor_homological_complex B c i) ⋙
+    short_complex.homology_functor : _
+  ... ≅ F.map_homological_complex _ ⋙ (short_complex.functor_homological_complex B c i) ⋙
+    short_complex.homology_functor : _
+  ... ≅ F.map_homological_complex _ ⋙ homology_functor B c i : _,
+  { exact iso_whisker_right (short_complex.homology_functor_iso A c i) F, },
+  { apply associator, },
+  { exact iso_whisker_left _ (F.homology_nat_iso), },
+  { symmetry, apply associator, },
+  { exact iso_whisker_right (short_complex.functor_homological_complex_map F c i) _, },
+  { apply associator, },
+  { exact iso_whisker_left _ (short_complex.homology_functor_iso B c i).symm, },
+end
 
 end functor
 
