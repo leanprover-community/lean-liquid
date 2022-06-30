@@ -19,6 +19,13 @@ def e (X : homological_complex (endomorphisms 𝓐) c) :
 { f := λ i, (X.X i).e,
   comm' := λ i j hij, (X.d i j).comm }
 
+def mk_end (X : homological_complex 𝓐 c) (f : X ⟶ X) :
+  homological_complex (endomorphisms 𝓐) c :=
+{ X := λ i, ⟨X.X i, f.f i⟩,
+  d := λ i j, ⟨X.d i j, f.comm i j⟩,
+  shape' := by { intros i j h, ext, apply X.shape i j h },
+  d_comp_d' := by { intros, ext, apply X.d_comp_d } }
+
 end homological_complex
 
 namespace homotopy_category
@@ -173,7 +180,17 @@ begin
 end
 .
 
-lemma Ext_is_zero_iff (X Y : bounded_homotopy_category (endomorphisms 𝓐)) :
+lemma Ext_is_zero_iff (X : chain_complex 𝓐 ℕ) (Y : 𝓐)
+  (f : X ⟶ X) (g : Y ⟶ Y) :
+  (∀ i, is_zero (((Ext i).obj (op $ chain_complex.to_bounded_homotopy_category.obj (X.mk_end f))).obj $ (single _ 0).obj ⟨Y, g⟩)) ↔
+  (∀ i, is_iso $ ((Ext i).map (chain_complex.to_bounded_homotopy_category.map f).op).app _ -
+                 ((Ext i).obj (op _)).map ((single _ 0).map g)) :=
+begin
+  sorry,
+end
+
+/-
+lemma Ext_is_zero_iff' (X Y : bounded_homotopy_category (endomorphisms 𝓐)) :
   (∀ i, is_zero (((Ext i).obj (op $ X)).obj $ Y)) ↔
   (∀ i, is_iso $
     ((Ext i).map (quiver.hom.op X.e)).app Y.unEnd - ((Ext i).obj (op X.unEnd)).map Y.e) :=
@@ -211,23 +228,8 @@ begin
   /-
   * Use Ext_iso to calculate both Ext(A,B) and Ext(A.unEnd, B.unEnd) with this replacement.
   -/
-  sorry,
 end
-
-lemma Ext_is_zero_iff' (X Y : cochain_complex 𝓐 ℤ)
-  [((homotopy_category.quotient 𝓐 (complex_shape.up ℤ)).obj X).is_bounded_above]
-  [((homotopy_category.quotient 𝓐 (complex_shape.up ℤ)).obj Y).is_bounded_above]
-  (f : X ⟶ X) (g : Y ⟶ Y) :
-  (∀ i, is_zero (((Ext i).obj (op $ mk_bo_ho_ca' X f)).obj $ mk_bo_ho_ca' Y g)) ↔
-  (∀ i, is_iso $ ((Ext i).map (of_hom f).op).app _ - ((Ext i).obj (op _)).map (of_hom g)) :=
-begin
-  rw Ext_is_zero_iff, apply forall_congr, intro i,
-  unfreezingI { cases X with X Xd hXs hXd2, cases Y with Y Yd hYs hYd2, },
-  dsimp [bounded_homotopy_category.unEnd, bounded_homotopy_category.e,
-    mk_bo_ho_ca, functor.map_homological_complex, homological_complex.e,
-    homotopy_category.quotient, quotient.functor],
-  refl,
-end
+-/
 
 open_locale zero_object
 
@@ -295,37 +297,86 @@ by rw [← category.assoc, iso.comp_inv_eq, single_unEnd_e]
 
 open category_theory.preadditive
 
-lemma Ext'_is_zero_iff (X Y : endomorphisms 𝓐) :
-  (∀ i, is_zero (((Ext' i).obj (op X)).obj Y)) ↔
-  (∀ i, is_iso $ ((Ext' i).map X.e.op).app Y.X - ((Ext' i).obj (op X.X)).map Y.e) :=
+def embed_single (X : 𝓐) :
+  (homological_complex.embed complex_shape.embedding.nat_down_int_up).obj
+    ((homological_complex.single 𝓐 (complex_shape.down ℕ) 0).obj X) ≅
+  (homological_complex.single 𝓐 (complex_shape.up ℤ) 0).obj X :=
+homological_complex.hom.iso_of_components (by rintro ((_|i)|i); exact iso.refl _)
 begin
-  refine (Ext_is_zero_iff ((single _ 0).obj X) ((single _ 0).obj Y)).trans _,
-  apply forall_congr, intro i,
-  rw [← single_e X, ← single_e Y],
-  rw [← is_iso.comp_left_iff    (((Ext i).obj (op ((single (endomorphisms 𝓐) 0).obj X).unEnd)).map Y.single_unEnd.inv),
-      ← is_iso.comp_right_iff _ (((Ext i).obj (op ((single (endomorphisms 𝓐) 0).obj X).unEnd)).map Y.single_unEnd.hom)],
-  simp only [nat_trans.comp_app, op_comp, comp_sub, sub_comp,
-    category.assoc, nat_trans.naturality, nat_trans.naturality_assoc],
-  simp only [← category_theory.functor.map_comp,
-    iso.hom_inv_id, iso.inv_hom_id, iso.hom_inv_id_assoc, iso.inv_hom_id_assoc,
-    functor.map_id, category.comp_id, category.assoc],
-  rw[← is_iso.comp_left_iff    (((Ext i).map X.single_unEnd.hom.op).app ((single 𝓐 0).obj Y.X)),
-     ← is_iso.comp_right_iff _ (((Ext i).map X.single_unEnd.inv.op).app ((single 𝓐 0).obj Y.X))],
-  simp only [nat_trans.comp_app, op_comp, comp_sub, sub_comp,
-    category.assoc, nat_trans.naturality, nat_trans.naturality_assoc],
-  simp only [← category_theory.functor.map_comp, ← nat_trans.comp_app, ← op_comp,
-    iso.hom_inv_id, iso.inv_hom_id, iso.hom_inv_id_assoc, iso.inv_hom_id_assoc,
-    functor.map_id, category.comp_id, category.assoc],
-  simp only [← category_theory.functor.map_comp, ← nat_trans.comp_app, ← op_comp,
-    iso.hom_inv_id, iso.inv_hom_id, iso.hom_inv_id_assoc, iso.inv_hom_id_assoc,
-    functor.map_id, category.id_comp, ← category.assoc, op_id, nat_trans.id_app],
-  refl,
+  rintro (i|i) j (rfl : _ = _),
+  { apply is_zero.eq_of_tgt, exact is_zero_zero _ },
+  { apply is_zero.eq_of_src, exact is_zero_zero _ },
 end
 
-lemma Ext'_is_zero_iff' (X Y : 𝓐) (f : X ⟶ X) (g : Y ⟶ Y) :
+def to_bounded_homotopy_category_single (X : 𝓐) :
+  chain_complex.to_bounded_homotopy_category.obj ((homological_complex.single _ _ 0).obj X) ≅
+  (single _ 0).obj X :=
+bounded_homotopy_category.mk_iso $ (homotopy_category.quotient _ _).map_iso $
+embed_single X
+
+lemma to_bounded_homotopy_category_single_naturality (X : 𝓐) (f : X ⟶ X) :
+  (to_bounded_homotopy_category_single X).op.hom ≫
+  (chain_complex.to_bounded_homotopy_category.map
+       ((homological_complex.single 𝓐 (complex_shape.down ℕ) 0).map f)).op ≫
+    (to_bounded_homotopy_category_single X).op.inv = ((single _ 0).map f).op :=
+begin
+  dsimp only [iso.op], simp only [← op_comp], congr' 1,
+  dsimp only [to_bounded_homotopy_category_single, chain_complex.to_bounded_homotopy_category,
+    bounded_homotopy_category.mk_iso, functor.comp_map, functor.map_iso, single,
+    homotopy_category.single],
+  erw [← functor.map_comp, ← functor.map_comp], congr' 1,
+  ext ((_|i)|i),
+  { dsimp,
+    erw [category.comp_id, category.id_comp],
+    convert rfl, },
+  { apply is_zero.eq_of_src, apply is_zero_zero },
+  { apply is_zero.eq_of_src, apply is_zero_zero },
+end
+
+def to_bounded_homotopy_category_mk_end_single (X : 𝓐) (f : X ⟶ X) :
+  chain_complex.to_bounded_homotopy_category.obj
+    (((homological_complex.single 𝓐 _ 0).obj X).mk_end
+       ((homological_complex.single 𝓐 _ 0).map f)) ≅
+  (single (endomorphisms 𝓐) 0).obj (⟨X,f⟩) :=
+begin
+  refine _ ≪≫ to_bounded_homotopy_category_single _,
+  apply functor.map_iso,
+  refine homological_complex.hom.iso_of_components _ _,
+  { rintro (_|i); refine endomorphisms.mk_iso _ _,
+    { exact iso.refl _ },
+    { dsimp [homological_complex.mk_end],
+      simp only [category.id_comp, category.comp_id, if_pos rfl], refl, },
+    { apply (is_zero_zero _).iso, apply is_zero_X, apply is_zero_zero },
+    { apply (is_zero_zero _).eq_of_src }, },
+  { rintro _ i (rfl : _ = _), apply is_zero.eq_of_src, rw is_zero_iff_id_eq_zero, ext, }
+end
+.
+
+attribute [reassoc] nat_trans.comp_app
+
+lemma Ext'_is_zero_iff (X Y : 𝓐) (f : X ⟶ X) (g : Y ⟶ Y) :
   (∀ i, is_zero (((Ext' i).obj (op $ endomorphisms.mk X f)).obj $ endomorphisms.mk Y g)) ↔
   (∀ i, is_iso $ ((Ext' i).map f.op).app _ - ((Ext' i).obj _).map g) :=
-Ext'_is_zero_iff _ _
+begin
+  convert (Ext_is_zero_iff ((homological_complex.single _ _ 0).obj X) Y (functor.map _ f) g)
+    using 1,
+  { apply propext, apply forall_congr, intro i,
+    apply iso.is_zero_iff, dsimp only [Ext', functor.comp_obj, functor.flip_obj_obj],
+    apply iso.app, apply functor.map_iso, dsimp only [functor.op_obj], apply iso.op,
+    apply to_bounded_homotopy_category_mk_end_single },
+  { apply propext, apply forall_congr, intro i,
+    let e := ((Ext i).map_iso (to_bounded_homotopy_category_single X).op).app ((single _ 0).obj Y),
+    rw [← is_iso.comp_left_iff e.hom, ← is_iso.comp_right_iff _ e.inv],
+    simp only [comp_sub, sub_comp, iso.app_hom, iso.app_inv, category.assoc,
+      functor.map_iso_hom, functor.map_iso_inv, ← nat_trans.comp_app, ← functor.map_comp,
+      to_bounded_homotopy_category_single_naturality],
+    clear e,
+    dsimp only [Ext', functor.comp_obj, functor.comp_map],
+    congr' 3,
+    rw [nat_trans.naturality, ← nat_trans.comp_app_assoc, ← functor.map_comp, iso.hom_inv_id,
+      functor.map_id, nat_trans.id_app, category.id_comp],
+    refl },
+end
 
 end endomorphisms
 
