@@ -59,12 +59,16 @@ instance : category (composable_morphisms C) :=
   id := hom.id,
   comp := λ S₁ S₂ S₃, hom.comp, }
 
-@[simp]
-lemma id_eq (S : composable_morphisms C) : 𝟙 S = hom.id S := rfl
+@[simp] lemma id_τ₁ (S : composable_morphisms C) : hom.τ₁ (𝟙 S) = 𝟙 _ := rfl
+@[simp] lemma id_τ₂ (S : composable_morphisms C) : hom.τ₂ (𝟙 S) = 𝟙 _ := rfl
+@[simp] lemma id_τ₃ (S : composable_morphisms C) : hom.τ₃ (𝟙 S) = 𝟙 _ := rfl
 
-@[simp]
-lemma comp_eq {S₁ S₂ S₃ : composable_morphisms C} (φ : S₁ ⟶ S₂) (ψ : S₂ ⟶ S₃) :
-  φ ≫ ψ = hom.comp φ ψ := rfl
+@[simp] lemma comp_τ₁ {S₁ S₂ S₃ : composable_morphisms C} (φ : S₁ ⟶ S₂) (ψ : S₂ ⟶ S₃) :
+  (φ ≫ ψ).τ₁ = φ.τ₁ ≫ ψ.τ₁ := rfl
+@[simp] lemma comp_τ₂ {S₁ S₂ S₃ : composable_morphisms C} (φ : S₁ ⟶ S₂) (ψ : S₂ ⟶ S₃) :
+  (φ ≫ ψ).τ₂ = φ.τ₂ ≫ ψ.τ₂ := rfl
+@[simp] lemma comp_τ₃ {S₁ S₂ S₃ : composable_morphisms C} (φ : S₁ ⟶ S₂) (ψ : S₂ ⟶ S₃) :
+  (φ ≫ ψ).τ₃ = φ.τ₃ ≫ ψ.τ₃ := rfl
 
 def zero (S : composable_morphisms C) [has_zero_morphisms C] : Prop := S.f ≫ S.g = 0
 
@@ -91,47 +95,5 @@ namespace composable_morphisms
 def apply_functor (S : composable_morphisms C) (F : C ⥤ D) := F.map_composable_morphisms.obj S
 
 end composable_morphisms
-
-section
-
-variables (C) [has_zero_morphisms C] [has_zero_morphisms D]
-
-@[derive category]
-def short_complex := { S : composable_morphisms C // S.zero }
-
-variables {C}
-
-namespace functor
-
-@[simps]
-def map_short_complex (F : C ⥤ D) [F.preserves_zero_morphisms] :
-  short_complex C ⥤ short_complex D :=
-full_subcategory.lift _ (induced_functor _ ⋙ F.map_composable_morphisms)
-(λ X, begin
-  have h := X.2,
-  dsimp [composable_morphisms.zero] at h ⊢,
-  rw [← F.map_comp, h, F.map_zero],
-end)
-
-end functor
-
-end
-
-namespace short_complex
-
-@[simps]
-def mk [has_zero_morphisms C] {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) (zero : f ≫ g = 0):
-  short_complex C := ⟨composable_morphisms.mk f g, zero⟩
-
-def homology [abelian C] (S : short_complex C) : C := homology S.1.f S.1.g S.2
-
-def homology_functor [abelian C] : short_complex C ⥤ C :=
-{ obj := λ X, X.homology,
-  map := λ X Y φ, homology.map X.2 Y.2 ⟨φ.τ₁, φ.τ₂, φ.comm₁₂.symm⟩
-    ⟨φ.τ₂, φ.τ₃, φ.comm₂₃.symm⟩ rfl,
-  map_id' := λ X, by apply homology.map_id,
-  map_comp' := λ X Y Z φ ψ, by { symmetry, apply homology.map_comp, }, }
-
-end short_complex
 
 end category_theory
