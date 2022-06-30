@@ -26,6 +26,12 @@ begin
   apply_instance,
 end
 
+example (G H : Type*) [add_comm_group G] [add_comm_group H] (f : G →+ H) (n : ℤ)
+  (g : G) : f (n • g) = n • f g :=
+begin
+  refine map_zsmul f _ _,
+end
+
 lemma add_comm_group.limit_torsion_free
   (J : (category_theory.as_small.{u} ℕ) ⥤ AddCommGroup.{u})
   (h_tf : ∀ j, no_zero_smul_divisors ℤ (J.obj j))
@@ -40,8 +46,12 @@ begin
   fconstructor,
   intros c x hx,
   let φ := λ x : (limit.{u u u u+1} J).α, λ j, (L.cone.π.app j) x,
-  have h1: φ 0 = 0, sorry,
-  have h2: φ (c • x) = c • φ x, sorry,
+  have h1: φ 0 = 0,
+  { ext j,
+    exact (L.cone.π.app j).2 },
+  have h2: φ (c • x) = c • φ x,
+  { ext j,
+    exact map_zsmul (L.cone.π.app j) _ _ },
   apply_fun φ at hx,
   simp only [h1, h2, pi.zero_def, function.funext_iff, pi.smul_apply, smul_eq_zero] at hx,
   by_cases hc : c = 0,
