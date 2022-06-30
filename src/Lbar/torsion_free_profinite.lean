@@ -16,6 +16,7 @@ set_option pp.universes true
 
 open Lbar Profinite CommGroup category_theory.limits
 
+--[FAE] not needed for LTE, may be for mathlib?
 lemma limit_torsion_free_to_Ab
   (C : Type u) [category_theory.small_category C] (J : C ⥤ Ab.{u})
   (h_tf : ∀ j, no_zero_smul_divisors ℤ (J.obj j))
@@ -54,12 +55,12 @@ lemma add_comm_group.limit_on_nat_torsion_free
   : no_zero_smul_divisors ℤ (limit J).α := limit_torsion_free_to_Ab (category_theory.as_small.{u} ℕ) J h_tf
 
 lemma limit_torsion_free_to_PFPNGwithTinv {C : Type u} [category_theory.small_category C] (J : C ⥤ (ProFiltPseuNormGrpWithTinv₁.{u} r'))
+  [preserves_limit J
+    (category_theory.forget.{u+1 u u}(ProFiltPseuNormGrpWithTinv₁.{u} r'))]
   (h_tf : ∀ j, no_zero_smul_divisors ℤ (J.obj j))
   : no_zero_smul_divisors ℤ (limit J).M :=
 begin
   let L := get_limit_cone _,
-  haveI : preserves_limit J
-    (category_theory.forget.{u+1 u u}(ProFiltPseuNormGrpWithTinv₁.{u} r')), sorry,
   have h_inj := @concrete.to_product_injective_of_is_limit (ProFiltPseuNormGrpWithTinv₁.{u} r') _ _ C _ J _ L.cone L.is_limit,
   fconstructor,
   intros c x hx,
@@ -82,6 +83,8 @@ begin
     simp only [comphaus_filtered_pseudo_normed_group_with_Tinv_hom.map_zero],
     exact hx },
 end
+
+instance (S : Profinite.{u}) : preserves_limit (fintype_diagram S ⋙ Fintype_Lbar.{u u} r') (category_theory.forget.{u+1 u u}(ProFiltPseuNormGrpWithTinv₁.{u} r')) := sorry
 
 instance (S : Profinite.{u}) : no_zero_smul_divisors ℤ ((extend (Fintype_Lbar.{u u} r')).obj S) :=
 begin
