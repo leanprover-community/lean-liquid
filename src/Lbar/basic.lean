@@ -193,7 +193,8 @@ lemma zero_apply (s : S) (n : ℕ) : (0 : Lbar r' S) s n = 0 := rfl
 
 lemma zmul_apply (F : Lbar r' S) (c : ℤ) : (((c • F) : (Lbar r' S)) : S → ℕ → ℤ) = λ s n, c • (F s n) := rfl
 
-instance : no_zero_smul_divisors ℤ (Lbar r' S) :=
+lemma Fintype.Lbar_no_zero_smul_divisors (T : Fintype.{u}) (r') : no_zero_smul_divisors ℤ
+  (Lbar r' T) :=
 begin
   fconstructor,
   intros c F hF,
@@ -206,7 +207,7 @@ begin
     rw function.funext_iff at hF,
     specialize hF n,
     simp only [smul_eq_zero, hc, false_or, zero_apply] at hF ⊢,
-    exact hF }
+    exact hF },
 end
 
 /-- The `coeff s n` is the additive homomorphism that sends `x : Lbar r' S`
