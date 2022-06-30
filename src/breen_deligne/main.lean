@@ -516,15 +516,16 @@ lemma main_lemma [has_finite_limits 𝓐] [has_finite_colimits 𝓐]
     ((Ext i).map ((BD.eval F).map f).op).app ((single _ 0).obj B) -
     ((Ext i).obj (op $ (BD.eval F).obj A)).map ((single _ 0).map g)) :=
 begin
-  rw [← endomorphisms.Ext'_is_zero_iff' A B f g],
-  erw [← endomorphisms.Ext_is_zero_iff'],
+  rw [← endomorphisms.Ext'_is_zero_iff A B f g],
+  erw [← endomorphisms.Ext_is_zero_iff],
   refine (main_lemma.is_zero BD F.map_endomorphisms _ _ _ T hT0 @hT hTA).trans _,
   { exact hH0_endo _ _ hH0 _ },
   apply forall_congr, intro i,
   apply iso.is_zero_iff,
   refine functor.map_iso _ _ ≪≫ iso.app (functor.map_iso _ _) _,
-  { exact (endomorphisms.mk_bo_ha_ca'_single _ _).symm, },
-  { refine (mk_bo_ha_ca'_Q _ _ _ _).op, },
+  { exact iso.refl _, },
+  { refine iso.op _, apply functor.map_iso,
+    sorry },
 end
 
 end
