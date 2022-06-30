@@ -33,6 +33,8 @@ apply_nolint breen_deligne.data.homological_complex.functor_eval_flip_preserves_
 
 -- breen_deligne/main.lean
 apply_nolint breen_deligne.package.eval'_bounded_above unused_arguments
+apply_nolint breen_deligne.package.hH0_endo₁_a unused_arguments
+apply_nolint breen_deligne.package.hH0_endo₁_b unused_arguments
 apply_nolint breen_deligne.package.main_lemma.IH_neg unused_arguments
 apply_nolint breen_deligne.package.main_lemma.bdd_step unused_arguments
 apply_nolint breen_deligne.package.main_lemma.bdd_step₂ unused_arguments
@@ -241,6 +243,9 @@ apply_nolint category_theory.kernel_lift_eq unused_arguments
 -- for_mathlib/homology_iso_Ab.lean
 apply_nolint AddCommGroup.homology_iso_hom_homology_map def_lemma
 apply_nolint AddCommGroup.homology_iso_inv_homology_map def_lemma
+
+-- for_mathlib/homology_iso_datum.lean
+apply_nolint homology_iso_datum.of_homological_complex_of_next_eq_none' unused_arguments
 
 -- for_mathlib/homology_map.lean
 apply_nolint is_iso_of_square unused_arguments
