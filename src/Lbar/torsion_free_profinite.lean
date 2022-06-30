@@ -26,25 +26,15 @@ begin
   apply_instance,
 end
 
--- noncomputable
 lemma add_comm_group.limit_torsion_free
   (J : (category_theory.as_small.{u} ℕ) ⥤ AddCommGroup.{u})
-  -- (J : (ulift.{u} ℕ) ⥤ (ulift.{u} ℕ)) : true :=
   (h_tf : ∀ j, no_zero_smul_divisors ℤ (J.obj j))
-  -- (h_lim : category_theory.limits.has_limit J)
   : no_zero_smul_divisors ℤ (category_theory.limits.limit J).α :=
 begin
   let L : limit_cone.{u u u u+1} J := get_limit_cone _,
-  -- haveI : category_theory.concrete_category.{u} ℕ, sorry,?
-  -- have := @preserves_limit (category_theory.as_small ℕ) _ (category_theory.as_small ℕ) _,
-  -- haveI : category_theory.small_category.{u} (ulift.{u} ℕ), sorry,
   haveI : preserves_limit.{u u u u u+1 u+1} J (category_theory.forget.{u+1 u u} AddCommGroup.{u}),
   apply preserves_limit_of_preserves_limit_cone.{u u u u u+1 u+1} L.2 _,
   sorry,
-  -- suggest,
-  -- use L.1,
-  -- use L.2,
-  -- have := concrete.to_product_injective_of_is_limit J,
   have h_inj := @concrete.to_product_injective_of_is_limit AddCommGroup.{u} _ _
     (category_theory.as_small.{u} ℕ) _ J _ L.cone L.is_limit,
   fconstructor,
@@ -53,20 +43,16 @@ begin
   have h1: φ 0 = 0, sorry,
   have h2: φ (c • x) = c • φ x, sorry,
   apply_fun φ at hx,
-  rw [h1, h2, pi.zero_def] at hx,
-  -- dsimp [φ] at hx,
-  rw function.funext_iff at hx,
-  simp only [pi.smul_apply, smul_eq_zero] at hx,--improve
+  simp only [h1, h2, pi.zero_def, function.funext_iff, pi.smul_apply, smul_eq_zero] at hx,
   by_cases hc : c = 0,
   { apply or.intro_left, exact hc},
-  simp only [hc, false_or] at hx,
-  apply or.intro_right,
-  apply h_inj,
-  simp only,
-  funext,
-  specialize hx j,
-  simp only [_root_.map_zero],
-  exact hx,
+  { simp only [hc, false_or] at hx,
+    apply or.intro_right,
+    apply h_inj,
+    funext j,
+    specialize hx j,
+    simp only [_root_.map_zero],
+    exact hx },
 end
 
 -- lemma limit_torsion_free (J : ℕ ⥤ (ProFiltPseuNormGrpWithTinv₁.{u} r'))
