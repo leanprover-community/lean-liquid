@@ -2,6 +2,7 @@ import algebra.category.Group.limits
 import for_mathlib.Profinite.extend
 import Lbar.basic
 import Lbar.functor
+import pseudo_normed_group.category.strictProFiltPseuNormGrpWithTinv
 
 universes u v
 
@@ -26,26 +27,18 @@ begin
   apply_instance,
 end
 
-example (G H : Type*) [add_comm_group G] [add_comm_group H] (f : G →+ H) (n : ℤ)
-  (g : G) : f (n • g) = n • f g :=
-begin
-  refine map_zsmul f _ _,
-end
-
 lemma add_comm_group.limit_torsion_free
   (J : (category_theory.as_small.{u} ℕ) ⥤ AddCommGroup.{u})
   (h_tf : ∀ j, no_zero_smul_divisors ℤ (J.obj j))
   : no_zero_smul_divisors ℤ (category_theory.limits.limit J).α :=
 begin
   let L : limit_cone.{u u u u+1} J := get_limit_cone _,
-  haveI : preserves_limit.{u u u u u+1 u+1} J (category_theory.forget.{u+1 u u} AddCommGroup.{u}),
-  apply preserves_limit_of_preserves_limit_cone.{u u u u u+1 u+1} L.2 _,
-  sorry,
+  haveI := AddCommGroup.forget_preserves_limits.{u u},
   have h_inj := @concrete.to_product_injective_of_is_limit AddCommGroup.{u} _ _
     (category_theory.as_small.{u} ℕ) _ J _ L.cone L.is_limit,
   fconstructor,
   intros c x hx,
-  let φ := λ x : (limit.{u u u u+1} J).α, λ j, (L.cone.π.app j) x,
+  let φ := λ x : (limit.{u u u u+1} J), λ j, (L.cone.π.app j) x,
   have h1: φ 0 = 0,
   { ext j,
     exact (L.cone.π.app j).2 },
@@ -65,16 +58,46 @@ begin
     exact hx },
 end
 
--- lemma limit_torsion_free (J : ℕ ⥤ (ProFiltPseuNormGrpWithTinv₁.{u} r'))
---   (h_tf : ∀ j, no_zero_smul_divisors ℤ (J.obj j))
---   (h_lim : category_theory.limits.has_limit J) :
---     no_zero_smul_divisors ℤ (category_theory.limits.limit J).M :=
--- begin
---   refine add_comm_group.limit_torsion_free J h_tf h_lim,
--- end
+example (G H : Type*) [profinitely_filtered_pseudo_normed_group_with_Tinv r' G] [profinitely_filtered_pseudo_normed_group_with_Tinv r' H]
+    (f : comphaus_filtered_pseudo_normed_group_with_Tinv_hom r' G H)
+    (n : ℤ) (g : G) : f (n • g) = n • f g :=
+begin
+  simp only [comphaus_filtered_pseudo_normed_group_with_Tinv_hom.map_zsmul],
+end
 
-lemma torsion_free_profinite (n : ℤ) (x : (extend (Fintype_Lbar.{u u} r')).obj S) :
-  n • x = 0 → n = 0 ∨ x = 0:=
+lemma profinitely_filtered_pseudo_normed_group_with_Tinv.limit_torsion_free (J : (category_theory.as_small.{u} ℕ) ⥤ (ProFiltPseuNormGrpWithTinv₁.{u} r'))
+  (h_tf : ∀ j, no_zero_smul_divisors ℤ (J.obj j))
+  (h_lim : category_theory.limits.has_limit J) :
+    no_zero_smul_divisors ℤ (category_theory.limits.limit J).M :=
+begin
+  let L : limit_cone.{u u u u+1} J := get_limit_cone _,
+  haveI : preserves_limit.{u u u u u+1 u+1} J (category_theory.forget.{u+1 u u}(ProFiltPseuNormGrpWithTinv₁.{u} r')), sorry,
+  have h_inj := @concrete.to_product_injective_of_is_limit (ProFiltPseuNormGrpWithTinv₁.{u} r') _ _
+    (category_theory.as_small.{u} ℕ) _ J _ L.cone L.is_limit,
+  fconstructor,
+  intros c x hx,
+  let φ := λ x : (limit.{u u u u+1} J), λ j, (L.cone.π.app j) x,
+  have h1: φ 0 = 0,
+  { ext j,
+    exact (L.cone.π.app j).2 },
+  have h2: φ (c • x) = c • φ x,
+  { ext j,
+    apply comphaus_filtered_pseudo_normed_group_with_Tinv_hom.map_zsmul },
+  apply_fun φ at hx,
+  simp only [h1, h2, pi.zero_def, function.funext_iff, pi.smul_apply, smul_eq_zero] at hx,
+  by_cases hc : c = 0,
+  { apply or.intro_left, exact hc},
+  { simp only [hc, false_or] at hx,
+    apply or.intro_right,
+    apply h_inj,
+    funext j,
+    specialize hx j,
+    simp only [comphaus_filtered_pseudo_normed_group_with_Tinv_hom.map_zero],
+    exact hx },
+end
+
+
+lemma torsion_free_profinite (n : ℤ) (x : (extend (Fintype_Lbar.{u u} r')).obj S) : n • x = 0 → n = 0 ∨ x = 0 :=
 begin
   intro hx,
   dsimp at x,--[FAE] look at `Lbar.basic.lean`, l. 445 the map `map` for the def'n of transitionss
