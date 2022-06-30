@@ -477,6 +477,31 @@ begin
     cokernel_π_iso₃_hom_assoc, cokernel.π_desc],
 end
 
+@[simp]
+lemma iso_inv : h.iso.inv = homology.desc' f g h.w (h.iso₁.inv ≫ h.π)
+  (by simp only [← h.f'_iso₁_hom, category.assoc, h.iso₁.hom_inv_id_assoc,
+    homology_iso_predatum.zero₂]) :=
+by rw [← cancel_epi (homology.π' f g h.w), homology.π'_desc', homology_π'_eq,
+    category.assoc, category.assoc, h.iso.hom_inv_id, category.comp_id]
+
+@[simp]
+lemma iso_hom : h.iso.hom = homology.lift f g h.w
+  (h.iso₂.hom ≫ cokernel.map h.f' f (𝟙 X) h.ι (by simp))
+  begin
+    rw ← cancel_epi h.iso₂.inv,
+    ext,
+    simp only [category.assoc, iso.inv_hom_id_assoc, cokernel.π_desc_assoc,
+      cokernel.π_desc, homology_iso_predatum.zero₁, comp_zero],
+  end :=
+begin
+  rw [← cancel_epi h.iso.inv, h.iso.inv_hom_id, h.iso_inv,
+    ← cancel_mono (homology.ι f g h.w), ← cancel_epi (homology.π' f g h.w),
+    ← cancel_epi h.iso₁.hom],
+  simp only [category.assoc, category.id_comp, homology.π'_ι, homology.lift_ι,
+    homology.π'_desc'_assoc, h.iso₁.hom_inv_id_assoc, h.iso₁_hom_kernel_ι_assoc,
+    ← cokernel_π_iso₂_inv, h.iso₂.inv_hom_id_assoc, cokernel.π_desc],
+end
+
 def has_homology : has_homology f g H :=
 { w := h.w,
   π := h.iso₁.inv ≫ h.π,
