@@ -189,6 +189,10 @@ is_colimit.cocone_point_unique_up_to_iso h.cofork_is_colimit (colimit_cocone.is_
 lemma cokernel_π_iso₂_inv : cokernel.π h.f' ≫ h.iso₂.inv = h.π :=
 is_colimit.comp_cocone_point_unique_up_to_iso_inv _ _ _
 
+@[reassoc]
+lemma cokernel_f'_eq_π_iso₂_hom : cokernel.π h.f' = h.π ≫ h.iso₂.hom :=
+by rw [← cokernel_π_iso₂_inv, category.assoc, h.iso₂.inv_hom_id, category.comp_id]
+
 instance : epi h.π := by { rw ← h.cokernel_π_iso₂_inv, apply epi_comp, }
 
 def iso₃ : cokernel h.f' ≅ cokernel (kernel.lift g f h.w) :=
@@ -477,14 +481,12 @@ begin
     cokernel_π_iso₃_hom_assoc, cokernel.π_desc],
 end
 
-@[simp]
 lemma iso_inv : h.iso.inv = homology.desc' f g h.w (h.iso₁.inv ≫ h.π)
   (by simp only [← h.f'_iso₁_hom, category.assoc, h.iso₁.hom_inv_id_assoc,
     homology_iso_predatum.zero₂]) :=
 by rw [← cancel_epi (homology.π' f g h.w), homology.π'_desc', homology_π'_eq,
     category.assoc, category.assoc, h.iso.hom_inv_id, category.comp_id]
 
-@[simp]
 lemma iso_hom : h.iso.hom = homology.lift f g h.w
   (h.iso₂.hom ≫ cokernel.map h.f' f (𝟙 X) h.ι (by simp))
   begin
@@ -502,6 +504,7 @@ begin
     ← cokernel_π_iso₂_inv, h.iso₂.inv_hom_id_assoc, cokernel.π_desc],
 end
 
+@[simps]
 def has_homology : has_homology f g H :=
 { w := h.w,
   π := h.iso₁.inv ≫ h.π,
