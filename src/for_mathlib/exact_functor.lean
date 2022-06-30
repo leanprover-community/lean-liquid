@@ -4,7 +4,7 @@ import for_mathlib.abelian_category
 import for_mathlib.equalizers
 import for_mathlib.homology_map_datum
 import for_mathlib.homological_complex_map_d_to_d_from
-import for_mathlib.composable_morphisms
+import for_mathlib.short_complex
 
 namespace category_theory
 
@@ -176,7 +176,8 @@ def homology_iso {X Y Z : A} (f : X ⟶ Y) (g : Y ⟶ Z) (w w') :
   F.obj (homology f g w) ≅ homology (F.map f) (F.map g) w' :=
 F.homology_nat_iso.app (short_complex.mk f g w)
 
-/- this definition shall be slightly changed to use more of `homology_nat_iso` -/
+/- this definition shall be slightly changed to use more of `homology_nat_iso`
+and `short_complex.functor_homological_complex` -/
 def homology_functor_iso {M : Type*} (c : complex_shape M) (i : M) :
   homology_functor A c i ⋙ F ≅
   F.map_homological_complex _ ⋙ homology_functor B c i :=
