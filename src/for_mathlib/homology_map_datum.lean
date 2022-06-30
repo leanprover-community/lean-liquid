@@ -65,6 +65,19 @@ def map_exact_functor (F : C ⥤ D) [F.additive]
   fac₃' := by { dsimp, simp only [← F.map_comp, μ.fac₃], }, }
 
 lemma homology_map_eq : short_complex.homology_functor.map φ =
-  h₁.iso.inv ≫ η ≫ h₂.iso.hom := sorry
+  h₁.iso.inv ≫ η ≫ h₂.iso.hom :=
+begin
+  simp only [short_complex.homology_functor_map, homology_iso_datum.iso_inv,
+    homology_iso_datum.iso_hom, ← cancel_epi h₁.iso₁.hom,
+    ← cancel_mono (homology.ι _ _ S₂.2), ← cancel_epi (homology.π' _ _ S₁.2), assoc,
+    homology.map_ι, homology.π'_ι_assoc, cokernel.π_desc, assoc],
+  erw [homology.lift_ι, homology.π'_desc'_assoc, assoc, μ.fac₃_assoc,
+    h₁.iso₁_hom_kernel_ι_assoc, ← μ.fac₂_assoc, h₁.iso₁.hom_inv_id_assoc,
+    ← h₂.cokernel_π_iso₂_inv_assoc, h₂.iso₂.inv_hom_id_assoc,
+    h₂.cokernel_f'_eq_π_iso₂_hom],
+  congr' 1,
+  simp only [← cancel_epi h₂.iso₁.inv, ← h₂.iso₁_hom_kernel_ι, assoc, h₂.iso₁.inv_hom_id_assoc,
+    ← h₂.has_homology.π_ι, h₂.has_homology_π, h₂.has_homology_ι],
+end
 
 end homology_map_datum

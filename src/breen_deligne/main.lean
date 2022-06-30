@@ -434,6 +434,45 @@ end
 
 section
 
+def eval_mk_end (A : 𝓐) (f : A ⟶ A) :
+  homological_complex.mk_end
+    (((data.eval_functor F).obj BD.data).obj A)
+    (((data.eval_functor F).obj BD.data).map f) ≅
+  ((data.eval_functor F.map_endomorphisms).obj BD.data).obj ⟨A, f⟩ :=
+begin
+  refine homological_complex.hom.iso_of_components _ _,
+  { intro i, refine endomorphisms.mk_iso _ _,
+    { refine F.map_iso _, exact (Pow_X ⟨A,f⟩ _).symm, },
+    { dsimp [homological_complex.mk_end],
+      rw [← F.map_comp, ← F.map_comp], congr' 1,
+      ext j,
+      simp only [category.assoc, biproduct.ι_map_assoc, biproduct.map_desc_assoc,
+        biproduct.ι_desc, biproduct.ι_desc_assoc],
+      rw ← endomorphisms.hom.comm, } },
+  { rintro _ i (rfl : _ = _), ext k,
+    dsimp [homological_complex.mk_end, endomorphisms.mk_iso],
+    simp only [universal_map.eval_Pow, free_abelian_group.lift_eq_sum, ← endomorphisms.forget_map,
+      nat_trans.app_sum, functor.map_sum, comp_sum, sum_comp,
+      nat_trans.app_zsmul, functor.map_zsmul, comp_zsmul, zsmul_comp],
+    refine finset.sum_congr rfl _,
+    intros x hx,
+    refine congr_arg2 _ rfl _,
+    dsimp only [endomorphisms.forget_map, functor.map_endomorphisms_map_f,
+      whisker_right_app, basic_universal_map.eval_Pow_app],
+    rw [← functor.map_comp, ← functor.map_comp], congr' 1,
+    ext j : 2,
+    rw [biproduct.ι_desc_assoc, biproduct.ι_matrix_assoc, ← endomorphisms.comp_f,
+      biproduct.ι_matrix, biproduct.lift_desc],
+    have := (endomorphisms.forget _).map_id ⟨A,f⟩, dsimp only [endomorphisms.forget_obj] at this,
+    simp only [← endomorphisms.forget_map, ← this, ← functor.map_zsmul, ← functor.map_sum, ← functor.map_comp],
+    congr' 1,
+    apply biproduct.hom_ext, intro i,
+    simp only [biproduct.lift_π, sum_comp, category.assoc],
+    rw finset.sum_eq_single_of_mem i (finset.mem_univ _),
+    { rw [biproduct.ι_π, dif_pos rfl, eq_to_hom_refl, category.comp_id], },
+    { rintro k - hk, rw [biproduct.ι_π_ne _ hk, comp_zero], } }
+end
+
 variables [has_finite_limits 𝓐] [has_finite_colimits 𝓐]
 variables (hH0 : ((data.eval_functor F).obj BD.data) ⋙ homology_functor _ _ 0 ≅ 𝟭 _)
 variables (X : endomorphisms 𝓐)
@@ -525,7 +564,7 @@ begin
   refine functor.map_iso _ _ ≪≫ iso.app (functor.map_iso _ _) _,
   { exact iso.refl _, },
   { refine iso.op _, apply functor.map_iso,
-    sorry },
+    apply eval_mk_end },
 end
 
 end

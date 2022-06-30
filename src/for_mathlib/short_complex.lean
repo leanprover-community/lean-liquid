@@ -149,6 +149,7 @@ def iso_mk [has_zero_morphisms C] {X₁ Y₁ Z₁ X₂ Y₂ Z₂ : C} {f₁ : X�
 
 def homology [abelian C] (S : short_complex C) : C := homology S.1.f S.1.g S.2
 
+@[simps]
 def homology_functor [abelian C] : short_complex C ⥤ C :=
 { obj := λ X, X.homology,
   map := λ X Y φ, homology.map X.2 Y.2 ⟨φ.τ₁, φ.τ₂, φ.comm₁₂.symm⟩
