@@ -57,15 +57,10 @@ namespace homological_complex
 
 variables [has_zero_morphisms C] [has_zero_object C] {M : Type*} {c : complex_shape M}
 
-/- there is already `prev_eq_zero` in `les_homology.lean`, but with extra assumptions -/
-lemma prev_eq_zero' {X Y : homological_complex C c} (f : X ⟶ Y) (i : M) (h : c.prev i = none) :
-  f.prev i = 0 :=
-by { dsimp [hom.prev], simpa only [h], }
-
 lemma prev_id (X : homological_complex C c) (i : M) : hom.prev (𝟙 X) i = 𝟙 (X.X_prev i) :=
 begin
   rcases h : c.prev i with _ | ⟨j,w⟩,
-  { rw prev_eq_zero' _ i h,
+  { rw homological_complex.prev_eq_zero' _ i h,
     symmetry,
     rw ← limits.is_zero.iff_id_eq_zero,
     exact limits.is_zero.of_iso (limits.is_zero_zero _)
@@ -82,7 +77,7 @@ lemma prev_comp {X Y Z : homological_complex C c} (f : X ⟶ Y) (g : Y ⟶ Z)
   (i : M) : hom.prev (f ≫ g) i = hom.prev f i ≫ hom.prev g i :=
 begin
   rcases h : c.prev i with _ | ⟨j,w⟩,
-  { simp only [prev_eq_zero' _ i h, comp_zero], },
+  { simp only [homological_complex.prev_eq_zero' _ i h, comp_zero], },
   { simp only [homological_complex.hom.prev_eq _ w, comp_f, assoc, iso.inv_hom_id_assoc], },
 end
 
@@ -203,9 +198,11 @@ nat_iso.of_components
     (by simpa only [iso.refl_hom, id_comp] using F.d_from_map X i))
   (λ X Y f, begin
     ext,
-    { sorry, },
+    { simp only [functor.comp_map, iso_mk_hom, comp_τ₁, functor.map_short_complex_map_τ₁,
+        functor_homological_complex_map_τ₁, hom_mk_τ₁, F.map_prev], },
     { dsimp, simp only [comp_id, id_comp], },
-    { sorry, },
+    { simp only [functor.comp_map, iso_mk_hom, comp_τ₃, functor.map_short_complex_map_τ₃,
+        functor_homological_complex_map_τ₃, hom_mk_τ₃, F.map_next], },
   end)
 
 end short_complex

@@ -7,13 +7,25 @@ universes v
 
 open category_theory category_theory.limits
 
+variables {C D : Type*} [category C] [category D]
+variables [has_zero_object C] [has_zero_object D]
+variables {M : Type*} {c : complex_shape M}
+
+/- there are already `prev_eq_zero` and `next_eq_zero`
+  in `les_homology.lean`, but with extra assumptions -/
+lemma homological_complex.prev_eq_zero' [has_zero_morphisms C]
+  {X Y : homological_complex C c} (f : X ⟶ Y) (i : M) (h : c.prev i = none) : f.prev i = 0 :=
+by { dsimp [homological_complex.hom.prev], simpa only [h], }
+
+lemma homological_complex.next_eq_zero' [has_zero_morphisms C]
+  {X Y : homological_complex C c} (f : X ⟶ Y) (i : M) (h : c.next i = none) : f.next i = 0 :=
+by { dsimp [homological_complex.hom.next], simpa only [h], }
+
 namespace category_theory
 
 namespace functor
 
-variables {C D : Type*} [category C] [preadditive C] [category D] [preadditive D]
-variables [has_zero_object C] [has_zero_object D]
-variables {M : Type*} {c : complex_shape M}
+variables [preadditive C] [preadditive D]
 variables (F : C ⥤ D) [functor.additive F] (X : homological_complex C c)
 
 def obj_X_prev {M : Type*} {c : complex_shape M} (X : homological_complex C c) (i : M) :
@@ -96,6 +108,37 @@ begin
     rw ← ((F.map_homological_complex c).obj X).d_from_comp_X_next_iso hij,
     simp only [map_comp, category.assoc, homological_complex.d_from_comp_X_next_iso,
       map_homological_complex_obj_d, map_next_iso_inv], },
+end
+
+def map_prev {M : Type*} {c : complex_shape M} {X Y : homological_complex C c}
+  (f : X ⟶ Y) (i : M) :
+  F.map (homological_complex.hom.prev f i) ≫ (F.obj_X_prev Y i).hom =
+  (F.obj_X_prev X i).hom ≫ homological_complex.hom.prev ((F.map_homological_complex c).map f) i :=
+begin
+  rcases h : c.prev i with _ | ⟨j, hij⟩,
+  { simp only [homological_complex.prev_eq_zero' _ _ h, functor.map_zero,
+      zero_comp, comp_zero], },
+  { simp only [homological_complex.hom.prev_eq _ hij,
+      F.obj_X_prev_hom_eq _ j i hij,
+      F.map_comp, eq_to_hom_refl, category.id_comp],
+    slice_lhs 3 4 { rw [← F.map_comp, iso.inv_hom_id, F.map_id], },
+    simp only [category.id_comp, map_homological_complex_map_f, category.assoc,
+      iso.inv_hom_id_assoc], },
+end
+
+def map_next {M : Type*} {c : complex_shape M} {X Y : homological_complex C c}
+  (f : X ⟶ Y) (i : M) :
+  F.map (homological_complex.hom.next f i) ≫ (F.obj_X_next Y i).hom =
+  (F.obj_X_next X i).hom ≫ homological_complex.hom.next ((F.map_homological_complex c).map f) i :=
+begin
+  rcases h : c.next i with _ | ⟨j, hij⟩,
+  { simp only [homological_complex.next_eq_zero' _ _ h, functor.map_zero,
+      zero_comp, comp_zero], },
+  { simp only [homological_complex.hom.next_eq _ hij,
+      F.obj_X_next_hom_eq _ i j hij, F.map_comp, eq_to_hom_refl, category.id_comp],
+    slice_lhs 3 4 { rw [← F.map_comp, iso.inv_hom_id, F.map_id], },
+    simp only [category.id_comp, map_homological_complex_map_f, category.assoc,
+      iso.inv_hom_id_assoc], },
 end
 
 end functor
