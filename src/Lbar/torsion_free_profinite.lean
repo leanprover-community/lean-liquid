@@ -3,6 +3,7 @@ import for_mathlib.Profinite.extend
 import Lbar.basic
 import Lbar.functor
 import pseudo_normed_group.category.strictProFiltPseuNormGrpWithTinv
+import pseudo_normed_group.bounded_limits
 
 noncomputable theory
 
@@ -10,13 +11,11 @@ universes u v
 
 open_locale nnreal
 
-variables {r' : ℝ≥0} [fact (0 < r')]
 
 set_option pp.universes true
 
 open Lbar Profinite CommGroup category_theory.limits
 
---[FAE] not needed for LTE, may be for mathlib?
 lemma limit_torsion_free_to_Ab
   (C : Type u) [category_theory.small_category C] (J : C ⥤ Ab.{u})
   (h_tf : ∀ j, no_zero_smul_divisors ℤ (J.obj j))
@@ -54,41 +53,117 @@ lemma add_comm_group.limit_on_nat_torsion_free
   (h_tf : ∀ j, no_zero_smul_divisors ℤ (J.obj j))
   : no_zero_smul_divisors ℤ (limit J).α := limit_torsion_free_to_Ab (category_theory.as_small.{u} ℕ) J h_tf
 
-lemma limit_torsion_free_to_PFPNGwithTinv {C : Type u} [category_theory.small_category C] (J : C ⥤ (ProFiltPseuNormGrpWithTinv₁.{u} r'))
-  [preserves_limit J
-    (category_theory.forget.{u+1 u u}(ProFiltPseuNormGrpWithTinv₁.{u} r'))]
-  (h_tf : ∀ j, no_zero_smul_divisors ℤ (J.obj j))
-  : no_zero_smul_divisors ℤ (limit J).M :=
-begin
-  let L := get_limit_cone _,
-  have h_inj := @concrete.to_product_injective_of_is_limit (ProFiltPseuNormGrpWithTinv₁.{u} r') _ _ C _ J _ L.cone L.is_limit,
-  fconstructor,
-  intros c x hx,
-  let φ := λ x : limit J, λ j, (L.cone.π.app j) x,
-  have h1: φ 0 = 0,
-  { ext j,
-    exact (L.cone.π.app j).2 },
-  have h2: φ (c • x) = c • φ x,
-  { ext j,
-    apply comphaus_filtered_pseudo_normed_group_with_Tinv_hom.map_zsmul },
-  apply_fun φ at hx,
-  simp only [h1, h2, pi.zero_def, function.funext_iff, pi.smul_apply, smul_eq_zero] at hx,
-  by_cases hc : c = 0,
-  { apply or.intro_left, exact hc},
-  { simp only [hc, false_or] at hx,
-    apply or.intro_right,
-    apply h_inj,
-    funext j,
-    specialize hx j,
-    simp only [comphaus_filtered_pseudo_normed_group_with_Tinv_hom.map_zero],
-    exact hx },
-end
 
-instance (S : Profinite.{u}) : preserves_limit (fintype_diagram S ⋙ Fintype_Lbar.{u u} r') (category_theory.forget.{u+1 u u}(ProFiltPseuNormGrpWithTinv₁.{u} r')) := sorry
+--[FAE] The following might be useless because the instance on line 89 might be false
+-- lemma limit_torsion_free_to_PFPNGwithTinv {C : Type u} [category_theory.small_category C]
+--   (J : C ⥤ (ProFiltPseuNormGrpWithTinv₁.{u} r'))
+--   [preserves_limit J
+--     (category_theory.forget.{u+1 u u}(ProFiltPseuNormGrpWithTinv₁.{u} r'))]
+--   (h_tf : ∀ j, no_zero_smul_divisors ℤ (J.obj j))
+--   : no_zero_smul_divisors ℤ (limit J).M :=
+-- begin
+--   let L := get_limit_cone _,
+--   have h_inj := @concrete.to_product_injective_of_is_limit (ProFiltPseuNormGrpWithTinv₁.{u} r') _ _ C _ J _ L.cone L.is_limit,
+--   fconstructor,
+--   intros c x hx,
+--   let φ := λ x : limit J, λ j, (L.cone.π.app j) x,
+--   have h1: φ 0 = 0,
+--   { ext j,
+--     exact (L.cone.π.app j).2 },
+--   have h2: φ (c • x) = c • φ x,
+--   { ext j,
+--     apply comphaus_filtered_pseudo_normed_group_with_Tinv_hom.map_zsmul },
+--   apply_fun φ at hx,
+--   simp only [h1, h2, pi.zero_def, function.funext_iff, pi.smul_apply, smul_eq_zero] at hx,
+--   by_cases hc : c = 0,
+--   { apply or.intro_left, exact hc},
+--   { simp only [hc, false_or] at hx,
+--     apply or.intro_right,
+--     apply h_inj,
+--     funext j,
+--     specialize hx j,
+--     simp only [comphaus_filtered_pseudo_normed_group_with_Tinv_hom.map_zero],
+--     exact hx },
+-- end
+
+-- instance (S : Profinite.{u}) : preserves_limit (fintype_diagram S ⋙ Fintype_Lbar.{u u} r') (category_theory.forget.{u+1 u u}(ProFiltPseuNormGrpWithTinv₁.{u} r')) := sorry
+
+-- instance (S : Profinite.{u}) : no_zero_smul_divisors ℤ ((extend (Fintype_Lbar.{u u} r')).obj S) :=
+-- begin
+--   apply limit_torsion_free_to_PFPNGwithTinv (fintype_diagram S ⋙ Fintype_Lbar.{u u} r'),
+--   intro _,
+--   exact Fintype.Lbar_no_zero_smul_divisors.{u} _ r',
+-- end
+
+section bounded
+
+-- open profinitely_filtered_pseudo_normed_group_with_Tinv
+
+-- variables (C : Type u) [category_theory.small_category C]
+-- variable (S : Profinite.{u})
+
+variables (r' : ℝ≥0) [fact (0 < r')]
+
+-- variable (J : C ⥤ (ProFiltPseuNormGrpWithTinv₁.{u} r'))
+-- variable (J : (discrete_quotient.{u} S) ⥤ (ProFiltPseuNormGrpWithTinv.{u} r'))
+
+def to_Ab : (ProFiltPseuNormGrpWithTinv₁.{u} r') ⥤ Ab.{u} :=
+{ obj := λ M, AddCommGroup.of M,
+  map := λ M N f, f.to_add_monoid_hom }
+
+def to_PseuNormGrp₁ : (ProFiltPseuNormGrpWithTinv₁.{u} r') ⥤ PseuNormGrp₁.{u} :=
+{ obj := λ X,
+  { carrier := X.1,
+  str := sorry,
+  exhaustive' := sorry },
+  map := sorry,
+  map_id' := sorry,
+  map_comp' := sorry }
+
+-- variable (L : limit_cone.{u} (J ⋙ (to_Ab r')))
+-- variable (L' : limit_cone.{u} (J ⋙ (to_PseuNormGrp₁.{u} r') ⋙ (PseuNormGrp₁.to_Ab)))
+
+
+-- def bounded_cone_point : (ProFiltPseuNormGrpWithTinv₁.{u} r') := sorry
+
+-- { x | ∃ c, ∀ j, C.cone.π.app j x ∈ pseudo_normed_group.filtration (K.obj j) c },
+-- variable (X : C)
+-- variable (c : ℝ≥0)
+-- -- variable (a)
+-- #check pseudo_normed_group.filtration (J.obj X) c
+-- variable (y : L.cone.1)
+-- #check L.cone.π.app X y ∈ (pseudo_normed_group.filtration (J.obj X) c)
+
+-- #check {y : L.cone.1 | ∃ c, ∀ X, L.cone.π.app X y ∈ (pseudo_normed_group.filtration (J.obj X) c)}
+
+
+
+-- def bounded_cone : cone.{u} J :=
+-- { X :=
+--   { M := @PseuNormGrp₁.bounded_elements.{u} C _ (J ⋙ (to_PseuNormGrp₁.{u} r')) L',
+--   str := sorry,
+--   exhaustive' := sorry },
+--   π := sorry }
+
+-- #check bounded_cone.{u} C _ J
+-- #check (@PseuNormGrp₁.bounded_cone.{u} C _ (J ⋙ (to_PseuNormGrp₁.{u} r')) L').1
+
+-- def bounded_cone_is_limit : is_limit (bounded_cone.{u} C r' J) := sorry
 
 instance (S : Profinite.{u}) : no_zero_smul_divisors ℤ ((extend (Fintype_Lbar.{u u} r')).obj S) :=
 begin
-  apply limit_torsion_free_to_PFPNGwithTinv (fintype_diagram S ⋙ Fintype_Lbar.{u u} r'),
-  intro _,
-  exact Fintype.Lbar_no_zero_smul_divisors.{u} _ r',
+  -- have bdd_L := bounded_cone.{u} (discrete_quotient.{u} ↥S) r'
+  --   (fintype_diagram.{u} S ⋙ (Fintype_Lbar.{u u} r')),
+  have lim_to_Ab : limit_cone.{u u u u+1}
+    ((S.fintype_diagram ⋙ Fintype_Lbar.{u u} r' ⋙ to_PseuNormGrp₁.{u} r')
+      ⋙ PseuNormGrp₁.to_Ab.{u}), sorry,--combine extend with the fact that
+        -- PFPNG_withTinv ≫ PNG₁ creates limits
+  have bdd_L := @PseuNormGrp₁.bounded_cone.{u} (discrete_quotient.{u} ↥S) _
+    (fintype_diagram.{u} S ⋙ (Fintype_Lbar.{u u} r' ⋙ (to_PseuNormGrp₁.{u} r'))) lim_to_Ab,
+  have h_tf : no_zero_smul_divisors ℤ bdd_L.1, sorry,--this is `lemma limit_torsion_free_to_Ab` above
+  have iso : ((extend (Fintype_Lbar.{u u} r')).obj S).1 ≃ₗ[ℤ] bdd_L.1, sorry,--uniqueness of limits
+  refine @function.injective.no_zero_smul_divisors ℤ _ _ _ _ _ _ _ h_tf iso.1
+   iso.injective iso.map_zero (linear_equiv.map_smul _),
 end
+
+end bounded
