@@ -264,21 +264,30 @@ def e : (F₀ F) ⋙ homology_functor ≅ (iso_datum F).H := nat_iso.of_componen
 (λ j, ((iso_datum F).apply_exact_functor ((evaluation J C).obj j)).iso.symm)
 sorry
 
+lemma goal : preserves_colimit (F₀ F) short_complex.homology_functor :=
+⟨λ s hs, begin
+  have e₁ : s ≅ colimit_cocone.cocone (F₀ F),
+  { refine is_initial.unique_up_to_iso _ _,
+    all_goals { equiv_rw (cocone.is_colimit_equiv_is_initial _).symm, },
+    exacts [hs, (colimit_cocone (F₀ F)).is_colimit], },
+  suffices : is_colimit (homology_functor.map_cocone (colimit_cocone.cocone (F₀ F))),
+  { exact is_colimit.of_iso_colimit this
+      ((cocones.functoriality _ homology_functor).map_iso e₁.symm), },
+  equiv_rw (is_colimit.precompose_hom_equiv (e F).symm _).symm,
+  sorry,
+end⟩
+
 end homology_functor_preserves_colimit
 
 instance (F₀ : J ⥤ short_complex C) : preserves_colimit F₀ short_complex.homology_functor :=
-⟨λ s hs, begin
-  /- TODO: it would be better to reduce to the case `F₀` is `F₀ F` for some
-    `(F : short_complex (J ⥤ C))` with the definitions above -/
-  have e : s ≅ colimit_cocone.cocone F₀,
-  { refine is_initial.unique_up_to_iso _ _,
-    all_goals { equiv_rw (cocone.is_colimit_equiv_is_initial _).symm, },
-    exacts [hs, (colimit_cocone F₀).is_colimit], },
-  suffices : is_colimit (homology_functor.map_cocone (colimit_cocone.cocone F₀)),
-  { exact is_colimit.of_iso_colimit this
-      ((cocones.functoriality _ homology_functor).map_iso e.symm), },
-  sorry,
-end⟩
+begin
+  let F := functor_category_equivalence.inverse.obj F₀,
+  haveI : preserves_colimit (homology_functor_preserves_colimit.F₀ F) homology_functor
+    := homology_functor_preserves_colimit.goal F,
+  have e₂ : homology_functor_preserves_colimit.F₀ F ≅ F₀ :=
+    functor_category_equivalence.counit_iso.app F₀,
+  exact preserves_colimit_of_iso_diagram short_complex.homology_functor e₂,
+end
 
 instance : preserves_colimits_of_shape J
   (short_complex.homology_functor : short_complex C ⥤ C) := ⟨λ F, infer_instance⟩
