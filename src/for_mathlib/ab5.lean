@@ -62,23 +62,12 @@ begin
   refl
 end
 
-local attribute [reassoc] nat_trans.comp_app
-
-/- J. Riou : plan for this result,
-  1) show the analogue of this for `short_complex.homlogy_functor : short_complex C ⥤ C`
-  2) check that `short_complex.functor_homological_complex` preserves colimit
-    using projections, see file `short_complex_colimits.lean`. -/
-
-noncomputable! -- UUUUGGGGHHH
+noncomputable
 instance homology_functor_preserves_filtered_colimit
   {M : Type} (c : complex_shape M) (i : M)
   (F : J ⥤ homological_complex A c) :
   preserves_colimit F (homology_functor A c i) :=
-begin
-  haveI : preserves_colimit (F ⋙ short_complex.functor_homological_complex A c i)
-    short_complex.homology_functor := sorry,
-  exact preserves_colimit_of_nat_iso F (short_complex.homology_functor_iso A c i).symm,
-end
+preserves_colimit_of_nat_iso F (short_complex.homology_functor_iso A c i).symm
 
 noncomputable
 instance homology_functor_preserves_filtered_colimits

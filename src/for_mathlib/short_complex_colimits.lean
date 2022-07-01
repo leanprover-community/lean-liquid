@@ -6,7 +6,11 @@ noncomputable theory
 open category_theory category_theory.category category_theory.limits
 open_locale zero_object
 
+universes v
+
 namespace short_complex
+
+section construction
 
 variables {C : Type*} [category C] [has_zero_morphisms C]
 
@@ -34,8 +38,6 @@ def φ₁₂ : (π₁ : short_complex C ⥤ C) ⟶ π₂ :=
 def φ₂₃ : (π₂ : short_complex C ⥤ C) ⟶ π₃ :=
 { app := λ S, S.1.g,
   naturality' := λ S₁ S₂ f, (composable_morphisms.hom.comm₂₃ f).symm, }
-
-section construction
 
 variables {J : Type*} [category J] (F : J ⥤ short_complex C)
   [has_colimit (F ⋙ π₁)] [has_colimit (F ⋙ π₂)] [has_colimit (F ⋙ π₃)]
@@ -128,6 +130,7 @@ end construction
 
 section preserves
 
+variables {C : Type*} [category C] [has_zero_morphisms C]
 variables {J D : Type*} [category J] [category D]
 
 def π₁₂₃_reflects_colimits {F : J ⥤ short_complex C} (s : cocone F)
@@ -172,7 +175,8 @@ end preserves
 
 section functor_homological_complex
 
-variables {M : Type*} {c : complex_shape M} [abelian C]
+variables {C : Type*} [category C] [abelian C]
+variables {M : Type*} {c : complex_shape M}
 variables {J : Type*} [category J]
 
 instance zero_preserves_colimits_of_shape {D : Type*} [category D]:
@@ -246,5 +250,26 @@ begin
 end
 
 end functor_homological_complex
+
+section functor_homology
+
+variables {C : Type*} [category.{v} C] [abelian C]
+variables {M : Type*} {c : complex_shape M}
+  {J : Type v} [small_category J] [is_filtered J]
+  (F : J ⥤ short_complex C)
+  [has_colimits_of_shape J C]
+  [preserves_finite_limits (limits.colim : (J ⥤ C) ⥤ C)]
+  [preserves_finite_colimits (limits.colim : (J ⥤ C) ⥤ C)]
+
+instance : preserves_colimit F short_complex.homology_functor :=
+⟨λ s hs, begin
+  sorry,
+end⟩
+
+instance : preserves_colimits_of_shape J
+  (short_complex.homology_functor : short_complex C ⥤ C) := ⟨λ F, infer_instance⟩
+
+end functor_homology
+
 
 end short_complex
