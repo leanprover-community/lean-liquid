@@ -3,6 +3,7 @@ import for_mathlib.short_complex
 noncomputable theory
 
 open category_theory category_theory.category category_theory.limits
+open_locale zero_object
 
 namespace short_complex
 
@@ -167,5 +168,84 @@ def preserves_colimits_of_shape_of_projections (F : D ⥤ short_complex C)
 ⟨by { intro G, apply π₁₂₃_reflect_preserves_colimits; apply_instance, }⟩
 
 end preserves
+
+section functor_homological_complex
+
+variables {M : Type*} {c : complex_shape M} [has_zero_object C]
+variables {J : Type*} [category J]
+
+instance (i : M) : preserves_colimits_of_shape J (homological_complex.eval C c i) := sorry
+
+instance zero_preserves_colimits_of_shape {D : Type*} [category D]:
+  preserves_colimits_of_shape J (0 : D ⥤ C) :=
+⟨λ F, ⟨λ s hs,
+{ desc := λ t, 0,
+  fac' := λ t j, begin
+    dsimp,
+    apply is_zero.eq_of_src,
+    apply is_zero.obj,
+    apply is_zero_zero,
+  end,
+  uniq' := λ t m j, begin
+    dsimp,
+    apply is_zero.eq_of_src,
+    apply is_zero.obj,
+    apply is_zero_zero,
+  end, }⟩⟩
+
+lemma functor_homological_complex_π₁_iso_zero (i : M) (h : c.prev i = none) :
+  functor_homological_complex C c i ⋙ π₁ ≅ 0 :=
+begin
+  refine is_zero.iso _ (is_zero_zero _),
+  rw is_zero.iff_id_eq_zero,
+  ext X,
+  apply is_zero.eq_of_src,
+  exact is_zero.of_iso (is_zero_zero _) (X.X_prev_iso_zero h),
+end
+
+lemma functor_homological_complex_π₃_iso_zero (i : M) (h : c.next i = none) :
+  functor_homological_complex C c i ⋙ π₃ ≅ 0 :=
+begin
+  refine is_zero.iso _ (is_zero_zero _),
+  rw is_zero.iff_id_eq_zero,
+  ext X,
+  apply is_zero.eq_of_src,
+  exact is_zero.of_iso (is_zero_zero _) (X.X_next_iso_zero h),
+end
+
+lemma functor_homological_complex_π₁_iso_eval (i j : M) (hij : c.rel j i) :
+  functor_homological_complex C c i ⋙ π₁ ≅ homological_complex.eval C c j :=
+nat_iso.of_components (λ X, X.X_prev_iso hij)
+(λ X Y f, begin
+  dsimp,
+  simp only [homological_complex.hom.prev_eq f hij, assoc, iso.inv_hom_id, comp_id],
+end)
+
+lemma functor_homological_complex_π₃_iso_eval (i j : M) (hij : c.rel i j) :
+  functor_homological_complex C c i ⋙ π₃ ≅ homological_complex.eval C c j :=
+nat_iso.of_components (λ X, X.X_next_iso hij)
+(λ X Y f, begin
+  dsimp,
+  simp only [homological_complex.hom.next_eq f hij, assoc, iso.inv_hom_id, comp_id],
+end)
+
+instance (i : M ):
+  preserves_colimits_of_shape J (short_complex.functor_homological_complex C c i) :=
+begin
+  apply preserves_colimits_of_shape_of_projections,
+  { rcases h : c.prev i with _ | ⟨j, hij⟩,
+    { exact preserves_colimits_of_shape_of_nat_iso
+        (functor_homological_complex_π₁_iso_zero i h).symm, },
+    { exact preserves_colimits_of_shape_of_nat_iso
+        (functor_homological_complex_π₁_iso_eval i j hij).symm, }, },
+  { exact (infer_instance : preserves_colimits_of_shape J (homological_complex.eval C c i)), },
+  { rcases h : c.next i with _ | ⟨j, hij⟩,
+    { exact preserves_colimits_of_shape_of_nat_iso
+        (functor_homological_complex_π₃_iso_zero i h).symm, },
+    { exact preserves_colimits_of_shape_of_nat_iso
+        (functor_homological_complex_π₃_iso_eval i j hij).symm, }, },
+end
+
+end functor_homological_complex
 
 end short_complex

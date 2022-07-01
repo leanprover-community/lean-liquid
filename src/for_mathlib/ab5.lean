@@ -3,6 +3,7 @@ import for_mathlib.ab4
 import for_mathlib.abelian_sheaves.functor_category
 import for_mathlib.homological_complex2
 import category_theory.limits.preserves.filtered
+import for_mathlib.short_complex_colimits
 
 namespace category_theory
 
@@ -74,41 +75,9 @@ instance homology_functor_preserves_filtered_colimit
   (F : J ⥤ homological_complex A c) :
   preserves_colimit F (homology_functor A c i) :=
 begin
-  let F' := homological_complex.eval_functor_equiv.functor.obj F,
-  let q := (colimit_homology_functor_iso A J c i).app F',
-  dsimp at q,
-  apply preserves_colimit_of_preserves_colimit_cocone (colimit.is_colimit F),
-  let e : F ⋙ homology_functor A c i ≅ F'.homology i :=
-    homological_complex.eval_functor_homology_iso _ _,
-  apply (limits.is_colimit.precompose_inv_equiv e
-    ((homology_functor A c i).map_cocone (colimit.cocone F))).to_fun,
-  suffices y : colimit.cocone _ ≅
-    (cocones.precompose e.inv).obj
-    ((homology_functor A c i).map_cocone (colimit.cocone F)),
-  { apply limits.is_colimit.of_iso_colimit (colimit.is_colimit _) y },
-  refine cocones.ext (q ≪≫ _) _,
-  { apply (homology_functor A c i).map_iso,
-    exact (eval_functor_colimit_iso _ _ _ _).symm },
-  { intro j,
-    dsimp,
-
-    -- Not sure if the following is a sensible approach...
-    rw [←iso.app_inv, iso.eq_inv_comp],
-    ext,
-    simp only [homology.map_ι, category.assoc],
-    rw [homology.π'_ι_assoc, cokernel.π_desc],
-    dsimp,
-  -- J. Riou: what follows was broken by the new definition of homology_functor_iso
-  -- A more basic approach to the proof of this instance should be possible.
-  --
-  --  dsimp [colimit_homology_functor_iso, colim.homology_functor_iso],
-  --  erw [homology.lift_ι_assoc],
-  --  slice_lhs 3 4 { rw colimit.ι_map, },
-  --  simp only [category.assoc],
-  --  simp only [←preserves_cokernel.iso_inv],
-  --  rw [is_iso.iso.inv_inv],
-
-    sorry }
+  haveI : preserves_colimit (F ⋙ short_complex.functor_homological_complex A c i)
+    short_complex.homology_functor := sorry,
+  exact preserves_colimit_of_nat_iso F (short_complex.homology_functor_iso A c i).symm,
 end
 
 noncomputable
