@@ -16,7 +16,6 @@ set_option pp.universes true
 
 open Lbar Profinite CommGroup category_theory.limits
 
---[FAE] not needed for LTE, may be for mathlib?
 lemma limit_torsion_free_to_Ab
   (C : Type u) [category_theory.small_category C] (J : C ⥤ Ab.{u})
   (h_tf : ∀ j, no_zero_smul_divisors ℤ (J.obj j))
@@ -157,11 +156,12 @@ begin
   --   (fintype_diagram.{u} S ⋙ (Fintype_Lbar.{u u} r')),
   have lim_to_Ab : limit_cone.{u u u u+1}
     ((S.fintype_diagram ⋙ Fintype_Lbar.{u u} r' ⋙ to_PseuNormGrp₁.{u} r')
-      ⋙ PseuNormGrp₁.to_Ab.{u}), sorry,
+      ⋙ PseuNormGrp₁.to_Ab.{u}), sorry,--combine extend with the fact that
+        -- PFPNG_withTinv ≫ PNG₁ creates limits
   have bdd_L := @PseuNormGrp₁.bounded_cone.{u} (discrete_quotient.{u} ↥S) _
     (fintype_diagram.{u} S ⋙ (Fintype_Lbar.{u u} r' ⋙ (to_PseuNormGrp₁.{u} r'))) lim_to_Ab,
-  have h_tf : no_zero_smul_divisors ℤ bdd_L.1, sorry,
-  have iso : ((extend (Fintype_Lbar.{u u} r')).obj S).1 ≃ₗ[ℤ] bdd_L.1, sorry,
+  have h_tf : no_zero_smul_divisors ℤ bdd_L.1, sorry,--this is `lemma limit_torsion_free_to_Ab` above
+  have iso : ((extend (Fintype_Lbar.{u u} r')).obj S).1 ≃ₗ[ℤ] bdd_L.1, sorry,--uniqueness of limits
   refine @function.injective.no_zero_smul_divisors ℤ _ _ _ _ _ _ _ h_tf iso.1
    iso.injective iso.map_zero (linear_equiv.map_smul _),
 end
