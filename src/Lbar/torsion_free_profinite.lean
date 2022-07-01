@@ -112,6 +112,8 @@ def to_Ab : (ProFiltPseuNormGrpWithTinv₁.{u} r') ⥤ Ab.{u} :=
   map := λ M N f, f.to_add_monoid_hom }
 
 def to_PseuNormGrp₁ : (ProFiltPseuNormGrpWithTinv₁.{u} r') ⥤ PseuNormGrp₁.{u} :=
+PFPNGT₁_to_CHFPNG₁ₑₗ _ ⋙ CompHausFiltPseuNormGrp₁.to_PNG₁
+/-
 { obj := λ X,
   { carrier := X.1,
   str := sorry,
@@ -119,6 +121,7 @@ def to_PseuNormGrp₁ : (ProFiltPseuNormGrpWithTinv₁.{u} r') ⥤ PseuNormGrp�
   map := sorry,
   map_id' := sorry,
   map_comp' := sorry }
+-/
 
 -- variable (L : limit_cone.{u} (J ⋙ (to_Ab r')))
 -- variable (L' : limit_cone.{u} (J ⋙ (to_PseuNormGrp₁.{u} r') ⋙ (PseuNormGrp₁.to_Ab)))
@@ -150,8 +153,41 @@ def to_PseuNormGrp₁ : (ProFiltPseuNormGrpWithTinv₁.{u} r') ⥤ PseuNormGrp�
 
 -- def bounded_cone_is_limit : is_limit (bounded_cone.{u} C r' J) := sorry
 
+instance preserves_limits : preserves_limits (to_PseuNormGrp₁ r') :=
+category_theory.limits.comp_preserves_limits _ _
+
 instance (S : Profinite.{u}) : no_zero_smul_divisors ℤ ((extend (Fintype_Lbar.{u u} r')).obj S) :=
 begin
+  /-
+  AT: Here is the skeleton I would recommend.
+
+  -- START
+  let T := Ab.explicit_limit_cone.{u u} ((S.fintype_diagram ⋙ Fintype_Lbar.{u u} r' ⋙
+    to_PseuNormGrp₁ _) ⋙ PseuNormGrp₁.to_Ab),
+  let hT : is_limit T := Ab.explicit_limit_cone_is_limit _,
+  let E := PseuNormGrp₁.bounded_cone ⟨T,hT⟩,
+  let hE : is_limit E := PseuNormGrp₁.bounded_cone_is_limit _,
+  suffices claim : no_zero_smul_divisors ℤ E.X,
+  { resetI,
+    let iso : (to_PseuNormGrp₁ _).obj ((extend (Fintype_Lbar.{u u} r')).obj S) ≅ E.X :=
+      (is_limit_of_preserves (to_PseuNormGrp₁ _)
+      (limit.is_limit _)).cone_point_unique_up_to_iso hE,
+    have : function.injective iso.hom, sorry,
+    apply function.injective.no_zero_smul_divisors iso.hom this,
+    any_goals { apply_instance },
+    { sorry },
+    { sorry } },
+  let ι : E.X →+ T.X := add_subgroup.subtype _,
+  apply function.injective.no_zero_smul_divisors ι (subtype.val_injective.{u+1}) ι.map_zero,
+  any_goals { apply_instance },
+  { intros c x, apply ι.map_zsmul, },
+  sorry,
+  --At this point, we have to show that the point of the explicit limit cone of plain
+  --abelian groups is torsion-free. This should already be defeq to a subtype of the product!
+  --The finite case should then give us the result.
+  --END
+  -/
+
   -- have bdd_L := bounded_cone.{u} (discrete_quotient.{u} ↥S) r'
   --   (fintype_diagram.{u} S ⋙ (Fintype_Lbar.{u u} r')),
   have lim_to_Ab : limit_cone.{u u u u+1}
