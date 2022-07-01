@@ -1,4 +1,5 @@
 import for_mathlib.short_complex
+import for_mathlib.homological_complex_abelian
 
 noncomputable theory
 
@@ -171,10 +172,8 @@ end preserves
 
 section functor_homological_complex
 
-variables {M : Type*} {c : complex_shape M} [has_zero_object C]
+variables {M : Type*} {c : complex_shape M} [abelian C]
 variables {J : Type*} [category J]
-
-instance (i : M) : preserves_colimits_of_shape J (homological_complex.eval C c i) := sorry
 
 instance zero_preserves_colimits_of_shape {D : Type*} [category D]:
   preserves_colimits_of_shape J (0 : D ⥤ C) :=
@@ -229,7 +228,7 @@ nat_iso.of_components (λ X, X.X_next_iso hij)
   simp only [homological_complex.hom.next_eq f hij, assoc, iso.inv_hom_id, comp_id],
 end)
 
-instance (i : M ):
+instance (i : M ) [has_colimits_of_shape J C] :
   preserves_colimits_of_shape J (short_complex.functor_homological_complex C c i) :=
 begin
   apply preserves_colimits_of_shape_of_projections,
