@@ -21,21 +21,6 @@ variables {C}
 
 namespace category_theory
 
-namespace functor
-
-@[simps]
-def map_short_complex [has_zero_morphisms C] [has_zero_morphisms D] (F : C ⥤ D)
-  [F.preserves_zero_morphisms] :
-  short_complex C ⥤ short_complex D :=
-full_subcategory.lift _ (induced_functor _ ⋙ F.map_composable_morphisms)
-(λ X, begin
-  have h := X.2,
-  dsimp [composable_morphisms.zero] at h ⊢,
-  rw [← F.map_comp, h, F.map_zero],
-end)
-
-end functor
-
 namespace arrow
 
 namespace hom
@@ -197,6 +182,40 @@ def homology_functor_iso [abelian C] {M : Type*} (c : complex_shape M) (i : M) :
 nat_iso.of_components (λ X, iso.refl _)
   (λ X Y f, by { ext, simpa only [iso.refl_hom, id_comp, comp_id], })
 
+end short_complex
+
+namespace category_theory
+
+namespace functor
+
+@[simps]
+def map_short_complex [has_zero_morphisms C] [has_zero_morphisms D] (F : C ⥤ D)
+  [F.preserves_zero_morphisms] :
+  short_complex C ⥤ short_complex D :=
+full_subcategory.lift _ (induced_functor _ ⋙ F.map_composable_morphisms)
+(λ X, begin
+  have h := X.2,
+  dsimp [composable_morphisms.zero] at h ⊢,
+  rw [← F.map_comp, h, F.map_zero],
+end)
+
+end functor
+
+namespace nat_trans
+
+def map_short_complex [has_zero_morphisms C] [has_zero_morphisms D] {F G : C ⥤ D}
+  [F.preserves_zero_morphisms] [G.preserves_zero_morphisms] (φ : F ⟶ G) :
+  F.map_short_complex ⟶ G.map_short_complex :=
+{ app := λ X, ⟨φ.app _, φ.app _, φ.app _, φ.naturality _, φ.naturality _⟩, }
+
+end nat_trans
+
+end category_theory
+
+open category_theory
+
+namespace short_complex
+
 variable {C}
 
 def functor_homological_complex_map [preadditive C] [has_zero_object C]
@@ -216,5 +235,15 @@ nat_iso.of_components
     { simp only [functor.comp_map, comp_τ₃, functor.map_short_complex_map_τ₃,
         functor_homological_complex_map_τ₃, iso_mk_hom_τ₃, F.map_next], },
   end)
+
+lemma naturality_functor_homological_complex_map [preadditive C] [has_zero_object C]
+  [preadditive D] [has_zero_object D] {F G : C ⥤ D} [F.additive] [G.additive]
+  {M : Type*} (c : complex_shape M) (i : M) (φ : F ⟶ G) (X : homological_complex C c) :
+  (nat_trans.map_short_complex φ).app
+    ((short_complex.functor_homological_complex C c i).obj X) ≫
+    (short_complex.functor_homological_complex_map G c i).hom.app X =
+  (short_complex.functor_homological_complex_map F c i).hom.app X ≫
+    (short_complex.functor_homological_complex D c i).map
+      ((nat_trans.map_homological_complex φ c).app X) := sorry
 
 end short_complex

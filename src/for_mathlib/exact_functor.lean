@@ -203,13 +203,33 @@ end
 
 variables {F G}
 
+def naturality_homology_nat_iso_app (S : short_complex A) :
+  φ.app (S.homology) ≫ G.homology_nat_iso.hom.app S =
+    F.homology_nat_iso.hom.app S ≫
+      short_complex.homology_functor.map (φ.map_short_complex.app S) :=
+begin
+  sorry
+end
+
 /-- naturality of `homology_functor_iso` on the variable `F` -/
-lemma naturality_homology_functor_iso_app {M : Type*} {c : complex_shape M}
+lemma naturality_homology_functor_iso_hom_app {M : Type*} {c : complex_shape M}
   (X : homological_complex A c) (i : M) :
   φ.app ((homology_functor A c i).obj X) ≫ (G.homology_functor_iso c i).hom.app X =
   (F.homology_functor_iso c i).hom.app X ≫
     (homology_functor B c i).map ((nat_trans.map_homological_complex φ c).app X) :=
-sorry
+begin
+  dsimp only [homology_functor_iso, iso.trans, iso_whisker_left, whiskering_left,
+    whisker_left, iso_whisker_right, whiskering_right, whisker_right, map_iso,
+    associator, iso.symm, short_complex.homology_functor_iso,
+    nat_iso.of_components, iso.refl],
+  simp only [category.assoc, nat_trans.comp_app, category.id_comp, F.map_id, G.map_id],
+  erw [category.id_comp, category.id_comp, category.comp_id],
+  slice_lhs 1 2 { erw naturality_homology_nat_iso_app φ
+    ((short_complex.functor_homological_complex A c i).obj X), },
+  rw [category.assoc, ← short_complex.homology_functor.map_comp],
+    simpa only [short_complex.naturality_functor_homological_complex_map,
+      short_complex.homology_functor.map_comp],
+end
 
 lemma naturality_homology_functor_iso {M : Type*} (c : complex_shape M) (i : M) :
   𝟙 (homology_functor A c i) ◫ φ ≫ (G.homology_functor_iso c i).hom =
@@ -220,7 +240,7 @@ begin
   simp only [nat_trans.comp_app, nat_trans.hcomp_app, nat_trans.id_app, G.map_id,
     category.comp_id],
   erw category.id_comp,
-  apply naturality_homology_functor_iso_app,
+  apply naturality_homology_functor_iso_hom_app,
 end
 
 end functor
