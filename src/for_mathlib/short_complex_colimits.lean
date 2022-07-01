@@ -1,5 +1,8 @@
-import for_mathlib.short_complex
+import for_mathlib.short_complex_projections
 import for_mathlib.homological_complex_abelian
+import for_mathlib.homology_map_datum
+import for_mathlib.abelian_sheaves.functor_category
+import for_mathlib.short_complex_functor_category
 
 noncomputable theory
 
@@ -13,32 +16,6 @@ namespace short_complex
 section construction
 
 variables {C : Type*} [category C] [has_zero_morphisms C]
-
-@[simps]
-def π₁ : short_complex C ⥤ C :=
-{ obj := λ S, S.1.X,
-  map := λ S₁ S₂ f, f.τ₁, }
-
-@[simps]
-def π₂ : short_complex C ⥤ C :=
-{ obj := λ S, S.1.Y,
-  map := λ S₁ S₂ f, f.τ₂, }
-
-@[simps]
-def π₃ : short_complex C ⥤ C :=
-{ obj := λ S, S.1.Z,
-  map := λ S₁ S₂ f, f.τ₃, }
-
-@[simps]
-def φ₁₂ : (π₁ : short_complex C ⥤ C) ⟶ π₂ :=
-{ app := λ S, S.1.f,
-  naturality' := λ S₁ S₂ f, (composable_morphisms.hom.comm₁₂ f).symm, }
-
-@[simps]
-def φ₂₃ : (π₂ : short_complex C ⥤ C) ⟶ π₃ :=
-{ app := λ S, S.1.g,
-  naturality' := λ S₁ S₂ f, (composable_morphisms.hom.comm₂₃ f).symm, }
-
 variables {J : Type*} [category J] (F : J ⥤ short_complex C)
   [has_colimit (F ⋙ π₁)] [has_colimit (F ⋙ π₂)] [has_colimit (F ⋙ π₃)]
 
@@ -232,7 +209,7 @@ nat_iso.of_components (λ X, X.X_next_iso hij)
   simp only [homological_complex.hom.next_eq f hij, assoc, iso.inv_hom_id, comp_id],
 end)
 
-instance (i : M ) [has_colimits_of_shape J C] :
+instance (i : M) [has_colimits_of_shape J C] :
   preserves_colimits_of_shape J (short_complex.functor_homological_complex C c i) :=
 begin
   apply preserves_colimits_of_shape_of_projections,
@@ -256,13 +233,50 @@ section functor_homology
 variables {C : Type*} [category.{v} C] [abelian C]
 variables {M : Type*} {c : complex_shape M}
   {J : Type v} [small_category J] [is_filtered J]
-  (F : J ⥤ short_complex C)
   [has_colimits_of_shape J C]
   [preserves_finite_limits (limits.colim : (J ⥤ C) ⥤ C)]
   [preserves_finite_colimits (limits.colim : (J ⥤ C) ⥤ C)]
 
-instance : preserves_colimit F short_complex.homology_functor :=
+namespace homology_functor_preserves_colimit
+
+variable (F : short_complex (J ⥤ C))
+
+def iso_datum := homology_iso_datum.tautological' F.1.f F.1.g F.2
+
+instance (j : J) : preserves_finite_limits ((evaluation J C).obj j) :=
+⟨by { intro F, introI, introI, apply_instance, }⟩
+instance (j : J) : preserves_finite_colimits ((evaluation J C).obj j) :=
+⟨by { intro F, introI, introI, apply_instance, }⟩
+instance (j : J) : functor.additive ((evaluation J C).obj j) := { }
+instance colim_additive : functor.additive (colim : (J ⥤ C) ⥤ C) := { }
+
+def iso_data (j : J) := (iso_datum F).apply_exact_functor ((evaluation J C).obj j)
+
+def iso_datum₀ := (iso_datum F).apply_exact_functor (colim : (J ⥤ C) ⥤ C)
+
+def sanity_check_K : colimit ((iso_datum F).K) ≅ (iso_datum₀ F).K := iso.refl _
+def sanity_check_H : colimit ((iso_datum F).H) ≅ (iso_datum₀ F).H := iso.refl _
+def sanity_check_H' : (iso_datum F).H ≅ _root_.homology F.1.f F.1.g F.2 := iso.refl _
+
+def F₀ := functor_category_equivalence.functor.obj F
+
+def e : (F₀ F) ⋙ homology_functor ≅ (iso_datum F).H := nat_iso.of_components
+(λ j, ((iso_datum F).apply_exact_functor ((evaluation J C).obj j)).iso.symm)
+sorry
+
+end homology_functor_preserves_colimit
+
+instance (F₀ : J ⥤ short_complex C) : preserves_colimit F₀ short_complex.homology_functor :=
 ⟨λ s hs, begin
+  /- TODO: it would be better to reduce to the case `F₀` is `F₀ F` for some
+    `(F : short_complex (J ⥤ C))` with the definitions above -/
+  have e : s ≅ colimit_cocone.cocone F₀,
+  { refine is_initial.unique_up_to_iso _ _,
+    all_goals { equiv_rw (cocone.is_colimit_equiv_is_initial _).symm, },
+    exacts [hs, (colimit_cocone F₀).is_colimit], },
+  suffices : is_colimit (homology_functor.map_cocone (colimit_cocone.cocone F₀)),
+  { exact is_colimit.of_iso_colimit this
+      ((cocones.functoriality _ homology_functor).map_iso e.symm), },
   sorry,
 end⟩
 
