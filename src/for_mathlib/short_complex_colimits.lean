@@ -2,6 +2,7 @@ import for_mathlib.short_complex_projections
 import for_mathlib.homological_complex_abelian
 import for_mathlib.homology_map_datum
 import for_mathlib.abelian_sheaves.functor_category
+import for_mathlib.short_complex_functor_category
 
 noncomputable theory
 
@@ -208,7 +209,7 @@ nat_iso.of_components (λ X, X.X_next_iso hij)
   simp only [homological_complex.hom.next_eq f hij, assoc, iso.inv_hom_id, comp_id],
 end)
 
-instance (i : M ) [has_colimits_of_shape J C] :
+instance (i : M) [has_colimits_of_shape J C] :
   preserves_colimits_of_shape J (short_complex.functor_homological_complex C c i) :=
 begin
   apply preserves_colimits_of_shape_of_projections,
@@ -246,9 +247,15 @@ instance : preserves_colimit F short_complex.homology_functor :=
   suffices : is_colimit (homology_functor.map_cocone (colimit_cocone.cocone F)),
   { exact is_colimit.of_iso_colimit this
       ((cocones.functoriality _ homology_functor).map_iso e.symm), },
-  let iso_data := λ j, homology_iso_datum.tautological (F.obj j).1.f (F.obj j).1.g (F.obj j).2,
---  let colim_iso_pre_data : homology_iso_predatum (colimit F).1.f (colimit F).1.g ...
--- need `short_complex (J ⥤ C) ≌ J ⥤ short_complex C` -> `short_complex_functor_category.lean`
+  let F' := functor_category_equivalence.inverse.obj F,
+  let iso_datum₁ := homology_iso_datum.tautological (F'.1.f) (F'.1.g) F'.2,
+  let eval := (evaluation J C),
+  haveI : Π (j : J), preserves_finite_limits (eval.obj j),
+  { intro j, constructor, intro F, introI, introI, apply_instance, },
+  haveI : Π (j : J), preserves_finite_colimits (eval.obj j),
+  { intro j, constructor, intro F, introI, introI, apply_instance, },
+  haveI : Π (j : J), (eval.obj j).additive := λ j, by constructor,
+  let iso_data := λ (j : J), iso_datum₁.apply_exact_functor (eval.obj j),
   sorry,
 end⟩
 
