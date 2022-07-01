@@ -13,6 +13,8 @@ variables {D : Type*} [category.{v} D] [abelian D]
 
 variables {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) (H : C) (w : f ≫ g = 0)
 
+/- Eventually, all of this should be refactored using `short_complex`. -/
+
 /-- This structure expresses that there is a candidate `H` for the
 homology of composable maps `f : X ⟶ Y` and `g : Y ⟶ Z`.
 When `0 ⟶ K ⟶ Y ⟶ Z` and `X ⟶ K ⟶ Q ⟶ 0` are exact, this

@@ -10,10 +10,6 @@ open category_theory category_theory.category category_theory.limits
 variables {C D : Type*} [category.{v} C] [category.{v} D] [abelian C] [abelian D]
   {S₁ S₂ : short_complex C} {H₁ H₂ : C}
 
---def homology.map_short_complex (φ : S₁ ⟶ S₂) :
---  S₁.homology ⟶ S₂.homology :=
---homology.map w₁ w₂ (arrow.hom_mk φ.comm₁₂.symm) (arrow.hom_mk φ.comm₂₃.symm) rfl
-
 /-- Each S₁, S₂ is a sequence of two composable arrows, φ is a map (i.e. two
 commutative squares) between S₁ and S₂. The datum given here allows to
 compute the map in homology induced by φ: up to the identifications of the
@@ -81,3 +77,21 @@ begin
 end
 
 end homology_map_datum
+
+namespace homology_iso_datum
+
+/-- If we understand the homology of `S`, then we should understand what is the
+homology map of the morphism `F.map_short_complex S ⟶ G.map_short_complex S`
+given by a natural transformation `φ : F ⟶ G` between exact functors -/
+def map_nat_trans {S : short_complex C} {H : C} (h : homology_iso_datum S.1.f S.1.g H)
+  {F G : C ⥤ D} [F.additive] [G.additive]
+  [preserves_finite_limits F] [preserves_finite_colimits F]
+  [preserves_finite_limits G] [preserves_finite_colimits G]
+  (φ : F ⟶ G) : homology_map_datum (φ.map_short_complex.app S)
+    (h.apply_exact_functor F) (h.apply_exact_functor G) (φ.app H) :=
+{ κ := φ.app _,
+  fac₁' := nat_trans.naturality _ _,
+  fac₂' := (nat_trans.naturality _ _).symm,
+  fac₃' := nat_trans.naturality _ _, }
+
+end homology_iso_datum
