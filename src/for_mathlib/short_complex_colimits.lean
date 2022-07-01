@@ -1,4 +1,4 @@
-import for_mathlib.short_complex
+import for_mathlib.short_complex_projections
 import for_mathlib.homological_complex_abelian
 import for_mathlib.homology_map_datum
 import for_mathlib.abelian_sheaves.functor_category
@@ -15,32 +15,6 @@ namespace short_complex
 section construction
 
 variables {C : Type*} [category C] [has_zero_morphisms C]
-
-@[simps]
-def π₁ : short_complex C ⥤ C :=
-{ obj := λ S, S.1.X,
-  map := λ S₁ S₂ f, f.τ₁, }
-
-@[simps]
-def π₂ : short_complex C ⥤ C :=
-{ obj := λ S, S.1.Y,
-  map := λ S₁ S₂ f, f.τ₂, }
-
-@[simps]
-def π₃ : short_complex C ⥤ C :=
-{ obj := λ S, S.1.Z,
-  map := λ S₁ S₂ f, f.τ₃, }
-
-@[simps]
-def φ₁₂ : (π₁ : short_complex C ⥤ C) ⟶ π₂ :=
-{ app := λ S, S.1.f,
-  naturality' := λ S₁ S₂ f, (composable_morphisms.hom.comm₁₂ f).symm, }
-
-@[simps]
-def φ₂₃ : (π₂ : short_complex C ⥤ C) ⟶ π₃ :=
-{ app := λ S, S.1.g,
-  naturality' := λ S₁ S₂ f, (composable_morphisms.hom.comm₂₃ f).symm, }
-
 variables {J : Type*} [category J] (F : J ⥤ short_complex C)
   [has_colimit (F ⋙ π₁)] [has_colimit (F ⋙ π₂)] [has_colimit (F ⋙ π₃)]
 
@@ -274,6 +248,7 @@ instance : preserves_colimit F short_complex.homology_functor :=
       ((cocones.functoriality _ homology_functor).map_iso e.symm), },
   let iso_data := λ j, homology_iso_datum.tautological (F.obj j).1.f (F.obj j).1.g (F.obj j).2,
 --  let colim_iso_pre_data : homology_iso_predatum (colimit F).1.f (colimit F).1.g ...
+-- need `short_complex (J ⥤ C) ≌ J ⥤ short_complex C` -> `short_complex_functor_category.lean`
   sorry,
 end⟩
 
