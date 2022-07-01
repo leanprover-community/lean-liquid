@@ -2,6 +2,7 @@ import for_mathlib.exact_filtered_colimits
 import for_mathlib.colim_preserves_colimits
 import condensed.exact
 import condensed.top_comparison
+import for_mathlib.exact_functor
 
 open category_theory
 open category_theory.limits
@@ -66,10 +67,14 @@ begin
 end
 
 -- I think it would be better to use ExtrDisc equiv as opposed to the constructor from AB5.
+noncomputable
 instance preserves_finite_limits
   (J : Type.{u+1}) [small_category J] [is_filtered J] :
   preserves_finite_limits (colim : (J ⥤ Condensed.{u} Ab.{u+1}) ⥤ _) :=
-sorry
+begin
+  apply functor.preserves_finite_limits_of_exact,
+  apply AB5.colim_exact,
+end
 
 noncomputable
 example
