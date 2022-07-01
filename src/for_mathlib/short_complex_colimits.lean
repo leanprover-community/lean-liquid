@@ -252,17 +252,22 @@ instance colim_additive : functor.additive (colim : (J ⥤ C) ⥤ C) := { }
 
 def iso_data (j : J) := (iso_datum F).apply_exact_functor ((evaluation J C).obj j)
 
-def iso_datum₀ := (iso_datum F).apply_exact_functor (colim : (J ⥤ C) ⥤ C)
+def iso_datum₁ := (iso_datum F).apply_exact_functor (colim : (J ⥤ C) ⥤ C)
 
-def sanity_check_K : colimit ((iso_datum F).K) ≅ (iso_datum₀ F).K := iso.refl _
-def sanity_check_H : colimit ((iso_datum F).H) ≅ (iso_datum₀ F).H := iso.refl _
+def sanity_check_K : colimit ((iso_datum F).K) ≅ (iso_datum₁ F).K := iso.refl _
+def sanity_check_H : colimit ((iso_datum F).H) ≅ (iso_datum₁ F).H := iso.refl _
 def sanity_check_H' : (iso_datum F).H ≅ _root_.homology F.1.f F.1.g F.2 := iso.refl _
 
 def F₀ := functor_category_equivalence.functor.obj F
 
 def e : (F₀ F) ⋙ homology_functor ≅ (iso_datum F).H := nat_iso.of_components
 (λ j, ((iso_datum F).apply_exact_functor ((evaluation J C).obj j)).iso.symm)
-sorry
+(λ i j f, begin
+  simp only [functor.comp_map, iso.symm_hom],
+  erw ((iso_datum F).map_nat_trans ((evaluation J C).map f)).homology_map_eq,
+  simpa only [evaluation_map_app, assoc, iso.hom_inv_id, comp_id,
+    iso.cancel_iso_inv_left],
+end)
 
 lemma goal : preserves_colimit (F₀ F) short_complex.homology_functor :=
 ⟨λ s hs, begin
@@ -274,6 +279,7 @@ lemma goal : preserves_colimit (F₀ F) short_complex.homology_functor :=
   { exact is_colimit.of_iso_colimit this
       ((cocones.functoriality _ homology_functor).map_iso e₁.symm), },
   equiv_rw (is_colimit.precompose_hom_equiv (e F).symm _).symm,
+
   sorry,
 end⟩
 
