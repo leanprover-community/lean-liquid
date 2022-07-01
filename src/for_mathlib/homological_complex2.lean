@@ -83,9 +83,7 @@ instance (x : X) : preserves_finite_colimits ((evaluation X 𝒜).obj x) :=
 def functor_eval_homology_iso (G : homological_complex (X ⥤ 𝒜) c) (i) :
   G.homology i ≅ functor_eval.flip.obj G ⋙ homology_functor _ c i :=
 nat_iso.of_components (λ x, (functor.homology_functor_iso ((evaluation X 𝒜).obj x) c i).app G)
-begin
-  sorry,
-end
+(λ x y f, functor.naturality_homology_functor_iso_app ((evaluation X 𝒜).map f) G i)
 
 def eval_functor_homology_iso (F : X ⥤ homological_complex 𝒜 c) (i) :
   F ⋙ homology_functor _ c i ≅ (eval_functor.obj F).homology i :=

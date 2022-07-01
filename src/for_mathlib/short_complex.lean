@@ -89,6 +89,9 @@ end homological_complex
 
 namespace short_complex
 
+@[simp, reassoc]
+lemma zero [has_zero_morphisms C] (S : short_complex C) : S.1.f ≫ S.1.g = 0 := S.2
+
 @[simps]
 def mk [has_zero_morphisms C] {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) (zero : f ≫ g = 0) :
   short_complex C := ⟨composable_morphisms.mk f g, zero⟩
@@ -121,14 +124,14 @@ def hom_mk [has_zero_morphisms C] {X₁ Y₁ Z₁ X₂ Y₂ Z₂ : C} {f₁ : X�
   mk f₁ g₁ zero₁ ⟶ mk f₂ g₂ zero₂ := ⟨τ₁, τ₂, τ₃, comm₁₂, comm₂₃⟩
 
 @[simps]
-def iso_mk [has_zero_morphisms C] {X₁ Y₁ Z₁ X₂ Y₂ Z₂ : C} {f₁ : X₁ ⟶ Y₁} {g₁ : Y₁ ⟶ Z₁}
-  {f₂ : X₂ ⟶ Y₂} {g₂ : Y₂ ⟶ Z₂} {zero₁ : f₁ ≫ g₁ = 0} {zero₂ : f₂ ≫ g₂ = 0}
-  (τ₁ : X₁ ≅ X₂) (τ₂ : Y₁ ≅ Y₂) (τ₃ : Z₁ ≅ Z₂) (comm₁₂ : f₁ ≫ τ₂.hom = τ₁.hom ≫ f₂)
-  (comm₂₃ : g₁ ≫ τ₃.hom = τ₂.hom ≫ g₂) :
-  mk f₁ g₁ zero₁ ≅ mk f₂ g₂ zero₂ :=
-{ hom := hom_mk τ₁.hom τ₂.hom τ₃.hom comm₁₂ comm₂₃,
+def iso_mk [has_zero_morphisms C] {S₁ S₂ : short_complex C}
+  (τ₁ : S₁.1.X ≅ S₂.1.X) (τ₂ : S₁.1.Y ≅ S₂.1.Y) (τ₃ : S₁.1.Z ≅ S₂.1.Z)
+  (comm₁₂ : S₁.1.f ≫ τ₂.hom = τ₁.hom ≫ S₂.1.f)
+  (comm₂₃ : S₁.1.g ≫ τ₃.hom = τ₂.hom ≫ S₂.1.g) :
+  S₁ ≅ S₂ :=
+{ hom := ⟨τ₁.hom, τ₂.hom, τ₃.hom, comm₁₂, comm₂₃⟩,
   inv := begin
-    refine hom_mk τ₁.inv τ₂.inv τ₃.inv _ _,
+    refine ⟨τ₁.inv, τ₂.inv, τ₃.inv, _, _⟩,
     { simp only [← cancel_mono τ₂.hom, ← cancel_epi τ₁.hom,
         assoc, iso.inv_hom_id, comp_id, iso.hom_inv_id_assoc, comm₁₂], },
     { simp only [← cancel_mono τ₃.hom, ← cancel_epi τ₂.hom,
@@ -146,6 +149,14 @@ def iso_mk [has_zero_morphisms C] {X₁ Y₁ Z₁ X₂ Y₂ Z₂ : C} {f₁ : X�
     { simpa only [iso.inv_hom_id, comp_τ₂, hom_mk_τ₂], },
     { simpa only [iso.inv_hom_id, comp_τ₃, hom_mk_τ₃], },
   end, }
+
+lemma is_iso_of_is_isos [has_zero_morphisms C] {S₁ S₂ : short_complex C}
+  (φ : S₁ ⟶ S₂) (h₁ : is_iso φ.τ₁) (h₂ : is_iso φ.τ₂) (h₃ : is_iso φ.τ₃) : is_iso φ :=
+begin
+  let e : S₁ ≅ S₂ := iso_mk (as_iso φ.τ₁) (as_iso φ.τ₂) (as_iso φ.τ₃) φ.comm₁₂ φ.comm₂₃,
+  unfreezingI { rcases φ with ⟨τ₁, τ₂, τ₃, comm₁₂, comm₂₂⟩, },
+  exact is_iso.of_iso e,
+end
 
 def homology [abelian C] (S : short_complex C) : C := homology S.1.f S.1.g S.2
 
@@ -199,11 +210,11 @@ nat_iso.of_components
     (by simpa only [iso.refl_hom, id_comp] using F.d_from_map X i))
   (λ X Y f, begin
     ext,
-    { simp only [functor.comp_map, iso_mk_hom, comp_τ₁, functor.map_short_complex_map_τ₁,
-        functor_homological_complex_map_τ₁, hom_mk_τ₁, F.map_prev], },
+    { simp only [functor.comp_map, comp_τ₁, functor.map_short_complex_map_τ₁,
+        functor_homological_complex_map_τ₁, iso_mk_hom_τ₁, F.map_prev], },
     { dsimp, simp only [comp_id, id_comp], },
-    { simp only [functor.comp_map, iso_mk_hom, comp_τ₃, functor.map_short_complex_map_τ₃,
-        functor_homological_complex_map_τ₃, hom_mk_τ₃, F.map_next], },
+    { simp only [functor.comp_map, comp_τ₃, functor.map_short_complex_map_τ₃,
+        functor_homological_complex_map_τ₃, iso_mk_hom_τ₃, F.map_next], },
   end)
 
 end short_complex

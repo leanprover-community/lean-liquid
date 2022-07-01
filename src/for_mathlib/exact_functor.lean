@@ -9,7 +9,7 @@ namespace category_theory
 
 universes v u u'
 variables {A : Type u} {B : Type u'} [category.{v} A] [category.{v} B]
-  [abelian A] [abelian B] (F : A ⥤ B) [functor.additive F]
+  [abelian A] [abelian B] (F G : A ⥤ B) [functor.additive F] [functor.additive G] (φ : F ⟶ G)
 
 lemma exact.mono_desc {X Y Z : A} {f : X ⟶ Y} {g : Y ⟶ Z} (e : exact f g) :
   mono (limits.cokernel.desc _ _ e.w) :=
@@ -162,6 +162,7 @@ begin
 end
 
 variables [preserves_finite_limits F] [preserves_finite_colimits F]
+variables [preserves_finite_limits G] [preserves_finite_colimits G]
 
 def homology_nat_iso :
   (short_complex.homology_functor : short_complex A ⥤ A) ⋙ F ≅
@@ -198,6 +199,28 @@ begin
   { exact iso_whisker_right (short_complex.functor_homological_complex_map F c i) _, },
   { apply associator, },
   { exact iso_whisker_left _ (short_complex.homology_functor_iso B c i).symm, },
+end
+
+variables {F G}
+
+/-- naturality of `homology_functor_iso` on the variable `F` -/
+lemma naturality_homology_functor_iso_app {M : Type*} {c : complex_shape M}
+  (X : homological_complex A c) (i : M) :
+  φ.app ((homology_functor A c i).obj X) ≫ (G.homology_functor_iso c i).hom.app X =
+  (F.homology_functor_iso c i).hom.app X ≫
+    (homology_functor B c i).map ((nat_trans.map_homological_complex φ c).app X) :=
+sorry
+
+lemma naturality_homology_functor_iso {M : Type*} (c : complex_shape M) (i : M) :
+  𝟙 (homology_functor A c i) ◫ φ ≫ (G.homology_functor_iso c i).hom =
+  (F.homology_functor_iso c i).hom ≫
+    nat_trans.map_homological_complex φ c ◫ (𝟙 (homology_functor B c i)) :=
+begin
+  ext1, ext1 X,
+  simp only [nat_trans.comp_app, nat_trans.hcomp_app, nat_trans.id_app, G.map_id,
+    category.comp_id],
+  erw category.id_comp,
+  apply naturality_homology_functor_iso_app,
 end
 
 end functor
