@@ -203,6 +203,7 @@ end functor
 
 namespace nat_trans
 
+@[simps]
 def map_short_complex [has_zero_morphisms C] [has_zero_morphisms D] {F G : C ⥤ D}
   [F.preserves_zero_morphisms] [G.preserves_zero_morphisms] (φ : F ⟶ G) :
   F.map_short_complex ⟶ G.map_short_complex :=
@@ -244,6 +245,12 @@ lemma naturality_functor_homological_complex_map [preadditive C] [has_zero_objec
     (short_complex.functor_homological_complex_map G c i).hom.app X =
   (short_complex.functor_homological_complex_map F c i).hom.app X ≫
     (short_complex.functor_homological_complex D c i).map
-      ((nat_trans.map_homological_complex φ c).app X) := sorry
+      ((nat_trans.map_homological_complex φ c).app X) :=
+begin
+  ext; dsimp [functor_homological_complex_map],
+  { apply φ.map_prev, },
+  { simp only [comp_id, id_comp], },
+  { apply φ.map_next, },
+end
 
 end short_complex
