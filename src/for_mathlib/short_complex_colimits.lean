@@ -1,5 +1,7 @@
 import for_mathlib.short_complex
 import for_mathlib.homological_complex_abelian
+import for_mathlib.homology_map_datum
+import for_mathlib.abelian_sheaves.functor_category
 
 noncomputable theory
 
@@ -263,6 +265,15 @@ variables {M : Type*} {c : complex_shape M}
 
 instance : preserves_colimit F short_complex.homology_functor :=
 ⟨λ s hs, begin
+  have e : s ≅ colimit_cocone.cocone F,
+  { refine is_initial.unique_up_to_iso _ _,
+    all_goals { equiv_rw (cocone.is_colimit_equiv_is_initial _).symm, },
+    exacts [hs, (colimit_cocone F).is_colimit], },
+  suffices : is_colimit (homology_functor.map_cocone (colimit_cocone.cocone F)),
+  { exact is_colimit.of_iso_colimit this
+      ((cocones.functoriality _ homology_functor).map_iso e.symm), },
+  let iso_data := λ j, homology_iso_datum.tautological (F.obj j).1.f (F.obj j).1.g (F.obj j).2,
+--  let colim_iso_pre_data : homology_iso_predatum (colimit F).1.f (colimit F).1.g ...
   sorry,
 end⟩
 
