@@ -338,7 +338,8 @@ section free
 variable [has_coproducts_of_shape (ulift.{v} ℕ) C]
 
 /-- `free X` is ⨁ₙX, the direct sum over the naturals, equipped with the endomorphism
-sending `(a : X)` in degree `n` to `a` in degree `n+1`. -/
+sending `(a : X)` in degree `n` to `a` in degree `n+1`. An alternative way to view `free X`
+is `X ⨂_{ℤ} ℤ[T]` with the endomorphism given by multiplication by `T`. -/
 @[simps]
 def free (X : C) : endomorphisms C :=
 { X := ∐ (λ i : ulift.{v} ℕ, X),
