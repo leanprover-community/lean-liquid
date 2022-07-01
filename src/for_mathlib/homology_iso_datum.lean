@@ -119,7 +119,11 @@ structure homology_iso_datum (H : C) extends homology_iso_predatum f g H :=
 
 namespace homology_iso_datum
 
-variable {H}
+variables {H f g}
+
+@[protected]
+def H (h : homology_iso_datum f g H) : C := H
+variables (f g)
 
 @[simps]
 def tautological : homology_iso_datum f g (cokernel (kernel.lift g f w)) :=
