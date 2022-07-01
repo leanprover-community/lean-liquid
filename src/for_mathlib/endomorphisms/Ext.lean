@@ -180,6 +180,51 @@ begin
 end
 .
 
+/-
+
+Mathematical summary of the `Ext_is_zero_iff` `sorry` according to kmb's
+possibly flawed understanding:
+
+The lemma will follow from the following things:
+
+1) If X is a complex in the bounded homotopy category
+and Y is an object, thought of as a `single`
+complex, then Extⁱ(X,Y) is the homology of the complex
+(Cᵢ) whose i'th term is Hom(Pⁱ,Y), where P is a projective
+replacement of X. This applies to both the category 𝓐
+and to the endomorphism category.
+
+2) For a cleverly chosen choice of Pⁱ (see `exists_K_projective_endomorphism_replacement`)
+we have a short exact sequence of complexes
+0 -> Hom_{endos}(Pⁱ,Y) -> Hom(Pⁱ,Y) -> Hom(Pⁱ,Y)->0
+where the surjection is e(P) - e(Y), with e the endomorphism.
+This can be checked to be surjective via an explicit construction;
+the trick is that Pⁱ is going to be `free Q` for some object `Q : 𝓐`
+
+-/
+-- This is an approximation of the statement we need
+-- for Pⁱ. Hopefully this is what we need. I might need
+-- to add extra things, hopefully not, but let's see
+-- if it's enough to prove `Ext_is_zero_iff`.
+-- Question: does `projective Q` imply `projective (free Q)`?
+-- Adam says we have this in `endomrphisms/basic`.
+lemma exists_K_projective_endomorphism_replacement
+  (X : bounded_homotopy_category (endomorphisms 𝓐)) :
+∃ (P : bounded_homotopy_category (endomorphisms 𝓐))
+  [homotopy_category.is_K_projective P.val]
+  (f : P ⟶ X), homotopy_category.is_quasi_iso f
+  ∧ (∀ j, ∃ Q, P.val.as.X j = free Q)
+  ∧ ∀ k, projective (P.val.as.X k)
+  ∧ ∀ k, projective (P.val.as.X k).X
+:= sorry
+
+/-
+
+Idea : We need a short exact sequence of complexes as above, and then
+the below follows from the associated long exact sequence
+of cohomology.
+
+-/
 lemma Ext_is_zero_iff (X : chain_complex 𝓐 ℕ) (Y : 𝓐)
   (f : X ⟶ X) (g : Y ⟶ Y) :
   (∀ i, is_zero (((Ext i).obj (op $ chain_complex.to_bounded_homotopy_category.obj (X.mk_end f))).obj $ (single _ 0).obj ⟨Y, g⟩)) ↔
@@ -189,6 +234,10 @@ begin
   sorry,
 end
 
+-- this is an older version; there might be a couple of useful
+-- things here. The first line is not right though, we can't
+-- use `exists_K_projective_replacement`, the idea is
+-- to use `exists_K_projective_endomorphism_replacement` instead.
 /-
 lemma Ext_is_zero_iff' (X Y : bounded_homotopy_category (endomorphisms 𝓐)) :
   (∀ i, is_zero (((Ext i).obj (op $ X)).obj $ Y)) ↔
