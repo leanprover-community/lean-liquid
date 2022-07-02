@@ -208,10 +208,30 @@ instance additive_tensor_flip_eval' (i : ℤ) : functor.additive
     (AddCommGroup.free.obj punit)) i)) :=
 Condensed.additive_tensor_flip _
 
-instance preserves_filtered_colimits_eval'_forget_free (i : ℤ) :
+instance preserves_filtered_colimits_eval'_forget_free :
+  preserves_filtered_colimits.{u+1 u+2 u+2}
+    (BD.eval' (forget.{u+2 u+1 u+1} AddCommGroup.{u+1} ⋙ AddCommGroup.free.{u+1})) :=
+begin
+  apply_with limits.comp_preserves_filtered_colimits.{u+1 u+2 _ u+2} {instances:=ff},
+  { apply_with data.eval_functor_preserves_filtered_colimits {instances:=ff},
+    apply_with limits.comp_preserves_filtered_colimits.{u+1 u+2 _ u+2} {instances:=ff},
+    { apply_instance },
+    { sorry } },
+  { sorry }
+end
+
+instance preserves_filtered_colimits_homology (i : ℤ) :
+  preserves_filtered_colimits.{u+1 u+2 u+2}
+    (homology_functor.{u+1 u+2 0} AddCommGroup.{u+1} (complex_shape.up.{0} ℤ) i) :=
+sorry
+
+instance preserves_filtered_colimits_eval'_forget_free_homology (i : ℤ) :
   preserves_filtered_colimits
   (BD.eval' (forget AddCommGroup.{u+1} ⋙ AddCommGroup.free) ⋙
-    homology_functor AddCommGroup.{u+1} (complex_shape.up ℤ) i) := sorry
+    homology_functor AddCommGroup.{u+1} (complex_shape.up ℤ) i) :=
+limits.comp_preserves_filtered_colimits.{u+1 u+2 _ u+2}
+  (BD.eval' (forget AddCommGroup.{u+1} ⋙ AddCommGroup.free))
+  (homology_functor AddCommGroup.{u+1} (complex_shape.up ℤ) i)
 
 instance _root_.bounded_homotopy_category.forget_additive (𝓐 : Type*) [category 𝓐] [abelian 𝓐] :
   (bounded_homotopy_category.forget 𝓐).additive :=
