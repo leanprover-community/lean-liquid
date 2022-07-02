@@ -7,6 +7,7 @@ import pseudo_normed_group.QprimeFP
 import for_mathlib.AddCommGroup
 import for_mathlib.map_to_sheaf_is_iso
 import condensed.is_iso_iff_extrdisc
+import Lbar.torsion_free_condensed
 
 .
 
@@ -255,7 +256,6 @@ begin
   apply is_iso.comp_is_iso,
 end
 
--- needs torsion-free condition on `M`
 def homology_bd_eval (M : Condensed.{u} Ab.{u+1})
   [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (M.val.obj (op S.val))] (i : ℤ) :
   ((BD.eval freeCond').obj M).val.as.homology i ≅
@@ -275,6 +275,7 @@ instance (α : Type (u+1)) (M) :
 sorry
 
 lemma bd_lemma (A : Condensed.{u} Ab.{u+1}) (B : Condensed.{u} Ab.{u+1})
+  [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (A.val.obj (op S.val))]
   (f : A ⟶ A) (g : B ⟶ B) :
   (∀ i, is_iso $ ((Ext' i).map f.op).app B - ((Ext' i).obj (op A)).map g) ↔
   (∀ i, is_iso $

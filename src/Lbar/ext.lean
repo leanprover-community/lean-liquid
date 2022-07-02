@@ -366,9 +366,6 @@ namespace Lbar
 open ProFiltPseuNormGrpWithTinv₁ ProFiltPseuNormGrp₁ CompHausFiltPseuNormGrp₁
 open bounded_homotopy_category
 
-def condensed : Profinite.{u} ⥤ Condensed.{u} Ab.{u+1} :=
-condensify (Fintype_Lbar.{u u} r' ⋙ PFPNGT₁_to_CHFPNG₁ₑₗ r')
-
 def Tinv_sub (S : Profinite.{u}) (V : SemiNormedGroup.{u}) [normed_with_aut r V] (i : ℤ) :
   ((Ext' i).obj (op $ (Lbar.condensed.{u} r').obj S)).obj V.to_Cond ⟶
   ((Ext' i).obj (op $ (Lbar.condensed.{u} r').obj S)).obj V.to_Cond :=
@@ -631,7 +628,8 @@ lemma hι : monotone (ι r r' i) :=
 /-- Thm 9.4bis of [Analytic]. More precisely: the first observation in the proof 9.4 => 9.1. -/
 theorem is_iso_Tinv_sub [normed_with_aut r V] : ∀ i, is_iso (Tinv_sub r r' S V i) :=
 begin
-  refine (Condensed.bd_lemma _ _ _ _).mpr _,
+  erw (Condensed.bd_lemma _ _ _ _),
+  swap, { apply Lbar.obj.no_zero_smul_divisors },
   intro i,
   refine is_iso_sq' _ _ _ (functor.map_iso _ $ condensify_iso_extend' _ _) _ _ _,
   { refine category_theory.functor.map _ _, refine Tinv_cond _ },
