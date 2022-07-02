@@ -557,18 +557,52 @@ functor.associator _ _ _ ≪≫
   embed_comp_next_functor 𝓐 e he i₁ ≪≫
   (short_complex.functor_homological_complex_π₃_iso_next_functor 𝓐 c₁ i₁).symm
 
+lemma embed_d_to (𝓐 : Type*) [category 𝓐] [abelian 𝓐]
+  {c₁ : complex_shape ι₁} {c₂ : complex_shape ι₂} (e : c₁.embedding c₂) (he : e.c_iff)
+  (i₁ : ι₁) (X : homological_complex 𝓐 c₁) :
+  ((embed e).obj X).d_to (e.f i₁) ≫ (embed.X_iso_of_some X (e.r_f i₁)).hom =
+  (embed_comp_prev_functor 𝓐 e he i₁).hom.app X ≫ X.d_to i₁ := sorry
+
+lemma embed_d_from (𝓐 : Type*) [category 𝓐] [abelian 𝓐]
+  {c₁ : complex_shape ι₁} {c₂ : complex_shape ι₂} (e : c₁.embedding c₂) (he : e.c_iff)
+  (i₁ : ι₁) (X : homological_complex 𝓐 c₁) :
+  ((embed e).obj X).d_from (e.f i₁) ≫ (embed_comp_next_functor 𝓐 e he i₁).hom.app X =
+  (embed.X_iso_of_some X (e.r_f i₁)).hom ≫ X.d_from i₁ := sorry
+
 def embed_short_complex_functor_homological_complex (𝓐 : Type*) [category 𝓐] [abelian 𝓐]
   {c₁ : complex_shape ι₁} {c₂ : complex_shape ι₂} (e : c₁.embedding c₂) (he : e.c_iff)
   (i₁ : ι₁) (i₂ : ι₂) (h₁₂ : e.f i₁ = i₂) :
   embed e ⋙ short_complex.functor_homological_complex 𝓐 c₂ i₂ ≅
   short_complex.functor_homological_complex 𝓐 c₁ i₁ :=
 begin
-  apply short_complex.functor_nat_iso_mk
+  refine short_complex.functor_nat_iso_mk
     (embed_short_complex_functor_homological_complex_π₁ 𝓐 e he i₁ i₂ h₁₂)
     (embed_short_complex_functor_homological_complex_π₂ 𝓐 e i₁ i₂ h₁₂)
-    (embed_short_complex_functor_homological_complex_π₃ 𝓐 e he i₁ i₂ h₁₂),
-  { sorry, },
-  { sorry, },
+    (embed_short_complex_functor_homological_complex_π₃ 𝓐 e he i₁ i₂ h₁₂) _ _,
+  { subst h₁₂,
+    ext X,
+    dsimp [nat_trans.hcomp, embed_short_complex_functor_homological_complex_π₂,
+      short_complex.functor_homological_complex_π₂_iso_eval,
+      embed_short_complex_functor_homological_complex_π₁, congr_eval,
+      congr_prev_functor, embed_comp_eval, iso.refl,
+      short_complex.functor_homological_complex_π₁_iso_prev_functor],
+    simp only [category.assoc],
+    erw [nat_trans.id_app, nat_trans.id_app],
+    repeat { erw category.id_comp, },
+    repeat { erw category.comp_id, },
+    apply embed_d_to, },
+  { subst h₁₂,
+    ext X,
+    dsimp [nat_trans.hcomp, embed_short_complex_functor_homological_complex_π₂,
+      short_complex.functor_homological_complex_π₂_iso_eval,
+      embed_short_complex_functor_homological_complex_π₃, congr_eval,
+      congr_prev_functor, embed_comp_eval, iso.refl,
+      short_complex.functor_homological_complex_π₃_iso_next_functor],
+    simp only [category.assoc],
+    erw [nat_trans.id_app, nat_trans.id_app],
+    repeat { erw category.id_comp, },
+    repeat { erw category.comp_id, },
+    apply embed_d_from, },
 end
 
 def homology_embed_nat_iso (𝓐 : Type*) [category 𝓐] [abelian 𝓐]
