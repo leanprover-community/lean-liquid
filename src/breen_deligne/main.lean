@@ -480,7 +480,47 @@ variables (X : endomorphisms 𝓐)
 def forget_eval :
   endomorphisms.forget _ ⋙ (data.eval_functor F).obj BD.data ≅
   (data.eval_functor F.map_endomorphisms).obj BD.data ⋙ (endomorphisms.forget 𝓐).map_homological_complex _ :=
-sorry
+nat_iso.of_components (λ X, homological_complex.hom.iso_of_components
+  (λ n, F.map_iso (Pow_X _ _).symm)
+  begin
+    rintro _ i (rfl : _=_),
+    dsimp only [functor.comp_obj, data.eval_functor_obj_obj_d,
+      functor.map_homological_complex_obj_d, universal_map.eval_Pow],
+    simp only [free_abelian_group.lift_eq_sum,
+      sum_comp, comp_sum, nat_trans.app_sum, functor.map_sum, whisker_right_app,
+      zsmul_comp, comp_zsmul, nat_trans.app_zsmul, functor.map_zsmul],
+    refine finset.sum_congr rfl _,
+    intros x hx,
+    refine congr_arg2 _ rfl _,
+    dsimp only [endomorphisms.forget_map, functor.map_endomorphisms_map_f, functor.map_iso_hom,
+      whisker_right_app, basic_universal_map.eval_Pow_app,
+      Pow_X_inv, iso.symm_hom],
+    rw [← functor.map_comp, ← functor.map_comp], congr' 1,
+    ext j : 2,
+    rw [biproduct.ι_desc_assoc, biproduct.ι_matrix_assoc, ← endomorphisms.comp_f,
+      biproduct.ι_matrix, biproduct.lift_desc],
+    have := (endomorphisms.forget _).map_id X,
+    simp only [← endomorphisms.forget_map, ← this, ← functor.map_zsmul, ← functor.map_sum, ← functor.map_comp],
+    congr' 1,
+    apply biproduct.hom_ext, intro i,
+    simp only [biproduct.lift_π, sum_comp, category.assoc],
+    rw finset.sum_eq_single_of_mem i (finset.mem_univ _),
+    { rw [biproduct.ι_π, dif_pos rfl, eq_to_hom_refl, category.comp_id], },
+    { rintro k - hk, rw [biproduct.ι_π_ne _ hk, comp_zero], }
+  end)
+begin
+  intros X Y f,
+  ext n,
+  dsimp only [homological_complex.hom.iso_of_components_hom_f,
+    homological_complex.comp_f, iso.symm_hom, Pow_X_inv, functor.comp_map, functor.map_iso_hom,
+    functor.map_homological_complex_map_f, data.eval_functor_obj_map_f,
+    endomorphisms.forget_map, functor.map_endomorphisms_map_f],
+  rw [← functor.map_comp, ← functor.map_comp], congr' 1,
+  ext j : 2,
+  rw [biproduct.ι_desc_assoc, biproduct.ι_map_assoc, ← endomorphisms.comp_f,
+    biproduct.ι_map, biproduct.ι_desc, endomorphisms.comp_f],
+end
+
 
 def eval'_homology :
   BD.eval' F ⋙ homology_functor 𝓐 (complex_shape.up ℤ) 0 ≅

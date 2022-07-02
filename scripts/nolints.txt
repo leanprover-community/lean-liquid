@@ -24,6 +24,10 @@ apply_nolint invpoly.to_laurent_measures_fun unused_arguments
 apply_nolint laurent_measures.to_Lbar unused_arguments
 apply_nolint laurent_measures.to_Lbar_section unused_arguments
 
+-- Lbar/torsion_free_profinite.lean
+apply_nolint to_Ab unused_arguments
+apply_nolint to_PseuNormGrp₁ unused_arguments
+
 -- breen_deligne/category.lean
 apply_nolint breen_deligne.FreeMat.kronecker_map_reindex_left unused_arguments
 apply_nolint breen_deligne.FreeMat.kronecker_map_reindex_right unused_arguments
@@ -215,6 +219,7 @@ apply_nolint category_theory.functor.left_derived.α unused_arguments
 apply_nolint category_theory.functor.left_derived.β unused_arguments
 
 -- for_mathlib/endomorphisms/Ext.lean
+apply_nolint category_theory.endomorphisms.embed_single unused_arguments
 apply_nolint category_theory.endomorphisms.mk_bo_ho_ca' unused_arguments
 apply_nolint category_theory.endomorphisms.quot_out_single_map unused_arguments
 apply_nolint category_theory.endomorphisms.single_unEnd unused_arguments
@@ -225,6 +230,7 @@ apply_nolint category_theory.endomorphisms.f_mono unused_arguments
 
 -- for_mathlib/exact_functor.lean
 apply_nolint category_theory.functor.exact unused_arguments
+apply_nolint category_theory.functor.naturality_homology_nat_iso_app def_lemma
 
 -- for_mathlib/exact_seq3.lean
 apply_nolint category_theory.exact_seq.w def_lemma
@@ -234,6 +240,10 @@ apply_nolint bounded_homotopy_category.hom_single_iso_setup.hom_complex unused_a
 
 -- for_mathlib/homological_complex_equiv_functor_category.lean
 apply_nolint homological_complex.complex_to_functor_functor unused_arguments
+
+-- for_mathlib/homological_complex_map_d_to_d_from.lean
+apply_nolint category_theory.functor.map_next def_lemma
+apply_nolint category_theory.functor.map_prev def_lemma
 
 -- for_mathlib/homology_iso.lean
 apply_nolint category_theory.homology_iso_inv_homology_functor_map def_lemma
@@ -245,6 +255,7 @@ apply_nolint AddCommGroup.homology_iso_hom_homology_map def_lemma
 apply_nolint AddCommGroup.homology_iso_inv_homology_map def_lemma
 
 -- for_mathlib/homology_iso_datum.lean
+apply_nolint homology_iso_datum.H unused_arguments
 apply_nolint homology_iso_datum.of_homological_complex_of_next_eq_none' unused_arguments
 
 -- for_mathlib/homology_map.lean
@@ -317,6 +328,19 @@ apply_nolint extended_le_span unused_arguments
 
 -- for_mathlib/sheafification_mono.lean
 apply_nolint category_theory.grothendieck_topology.eq_zero_of_exists unused_arguments
+
+-- for_mathlib/short_complex_colimits.lean
+apply_nolint short_complex.functor_homological_complex_π₁_iso_eval def_lemma
+apply_nolint short_complex.functor_homological_complex_π₁_iso_zero def_lemma
+apply_nolint short_complex.functor_homological_complex_π₃_iso_eval def_lemma
+apply_nolint short_complex.functor_homological_complex_π₃_iso_zero def_lemma
+apply_nolint short_complex.homology_functor_preserves_colimit.F₀ unused_arguments
+apply_nolint short_complex.homology_functor_preserves_colimit.colim_additive unused_arguments
+apply_nolint short_complex.homology_functor_preserves_colimit.goal def_lemma
+apply_nolint short_complex.homology_functor_preserves_colimit.iso_datum unused_arguments
+apply_nolint short_complex.homology_functor_preserves_colimit.obj.category_theory.functor.additive unused_arguments
+apply_nolint short_complex.homology_functor_preserves_colimit.obj.category_theory.limits.preserves_finite_colimits unused_arguments
+apply_nolint short_complex.homology_functor_preserves_colimit.obj.category_theory.limits.preserves_finite_limits unused_arguments
 
 -- for_mathlib/single_coproducts.lean
 apply_nolint bounded_homotopy_category.preserves_coproducts_single unused_arguments
