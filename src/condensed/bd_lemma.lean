@@ -38,7 +38,7 @@ match i with
     refine iso_whisker_right _ _,
     refine (Condensed_Ab_to_presheaf.map_biproduct _),
   end
-| int.of_nat (i+1) := is_zero.iso (is_zero_zero _) sorry
+| int.of_nat (i+1) := is_zero.iso (is_zero_zero _) (functor.map_is_zero _ $ is_zero_zero _)
 | -[1+i] := presheaf_to_Condensed_Ab.map_iso begin
     refine functor.associator _ _ _ ≪≫ _,
     refine iso_whisker_right _ _,
