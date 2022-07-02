@@ -525,13 +525,16 @@ end
 def eval'_homology :
   BD.eval' F ⋙ homology_functor 𝓐 (complex_shape.up ℤ) 0 ≅
   (data.eval_functor F).obj BD.data ⋙ homology_functor 𝓐 (complex_shape.down ℕ) 0 :=
-nat_iso.of_components (λ X, homology_embed_iso _ 0 : _)
 begin
-  intros X Y f, dsimp only [functor.comp_map, homology_embed_iso],
-  ext, simp only [category.assoc],
-  erw [homology.π'_map_assoc, homology.map_ι],
-  show _ ≫ _ ≫ has_homology.map _ _ _ _ ≫ _ = _,
-  sorry
+  calc ((data.eval_functor F).obj BD.data ⋙
+    homological_complex.embed complex_shape.embedding.nat_down_int_up) ⋙
+    homology_functor 𝓐 (complex_shape.up ℤ) 0 ≅
+    (data.eval_functor F).obj BD.data ⋙
+    homological_complex.embed complex_shape.embedding.nat_down_int_up ⋙
+    homology_functor 𝓐 (complex_shape.up ℤ) 0 : functor.associator _ _ _
+  ... ≅ (data.eval_functor F).obj BD.data ⋙ homology_functor 𝓐 (complex_shape.down ℕ) 0 :
+    iso_whisker_left _ _,
+  apply homology_embed_nat_iso_0,
 end
 
 def hH0_endo₁_a :

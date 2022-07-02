@@ -59,6 +59,13 @@ begin
   exact cochain_complex_int_has_homology C' (-(n+1+1+1:ℕ):ℤ),
 end
 
+/- strategy for this: compare two functors `cochain_complex 𝓐 ℤ ⥤ short_complex 𝓐`, and
+then apply `short_complex.homology_functor` -/
+def homology_embed_nat_iso_0 {𝓐 : Type*} [category 𝓐] [abelian 𝓐] :
+homological_complex.embed complex_shape.embedding.nat_down_int_up ⋙
+  homology_functor 𝓐 (complex_shape.up ℤ) 0 ≅ homology_functor 𝓐 (complex_shape.down ℕ) 0 :=
+sorry
+
 def map_homological_complex_embed
   {𝓐 𝓑 : Type*} [category 𝓐] [abelian 𝓐] [category 𝓑] [abelian 𝓑]
   (F : 𝓐 ⥤ 𝓑) [F.additive] :
