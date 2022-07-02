@@ -51,6 +51,8 @@ instance chain_complex.is_bounded_above (P : chain_complex C ℕ) :
       quotient C (complex_shape.up ℤ)).obj P).is_bounded_above :=
 ⟨⟨1, chain_complex.bounded_by_one _⟩⟩
 
+/-- The functor from ℕ-indexed chain complexes to bounded-above ℤ-indexed cochain complexes
+sending `C₀ ← C₁ ← ...` to `... ⟶ C₁ ⟶ C₀ ⟶ 0 ⟶ ...` -/
 @[simps obj obj_val map]
 noncomputable def chain_complex.to_bounded_homotopy_category :
   chain_complex C ℕ ⥤ bounded_homotopy_category C :=
