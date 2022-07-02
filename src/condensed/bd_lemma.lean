@@ -46,6 +46,7 @@ match i with
   end
 end )
 sorry
+.
 
 def eval_freeAb_iso_component (M : Condensed.{u} Ab.{u+1}) (S : ExtrDisc.{u}) :
   (((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj (op S.val)).map_homological_complex
@@ -60,7 +61,7 @@ match i with
     refine (category_theory.forget _).map_iso _,
     refine ((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj (op S.val)).map_biproduct _
   end
-| int.of_nat (i+1) := is_zero.iso sorry (is_zero_zero _)
+| int.of_nat (i+1) := is_zero.iso (functor.map_is_zero _ $ is_zero_zero _) (is_zero_zero _)
 | -[1+i] := begin
     refine AddCommGroup.free.map_iso _,
     refine (category_theory.forget _).map_iso _,
