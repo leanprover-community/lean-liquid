@@ -207,15 +207,15 @@ the trick is that Pⁱ is going to be `free Q` for some object `Q : 𝓐`
 -- to add extra things, hopefully not, but let's see
 -- if it's enough to prove `Ext_is_zero_iff`.
 -- Question: does `projective Q` imply `projective (free Q)`?
--- Adam says we have this in `endomrphisms/basic`.
+-- Adam says we have this in `endomorphisms/basic`.
 lemma exists_K_projective_endomorphism_replacement
   (X : bounded_homotopy_category (endomorphisms 𝓐)) :
 ∃ (P : bounded_homotopy_category (endomorphisms 𝓐))
   [homotopy_category.is_K_projective P.val]
   (f : P ⟶ X), homotopy_category.is_quasi_iso f
-  ∧ (∀ j, ∃ Q, P.val.as.X j = free Q)
-  ∧ ∀ k, projective (P.val.as.X k)
-  ∧ ∀ k, projective (P.val.as.X k).X
+  ∧ (∀ j, ∃ Q, projective Q ∧ ∃ (i: P.val.as.X j ≅ free Q), true)
+--  ∧ ∀ k, projective (P.val.as.X k) -- should follow
+--  ∧ ∀ k, projective (P.val.as.X k).X -- should follow
 := sorry
 
 /-
@@ -225,6 +225,7 @@ the below follows from the associated long exact sequence
 of cohomology.
 
 -/
+
 lemma Ext_is_zero_iff (X : chain_complex 𝓐 ℕ) (Y : 𝓐)
   (f : X ⟶ X) (g : Y ⟶ Y) :
   (∀ i, is_zero (((Ext i).obj (op $ chain_complex.to_bounded_homotopy_category.obj (X.mk_end f))).obj $ (single _ 0).obj ⟨Y, g⟩)) ↔
