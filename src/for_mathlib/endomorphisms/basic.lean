@@ -479,30 +479,34 @@ def free.presentation [enough_projectives C] (A : endomorphisms C) :
 instance [enough_projectives C] : enough_projectives (endomorphisms C) :=
 { presentation := λ A, ⟨free.presentation A⟩ }
 
--- instance projective_X [enough_projectives C] (P : endomorphisms C) [projective P] :
---   projective P.X :=
--- ⟨λ E X f e he, begin
---   let F := free.presentation P,
---   haveI : projective F.P := F.projective,
---   haveI : epi F.f := F.epi,
---   let s : P ⟶ F.P := projective.factor_thru (𝟙 _) F.f,
---   have hsπ : s ≫ F.f = 𝟙 _ := projective.factor_thru_comp _ _,
---   let X' : endomorphisms C := ⟨X, 𝟙 _⟩,
---   let E' : endomorphisms C := ⟨E, 𝟙 _⟩,
---   let e' : E' ⟶ X' := ⟨e, by { dsimp only, rw [category.id_comp, category.comp_id] }⟩,
---   haveI he' : epi e' := epi_of_epi_f e',
---   let φ : F.P ⟶ X' := free.desc (projective.π _ ≫ f),
---   let ψ : F.P ⟶ E' := projective.factor_thru φ e',
---   refine ⟨(s ≫ ψ).f, _⟩,
---   show ((s ≫ ψ) ≫ e').f = f,
---   rw [category.assoc, projective.factor_thru_comp],
---   suffices : φ.f = F.f.f ≫ f,
---   { rw [comp_f, this, ← comp_f_assoc, hsπ, id_f, category.id_comp], },
---   ext j,
---   erw [colimit.ι_desc, colimit.ι_desc_assoc],
---   dsimp only [limits.cofan.mk_ι_app],
---   -- this goal is garbáge
--- end⟩
+-- generalize to colimits
+instance projective_sigma {C ι : Type*} [category C] (P : ι → C) [has_coproduct P]
+  [∀ i, projective (P i)] :
+  projective (∐ P) :=
+{ factors := begin
+  introsI E X f e he,
+  let φ : ∐ P ⟶ E := sigma.desc (λ i, projective.factor_thru (sigma.ι _ _ ≫ f) e),
+  refine ⟨φ, _⟩,
+  ext i,
+  rw [limits.colimit.ι_desc_assoc, limits.cofan.mk_ι_app, projective.factor_thru_comp],
+end }
+
+instance projective_X [enough_projectives C] (P : endomorphisms C) [projective P] :
+  projective P.X :=
+⟨λ E X f e he, begin
+  let F := free.presentation P,
+  haveI : projective F.P.X := endomorphisms.projective_sigma _,
+  haveI : epi F.f := F.epi,
+  let s : P ⟶ F.P := projective.factor_thru (𝟙 _) F.f,
+  have hsπ : s ≫ F.f = 𝟙 _ := projective.factor_thru_comp _ _,
+  let X' : endomorphisms C := ⟨X, 𝟙 _⟩,
+  let E' : endomorphisms C := ⟨E, 𝟙 _⟩,
+  let e' : E' ⟶ X' := ⟨e, by { dsimp only, rw [category.id_comp, category.comp_id] }⟩,
+  haveI he' : epi e' := epi_of_epi_f e',
+  let φ : F.P.X ⟶ E := projective.factor_thru (F.f.f ≫ f) e,
+  refine ⟨s.f ≫ φ, _⟩,
+  rw [category.assoc, projective.factor_thru_comp, ← comp_f_assoc, hsπ, id_f, category.id_comp],
+end⟩
 
 end projectives
 
