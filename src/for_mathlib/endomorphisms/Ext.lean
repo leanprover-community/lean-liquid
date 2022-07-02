@@ -192,7 +192,8 @@ and Y is an object, thought of as a `single`
 complex, then Extⁱ(X,Y) is the homology of the complex
 (Cᵢ) whose i'th term is Hom(Pⁱ,Y), where P is a projective
 replacement of X. This applies to both the category 𝓐
-and to the endomorphism category.
+and to the endomorphism category. The reason is
+that Extⁱ(X,Y)=Hom(P,Y⟦i⟧).
 
 2) For a cleverly chosen choice of Pⁱ (see `exists_K_projective_endomorphism_replacement`)
 we have a short exact sequence of complexes
@@ -211,18 +212,31 @@ the trick is that Pⁱ is going to be `free Q` for some object `Q : 𝓐`
 lemma exists_K_projective_endomorphism_replacement
   (X : bounded_homotopy_category (endomorphisms 𝓐)) :
 ∃ (P : bounded_homotopy_category (endomorphisms 𝓐))
-  [homotopy_category.is_K_projective P.val]
-  (f : P ⟶ X), homotopy_category.is_quasi_iso f
-  ∧ (∀ j, ∃ Q, projective Q ∧ ∃ (i: P.val.as.X j ≅ free Q), true)
+  (f : P ⟶ X),
+  homotopy_category.is_K_projective P.val ∧
+  homotopy_category.is_quasi_iso f
+  ∧ (∀ j, ∃ (Q : 𝓐) (i: P.val.as.X j ≅ free Q), projective Q)
 --  ∧ ∀ k, projective (P.val.as.X k) -- should follow
 --  ∧ ∀ k, projective (P.val.as.X k).X -- should follow
 := sorry
 
+def K_projective_endomorphism_replacement (X : bounded_homotopy_category (endomorphisms 𝓐)) :=
+(exists_K_projective_endomorphism_replacement X).some
+
+/-
+
+Next: make the complexes Hom_T(P^*,Y) and Hom(P^*,Y)
+Next: make the SES
+
+-/
 /-
 
 Idea : We need a short exact sequence of complexes as above, and then
 the below follows from the associated long exact sequence
 of cohomology.
+
+* SES
+* six_term_exact_seq
 
 -/
 
