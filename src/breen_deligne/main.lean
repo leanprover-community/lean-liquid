@@ -9,6 +9,7 @@ import category_theory.limits.opposites
 import for_mathlib.free_abelian_group2
 import for_mathlib.has_homology_aux
 import for_mathlib.exact_functor
+import for_mathlib.derived.Ext_lemmas
 
 .
 
@@ -47,7 +48,10 @@ end
 def IH_0_aux (C : bounded_homotopy_category 𝓐) (hC : C.val.bounded_by 1) :
   ((Ext' 0).flip.obj B).obj (op (C.val.as.homology 0)) ≅
   ((Ext 0).obj (op C)).obj ((single 𝓐 0).obj B) :=
-sorry
+begin
+  refine (bounded_derived_category.Ext'_zero_flip_iso _ _).app _ ≪≫ _,
+  sorry
+end
 
 variables (hH0 : ((BD.eval F).obj A).val.as.homology 0 ≅ A)
 
