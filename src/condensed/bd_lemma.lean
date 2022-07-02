@@ -68,16 +68,24 @@ match i with
     refine ((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj (op S.val)).map_biproduct _
   end
 end )
-sorry
+begin
+  rintro i _ (rfl : _=_),
+  sorry
+end
+.
 
 def eval_freeCond'_iso :
   BD.eval' freeCond' ≅
-  Condensed_Ab_to_presheaf ⋙
-  BD.eval' freeFunc ⋙
-  presheaf_to_Condensed_Ab.map_homological_complex _ :=
+  Condensed_Ab_to_presheaf ⋙ BD.eval' freeFunc ⋙ presheaf_to_Condensed_Ab.map_homological_complex _ :=
 nat_iso.of_components
 (λ M, eval_freeCond'_iso_component _ _)
-sorry
+begin
+  intros X Y f,
+  ext ((_|i)|i) : 2,
+  { sorry },
+  { apply is_zero.eq_of_src, apply is_zero_zero },
+  { sorry }
+end
 
 def eval_freeAb_iso (S : ExtrDisc.{u}) :
   Condensed_Ab_to_presheaf ⋙ BD.eval' freeFunc ⋙
@@ -85,7 +93,13 @@ def eval_freeAb_iso (S : ExtrDisc.{u}) :
   evaluation _ S.val ⋙ BD.eval' (category_theory.forget _ ⋙ AddCommGroup.free) :=
 nat_iso.of_components
 (λ M, eval_freeAb_iso_component _ _ _)
-sorry
+begin
+  intros X Y f,
+  ext ((_|i)|i) : 2,
+  { sorry },
+  { apply is_zero.eq_of_tgt, apply is_zero_zero },
+  { sorry }
+end
 
 -- Move this.
 def point {A : Type u} (a : A) : punit.{u+1} ⟶ A := λ _, a
@@ -97,20 +111,22 @@ def tensor_to_unsheafified_homology_component_applied
   (homological_complex.homology ((BD.eval' freeFunc).obj
     (Condensed_Ab_to_presheaf.obj M)) i).obj (op S.val) :=
 match i with
-| (int.of_nat 0) := (homology_functor _ _ _).map
-    ((BD.eval' (forget AddCommGroup ⋙ AddCommGroup.free)).map
-      ((AddCommGroup.adj.hom_equiv _ _).symm (point m)) ≫
-      (eval_freeAb_iso_component _ _ _).inv) ≫
+| (int.of_nat 0) := (homotopy_category.homology_functor _ _ _).map
+    ((BD.eval (forget AddCommGroup ⋙ AddCommGroup.free)).map
+      ((AddCommGroup.adj.hom_equiv _ _).symm (point m))) ≫
+      (homology_functor _ _ _).map (eval_freeAb_iso_component _ _ _).inv ≫
     (((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj
       (op S.val)).homology_functor_iso _ _).inv.app _
 | (int.of_nat (i+1)) := 0
-| (int.neg_succ_of_nat i) := (homology_functor _ _ _).map
-    ((BD.eval' (forget AddCommGroup ⋙ AddCommGroup.free)).map
-      ((AddCommGroup.adj.hom_equiv _ _).symm (point m)) ≫
-      (eval_freeAb_iso_component _ _ _).inv) ≫
+| (int.neg_succ_of_nat i) := (homotopy_category.homology_functor _ _ _).map
+    ((BD.eval (forget AddCommGroup ⋙ AddCommGroup.free)).map
+      ((AddCommGroup.adj.hom_equiv _ _).symm (point m))) ≫
+      (homology_functor _ _ _).map (eval_freeAb_iso_component _ _ _).inv ≫
     (((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj
       (op S.val)).homology_functor_iso _ _).inv.app _
 end
+
+open category_theory.preadditive
 
 def tensor_to_unsheafified_homology_component (M : Condensed.{u} Ab.{u+1}) (i : ℤ)
   (S : ExtrDisc.{u}) :
@@ -120,9 +136,19 @@ def tensor_to_unsheafified_homology_component (M : Condensed.{u} Ab.{u+1}) (i : 
       (AddCommGroup.free.obj punit)).val.as.homology i ⟶
     (homological_complex.homology ((BD.eval' freeFunc).obj
       (Condensed_Ab_to_presheaf.obj M)) i).obj (op S.val)) :=
-{ to_fun := λ m, tensor_to_unsheafified_homology_component_applied _ _ _ _ m,
-  map_zero' := sorry,
-  map_add' := sorry }
+add_monoid_hom.mk' (λ m, tensor_to_unsheafified_homology_component_applied _ _ _ _ m)
+begin
+  intros x y, rcases i with ((_|i)|i),
+  { erw [← add_comp, ← functor.map_add, ← functor.map_add], apply congr_arg2 _ _ rfl, congr' 2,
+    dsimp only [AddCommGroup.adj, adjunction.mk_of_hom_equiv_hom_equiv],
+    ext ⟨⟩, simp only [equiv.symm_symm, add_monoid_hom.add_apply, free_abelian_group.lift.of],
+    refl },
+  { symmetry, apply add_zero, },
+  { erw [← add_comp, ← functor.map_add, ← functor.map_add], apply congr_arg2 _ _ rfl, congr' 2,
+    dsimp only [AddCommGroup.adj, adjunction.mk_of_hom_equiv_hom_equiv],
+    ext ⟨⟩, simp only [equiv.symm_symm, add_monoid_hom.add_apply, free_abelian_group.lift.of],
+    refl },
+end
 
 def tensor_to_unsheafified_homology (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
   (((Condensed_ExtrSheaf_equiv Ab).inverse.obj M).tensor
@@ -136,15 +162,18 @@ def tensor_to_unsheafified_homology (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
 
 def plain_eval_comparison_component (i : ℤ) (A : AddCommGroup.{u+1}) :
   A ⟶ AddCommGroup.of
-  (homological_complex.homology
-    ((BD.eval' (forget AddCommGroup ⋙ AddCommGroup.free)).obj (AddCommGroup.free.obj punit)) i ⟶
-    homological_complex.homology
-    ((BD.eval' (category_theory.forget AddCommGroup ⋙ AddCommGroup.free)).obj A) i) :=
-{ to_fun := λ a,
-    (homology_functor _ _ _).map $ (BD.eval' _).map $ (AddCommGroup.adj.hom_equiv _ _).symm
-    (point a),
-  map_zero' := sorry,
-  map_add' := sorry }
+  ((homotopy_category.homology_functor _ _ i).obj
+    ((BD.eval (forget AddCommGroup ⋙ AddCommGroup.free)).obj (AddCommGroup.free.obj punit)).val ⟶
+    (homotopy_category.homology_functor _ _ i).obj
+    ((BD.eval (category_theory.forget AddCommGroup ⋙ AddCommGroup.free)).obj A).val) :=
+add_monoid_hom.mk' (λ a, (homotopy_category.homology_functor _ _ _).map $ (BD.eval _).map $
+  (AddCommGroup.adj.hom_equiv _ _).symm (point a))
+begin
+  intros x y, rw [← functor.map_add, ← functor.map_add], congr' 2,
+  dsimp only [AddCommGroup.adj, adjunction.mk_of_hom_equiv_hom_equiv],
+  ext ⟨⟩, simp only [equiv.symm_symm, add_monoid_hom.add_apply, free_abelian_group.lift.of],
+  refl
+end
 
 def plain_eval_comparison (i : ℤ) :
   AddCommGroup.tensor_functor.flip.obj
