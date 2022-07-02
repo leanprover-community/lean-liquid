@@ -185,11 +185,16 @@ def tensor_to_homology (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
 
 .
 
+instance preserves_filtered_colimits_tensor_flip (A) :
+  preserves_filtered_colimits (AddCommGroup.tensor_functor.flip.obj A) :=
+sorry
+
 instance preserves_filtered_colimits_tensor_flip_eval' (i : ℤ) :
   preserves_filtered_colimits
   (AddCommGroup.tensor_functor.flip.obj (homological_complex.homology
     ((BD.eval' (forget AddCommGroup.{u+1} ⋙ AddCommGroup.free)).obj
-    (AddCommGroup.free.obj punit)) i)) := sorry
+    (AddCommGroup.free.obj punit)) i)) :=
+Condensed.preserves_filtered_colimits_tensor_flip _
 
 set_option pp.universes true
 
