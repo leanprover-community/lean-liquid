@@ -50,6 +50,9 @@ def IH_0_aux (C : bounded_homotopy_category 𝓐) (hC : C.val.bounded_by 1) :
   ((Ext 0).obj (op C)).obj ((single 𝓐 0).obj B) :=
 begin
   refine (bounded_derived_category.Ext'_zero_flip_iso _ _).app _ ≪≫ _,
+  refine _ ≪≫ (bounded_homotopy_category.Ext0.obj (op C)).map_iso (shift_zero _ _).symm,
+  refine _ ≪≫ (bounded_homotopy_category.hom_single_iso _ _ _).symm,
+  dsimp only [unop_op],
   sorry
 end
 
