@@ -541,7 +541,8 @@ begin
     homology_functor 𝓐 (complex_shape.up ℤ) 0 : functor.associator _ _ _
   ... ≅ (data.eval_functor F).obj BD.data ⋙ homology_functor 𝓐 (complex_shape.down ℕ) 0 :
     iso_whisker_left _ _,
-  apply homology_embed_nat_iso_0,
+  exact homological_complex.homology_embed_nat_iso 𝓐 complex_shape.embedding.nat_down_int_up
+    complex_shape.embedding.nat_down_int_up_c_iff 0 0 rfl,
 end
 
 def hH0_endo₁_a :

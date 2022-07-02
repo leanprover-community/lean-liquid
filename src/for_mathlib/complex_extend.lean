@@ -1,5 +1,7 @@
 import algebra.homology.homotopy
 import category_theory.abelian.basic
+import for_mathlib.short_complex_functor_category
+import for_mathlib.short_complex_homological_complex
 
 universes v u
 
@@ -23,6 +25,10 @@ structure embedding (c₁ : complex_shape ι₁) (c₂ : complex_shape ι₂) :=
 (c : ∀ ⦃i j⦄, c₁.rel i j → c₂.rel (f i) (f j))
 
 namespace embedding
+
+/-- extra condition which shall be useful to compare homology -/
+def c_iff {c₁ : complex_shape ι₁} {c₂ : complex_shape ι₂} (e : c₁.embedding c₂) : Prop :=
+∀ (i j), c₁.rel i j ↔ c₂.rel (e.f i) (e.f j)
 
 lemma r_f {c₁ : complex_shape ι₁} {c₂ : complex_shape ι₂} (e : c₁.embedding c₂) (i : ι₁) :
   e.r (e.f i) = some i := by rw e.eq_some
@@ -87,6 +93,19 @@ def nat_down_int_up : embedding (complex_shape.down ℕ) (complex_shape.up ℤ) 
   end,
   c := by { rintro i j (rfl : _ = _),
     simp only [pi.neg_apply, int.coe_nat_succ, neg_add_rev, up_rel, neg_add_cancel_comm], } }
+
+lemma nat_down_int_up_c_iff : nat_down_int_up.c_iff :=
+begin
+  intros i j,
+  split,
+  { apply nat_down_int_up.c, },
+  { intro hij,
+    change j+1 = i,
+    dsimp [nat_down_int_up] at hij,
+    rw ← int.coe_nat_eq_coe_nat_iff,
+    simp only [int.coe_nat_succ],
+    linarith, },
+end
 
 /-- Obvious embedding from the `ℕ`-indexed cohomological complex `* → * → * ...`
   to `ℤ`-indexed homological complex ` ... ← * ← * ← ...` sending $n$ to $-n$
@@ -425,6 +444,154 @@ def embed_homotopy (e : cι.embedding cι') :
   end }
 
 end homotopy
+
+section homology_comparison
+
+def congr_eval (𝓐 : Type*) [category 𝓐] [abelian 𝓐] (c₁ : complex_shape ι₁) (i j : ι₁)
+  (h : i = j) : eval 𝓐 c₁ i ≅ eval 𝓐 c₁ j := eq_to_iso (by rw h)
+
+def congr_prev_functor (𝓐 : Type*) [category 𝓐] [abelian 𝓐] (c₁ : complex_shape ι₁) (i j : ι₁)
+  (h : i = j) : prev_functor 𝓐 c₁ i ≅ prev_functor 𝓐 c₁ j := eq_to_iso (by rw h)
+
+def congr_next_functor (𝓐 : Type*) [category 𝓐] [abelian 𝓐] (c₁ : complex_shape ι₁) (i j : ι₁)
+  (h : i = j) : next_functor 𝓐 c₁ i ≅ next_functor 𝓐 c₁ j := eq_to_iso (by rw h)
+
+def embed_comp_eval (𝓐 : Type*) [category 𝓐] [abelian 𝓐]
+  {c₁ : complex_shape ι₁} {c₂ : complex_shape ι₂} (e : c₁.embedding c₂) (i₁ : ι₁) :
+  embed e ⋙ eval 𝓐 c₂ (e.f i₁) ≅ eval 𝓐 c₁ i₁ :=
+nat_iso.of_components
+(λ X, embed.X_iso_of_some X (e.r_f i₁))
+(λ X Y f, begin
+  dsimp [embed, embed.map],
+  rw embed.f_of_some f (e.r_f i₁),
+  simp only [category.assoc, iso.inv_hom_id, category.comp_id],
+end)
+
+def embed_comp_prev_functor (𝓐 : Type*) [category 𝓐] [abelian 𝓐]
+  {c₁ : complex_shape ι₁} {c₂ : complex_shape ι₂} (e : c₁.embedding c₂) (he : e.c_iff) (i₁ : ι₁) :
+  embed e ⋙ prev_functor 𝓐 c₂ (e.f i₁) ≅ prev_functor 𝓐 c₁ i₁ :=
+begin
+  rcases h₁ : c₁.prev i₁ with _ | ⟨j, hj⟩,
+  { apply is_zero.iso,
+    { rcases h₂ : c₂.prev (e.f i₁) with _ | ⟨k, hk⟩,
+      { apply functor.is_zero_of_comp,
+        exact prev_functor_is_zero _ _ _ h₂, },
+      { rw is_zero.iff_id_eq_zero,
+        ext X,
+        apply is_zero.eq_of_src,
+        dsimp,
+        refine is_zero.of_iso _ (((embed e).obj X).X_prev_iso hk),
+        dsimp [embed, embed.obj],
+        apply embed.X_is_zero_of_none X,
+        apply e.r_none,
+        rintro ⟨i, hi⟩,
+        rw [hi, ← he] at hk,
+        rw c₁.prev_eq_some hk at h₁,
+        simpa only using h₁, }, },
+    { exact prev_functor_is_zero _ _ _ h₁, }, },
+  { exact iso_whisker_left (embed e) (prev_functor_iso_eval 𝓐 c₂ (e.f i₁) (e.f j) (e.c hj)) ≪≫
+       embed_comp_eval 𝓐 e j ≪≫
+       (prev_functor_iso_eval 𝓐 c₁ i₁ j hj).symm, }
+end
+
+def embed_comp_next_functor (𝓐 : Type*) [category 𝓐] [abelian 𝓐]
+  {c₁ : complex_shape ι₁} {c₂ : complex_shape ι₂} (e : c₁.embedding c₂) (he : e.c_iff) (i₁ : ι₁) :
+  embed e ⋙ next_functor 𝓐 c₂ (e.f i₁) ≅ next_functor 𝓐 c₁ i₁ :=
+begin
+  rcases h₁ : c₁.next i₁ with _ | ⟨j, hj⟩,
+  { apply is_zero.iso,
+    { rcases h₂ : c₂.next (e.f i₁) with _ | ⟨k, hk⟩,
+      { apply functor.is_zero_of_comp,
+        exact next_functor_is_zero _ _ _ h₂, },
+      { rw is_zero.iff_id_eq_zero,
+        ext X,
+        apply is_zero.eq_of_src,
+        dsimp,
+        refine is_zero.of_iso _ (((embed e).obj X).X_next_iso hk),
+        dsimp [embed, embed.obj],
+        apply embed.X_is_zero_of_none X,
+        apply e.r_none,
+        rintro ⟨i, hi⟩,
+        rw [hi, ← he] at hk,
+        rw c₁.next_eq_some hk at h₁,
+        simpa only using h₁,}, },
+    { exact next_functor_is_zero _ _ _ h₁, }, },
+  { exact iso_whisker_left (embed e) (next_functor_iso_eval 𝓐 c₂ (e.f i₁) (e.f j) (e.c hj)) ≪≫
+       embed_comp_eval 𝓐 e j ≪≫
+       (next_functor_iso_eval 𝓐 c₁ i₁ j hj).symm }
+end
+
+def embed_short_complex_functor_homological_complex_π₁ (𝓐 : Type*) [category 𝓐] [abelian 𝓐]
+  {c₁ : complex_shape ι₁} {c₂ : complex_shape ι₂} (e : c₁.embedding c₂) (he : e.c_iff)
+  (i₁ : ι₁) (i₂ : ι₂) (h₁₂ : e.f i₁ = i₂) :
+  (embed e ⋙ short_complex.functor_homological_complex 𝓐 c₂ i₂) ⋙ short_complex.π₁ ≅
+  short_complex.functor_homological_complex 𝓐 c₁ i₁ ⋙ short_complex.π₁ :=
+functor.associator _ _ _ ≪≫
+  iso_whisker_left (embed e)
+    (short_complex.functor_homological_complex_π₁_iso_prev_functor 𝓐 c₂ i₂) ≪≫
+  (iso_whisker_left (embed e) (congr_prev_functor 𝓐 c₂ i₂ (e.f i₁) h₁₂.symm)) ≪≫
+  embed_comp_prev_functor 𝓐 e he i₁ ≪≫
+  (short_complex.functor_homological_complex_π₁_iso_prev_functor 𝓐 c₁ i₁).symm
+
+def embed_short_complex_functor_homological_complex_π₂ (𝓐 : Type*) [category 𝓐] [abelian 𝓐]
+  {c₁ : complex_shape ι₁} {c₂ : complex_shape ι₂} (e : c₁.embedding c₂) (i₁ : ι₁) (i₂ : ι₂)
+  (h₁₂ : e.f i₁ = i₂) :
+  (embed e ⋙ short_complex.functor_homological_complex 𝓐 c₂ i₂) ⋙ short_complex.π₂ ≅
+  short_complex.functor_homological_complex 𝓐 c₁ i₁ ⋙ short_complex.π₂ :=
+functor.associator _ _ _ ≪≫
+  iso_whisker_left (embed e)
+    (short_complex.functor_homological_complex_π₂_iso_eval 𝓐 c₂ i₂) ≪≫
+  (iso_whisker_left (embed e) (congr_eval 𝓐 c₂ i₂ (e.f i₁) h₁₂.symm)) ≪≫
+  embed_comp_eval 𝓐 e i₁ ≪≫
+  (short_complex.functor_homological_complex_π₂_iso_eval 𝓐 c₁ i₁).symm
+
+def embed_short_complex_functor_homological_complex_π₃ (𝓐 : Type*) [category 𝓐] [abelian 𝓐]
+  {c₁ : complex_shape ι₁} {c₂ : complex_shape ι₂} (e : c₁.embedding c₂) (he : e.c_iff)
+  (i₁ : ι₁) (i₂ : ι₂) (h₁₂ : e.f i₁ = i₂) :
+  (embed e ⋙ short_complex.functor_homological_complex 𝓐 c₂ i₂) ⋙ short_complex.π₃ ≅
+  short_complex.functor_homological_complex 𝓐 c₁ i₁ ⋙ short_complex.π₃ :=
+functor.associator _ _ _ ≪≫
+  iso_whisker_left (embed e)
+    (short_complex.functor_homological_complex_π₃_iso_next_functor 𝓐 c₂ i₂) ≪≫
+  (iso_whisker_left (embed e) (congr_next_functor 𝓐 c₂ i₂ (e.f i₁) h₁₂.symm)) ≪≫
+  embed_comp_next_functor 𝓐 e he i₁ ≪≫
+  (short_complex.functor_homological_complex_π₃_iso_next_functor 𝓐 c₁ i₁).symm
+
+def embed_short_complex_functor_homological_complex (𝓐 : Type*) [category 𝓐] [abelian 𝓐]
+  {c₁ : complex_shape ι₁} {c₂ : complex_shape ι₂} (e : c₁.embedding c₂) (he : e.c_iff)
+  (i₁ : ι₁) (i₂ : ι₂) (h₁₂ : e.f i₁ = i₂) :
+  embed e ⋙ short_complex.functor_homological_complex 𝓐 c₂ i₂ ≅
+  short_complex.functor_homological_complex 𝓐 c₁ i₁ :=
+begin
+  apply short_complex.functor_nat_iso_mk
+    (embed_short_complex_functor_homological_complex_π₁ 𝓐 e he i₁ i₂ h₁₂)
+    (embed_short_complex_functor_homological_complex_π₂ 𝓐 e i₁ i₂ h₁₂)
+    (embed_short_complex_functor_homological_complex_π₃ 𝓐 e he i₁ i₂ h₁₂),
+  { sorry, },
+  { sorry, },
+end
+
+def homology_embed_nat_iso (𝓐 : Type*) [category 𝓐] [abelian 𝓐]
+{c₁ : complex_shape ι₁} {c₂ : complex_shape ι₂} (e : c₁.embedding c₂) (he : e.c_iff)
+  (i₁ : ι₁) (i₂ : ι₂) (h₁₂ : e.f i₁ = i₂) :
+  embed e ⋙ homology_functor 𝓐 c₂ i₂ ≅ homology_functor 𝓐 c₁ i₁ :=
+begin
+  calc embed e ⋙ homology_functor 𝓐 c₂ i₂ ≅
+    embed e ⋙ (short_complex.functor_homological_complex 𝓐 c₂ i₂ ⋙
+      short_complex.homology_functor) : _
+  ... ≅ (embed e ⋙ short_complex.functor_homological_complex 𝓐 c₂ i₂) ⋙
+      short_complex.homology_functor : _
+  ... ≅ short_complex.functor_homological_complex 𝓐 c₁ i₁ ⋙
+    short_complex.homology_functor : _
+  ... ≅ homology_functor 𝓐 c₁ i₁ : _,
+  { exact iso_whisker_left _ (short_complex.homology_functor_iso 𝓐 c₂ i₂), },
+  { exact (functor.associator _ _ _).symm, },
+  { exact iso_whisker_right
+    (embed_short_complex_functor_homological_complex 𝓐 e he i₁ i₂ h₁₂) _, },
+  { exact (short_complex.homology_functor_iso 𝓐 c₁ i₁).symm, },
+end
+
+end homology_comparison
 
 end homological_complex
 
