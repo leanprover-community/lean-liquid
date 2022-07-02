@@ -47,7 +47,7 @@ instance (C : Type u) [category.{v} C] : category_struct (endomorphisms C) :=
 
 @[simp] lemma id_f (X : endomorphisms C) : hom.f (𝟙 X) = 𝟙 X.X := rfl
 
-@[simp] lemma comp_f {X Y Z : endomorphisms C} (f : X ⟶ Y) (g : Y ⟶ Z) :
+@[simp, reassoc] lemma comp_f {X Y Z : endomorphisms C} (f : X ⟶ Y) (g : Y ⟶ Z) :
   hom.f (f ≫ g) = f.f ≫ g.f := rfl
 
 instance (C : Type u) [category.{v} C] : category (endomorphisms C) :=
@@ -478,6 +478,31 @@ def free.presentation [enough_projectives C] (A : endomorphisms C) :
 
 instance [enough_projectives C] : enough_projectives (endomorphisms C) :=
 { presentation := λ A, ⟨free.presentation A⟩ }
+
+-- instance projective_X [enough_projectives C] (P : endomorphisms C) [projective P] :
+--   projective P.X :=
+-- ⟨λ E X f e he, begin
+--   let F := free.presentation P,
+--   haveI : projective F.P := F.projective,
+--   haveI : epi F.f := F.epi,
+--   let s : P ⟶ F.P := projective.factor_thru (𝟙 _) F.f,
+--   have hsπ : s ≫ F.f = 𝟙 _ := projective.factor_thru_comp _ _,
+--   let X' : endomorphisms C := ⟨X, 𝟙 _⟩,
+--   let E' : endomorphisms C := ⟨E, 𝟙 _⟩,
+--   let e' : E' ⟶ X' := ⟨e, by { dsimp only, rw [category.id_comp, category.comp_id] }⟩,
+--   haveI he' : epi e' := epi_of_epi_f e',
+--   let φ : F.P ⟶ X' := free.desc (projective.π _ ≫ f),
+--   let ψ : F.P ⟶ E' := projective.factor_thru φ e',
+--   refine ⟨(s ≫ ψ).f, _⟩,
+--   show ((s ≫ ψ) ≫ e').f = f,
+--   rw [category.assoc, projective.factor_thru_comp],
+--   suffices : φ.f = F.f.f ≫ f,
+--   { rw [comp_f, this, ← comp_f_assoc, hsπ, id_f, category.id_comp], },
+--   ext j,
+--   erw [colimit.ι_desc, colimit.ι_desc_assoc],
+--   dsimp only [limits.cofan.mk_ι_app],
+--   -- this goal is garbáge
+-- end⟩
 
 end projectives
 
