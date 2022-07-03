@@ -561,13 +561,62 @@ lemma embed_d_to (𝓐 : Type*) [category 𝓐] [abelian 𝓐]
   {c₁ : complex_shape ι₁} {c₂ : complex_shape ι₂} (e : c₁.embedding c₂) (he : e.c_iff)
   (i₁ : ι₁) (X : homological_complex 𝓐 c₁) :
   ((embed e).obj X).d_to (e.f i₁) ≫ (embed.X_iso_of_some X (e.r_f i₁)).hom =
-  (embed_comp_prev_functor 𝓐 e he i₁).hom.app X ≫ X.d_to i₁ := sorry
+  (embed_comp_prev_functor 𝓐 e he i₁).hom.app X ≫ X.d_to i₁ :=
+begin
+  dsimp [embed_comp_prev_functor],
+  rcases h₁ : c₁.prev i₁ with _ | ⟨j, hj⟩,
+  { simp only [h₁, d_to_eq_zero, comp_zero, preadditive.is_iso.comp_right_eq_zero],
+    rcases h₂ : c₂.prev (e.f i₁) with _ | ⟨k, hk⟩,
+    { apply is_zero.eq_of_src,
+      exact is_zero.of_iso (limits.is_zero_zero _) (((embed e).obj X).X_prev_iso_zero h₂), },
+    { simp only [homological_complex.d_to_eq _ hk, preadditive.is_iso.comp_left_eq_zero],
+      dsimp [embed, embed.obj, embed.d],
+      rcases h₃ : e.r k with _ | l,
+      { refl, },
+      { rw e.r_f i₁,
+        dsimp [embed.d],
+        by_cases h₄ : c₁.rel l i₁,
+        { exfalso,
+          simpa only [c₁.prev_eq_some h₄] using h₁, },
+        { exact X.shape _ _ h₄, }, }, }, },
+  { simp only [h₁, homological_complex.d_to_eq _ hj,
+      homological_complex.d_to_eq _ (e.c hj)],
+    conv_lhs { congr, congr, skip, dsimp [embed, embed.obj, embed.d], },
+    rw embed.d_of_some_of_some X (e.r_f j) (e.r_f i₁),
+    dsimp [iso_whisker_left, prev_functor_iso_eval, embed_comp_eval, nat_iso.of_components],
+    simp only [category.assoc, iso.inv_hom_id, category.comp_id, iso.inv_hom_id_assoc], },
+end
 
 lemma embed_d_from (𝓐 : Type*) [category 𝓐] [abelian 𝓐]
   {c₁ : complex_shape ι₁} {c₂ : complex_shape ι₂} (e : c₁.embedding c₂) (he : e.c_iff)
   (i₁ : ι₁) (X : homological_complex 𝓐 c₁) :
   ((embed e).obj X).d_from (e.f i₁) ≫ (embed_comp_next_functor 𝓐 e he i₁).hom.app X =
-  (embed.X_iso_of_some X (e.r_f i₁)).hom ≫ X.d_from i₁ := sorry
+  (embed.X_iso_of_some X (e.r_f i₁)).hom ≫ X.d_from i₁ :=
+begin
+  dsimp [embed_comp_next_functor],
+  rcases h₁ : c₁.next i₁ with _ | ⟨j, hj⟩,
+  { simp only [h₁, d_from_eq_zero, comp_zero, preadditive.is_iso.comp_right_eq_zero],
+    rcases h₂ : c₂.next (e.f i₁) with _ | ⟨k, hk⟩,
+    { apply is_zero.eq_of_tgt,
+      exact is_zero.of_iso (limits.is_zero_zero _) (((embed e).obj X).X_next_iso_zero h₂), },
+    { simp only [homological_complex.d_from_eq _ hk, preadditive.is_iso.comp_right_eq_zero],
+      dsimp [embed, embed.obj, embed.d],
+      rcases h₃ : e.r k with _ | l,
+      { exact embed.d_of_none_tgt X rfl, },
+      { rw e.r_f i₁,
+        dsimp [embed.d],
+        by_cases h₄ : c₁.rel i₁ l,
+        { exfalso,
+          simpa only [c₁.next_eq_some h₄] using h₁, },
+        { exact X.shape _ _ h₄, }, }, }, },
+  { simp only [h₁, homological_complex.d_from_eq _ hj,
+      homological_complex.d_from_eq _ (e.c hj)],
+    conv_lhs { congr, congr, dsimp [embed, embed.obj, embed.d], },
+    rw embed.d_of_some_of_some X (e.r_f i₁) (e.r_f j),
+    dsimp [iso_whisker_left, next_functor_iso_eval, embed_comp_eval, nat_iso.of_components],
+    simp only [category.assoc, eq_to_hom_trans, eq_to_hom_refl, category.comp_id,
+      iso.inv_hom_id_assoc], },
+end
 
 def embed_short_complex_functor_homological_complex (𝓐 : Type*) [category 𝓐] [abelian 𝓐]
   {c₁ : complex_shape ι₁} {c₂ : complex_shape ι₂} (e : c₁.embedding c₂) (he : e.c_iff)
