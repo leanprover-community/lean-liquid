@@ -79,15 +79,21 @@ begin
       a differential -> cf. `homology_iso_deg_0_of_bounded_by_1` above,
     finally use left exactness of Hom (or more generally of a left exact functor) -/
   have h := homotopy_category.exists_bounded_K_projective_replacement_of_bounded 1 C.val hC,
-  let P := h.some,
-  haveI : P.is_K_projective := h.some_spec.some,
-  have hP : P.bounded_by 1 := h.some_spec.some_spec.some,
-  let φ : P ⟶ C.val := h.some_spec.some_spec.some_spec.some,
-  let hφ₁ : homotopy_category.is_quasi_iso φ := h.some_spec.some_spec.some_spec.some_spec.1,
-  let hφ₂ :  ∀ (k : ℤ), projective (P.as.X k) := h.some_spec.some_spec.some_spec.some_spec.2,
-
-  /- TODO : use the API about projective replacement to get `C.replace.val ≅ P`
-     TODO : find/define the op functor on homotopy_category and apply
+  let P₁ := h.some,
+  have hP₁ : P₁.bounded_by 1 := h.some_spec.some_spec.some,
+  haveI : P₁.is_bounded_above := ⟨⟨1, hP₁⟩⟩,
+  let P : bounded_homotopy_category 𝓐 := ⟨P₁⟩,
+  haveI : P.val.is_K_projective := h.some_spec.some,
+  let ψ : P ⟶ C := h.some_spec.some_spec.some_spec.some,
+  haveI : homotopy_category.is_quasi_iso ψ := h.some_spec.some_spec.some_spec.some_spec.1,
+  let e : C.replace ≅ P :=
+  { hom := bounded_homotopy_category.lift C.π ψ,
+    inv := bounded_homotopy_category.lift ψ C.π,
+    hom_inv_id' := by simp only [bounded_homotopy_category.lift_comp_lift_self,
+      bounded_homotopy_category.lift_self],
+    inv_hom_id' := by simp only [bounded_homotopy_category.lift_comp_lift_self,
+      bounded_homotopy_category.lift_self], },
+  /- TODO : find/define the op functor on homotopy_category and apply
       (functor.map_homotopy_category (complex_shape.up ℤ).symm
     (preadditive_yoneda.obj B) ⋙ homotopy_category.homology_functor _ _ 0).map_iso
       to the iso above
@@ -625,8 +631,21 @@ begin
   dsimp only [functor.comp_map, endomorphisms.forget_map],
   erw endomorphisms.homology_functor_obj_e ((BD.eval' F.map_endomorphisms).obj X) 0,
   congr' 2,
+  dsimp only [package.eval'],
   ext i,
-  sorry,
+  rcases hi : complex_shape.embedding.nat_down_int_up.r i with _ | j,
+  { apply is_zero.eq_of_src,
+    dsimp [homological_complex.embed, homological_complex.embed.obj],
+    simp only [hi],
+    let zero : endomorphisms 𝓐 := ⟨0, 0⟩,
+    have h : is_zero zero := by { rw is_zero.iff_id_eq_zero, ext, },
+    have e' := (endomorphisms.forget 𝓐).map_iso (is_zero.iso h (is_zero_zero _)),
+    refine is_zero.of_iso _ e'.symm,
+    rw is_zero.iff_id_eq_zero,
+    rw ← (endomorphisms.forget 𝓐).map_id,
+    convert (endomorphisms.forget 𝓐).map_zero _ _,
+    ext, },
+  { sorry, },
   -- tentative suggestion: split into two separate statements
   -- 1) get rid of the `homological_complex.embed complex_shape.embedding.nat_down_int_up`
   --   by showing the endomorphisms we get with complexes indexed by `ℤ` are either both 0
