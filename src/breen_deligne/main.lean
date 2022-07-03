@@ -19,6 +19,7 @@ noncomputable theory
 universes v u
 
 open_locale big_operators
+open_locale zero_object
 
 open category_theory category_theory.limits opposite
 open bounded_homotopy_category (Ext single)
@@ -46,6 +47,23 @@ begin
   { apply Ext'_is_zero_of_neg, linarith only [hj, hij] }
 end
 
+def homology_iso_deg_0_of_bounded_by_1 (C : bounded_homotopy_category 𝓐)
+  (hC : C.val.bounded_by 1) : C.val.as.homology 0 ≅ cokernel (C.val.as.d_to 0) :=
+begin
+  let S := short_complex.mk (C.val.as.d_to 0) (0 : _ ⟶ 0) (by rw comp_zero),
+  let e : (short_complex.functor_homological_complex 𝓐 (complex_shape.up ℤ) 0 ⋙ short_complex.homology_functor).obj C.val.as
+    ≅ S.homology := short_complex.homology_functor.map_iso begin
+    refine short_complex.iso_mk (iso.refl _) (iso.refl _)
+      (C.val.as.X_next_iso (zero_add 1) ≪≫ is_zero.iso_zero (hC 1 (by refl))) _ _,
+    { dsimp, simp only [category.comp_id, category.id_comp], },
+    { dsimp,
+      apply is_zero.eq_of_tgt,
+      apply is_zero_zero, },
+  end,
+  exact (short_complex.homology_functor_iso 𝓐 _ 0).app C.val.as ≪≫ e ≪≫
+    (homology_iso_datum.of_Z_is_zero (C.val.as.d_to 0) (0 : _ ⟶ 0) (is_zero_zero _)).iso.symm,
+end
+
 def IH_0_aux (C : bounded_homotopy_category 𝓐) (hC : C.val.bounded_by 1) :
   ((Ext' 0).flip.obj B).obj (op (C.val.as.homology 0)) ≅
   ((Ext 0).obj (op C)).obj ((single 𝓐 0).obj B) :=
@@ -58,7 +76,7 @@ begin
     then, we should use an homotopy equivalence with a replacement which is ≤ 0,
     the condition ≤ 0 is preserved by map_homological_complex,
     then use some iso of the homology in degree 0 of such complexes as a coker/ker of
-      a differential,
+      a differential -> cf. `homology_iso_deg_0_of_bounded_by_1` above,
     finally use left exactness of Hom (or more generally of a left exact functor) -/
   sorry
 end

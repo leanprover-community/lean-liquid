@@ -545,4 +545,18 @@ def has_homology : has_homology f g H :=
 
 end has_homology
 
+variables (f g)
+
+def of_Z_is_zero (hX : is_zero Z) : homology_iso_datum f g (cokernel f) :=
+{ w := is_zero.eq_of_tgt hX _ _,
+  K := Y,
+  ι := 𝟙 Y,
+  f' := f,
+  fac' := category.comp_id _,
+  zero₁' := is_zero.eq_of_tgt hX _ _,
+  π := cokernel.π f,
+  zero₂' := cokernel.condition f,
+  fork_is_limit := sorry,
+  cofork_is_colimit := by apply cokernel_is_cokernel, }
+
 end homology_iso_datum
