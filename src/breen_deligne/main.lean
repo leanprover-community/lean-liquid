@@ -54,6 +54,12 @@ begin
   refine _ ≪≫ (bounded_homotopy_category.Ext0.obj (op C)).map_iso (shift_zero _ _).symm,
   refine _ ≪≫ (bounded_homotopy_category.hom_single_iso _ _ _).symm,
   dsimp only [unop_op],
+  /- `C.replace` is not necessarily ≤ 0, right?
+    then, we should use an homotopy equivalence with a replacement which is ≤ 0,
+    the condition ≤ 0 is preserved by map_homological_complex,
+    then use some iso of the homology in degree 0 of such complexes as a coker/ker of
+      a differential,
+    finally use left exactness of Hom (or more generally of a left exact functor) -/
   sorry
 end
 
