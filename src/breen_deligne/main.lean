@@ -10,6 +10,7 @@ import for_mathlib.free_abelian_group2
 import for_mathlib.has_homology_aux
 import for_mathlib.exact_functor
 import for_mathlib.derived.Ext_lemmas
+import for_mathlib.endomorphisms.homology
 
 .
 
@@ -582,9 +583,16 @@ begin
   have := (hH0_endo₁ BD F).hom.naturality φ, erw [← this], clear this,
   refine congr_arg2 _ _ rfl,
   dsimp only [functor.comp_map, endomorphisms.forget_map],
-  -- let e := ((endomorphisms.forget 𝓐).homology_functor_iso (complex_shape.up ℤ) 0).hom,
-  -- have := e.naturality,
-  sorry
+  erw endomorphisms.homology_functor_obj_e ((BD.eval' F.map_endomorphisms).obj X) 0,
+  congr' 2,
+  ext i,
+  sorry,
+  -- tentative suggestion: split into two separate statements
+  -- 1) get rid of the `homological_complex.embed complex_shape.embedding.nat_down_int_up`
+  --   by showing the endomorphisms we get with complexes indexed by `ℤ` are either both 0
+  --   or those the indices in `ℕ`
+  -- 2) prove a quite general lemma comparing the endomorphisms for
+  --     a functor `𝒜 ⥤ chain_complex 𝒜 ℕ`
 end
 
 end
