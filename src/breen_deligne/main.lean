@@ -645,13 +645,27 @@ begin
     rw ← (endomorphisms.forget 𝓐).map_id,
     convert (endomorphisms.forget 𝓐).map_zero _ _,
     ext, },
-  { sorry, },
-  -- tentative suggestion: split into two separate statements
-  -- 1) get rid of the `homological_complex.embed complex_shape.embedding.nat_down_int_up`
-  --   by showing the endomorphisms we get with complexes indexed by `ℤ` are either both 0
-  --   or those the indices in `ℕ`
-  -- 2) prove a quite general lemma comparing the endomorphisms for
-  --     a functor `𝒜 ⥤ chain_complex 𝒜 ℕ`
+  { apply endomorphisms.congr_f,
+    dsimp [homological_complex.embed, homological_complex.embed.map,
+      homological_complex.embed.obj],
+    rw homological_complex.embed.f_of_some _ hi,
+    rw ← cancel_mono (homological_complex.embed.X_iso_of_some
+      (((data.eval_functor F.map_endomorphisms).obj BD.data).obj X) hi).hom,
+    rw ← cancel_epi (homological_complex.embed.X_iso_of_some
+      (((data.eval_functor F.map_endomorphisms).obj BD.data).obj X) hi).inv,
+    simp only [category.assoc, iso.inv_hom_id, category.comp_id, iso.inv_hom_id_assoc],
+    dsimp only [homological_complex.tautological_endomorphism],
+    ext,
+    simp only [endomorphisms.comp_f, endomorphisms.hom.comm],
+    slice_lhs 1 2 { rw [← endomorphisms.comp_f, iso.inv_hom_id, endomorphisms.id_f], },
+    rw category.id_comp,
+    dsimp,
+    congr,
+    rw ← endomorphisms.end_of_e_f,
+    apply endomorphisms.congr_f,
+    apply biproduct.hom_ext,
+    intro a,
+    simpa only [biproduct.map_π, endomorphisms.end_of_e_comm], },
 end
 
 end

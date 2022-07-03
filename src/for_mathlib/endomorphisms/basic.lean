@@ -47,6 +47,13 @@ instance (C : Type u) [category.{v} C] : category_struct (endomorphisms C) :=
 
 @[simp] lemma id_f (X : endomorphisms C) : hom.f (𝟙 X) = 𝟙 X.X := rfl
 
+@[simps]
+def end_of_e (X : endomorphisms C) : X ⟶ X := ⟨X.e, rfl⟩
+
+lemma end_of_e_comm {X Y : endomorphisms C} (g : X ⟶ Y) : X.end_of_e ≫ g =
+  g ≫ Y.end_of_e :=
+by { ext, apply endomorphisms.hom.comm, }
+
 @[simp, reassoc] lemma comp_f {X Y Z : endomorphisms C} (f : X ⟶ Y) (g : Y ⟶ Z) :
   hom.f (f ≫ g) = f.f ≫ g.f := rfl
 
@@ -54,6 +61,8 @@ instance (C : Type u) [category.{v} C] : category (endomorphisms C) :=
 { id_comp' := λ X Y f, by { ext1, simp only [comp_f, id_f, category.id_comp] },
   comp_id' := λ X Y f, by { ext1, simp only [comp_f, id_f, category.comp_id] },
   assoc' := λ X Y Z W f g h, by { ext1, simp only [comp_f, category.assoc] } }
+
+lemma congr_f {X Y : endomorphisms C} (f₁ f₂ : X ⟶ Y) (h : f₁ = f₂) : f₁.f = f₂.f := by rw h
 
 @[simp, reassoc] lemma pow_comm {X Y : endomorphisms C} (f : X ⟶ Y) (n : ℕ) :
   (X.e ^ n : End X.X) ≫ f.f = f.f ≫ (Y.e ^ n : End Y.X) :=
