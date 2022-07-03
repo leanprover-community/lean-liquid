@@ -203,25 +203,19 @@ This can be checked to be surjective via an explicit construction;
 the trick is that Pⁱ is going to be `free Q` for some object `Q : 𝓐`
 
 -/
--- This is an approximation of the statement we need
--- for Pⁱ. Hopefully this is what we need. I might need
--- to add extra things, hopefully not, but let's see
--- if it's enough to prove `Ext_is_zero_iff`.
--- Question: does `projective Q` imply `projective (free Q)`?
--- Adam says we have this in `endomorphisms/basic`.
-lemma exists_K_projective_endomorphism_replacement
-  (X : bounded_homotopy_category (endomorphisms 𝓐)) :
-∃ (P : bounded_homotopy_category (endomorphisms 𝓐))
-  (f : P ⟶ X),
-  homotopy_category.is_K_projective P.val ∧
-  homotopy_category.is_quasi_iso f
-  ∧ (∀ j, ∃ (Q : 𝓐) (i: P.val.as.X j ≅ free Q), projective Q)
---  ∧ ∀ k, projective (P.val.as.X k) -- should follow
---  ∧ ∀ k, projective (P.val.as.X k).X -- should follow
-:= sorry
 
-def K_projective_endomorphism_replacement (X : bounded_homotopy_category (endomorphisms 𝓐)) :=
-(exists_K_projective_endomorphism_replacement X).some
+-- We no longer need this lemma, which is true but whose proof will probably be a
+-- huge hassle. Thanks Jo\"el Riou!
+-- lemma exists_K_projective_endomorphism_replacement
+--   (X : bounded_homotopy_category (endomorphisms 𝓐)) :
+-- ∃ (P : bounded_homotopy_category (endomorphisms 𝓐))
+--   (f : P ⟶ X),
+--   homotopy_category.is_K_projective P.val ∧
+--   homotopy_category.is_quasi_iso f
+--   ∧ (∀ j, ∃ (Q : 𝓐) (i: P.val.as.X j ≅ free Q), projective Q)
+-- --  ∧ ∀ k, projective (P.val.as.X k) -- should follow
+-- --  ∧ ∀ k, projective (P.val.as.X k).X -- should follow
+-- := sorry
 
 /-
 
@@ -246,6 +240,44 @@ lemma Ext_is_zero_iff (X : chain_complex 𝓐 ℕ) (Y : 𝓐)
   (∀ i, is_iso $ ((Ext i).map (chain_complex.to_bounded_homotopy_category.map f).op).app _ -
                  ((Ext i).obj (op _)).map ((single _ 0).map g)) :=
 begin
+  -- this might be refactored out
+  obtain ⟨P, _inst, fP, h1, h2⟩ := exists_K_projective_replacement
+    (chain_complex.to_bounded_homotopy_category.obj (X.mk_end f)),
+  resetI,
+--  have := hom_single_iso P ⟨Y,g⟩,
+--  have := hom_single_iso P.unEnd Y,
+  let obj1 :=
+    ((preadditive_yoneda.obj ({X := Y, e := g} : endomorphisms 𝓐)).map_homological_complex
+      (complex_shape.up ℤ).symm).obj P.val.as.op,
+  let obj2 := ((preadditive_yoneda.obj Y).map_homological_complex (complex_shape.up ℤ).symm).obj
+    P.unEnd.val.as.op,
+  let obj3 := ((preadditive_yoneda.obj Y).map_homological_complex (complex_shape.up ℤ).symm).obj
+    P.unEnd.val.as.op,
+  let map1 : obj1 ⟶ obj2 :=
+  { f := λ i,
+    { to_fun := endomorphisms.hom.f,
+      map_zero' := rfl,
+      map_add' := λ _ _, rfl },
+    comm' := λ i j h, rfl },
+  let map2 : obj2 ⟶ obj3 :=
+  { f := λ i,
+    { to_fun := λ ψ, (P.val.as.X i).e ≫ ψ - ψ ≫ g,
+      map_zero' := by simp only [comp_zero, zero_comp, sub_self],
+      map_add' := λ a b, begin
+        simp only [preadditive.comp_add, preadditive.add_comp],
+        abel,
+      end, },
+    comm' := λ i j, by sorry;{ -- this sorry is removable and just there for time purposes
+      rintro (rfl : _ = _),
+      ext1,
+      dsimp,
+      simp,
+      let bar := (endomorphisms.hom.comm (P.val.as.d j (j+1))).symm,
+      rw [← category.assoc, ← category.assoc],
+      congr' 1,
+    } },
+  have foo : exact map1 map2,
+  { sorry },
   sorry,
 end
 
