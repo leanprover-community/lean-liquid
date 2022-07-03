@@ -78,6 +78,22 @@ begin
     then use some iso of the homology in degree 0 of such complexes as a coker/ker of
       a differential -> cf. `homology_iso_deg_0_of_bounded_by_1` above,
     finally use left exactness of Hom (or more generally of a left exact functor) -/
+  have h := homotopy_category.exists_bounded_K_projective_replacement_of_bounded 1 C.val hC,
+  let P := h.some,
+  haveI : P.is_K_projective := h.some_spec.some,
+  have hP : P.bounded_by 1 := h.some_spec.some_spec.some,
+  let φ : P ⟶ C.val := h.some_spec.some_spec.some_spec.some,
+  let hφ₁ : homotopy_category.is_quasi_iso φ := h.some_spec.some_spec.some_spec.some_spec.1,
+  let hφ₂ :  ∀ (k : ℤ), projective (P.as.X k) := h.some_spec.some_spec.some_spec.some_spec.2,
+
+  /- TODO : use the API about projective replacement to get `C.replace.val ≅ P`
+     TODO : find/define the op functor on homotopy_category and apply
+      (functor.map_homotopy_category (complex_shape.up ℤ).symm
+    (preadditive_yoneda.obj B) ⋙ homotopy_category.homology_functor _ _ 0).map_iso
+      to the iso above
+   -/
+  refine (preadditive_yoneda.obj B).map_iso (homology_iso_deg_0_of_bounded_by_1 C hC).op.symm ≪≫
+    _,
   sorry
 end
 
