@@ -556,7 +556,8 @@ def of_Z_is_zero (hX : is_zero Z) : homology_iso_datum f g (cokernel f) :=
   zero₁' := is_zero.eq_of_tgt hX _ _,
   π := cokernel.π f,
   zero₂' := cokernel.condition f,
-  fork_is_limit := sorry,
+  fork_is_limit := is_limit_aux _ (λ s, s.ι) (λ s, by apply category.comp_id)
+      (λ s m hm, begin rw [← hm], symmetry, apply category.comp_id, end),
   cofork_is_colimit := by apply cokernel_is_cokernel, }
 
 end homology_iso_datum
