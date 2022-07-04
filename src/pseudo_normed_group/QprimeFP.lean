@@ -545,6 +545,14 @@ variables (ι : ulift.{u+1} ℕ → ℝ≥0) (hι : monotone ι)
 
 open category_theory.preadditive
 
+-- lemma commsq_sigma_proj_Tinv' (j) (n : ℕ) [fact (κ₂ (ι j) n ≤ r' * κ (ι j) n)] :
+-- QprimeFP_incl_aux M (κ₂ (ι j) n) (BD.data.X n) ≫
+--     Condensed_Ab_to_CondensedSet.map (biproduct.map (λ (i : ulift (fin (BD.data.X n))), M.Tinv_cond)) =
+--   Profinite_to_Condensed.map
+--       ((FiltrationPow.Tinv r' (κ₂ (ι j) n) (κ (ι j) n) (BD.data.X n)).app ⟨M⟩) ≫
+--     QprimeFP_incl_aux M (κ (ι j) n) (BD.data.X n) :=
+-- by admit
+
 lemma commsq_sigma_proj_Tinv [∀ (c : ℝ≥0) (n : ℕ), fact (κ₂ c n ≤ r' * κ c n)] :
   commsq (QprimeFP_sigma_proj BD κ₂ M ι) (sigma_map (λ (k : ulift ℕ), ι k)
     (QprimeFP_int.Tinv BD.data κ₂ κ M))
@@ -563,6 +571,12 @@ commsq.of_eq begin
     homological_complex.functor_eval_map_app_f, data.eval_functor'_obj_X_map, functor.comp_map,
     QprimeFP_nat.Tinv, whisker_right_app, functor.map_homological_complex_map_f],
   rw [map_FreeAb_comp_map],
+  dsimp only [FreeAb.eval, functor.map_FreeAb, FPsystem.Tinv, FP2.Tinv_app,
+    FreeAb.of_functor],
+  simp only [free_abelian_group.lift_map, function.comp, function.comp.left_id],
+  rw [free_abelian_group.lift.of],
+  simp only [← functor.map_comp],
+  congr' 1,
   sorry
 end
 
