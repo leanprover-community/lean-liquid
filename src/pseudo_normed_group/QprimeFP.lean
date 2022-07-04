@@ -229,10 +229,11 @@ def QprimeFP_incl (c : ℝ≥0) :
       (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).map
         (biproduct.π (λ (i : ulift (fin (BD.data.X n))), M.to_Condensed) i),
     { intros, refl },
-    simp only [← help, (y _).fac],
+    simp only [← help, (y _).fac], clear help,
     dsimp only [basic_universal_map.eval_FP, Profinite_to_Condensed_map_val,
       basic_universal_map.eval_png₀],
     ext S : 2,
+    dsimp only [nat_trans.comp_app, whisker_right_app, QprimeFP_incl_aux'],
     -- dsimp,
     sorry,
   end }
