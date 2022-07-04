@@ -127,6 +127,11 @@ match i with
     (((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj
       (op S.val)).homology_functor_iso _ _).inv.app _
 end
+.
+
+lemma tensor_to_unsheafified_homology_component_applied_of_nat_succ
+  (M : Condensed.{u} Ab.{u+1}) (i : ℕ) (S : ExtrDisc.{u}) :
+  tensor_to_unsheafified_homology_component_applied BD M (i+1:ℕ) S = 0 := rfl
 
 open category_theory.preadditive
 
@@ -151,6 +156,23 @@ begin
     ext ⟨⟩, simp only [equiv.symm_symm, add_monoid_hom.add_apply, free_abelian_group.lift.of],
     refl },
 end
+.
+
+lemma tensor_to_unsheafified_homology_natural (M : Condensed.{u} Ab.{u+1}) (i : ℤ) (S T : ExtrDiscᵒᵖ)
+  (f : S ⟶ T)
+  (x : (((ExtrSheaf_ExtrSheafProd_equiv Ab).functor.obj
+             ((Condensed_ExtrSheaf_equiv Ab).inverse.obj M)).val.obj S)) :
+  ((tensor_to_unsheafified_homology_component_applied BD M i (unop T)) ((M.val.map f.unop.val.op) x)) =
+  ((tensor_to_unsheafified_homology_component_applied BD M i (unop S)) x) ≫
+    ((homological_complex.homology ((BD.eval' freeFunc).obj (Condensed_Ab_to_presheaf.obj M)) i).map f.unop.val.op) :=
+begin
+  rcases i with ((_|i)|i),
+  { erw [category.assoc, category.assoc],
+    sorry },
+  { erw [tensor_to_unsheafified_homology_component_applied_of_nat_succ,
+        tensor_to_unsheafified_homology_component_applied_of_nat_succ, zero_comp], refl, },
+  { sorry },
+end
 
 def tensor_to_unsheafified_homology (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
   (((Condensed_ExtrSheaf_equiv Ab).inverse.obj M).tensor
@@ -160,7 +182,20 @@ def tensor_to_unsheafified_homology (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
     ((BD.eval' freeFunc).obj (Condensed_Ab_to_presheaf.obj M)) i :=
 { app := λ S, AddCommGroup.tensor_uncurry $
     tensor_to_unsheafified_homology_component _ _ _ _,
-  naturality' := sorry }
+  naturality' := λ S T f, begin
+    apply AddCommGroup.tensor_ext, intros x y,
+    dsimp only [ExtrSheaf.tensor, ExtrSheafProd.tensor,
+      ExtrSheaf_ExtrSheafProd_equiv, ExtrSheafProd.tensor_presheaf_map,
+      AddCommGroup.map_tensor, AddCommGroup.tensor_uncurry],
+    erw [comp_apply, comp_apply, tensor_product.map_tmul,
+      tensor_product.lift.tmul, tensor_product.lift.tmul],
+    dsimp only [add_monoid_hom.coe_to_int_linear_map, linear_map.comp_apply,
+      add_monoid_hom.coe_mk, functor.comp_map, Condensed_ExtrSheaf_equiv_inverse_val,
+      ExtrDisc_to_Profinite_map, functor.op_map, tensor_to_unsheafified_homology_component,
+      add_monoid_hom.mk'_apply],
+    erw [id_apply, ← comp_apply], congr' 1,
+    apply tensor_to_unsheafified_homology_natural,
+  end }
 
 def plain_eval_comparison_component (i : ℤ) (A : AddCommGroup.{u+1}) :
   A ⟶ AddCommGroup.of
@@ -177,13 +212,50 @@ begin
   refl
 end
 
+lemma plain_eval_comparison_natural (i : ℤ) (A B : AddCommGroup.{u+1}) (f : A ⟶ B) (x) :
+  ((plain_eval_comparison_component BD i B) (f x)) =
+  ((plain_eval_comparison_component BD i A) x) ≫
+  (homotopy_category.homology_functor AddCommGroup (complex_shape.up ℤ) i).map
+    ((BD.eval (forget AddCommGroup ⋙ AddCommGroup.free)).map f) :=
+begin
+  dsimp only [plain_eval_comparison_component, add_monoid_hom.mk'_apply, functor.comp_map],
+  rw [← functor.map_comp], congr' 1,
+  erw [← (BD.eval (forget AddCommGroup ⋙ AddCommGroup.free)).map_comp], congr' 1,
+  dsimp only [AddCommGroup.adj, adjunction.mk_of_hom_equiv_hom_equiv, equiv.symm, equiv.coe_fn_mk,
+    equiv.to_fun_as_coe],
+  ext ⟨⟩,
+  simp only [free_abelian_group.lift.of, comp_apply],
+  refl,
+end
+
+lemma plain_eval_comparison_natural' (i : ℤ) (A B : AddCommGroup.{u+1}) (f : A ⟶ B) :
+  (AddCommGroup.tensor_functor.flip.obj
+       (homological_complex.homology
+          ((BD.eval' (forget AddCommGroup ⋙ AddCommGroup.free)).obj (AddCommGroup.free.obj punit)) i)).map f ≫
+    AddCommGroup.tensor_uncurry (plain_eval_comparison_component BD i B) =
+  AddCommGroup.tensor_uncurry (plain_eval_comparison_component BD i A) ≫
+    (BD.eval' (forget AddCommGroup ⋙ AddCommGroup.free) ⋙
+       homology_functor AddCommGroup (complex_shape.up ℤ) i).map f :=
+begin
+  apply AddCommGroup.tensor_ext, intros x y,
+  rw [comp_apply, comp_apply],
+  dsimp only [functor.flip_obj_map, AddCommGroup.tensor_functor_map_app],
+  delta AddCommGroup.tensor_uncurry AddCommGroup.map_tensor,
+  dsimp only [linear_map.to_add_monoid_hom_coe],
+  rw [tensor_product.map_tmul, tensor_product.lift.tmul, tensor_product.lift.tmul],
+  dsimp only [add_monoid_hom.coe_to_int_linear_map, linear_map.comp_apply,
+    add_monoid_hom.coe_mk],
+  rw [plain_eval_comparison_natural],
+  refl
+end
+
 def plain_eval_comparison (i : ℤ) :
   AddCommGroup.tensor_functor.flip.obj
   (((BD.eval' (forget AddCommGroup ⋙ AddCommGroup.free)).obj
     (AddCommGroup.free.obj punit)).homology i) ⟶
   BD.eval' (forget AddCommGroup ⋙ AddCommGroup.free) ⋙ homology_functor _ _ i :=
 { app := λ A, AddCommGroup.tensor_uncurry $ plain_eval_comparison_component _ _ _,
-  naturality' := sorry }
+  naturality' := λ A B f, by apply plain_eval_comparison_natural' }
 
 lemma tensor_to_unsheafified_homology_app_eq
   (M : Condensed.{u} Ab.{u+1}) (i : ℤ) (S : ExtrDisc.{u}) :

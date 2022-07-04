@@ -32,6 +32,13 @@ def linear_equiv_to_iso {A B : AddCommGroup.{u}}
 def tensor (A B : AddCommGroup.{u}) : AddCommGroup.{u} :=
 AddCommGroup.of (A ⊗[ℤ] B)
 
+lemma tensor_ext {A B C : AddCommGroup.{u}} (f g : A.tensor B ⟶ C)
+  (h : ∀ x y, f (x ⊗ₜ y) = g (x ⊗ₜ y)) : f = g :=
+begin
+  ext1 x, show f.to_int_linear_map x = g.to_int_linear_map x, congr' 1, clear x,
+  apply tensor_product.ext', exact h,
+end
+
 def tensor_uncurry {A B C : AddCommGroup.{u}}
   (e : A ⟶ AddCommGroup.of (B ⟶ C)) : tensor A B ⟶ C :=
 linear_map.to_add_monoid_hom $ tensor_product.lift $
@@ -71,16 +78,11 @@ def tensor_curry_equiv (A B C : AddCommGroup.{u}) :
 { to_fun := tensor_curry,
   inv_fun := tensor_uncurry,
   left_inv := begin
-    intros f,
-    ext t,
-    apply tensor_product.induction_on t,
-    { simp, },
-    { intros x y, dsimp [tensor_uncurry, tensor_curry],
-      simp, },
-    { intros x y h1 h2,
-      simp only [map_add, h1, h2] }
+    intros f, apply tensor_ext, intros x y, dsimp only [tensor_uncurry, tensor_curry],
+    erw [tensor_product.lift.tmul], refl,
   end,
-  right_inv := λ f, by { ext, dsimp [tensor_uncurry, tensor_curry], simp, },
+  right_inv := λ f, by { ext, dsimp only [tensor_uncurry, tensor_curry],
+    erw [tensor_product.lift.tmul], refl, },
   map_add' := λ x y, by { ext, refl } }
 
 .
@@ -237,14 +239,11 @@ def tensor_adj (B : AddCommGroup.{u}) :
 adjunction.mk_of_hom_equiv
 { hom_equiv := λ A C, (tensor_curry_equiv A B C).to_equiv,
   hom_equiv_naturality_left_symm' := λ A A' C f g, begin
-    ext1 x,
+    apply tensor_ext, intros x y,
     erw [tensor_curry_equiv_symm_apply, comp_apply, tensor_curry_equiv_symm_apply],
-    dsimp only [tensor_uncurry, functor.flip_obj_map, tensor_functor_map_app, map_tensor,
-      linear_map.to_add_monoid_hom_coe],
-    rw [← linear_map.comp_apply], congr' 1, clear x,
-    apply tensor_product.ext', intros x y,
+    dsimp only [tensor_uncurry],
     simp only [linear_map.comp_apply, tensor_product.lift.tmul, tensor_product.map_tmul,
-      add_monoid_hom.coe_to_int_linear_map, id_apply, comp_apply],
+      add_monoid_hom.coe_to_int_linear_map, id_apply, comp_apply], refl,
   end,
   hom_equiv_naturality_right' := λ A C C' f g, by { ext x y : 2, refl } }
 .
