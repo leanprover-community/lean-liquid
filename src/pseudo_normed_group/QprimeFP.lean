@@ -577,6 +577,19 @@ commsq.of_eq begin
   rw [free_abelian_group.lift.of],
   simp only [← functor.map_comp],
   congr' 1,
+  ext1,
+  let x := biproduct.is_limit (λ (i : ulift (fin (BD.data.X n))), M.to_Condensed),
+  let y := is_limit_of_preserves (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf) x,
+  apply y.hom_ext, intro k,
+  simp only [Sheaf.hom.comp_val, category.assoc, QprimeFP_incl_aux, y.fac],
+  rw [← CondensedSet_to_presheaf_map, ← functor.comp_map],
+  simp only [functor.map_cone_π_app, bicone.to_cone_π_app, biproduct.bicone_π],
+  rw [← functor.map_comp, biproduct.map_π, functor.map_comp],
+  have : ((Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).map_cone
+    (biproduct.bicone (λ (i : ulift (fin (BD.data.X n))), M.to_Condensed)).to_cone).π.app k =
+    (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).map
+    (biproduct.π (λ (j : ulift (fin (BD.data.X n))), M.to_Condensed) k) := rfl,
+  rw [← this, ← category.assoc, y.fac],
   sorry
 end
 
