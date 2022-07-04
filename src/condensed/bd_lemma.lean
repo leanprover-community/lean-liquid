@@ -318,15 +318,17 @@ instance additive_tensor_flip_eval' (i : ℤ) : functor.additive
     (AddCommGroup.free.obj punit)) i)) :=
 Condensed.additive_tensor_flip _
 
+-- move me
+instance AddCommGroup.free_preserves_limits : preserves_colimits AddCommGroup.free :=
+AddCommGroup.adj.left_adjoint_preserves_colimits
+
 instance preserves_filtered_colimits_eval'_forget_free :
   preserves_filtered_colimits.{u+1 u+2 u+2}
     (BD.eval' (forget.{u+2 u+1 u+1} AddCommGroup.{u+1} ⋙ AddCommGroup.free.{u+1})) :=
 begin
   apply_with limits.comp_preserves_filtered_colimits.{u+1 u+2 _ u+2} {instances:=ff},
   { apply_with data.eval_functor_preserves_filtered_colimits {instances:=ff},
-    apply_with limits.comp_preserves_filtered_colimits.{u+1 u+2 _ u+2} {instances:=ff},
-    { apply_instance },
-    { sorry } },
+    apply limits.comp_preserves_filtered_colimits.{u+1 u+2 _ u+2}, },
   { sorry }
 end
 
