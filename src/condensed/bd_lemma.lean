@@ -28,6 +28,39 @@ variables (BD : package)
 abbreviation freeFunc : (Profiniteᵒᵖ ⥤ Ab) ⥤ Profiniteᵒᵖ ⥤ Ab :=
 (whiskering_right _ _ _).obj (forget _ ⋙ AddCommGroup.free)
 
+namespace eval_freeCond'_iso
+
+def component_zero (M : Condensed.{u} Ab.{u+1}) :
+  ((BD.eval' freeCond').obj M).X (int.of_nat 0) ≅
+  ((presheaf_to_Condensed_Ab.map_homological_complex (complex_shape.up ℤ)).obj
+    ((BD.eval' freeFunc).obj (Condensed_Ab_to_presheaf.obj M))).X
+  (int.of_nat 0) :=
+presheaf_to_Condensed_Ab.map_iso begin
+    refine functor.associator _ _ _ ≪≫ _,
+    refine iso_whisker_right _ _,
+    refine (Condensed_Ab_to_presheaf.map_biproduct _),
+  end
+
+def component_pos (M : Condensed.{u} Ab.{u+1}) (i : ℕ) :
+  ((BD.eval' freeCond').obj M).X (int.of_nat (i+1)) ≅
+  ((presheaf_to_Condensed_Ab.map_homological_complex (complex_shape.up ℤ)).obj
+    ((BD.eval' freeFunc).obj (Condensed_Ab_to_presheaf.obj M))).X
+  (int.of_nat (i+1)) :=
+is_zero.iso (is_zero_zero _) (functor.map_is_zero _ $ is_zero_zero _)
+
+def component_neg (M : Condensed.{u} Ab.{u+1}) (i : ℕ) :
+  ((BD.eval' freeCond').obj M).X (-[1+i]) ≅
+  ((presheaf_to_Condensed_Ab.map_homological_complex (complex_shape.up ℤ)).obj
+    ((BD.eval' freeFunc).obj (Condensed_Ab_to_presheaf.obj M))).X
+  (-[1+i]) :=
+presheaf_to_Condensed_Ab.map_iso begin
+    refine functor.associator _ _ _ ≪≫ _,
+    refine iso_whisker_right _ _,
+    refine (Condensed_Ab_to_presheaf.map_biproduct _),
+  end
+
+end eval_freeCond'_iso
+
 def eval_freeCond'_iso_component (M : Condensed.{u} Ab.{u+1}) :
   ((BD.eval' freeCond').obj M) ≅
   (presheaf_to_Condensed_Ab.map_homological_complex _).obj
@@ -35,19 +68,22 @@ def eval_freeCond'_iso_component (M : Condensed.{u} Ab.{u+1}) :
 homological_complex.hom.iso_of_components
 (λ i,
 match i with
-| int.of_nat 0 := presheaf_to_Condensed_Ab.map_iso begin
-    refine functor.associator _ _ _ ≪≫ _,
-    refine iso_whisker_right _ _,
-    refine (Condensed_Ab_to_presheaf.map_biproduct _),
-  end
-| int.of_nat (i+1) := is_zero.iso (is_zero_zero _) (functor.map_is_zero _ $ is_zero_zero _)
-| -[1+i] := presheaf_to_Condensed_Ab.map_iso begin
-    refine functor.associator _ _ _ ≪≫ _,
-    refine iso_whisker_right _ _,
-    refine (Condensed_Ab_to_presheaf.map_biproduct _)
-  end
+| int.of_nat 0 := eval_freeCond'_iso.component_zero _ _
+| int.of_nat (i+1) := eval_freeCond'_iso.component_pos _ _ _
+| -[1+i] := eval_freeCond'_iso.component_neg _ _ _
 end )
-sorry
+begin
+  rintros ((_|i)|(_|i)) ((_|j)|(_|j)) ⟨rfl⟩,
+  { apply is_zero.eq_of_tgt,
+    apply functor.map_is_zero,
+    apply is_zero_zero },
+  { apply is_zero.eq_of_tgt,
+    apply functor.map_is_zero,
+    apply is_zero_zero },
+  { sorry },
+  { sorry },
+  { sorry },
+end
 .
 
 lemma eval_freeCond'_iso_component_hom_zero (M : Condensed.{u} Ab.{u+1}) :
