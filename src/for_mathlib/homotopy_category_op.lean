@@ -50,4 +50,9 @@ functor.left_op (category_theory.quotient.lift _
     end, },
 end))
 
+def quotient_op_functor :
+  (quotient C c).op ⋙ op_functor ≅ homological_complex.op_functor ⋙ quotient Cᵒᵖ c.symm :=
+nat_iso.of_components (λ X, eq_to_iso (by refl))
+(λ X Y f, by { dsimp, simpa only [category.comp_id, category.id_comp], })
+
 end homotopy_category
