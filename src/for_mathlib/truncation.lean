@@ -53,7 +53,7 @@ def truncation (C : cochain_complex 𝓐 ℤ) (n : ℤ) : cochain_complex 𝓐 �
         subst hn,
         rw dif_pos rfl,
         simp only [eq_to_hom_trans_assoc, category.assoc, preadditive.is_iso.comp_left_eq_zero],
-        rw [← category.assoc, ← category.assoc, imker.comp_mono_zero_iff],
+        rw [← category.assoc, ← category.assoc, comp_mono_zero_iff],
         ext,
         simp, } },
     { rw dif_neg hin,

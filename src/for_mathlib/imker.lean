@@ -77,21 +77,6 @@ eq_to_iso (by {rw [X_def, if_pos rfl]})
   (imker C n).X i ≅ image (C.d_to n) :=
 eq_to_iso (by {rw [X_def, if_pos h]})
 
-def image_iso_of_eq {A B : 𝓐} {f f' : A ⟶ B} (h : f = f') : image f ≅ image f' :=
-eq_to_iso (by rw h)
-
-def image.is_iso_comp {A B C : 𝓐} {f : A ⟶ B} [is_iso f] (g : B ⟶ C) : image (f ≫ g) ≅ image g :=
-{ hom := image.lift (({ I := _,
-  m := image.ι _,
-  m_mono := infer_instance,
-  e := f ≫ factor_thru_image g,
-  fac' := by simp only [category.assoc, image.fac]} : mono_factorisation _)),
-  inv := image.lift (({ I := _,
-  m := image.ι _,
-  m_mono := infer_instance,
-  e := (inv f) ≫ factor_thru_image (f ≫ g),
-  fac' := by simp only [category.assoc, image.fac, is_iso.inv_hom_id_assoc]} : mono_factorisation _)) }
-
 @[simps]
 def X_iso_image' (n : ℤ) :
 (C.imker (n + 1)).X n ≅ image (C.d n (n + 1)) :=
@@ -177,29 +162,6 @@ def to_single (n : ℤ) : C.imker n ⟶ (single _ _ n).obj (C.homology n) :=
    { rw comp_zero },
   end }
 
--- TODO: the next few lemmas are in the wrong file and the wrong namespace.
-
--- move
-lemma is_iso_of_is_zero_of_is_zero {a b : 𝓐} (ha : is_zero a) (hb : is_zero b)
-  (f : a ⟶ b) : is_iso f :=
-begin
-  rw is_zero.eq_zero_of_src ha f,
-  apply (is_iso_zero_equiv a b).symm.to_fun,
-  exact ⟨is_zero.eq_of_src ha (𝟙 a) 0, is_zero.eq_of_src hb (𝟙 b) 0⟩,
-end
-
--- move
-lemma obj_is_zero_of_iso {𝓑 : Type*} [category 𝓑] [abelian 𝓑] {F G : 𝓐 ⥤ 𝓑}
-  (h : F ≅ G) {a : 𝓐} (ha : is_zero (F.obj a)) : is_zero (G.obj a) :=
-is_zero_of_iso_of_zero ha (h.app a)
-
--- move
-lemma map_is_iso_of_iso_of_map_is_iso {𝓑 : Type*} [category 𝓑] [abelian 𝓑] {F G : 𝓐 ⥤ 𝓑}
-  (h : F ≅ G) {a₁ a₂ : 𝓐} (f : a₁ ⟶ a₂) (ha : is_iso (F.map f)) : is_iso (G.map f) :=
-begin
-  rw ← nat_iso.naturality_1 h,
-  exact is_iso.comp_is_iso,
-end
 
 -- move
 lemma _root_.homological_complex.single_obj_is_zero (V : Type*) [_inst_1 : category V]
@@ -299,71 +261,6 @@ epi (homological_complex.hom.sq_from φ i) :=
     subst gR0, },
 end⟩
 
--- move
-@[simp] lemma epi_comp_iso_iff_epi {V : Type*} [category V] {A B C : V} (e : A ≅ B) (f : B ⟶ C) :
-  epi (e.hom ≫ f) ↔ epi f :=
-begin
-  split,
-  { rintro ⟨h⟩,
-    constructor,
-    intros Z s t h2,
-    apply h,
-    simp [h2], },
-  { rintro ⟨h⟩,
-    constructor,
-    intros Z s t h2,
-    apply h,
-    simpa using h2,
-  },
-end
-
--- move
-@[simp] lemma epi_iso_comp_iff_epi {V : Type*} [category V] {A B C : V} (f : A ⟶ B) (e : B ≅ C) :
-  epi (f ≫ e.hom) ↔ epi f :=
-begin
-  split,
-  { introI h,
-    constructor,
-    intros Z s t h2,
-    suffices : e.inv ≫ s = e.inv ≫ t,
-      simpa,
-    rw ← cancel_epi (f ≫ e.hom),
-    simpa using h2, },
-  { introI h,
-    constructor,
-    intros Z s t h2,
-    simp only [category.assoc] at h2,
-    rw cancel_epi at h2,
-    rwa cancel_epi at h2, },
-end
-
--- move
-lemma is_iso_iff_is_iso_comp_left {V : Type*} [category V] {A B C : V} (f : A ⟶ B) {e : B ⟶ C}
-  [is_iso f] : is_iso (f ≫ e) ↔ is_iso e :=
-begin
-  split,
-  { introI h, exact is_iso.of_is_iso_comp_left f e },
-  { introI h, exact is_iso.comp_is_iso },
-end
-
--- move
-lemma is_iso_iff_is_iso_comp_right {V : Type*} [category V] {A B C : V} {f : A ⟶ B} (g : B ⟶ C)
-  [is_iso g] : is_iso (f ≫ g) ↔ is_iso f :=
-begin
-  split,
-  { introI, exact is_iso.of_is_iso_comp_right f g},
-  { introI h, exact is_iso_of_op (f ≫ g), },
-end
-
--- move
-@[simp] lemma epi_comp_is_iso_iff_epi {V : Type*} [category V] {A B C : V} (e : A ⟶ B) (f : B ⟶ C)
-  [is_iso e] : epi (e ≫ f) ↔ epi f :=
-epi_comp_iso_iff_epi (as_iso e) f
-
--- move
-@[simp] lemma epi_is_iso_comp_iff_epi {V : Type*} [category V] {A B C : V} (f : A ⟶ B) (e : B ⟶ C)
-  [is_iso e] : epi (f ≫ e) ↔ epi f :=
-epi_iso_comp_iff_epi f (as_iso e)
 
 -- move
 lemma kernel_subobject_map_epi_of_epi {C : Type*} [_inst_1 : category C] [abelian C] {X Y : C}
@@ -386,28 +283,6 @@ begin
   rw kernel_subobject_map_arrow,
   simp,
   apply_instance,
-end
-
--- move
-lemma zero_of_epi_comp_zero {V : Type*} [category V] [abelian V]
-  {A B C : V} {f : A ⟶ B} {g : B ⟶ C} (w : f ≫ g = 0) [epi f] : g = 0 :=
-(preadditive.epi_iff_cancel_zero f).mp infer_instance C g w
-
--- move
-@[simp] lemma comp_mono_zero_iff {V : Type*} [category V] [abelian V]
-  {A B C : V} {f : A ⟶ B} {g : B ⟶ C} [mono g] : f ≫ g = 0 ↔ f = 0 :=
-⟨(preadditive.mono_iff_cancel_zero g).1 infer_instance A f, λ f, f.symm ▸ zero_comp⟩
-
--- move
-lemma epi_of_epi_of_comp_epi_of_mono {V : Type*} [category V] [abelian V]
-  {A B C : V} (f : A ⟶ B) (g : B ⟶ C) [epi (f ≫ g)] [mono g] : epi f :=
-begin
-  haveI foo : is_iso g,
-  { rw is_iso_iff_mono_and_epi,
-    refine ⟨infer_instance, _⟩,
-    apply epi_of_epi f,
-  },
-  simp * at *,
 end
 
 -- move
