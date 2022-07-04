@@ -359,9 +359,66 @@ begin
   exact functor.comp.additive (package.eval BD (forget AddCommGroup ⋙ AddCommGroup.free) ⋙ forget AddCommGroup)
   (homotopy_category.homology_functor AddCommGroup (complex_shape.up ℤ) i)
 end
+.
+
+lemma coeff_star_smul (x : free_abelian_group.{u} punit) :
+  free_abelian_group.coeff punit.star x • free_abelian_group.of.{u} punit.star = x :=
+begin
+  refine free_abelian_group.induction_on'' x _ _ _; clear x,
+  { simp only [map_zero, zero_smul], },
+  { rintro n hn ⟨⟩, simp only [map_zsmul, free_abelian_group.coeff_of_self, smul_assoc, one_smul], },
+  { rintro x n hn ⟨⟩ hx IH1 IH2, simp only [map_add, add_smul, IH1, IH2], },
+end
+
+lemma AddCommGroup.adj_hom_equiv_punit (a) :
+  ((AddCommGroup.adj.{u+1}.hom_equiv punit.{u+2}
+    (AddCommGroup.free.{u+1}.obj punit.{u+2})).symm) (point.{u+1} a) =
+    (free_abelian_group.coeff punit.star a) • 𝟙 _ :=
+begin
+  dsimp only [AddCommGroup.adj, adjunction.mk_of_hom_equiv_hom_equiv, equiv.symm, equiv.coe_fn_mk, equiv.to_fun_as_coe],
+  ext ⟨⟩,
+  rw [free_abelian_group.lift.of, add_monoid_hom.smul_apply, id_apply, coeff_star_smul],
+  refl
+end
+
+lemma homology_functor.map_id_bo_ho_ca {𝓐 : Type*} [category 𝓐] [abelian 𝓐] [enough_projectives 𝓐]
+  (X : bounded_homotopy_category 𝓐) (i : ℤ) :
+  (homotopy_category.homology_functor _ (complex_shape.up ℤ) i).map (𝟙 X : _) =
+    𝟙 ((homotopy_category.homology_functor _ (complex_shape.up ℤ) i).obj X.val) :=
+category_theory.functor.map_id _ _
+
+lemma plain_eval_comparison_is_iso_aux (A : AddCommGroup) :
+  is_iso (AddCommGroup.tensor_uncurry $ add_monoid_hom.mk' (λ (a : (AddCommGroup.free.obj punit)),
+     (free_abelian_group.coeff punit.star) a • 𝟙 A) $ by intros; simp only [map_add, add_smul]) :=
+begin
+  constructor,
+  refine ⟨add_monoid_hom.mk' (λ a, free_abelian_group.of punit.star ⊗ₜ a) _, _, _⟩,
+  { intros, rw tensor_product.tmul_add, },
+  sorry { apply AddCommGroup.tensor_ext, intros x y,
+    erw [comp_apply, id_apply],
+    dsimp only [AddCommGroup.tensor_uncurry, add_monoid_hom.mk'_apply,
+      linear_map.to_add_monoid_hom_coe],
+    rw [tensor_product.lift.tmul],
+    dsimp only [add_monoid_hom.coe_to_int_linear_map, linear_map.comp_apply,
+      add_monoid_hom.coe_mk, add_monoid_hom.mk'_apply, add_monoid_hom.smul_apply],
+    rw [← tensor_product.smul_tmul, id_apply, coeff_star_smul], },
+  { ext a, rw [id_apply, comp_apply],
+    dsimp only [AddCommGroup.tensor_uncurry, add_monoid_hom.mk'_apply,
+      linear_map.to_add_monoid_hom_coe],
+    rw [tensor_product.lift.tmul],
+    dsimp only [add_monoid_hom.coe_to_int_linear_map, linear_map.comp_apply,
+      add_monoid_hom.coe_mk, add_monoid_hom.mk'_apply, add_monoid_hom.smul_apply],
+    rw [free_abelian_group.coeff_of_self, one_smul], refl }
+end
 
 instance (i : ℤ) : is_iso ((plain_eval_comparison BD i).app
-  (AddCommGroup.free.obj (punit : Type (u+1)))) := sorry
+  (AddCommGroup.free.obj (punit : Type (u+1)))) :=
+begin
+  dsimp only [plain_eval_comparison, plain_eval_comparison_component],
+  simp only [AddCommGroup.adj_hom_equiv_punit, functor.map_smul,
+    category_theory.functor.map_id, homology_functor.map_id_bo_ho_ca],
+  apply plain_eval_comparison_is_iso_aux
+end
 
 instance is_iso_map_tensor_to_homology_aux_comp (M : Condensed.{u} Ab.{u+1}) (i : ℤ)
   [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (M.val.obj (op S.val))] :
