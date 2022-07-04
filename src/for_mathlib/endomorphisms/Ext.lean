@@ -310,6 +310,46 @@ end
 lemma map₂_epi {n : ℤ} (h : projective (P.val.as.X n)) : epi ((map₂ Y g P).f n) :=
 begin
   -- this is Joel Riou's argument, reduce to `free` and do an explicit calculation
+  let F : (endomorphisms 𝓐)ᵒᵖ ⥤ AddCommGroup :=
+    (endomorphisms.forget 𝓐).op ⋙ (preadditive_yoneda.obj Y),
+  let τ : F ⟶ F :=
+  { app := λ Q, add_monoid_hom.mk' (λ ψ, Q.unop.e ≫ ψ - ψ ≫ g)
+    begin
+      intros a b,
+      simp only [comp_add, add_comp, sub_eq_add_neg, neg_add, add_assoc],
+      congr' 1, apply add_left_comm,
+    end,
+    naturality' := λ Q₁ Q₂ f, begin
+      ext,
+      simp only [functor.comp_map, functor.op_map, forget_map, comp_apply,
+        add_monoid_hom.mk'_apply, map_sub],
+      congr' 1,
+      { dsimp, apply f.unop.comm_assoc, },
+      { dsimp, rw category.assoc, },
+    end, },
+  suffices : ∀ (Q : endomorphisms 𝓐) (hQ : projective Q), epi (τ.app (op Q)),
+  { exact this _ h, },
+  suffices : ∀ (A : 𝓐) (hA : projective A), epi (τ.app (op (free A))),
+  { intro Q,
+    introI,
+    haveI := this Q.X (infer_instance),
+    let π := free.desc (𝟙 (Q.X)),
+    haveI : epi π.f := begin
+      refine @epi_of_epi _ _ _ _ _ (sigma.ι _ (ulift.up 0)) _ (id _),
+      simp only [free.desc_f, category.id_comp, colimit.ι_desc, cofan.mk_ι_app, pow_zero,
+        End.one_def],
+      apply_instance,
+    end,
+    haveI : epi π := epi_of_epi_f _,
+    let s := projective.factor_thru (𝟙 Q) π,
+    have hs : s ≫ π = 𝟙 Q := projective.factor_thru_comp _ _,
+    constructor,
+    intros Z q₁ q₂ hq₀,
+    have hq₁ := congr_arg (λ (q : _ ⟶ _), (F.map s.op) ≫ q) hq₀,
+    simp only at hq₁,
+    rw [τ.naturality_assoc, τ.naturality_assoc, cancel_epi (τ.app (op (free Q.X)))] at hq₁,
+    simpa only [← F.map_comp_assoc, ← op_comp, hs, op_id, F.map_id, category.id_comp]
+      using congr_arg (λ (q : _ ⟶ _), (F.map π.op) ≫ q) hq₁, },
   sorry
 end
 
