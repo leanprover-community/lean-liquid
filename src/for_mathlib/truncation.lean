@@ -53,7 +53,7 @@ def truncation (C : cochain_complex 𝓐 ℤ) (n : ℤ) : cochain_complex 𝓐 �
         subst hn,
         rw dif_pos rfl,
         simp only [eq_to_hom_trans_assoc, category.assoc, preadditive.is_iso.comp_left_eq_zero],
-        rw [← category.assoc, ← category.assoc, imker.comp_mono_zero_iff],
+        rw [← category.assoc, ← category.assoc, comp_mono_zero_iff],
         ext,
         simp, } },
     { rw dif_neg hin,
@@ -221,7 +221,7 @@ def map_of_le (m n : ℤ) (h : m ≤ n) : C.truncation m ⟶ C.truncation n :=
     delta truncation,
     dsimp only [zero_add, neg_zero, add_zero, zero_lt_one, neg_neg, neg_eq_zero, homological_complex.d_comp_d, dif_neg, dif_pos,
   category.assoc, eq_to_hom_trans_assoc, eq_to_hom_refl, category.id_comp, homological_complex.d_comp_d_assoc,
-  zero_comp, comp_zero, preadditive.is_iso.comp_left_eq_zero, imker.comp_mono_zero_iff,
+  zero_comp, comp_zero, preadditive.is_iso.comp_left_eq_zero, comp_mono_zero_iff,
   homological_complex.d_comp_eq_to_hom, add_tsub_cancel_right, complex_shape.up_rel, add_left_inj, eq_self_iff_true,
   equalizer_as_kernel, kernel.lift_ι, mul_one],
     simp only [eq_self_iff_true, eq_to_iso.hom, eq_to_iso.inv, eq_to_hom_trans, eq_to_hom_trans_assoc, dif_pos],
@@ -432,8 +432,8 @@ end
 
 lemma image.lift_image_ι {A A' B : 𝓐} (f : A ⟶ B) (f' : A' ⟶ B) (e : A' ⟶ A) [is_iso e] (w : f' = e ≫ f) :
 image.lift ({ I := image f', m := image.ι f', e := factor_thru_image f ≫
-(image_comp_is_iso_left e f).inv ≫ (imker.image_iso_of_eq w.symm).hom,
-fac' := by { subst w, simp [image_comp_is_iso_left, imker.image_iso_of_eq] },
+(image_comp_is_iso_left e f).inv ≫ (image_iso_of_eq w.symm).hom,
+fac' := by { subst w, simp [image_comp_is_iso_left, image_iso_of_eq] },
 } : mono_factorisation f) ≫ image.ι f' = image.ι f :=
 begin
   simp,
@@ -456,8 +456,8 @@ begin
   ext,
   simp only [homological_complex.X_prev_iso_comp_d_to, category.assoc, image.pre_comp_ι,
   category_theory.limits.eq_to_hom_comp_image.ι, image.fac],
-  have foo : (imker.image.is_iso_comp (C.d n (n + 1))).inv ≫
-  (imker.image_iso_of_eq (C.d_to_eq rfl)).inv ≫ image.ι (homological_complex.d_to C (n + 1)) = (image.ι (C.d n (n+1)) : image (C.d n (n + 1)) ⟶ C.X (n + 1)),
+  have foo : (image.is_iso_comp (C.d n (n + 1))).inv ≫
+  (image_iso_of_eq (C.d_to_eq rfl)).inv ≫ image.ι (homological_complex.d_to C (n + 1)) = (image.ι (C.d n (n+1)) : image (C.d n (n + 1)) ⟶ C.X (n + 1)),
   { ext, simp,
     -- is this the right move? Surely?
     convert image.fac (C.d n (n+1)),
@@ -467,15 +467,15 @@ begin
     _inst_2 : abelian 𝓐,
     C : cochain_complex 𝓐 ℤ,
     n : ℤ
-    ⊢ (imker.image.is_iso_comp (C.d n (n + 1))).inv ≫
-          (imker.image_iso_of_eq _).inv ≫ image.ι (homological_complex.d_to C (n + 1)) =
+    ⊢ (image.is_iso_comp (C.d n (n + 1))).inv ≫
+          (image_iso_of_eq _).inv ≫ image.ι (homological_complex.d_to C (n + 1)) =
         image.ι (C.d n (n + 1))
     -/
 
 
     rw ← category.assoc,
     convert image.lift_image_ι _ _ _ (C.d_to_eq rfl), swap, apply_instance,
-    simp [imker.image.is_iso_comp, imker.image_iso_of_eq],
+    simp [image.is_iso_comp, image_iso_of_eq],
     rw ← is_iso.eq_comp_inv,
     ext,
     simp,
@@ -488,7 +488,7 @@ begin
     ⊢ C.d n (n + 1) =
         factor_thru_image (C.d n (n + 1)) ≫
           (image_comp_is_iso_left (homological_complex.X_prev_iso C rfl).hom (C.d n (n + 1))).inv ≫
-            (imker.image_iso_of_eq _).hom ≫
+            (image_iso_of_eq _).hom ≫
               eq_to_hom _ ≫ image.ι ((homological_complex.X_prev_iso C rfl).hom ≫ C.d n (n + 1))
     -/
     convert (image.fac (C.d n (n+1))).symm,
@@ -499,12 +499,12 @@ begin
     C : cochain_complex 𝓐 ℤ,
     n : ℤ
     ⊢ (image_comp_is_iso_left (homological_complex.X_prev_iso C rfl).hom (C.d n (n + 1))).inv ≫
-          (imker.image_iso_of_eq _).hom ≫
+          (image_iso_of_eq _).hom ≫
             eq_to_hom _ ≫ image.ι ((homological_complex.X_prev_iso C rfl).hom ≫ C.d n (n + 1)) =
         image.ι (C.d n (n + 1))
     -/
     convert image_comp_is_iso_left_comp_ι' _ _,
-    delta imker.image_iso_of_eq,
+    delta image_iso_of_eq,
     simp, },
   rw foo,
   simp,
@@ -567,7 +567,7 @@ begin
   delta to_imker, dsimp only,
   split_ifs with hn hi,
   { subst hn,
-    simp only [imker.epi_comp_is_iso_iff_epi, imker.epi_is_iso_comp_iff_epi,
+    simp only [epi_comp_is_iso_iff_epi, epi_is_iso_comp_iff_epi,
       factor_thru_image.category_theory.epi], },
   { subst hi,
     simp,
@@ -722,7 +722,7 @@ lemma epi_kernel_lift_zero_iff_epi {A B C : 𝓐} (f : A ⟶ B) :
   epi (kernel.lift (0 : B ⟶ C) f comp_zero) ↔ epi f :=
 begin
   conv_rhs {rw ← kernel.lift_ι (0 : B ⟶ C) f comp_zero},
-  rw imker.epi_is_iso_comp_iff_epi,
+  rw epi_is_iso_comp_iff_epi,
 end
 
 def kernel_comp_is_iso {X Y Z : 𝓐} (f : X ⟶ Y) (g : Y ⟶ Z) [is_iso g] :
@@ -772,10 +772,10 @@ begin
       not_false_iff, eq_to_iso.hom, eq_to_hom_trans, lt_add_iff_pos_right, lt_self_iff_false,
       eq_to_iso.inv],
     -- goal is epi (mess : ker(d)->)
-    rw ← imker.epi_iso_comp_iff_epi _ (kernel_is_iso_comp _ _),
+    rw ← epi_iso_comp_iff_epi _ (kernel_is_iso_comp _ _),
     -- now knock them off the other end
-    rw ← imker.epi_iso_comp_iff_epi _ (kernel_iso_assoc _ _ _),
-    rw ← imker.epi_iso_comp_iff_epi _ (kernel_comp_is_iso _ _),
+    rw ← epi_iso_comp_iff_epi _ (kernel_iso_assoc _ _ _),
+    rw ← epi_iso_comp_iff_epi _ (kernel_comp_is_iso _ _),
     -- simp now goes down the wrong track
     /- The goal is now to prove that some monstrous map
 
@@ -788,14 +788,14 @@ begin
     to itself and then claim that it is epi because it's the identity
     and then hopefully `ext, simp` will do it.
     -/
-    rw ← imker.epi_comp_iso_iff_epi (X_iso_of_eq C rfl).symm,
+    rw ← epi_comp_iso_iff_epi (X_iso_of_eq C rfl).symm,
     have foo : eq_to_hom _ ≫ C.d (n + 1 - 1) (n + 1) = C.d n (n + 1) := C.eq_to_hom_comp_d
       (show n + 1 = n + 1, by refl) (show (n + 1 - 1) + 1 = n + 1, by ring),
-    rw ← imker.epi_iso_comp_iff_epi _ (kernel_iso_of_eq (image.factor_thru_image_pre_comp _ _).symm),
+    rw ← epi_iso_comp_iff_epi _ (kernel_iso_of_eq (image.factor_thru_image_pre_comp _ _).symm),
     swap, apply_instance, swap, apply_instance,
-    rw ← imker.epi_iso_comp_iff_epi _ (kernel_comp_is_iso _ _),
-    rw ← imker.epi_iso_comp_iff_epi _ (kernel_factor_thru_image_iso _),
-    rw ← imker.epi_iso_comp_iff_epi _ (kernel_iso_of_eq foo),
+    rw ← epi_iso_comp_iff_epi _ (kernel_comp_is_iso _ _),
+    rw ← epi_iso_comp_iff_epi _ (kernel_factor_thru_image_iso _),
+    rw ← epi_iso_comp_iff_epi _ (kernel_iso_of_eq foo),
     -- finally there!
     convert category_struct.id.epi _,
     ext,

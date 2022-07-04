@@ -11,6 +11,7 @@ import Lbar.torsion_free_condensed
 import condensed.ab5
 import condensed.ab4
 import for_mathlib.endomorphisms.ab4
+import for_mathlib.homology_exact
 
 .
 
@@ -224,7 +225,7 @@ end
 local attribute [-simp] forget_map_eq_coe
 
 lemma eval_freeCond'_iso_aux_zero
-  (X Y: Condensed Ab) (f: X ⟶ Y) :
+  (X Y : Condensed Ab) (f : X ⟶ Y) :
   ((BD.eval' freeCond').map f ≫ (eval_freeCond'_iso_component BD Y).hom).f (int.of_nat 0) =
   ((eval_freeCond'_iso_component BD X).hom ≫
      (Condensed_Ab_to_presheaf ⋙
@@ -259,7 +260,7 @@ begin
 end
 
 lemma eval_freeCond'_iso_aux_neg
-  (X Y: Condensed Ab) (f: X ⟶ Y) (i : ℕ) :
+  (X Y : Condensed Ab) (f : X ⟶ Y) (i : ℕ) :
   ((BD.eval' freeCond').map f ≫ (eval_freeCond'_iso_component BD Y).hom).f (-[1+i]) =
   ((eval_freeCond'_iso_component BD X).hom ≫
      (Condensed_Ab_to_presheaf ⋙
@@ -346,6 +347,22 @@ match i with
 end
 .
 
+lemma tensor_to_unsheafified_homology_component_applied_eq
+  (M : Condensed.{u} Ab.{u+1}) (i : ℤ) (S : ExtrDisc.{u}) (m : M.val.obj (op S.val)) :
+  tensor_to_unsheafified_homology_component_applied BD M i S m =
+  (homotopy_category.homology_functor _ _ _).map
+    ((BD.eval (forget AddCommGroup ⋙ AddCommGroup.free)).map
+      ((AddCommGroup.adj.hom_equiv _ _).symm (point m))) ≫
+      (homology_functor _ _ _).map (eval_freeAb_iso_component _ _ _).inv ≫
+    (((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj
+      (op S.val)).homology_functor_iso _ _).inv.app _ :=
+begin
+  rcases i with ((_|i)|i),
+  { refl },
+  { apply is_zero.eq_of_src, apply is_zero.homology_is_zero, apply is_zero_zero, },
+  { refl },
+end
+
 lemma tensor_to_unsheafified_homology_component_applied_of_nat_succ
   (M : Condensed.{u} Ab.{u+1}) (i : ℕ) (S : ExtrDisc.{u}) :
   tensor_to_unsheafified_homology_component_applied BD M (i+1:ℕ) S = 0 := rfl
@@ -383,12 +400,8 @@ lemma tensor_to_unsheafified_homology_natural (M : Condensed.{u} Ab.{u+1}) (i : 
   ((tensor_to_unsheafified_homology_component_applied BD M i (unop S)) x) ≫
     ((homological_complex.homology ((BD.eval' freeFunc).obj (Condensed_Ab_to_presheaf.obj M)) i).map f.unop.val.op) :=
 begin
-  rcases i with ((_|i)|i),
-  { erw [category.assoc, category.assoc],
-    sorry },
-  { erw [tensor_to_unsheafified_homology_component_applied_of_nat_succ,
-        tensor_to_unsheafified_homology_component_applied_of_nat_succ, zero_comp], refl, },
-  { sorry },
+  simp only [tensor_to_unsheafified_homology_component_applied_eq, category.assoc],
+  sorry
 end
 
 def tensor_to_unsheafified_homology (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
