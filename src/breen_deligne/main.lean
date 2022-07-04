@@ -12,7 +12,7 @@ import for_mathlib.exact_functor
 import for_mathlib.derived.Ext_lemmas
 import for_mathlib.endomorphisms.homology
 import for_mathlib.yoneda_left_exact
-import for_mathlib.homotopy_category_op
+import for_mathlib.homotopy_category_functor_compatibilities
 
 .
 
@@ -74,39 +74,6 @@ begin
   { rw [this, comp_zero], },
   apply is_zero.eq_of_src,
   exact hC 1 (by refl),
-end
-
-def _root_.category_theory.functor.quotient_op_map_homology_nat_iso {A B : Type*}
-  [category A] [category B] [abelian A] [abelian B] (F : Aᵒᵖ ⥤ B)
-  {ι : Type*} (c : complex_shape ι)
-  [functor.additive F] (i : ι) :
-  (homotopy_category.quotient A c).op ⋙ homotopy_category.op_functor ⋙
-    functor.map_homotopy_category c.symm F ⋙ homotopy_category.homology_functor _ _ i ≅
-    homological_complex.op_functor ⋙ F.map_homological_complex c.symm ⋙
-   homology_functor _ _ i :=
-begin
-   sorry
-end
-
-def _root_.category_theory.functor.quotient_op_map_homology_iso {A B : Type*}
-  [category A] [category B] [abelian A] [abelian B] (F : Aᵒᵖ ⥤ B)
-  {ι : Type*} {c : complex_shape ι}
-  [functor.additive F] (X : homotopy_category A c) (i : ι) :
-  (homotopy_category.op_functor ⋙
-    functor.map_homotopy_category c.symm F ⋙
-    homotopy_category.homology_functor _ _ i).obj (op X) ≅
-  (F.map_homological_complex c.symm ⋙ homology_functor _ _ i).obj X.as.op :=
-begin
-  have e : op X ≅ (homotopy_category.quotient A c).op.obj (op X.as),
-  { dsimp,
-    apply iso.op,
-    apply eq_to_iso,
-    cases X,
-    refl, },
-  refine _ ≪≫ (F.quotient_op_map_homology_nat_iso c i).app (op X.as) ≪≫ _,
-  { exact (homotopy_category.op_functor ⋙ functor.map_homotopy_category c.symm F ⋙
-     homotopy_category.homology_functor B c.symm i).map_iso e, },
-  { refl, },
 end
 
 def IH_0_aux (C : bounded_homotopy_category 𝓐) (hC : C.val.bounded_by 1) :
