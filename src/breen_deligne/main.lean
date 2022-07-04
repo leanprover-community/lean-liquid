@@ -12,6 +12,7 @@ import for_mathlib.exact_functor
 import for_mathlib.derived.Ext_lemmas
 import for_mathlib.endomorphisms.homology
 import for_mathlib.yoneda_left_exact
+import for_mathlib.homotopy_category_op
 
 .
 
@@ -83,12 +84,6 @@ begin
   refine _ ≪≫ (bounded_homotopy_category.Ext0.obj (op C)).map_iso (shift_zero _ _).symm,
   refine _ ≪≫ (bounded_homotopy_category.hom_single_iso _ _ _).symm,
   dsimp only [unop_op],
-  /- `C.replace` is not necessarily ≤ 0, right?
-    then, we should use an homotopy equivalence with a replacement which is ≤ 0,
-    the condition ≤ 0 is preserved by map_homological_complex,
-    then use some iso of the homology in degree 0 of such complexes as a coker/ker of
-      a differential -> cf. `homology_iso_deg_0_of_bounded_by_1` above,
-    finally use left exactness of Hom (or more generally of a left exact functor) -/
   have h := homotopy_category.exists_bounded_K_projective_replacement_of_bounded 1 C.val hC,
   let P₁ := h.some,
   have hP₁ : P₁.bounded_by 1 := h.some_spec.some_spec.some,
@@ -97,24 +92,25 @@ begin
   haveI : P.val.is_K_projective := h.some_spec.some,
   let ψ : P ⟶ C := h.some_spec.some_spec.some_spec.some,
   haveI hψ : homotopy_category.is_quasi_iso ψ := h.some_spec.some_spec.some_spec.some_spec.1,
-  let e : C.replace ≅ P :=
+  let e : C.replace.val ≅ P.val := (bounded_homotopy_category.forget _).map_iso
   { hom := bounded_homotopy_category.lift C.π ψ,
     inv := bounded_homotopy_category.lift ψ C.π,
     hom_inv_id' := by simp only [bounded_homotopy_category.lift_comp_lift_self,
       bounded_homotopy_category.lift_self],
     inv_hom_id' := by simp only [bounded_homotopy_category.lift_comp_lift_self,
       bounded_homotopy_category.lift_self], },
-  /- TODO : find/define the op functor on homotopy_category and apply
-      (functor.map_homotopy_category (complex_shape.up ℤ).symm
-    (preadditive_yoneda.obj B) ⋙ homotopy_category.homology_functor _ _ 0).map_iso
-      to the iso above
-   -/
-   let e' : (((preadditive_yoneda.obj B).map_homological_complex
+  let e' : (((preadditive_yoneda.obj B).map_homological_complex
     (complex_shape.up ℤ).symm).obj C.replace.val.as.op).homology 0 ≅
     (((preadditive_yoneda.obj B).map_homological_complex
-    (complex_shape.up ℤ).symm).obj P.val.as.op).homology 0 := sorry,
-    refine  _ ≪≫
-     (homology_iso_deg_0_of_bounded_by_1_down
+    (complex_shape.up ℤ).symm).obj P.val.as.op).homology 0 :=
+  begin
+    let F := functor.map_homotopy_category (complex_shape.down ℤ) (preadditive_yoneda.obj B)
+      ⋙ homotopy_category.homology_functor _ _ 0,
+    refine _ ≪≫ F.map_iso (homotopy_category.op_functor.map_iso e.op) ≪≫ _,
+    all_goals { sorry, },
+  end,
+  refine  _ ≪≫
+    (homology_iso_deg_0_of_bounded_by_1_down
       (((preadditive_yoneda.obj B).map_homological_complex
       (complex_shape.up ℤ).symm).obj P.val.as.op)
       (λ i hi, begin dsimp only [functor.map_homological_complex],

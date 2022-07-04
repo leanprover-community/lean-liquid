@@ -178,5 +178,18 @@ instance shift_functor_additive (n : ℤ) :
   (category_theory.shift_functor (homotopy_category V (complex_shape.up ℤ)) n).additive :=
 {}
 
+@[simps]
+def map_homotopy_category_comp {W : Type*} [category W] [preadditive W] (F : V ⥤ W)
+[functor.additive F] (c : complex_shape ι) :
+  F.map_homological_complex c ⋙ homotopy_category.quotient W c ≅
+  homotopy_category.quotient V c ⋙ functor.map_homotopy_category c F :=
+nat_iso.of_components
+(λ X, eq_to_iso (by refl))
+(λ X Y f, begin
+  simp only [functor.comp_map, eq_to_iso_refl, iso.refl_hom, category.comp_id,
+    functor.map_homotopy_category_map, category.id_comp],
+  apply category_theory.quotient.sound,
+  exact nonempty.intro (F.map_homotopy (homotopy_out_map f)).symm,
+end)
 
 end homotopy_category
