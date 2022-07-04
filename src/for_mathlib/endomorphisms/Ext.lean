@@ -190,6 +190,24 @@ instance forget_preserves_K_projective {P : bounded_homotopy_category (endomorph
 ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P).val.is_K_projective :=
 sorry
 
+def forget_mk_end (X : chain_complex 𝓐 ℕ) (f : X ⟶ X) :
+  (endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj
+    (chain_complex.to_bounded_homotopy_category.obj (homological_complex.mk_end X f)) ≅
+  chain_complex.to_bounded_homotopy_category.obj X :=
+bounded_homotopy_category.mk_iso $ (homotopy_category.quotient _ _).map_iso $
+homological_complex.hom.iso_of_components
+(λ m,
+match m with
+| int.of_nat 0 := iso.refl _
+| int.of_nat (i+1) := is_zero.iso (functor.map_is_zero _ $ is_zero_zero _) (is_zero_zero _)
+| -[1+i] := iso.refl _
+end)
+begin
+  rintros i j (rfl : _ = _),
+  sorry,
+end
+
+
 /-
 
 Mathematical summary of the `Ext_is_zero_iff` `sorry` according to kmb's
@@ -312,16 +330,14 @@ begin
   sorry
 end
 
-example (X : chain_complex 𝓐 ℕ) (f : X ⟶ X) :
-  (endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj
-    (chain_complex.to_bounded_homotopy_category.obj (homological_complex.mk_end X f)) =
-  chain_complex.to_bounded_homotopy_category.obj X :=
-begin
-  dsimp,
-  congr' 1,
-  congr' 1,
-  sorry,
-end
+-- example (X : chain_complex 𝓐 ℕ) (f : X ⟶ X) (m : ℤ) :
+-- ((chain_complex.to_bounded_homotopy_category.obj (homological_complex.mk_end X f)).val.as.X m).X =
+--     ((homological_complex.embed complex_shape.embedding.nat_down_int_up).obj X).X m
+-- :=
+-- begin
+--   cases m,
+--   refl,refl,
+-- end
 
 lemma Ext_is_zero_iff (X : chain_complex 𝓐 ℕ) (Y : 𝓐)
   (f : X ⟶ X) (g : Y ⟶ Y) :
@@ -360,20 +376,45 @@ begin
     -- this might be a nightmare, but who knows. The first part
     -- wasn't so bad.
     -- Note that I'm unclear whether the next line is `rw foo` or not.
+    rw foo,
     apply forall_congr, -- could have a sign problem now
     intro i,
-    let fP' := ((endomorphisms.forget _).map_bounded_homotopy_category).map fP,
-    let j : (((Ext i).obj (op (chain_complex.to_bounded_homotopy_category.obj X))).obj ((single 𝓐 0).obj Y))
+    -- let fP' : (endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P ⟶
+    --   chain_complex.to_bounded_homotopy_category.obj X :=
+    --  (homotopy_category.quotient _ _).map
+    --  { f := λ m, (fP.out.f m).f ≫ _,
+    --    comm' := _ },--((F.map_homological_complex c).map (quot.out f)),
+    let fP' := ((endomorphisms.forget _).map_bounded_homotopy_category).map fP ≫ (forget_mk_end X f).hom,
+    let j : (((Ext (-i)).obj (op (chain_complex.to_bounded_homotopy_category.obj X))).obj ((single 𝓐 0).obj Y))
     ≅ ((homology_functor AddCommGroup (complex_shape.up ℤ).symm i).obj (C₂ Y P)),
-    { -- need fP.unend
-      let AAA := ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj
-             (chain_complex.to_bounded_homotopy_category.obj (homological_complex.mk_end X f))),
-      let BBB := (chain_complex.to_bounded_homotopy_category.obj X),
-      --have : AAA = BBB := rfl,
-      --let foo := Ext_iso i _ _ ((single 𝓐 0).obj Y) fP',
-      --refine iso.trans foo _,
-      sorry },
-    delta map₂ C₂,
+    { -- need that post-composing with an iso sends quasi-isos to quasi-isos! More precisely:
+      -- Above I sorried that if fP is a quasi-iso then so is
+      -- ((endomorphisms.forget _).map_bounded_homotopy_category).map fP,
+      -- however unfortunately we now need to post-compose with something
+      -- which is close to, but not equal to, 𝟙.
+      haveI : homotopy_category.is_quasi_iso fP' := sorry,
+      refine iso.trans (Ext_iso (-i) _ _ ((single 𝓐 0).obj Y) fP') _,
+--      delta C₂,
+      have := hom_single_iso ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P) Y i,
+      refine iso.trans _ this, clear this,
+      have := (shift_single_iso 0 (-i) : single 𝓐 0 ⋙ _ ≅ _),
+      change (preadditive_coyoneda.obj (op ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P))).obj _ ≅ _,
+      apply (preadditive_coyoneda.obj _).map_iso,
+      convert iso.app this _,
+      ring, },
+    -- Goal is `is_iso f : A ⟶ A` iff `is_iso f' : A' ⟶ A'` and we have an
+    -- iso `j : A ⟶ A'` so it suffices to prove that the square
+    -- (with `j` on two sides) commutes.
+    suffices : j.hom ≫ ((homology_functor AddCommGroup (complex_shape.up ℤ).symm i).map (map₂ Y g P))
+      = (((Ext (-i)).map (chain_complex.to_bounded_homotopy_category.map f).op).app ((single 𝓐 0).obj Y) -
+      ((Ext (-i)).obj (op (chain_complex.to_bounded_homotopy_category.obj X))).map ((single 𝓐 0).map g)) ≫ j.hom,
+    { rw [← is_iso_iff_is_iso_comp_left j.hom, this, is_iso_iff_is_iso_comp_right], },
+    delta map₂,
+    --simp only [j],
+    -- this looks horrible
+    -- It's of the form j ≫ (a - b) = (c - d) ≫ j
+    -- and in fact j ≫ a = c ≫ j and j ≫ b = d ≫ j are both true
+    -- so perhaps the next goal is reducing to that.
     sorry },
 end
 
