@@ -264,11 +264,10 @@ def map₂ : C₂ Y P ⟶ C₂ Y P :=
     dsimp,
     simp only [comp_apply, add_monoid_hom.mk'_apply, linear_map.to_add_monoid_hom_coe,
       preadditive_yoneda_obj_map_apply, comp_sub, ← category.assoc],
-    congr' 1,
+    congr' 2,
     have := (endomorphisms.hom.comm (P.val.as.d j (j+1))).symm,
-    sorry
+    exact this,
   end }
-
 
 lemma Ext_is_zero_iff (X : chain_complex 𝓐 ℕ) (Y : 𝓐)
   (f : X ⟶ X) (g : Y ⟶ Y) :
