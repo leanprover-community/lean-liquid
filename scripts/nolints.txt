@@ -44,6 +44,7 @@ apply_nolint breen_deligne.package.main_lemma.IH_neg unused_arguments
 apply_nolint breen_deligne.package.main_lemma.bdd_step unused_arguments
 apply_nolint breen_deligne.package.main_lemma.bdd_step₂ unused_arguments
 apply_nolint breen_deligne.package.main_lemma.bdd_step₅_aux'' unused_arguments
+apply_nolint breen_deligne.package.main_lemma.homology_iso_deg_0_of_bounded_by_1 unused_arguments
 apply_nolint breen_deligne.package.main_lemma.shift_equiv_functor_additive unused_arguments
 
 -- breen_deligne/suitable.lean
@@ -228,6 +229,9 @@ apply_nolint category_theory.endomorphisms.single_unEnd unused_arguments
 -- for_mathlib/endomorphisms/basic.lean
 apply_nolint category_theory.endomorphisms.f_epi unused_arguments
 apply_nolint category_theory.endomorphisms.f_mono unused_arguments
+
+-- for_mathlib/endomorphisms/homology.lean
+apply_nolint homological_complex.tautological_endomorphism unused_arguments
 
 -- for_mathlib/exact_functor.lean
 apply_nolint category_theory.functor.exact unused_arguments
