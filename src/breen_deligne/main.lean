@@ -11,6 +11,7 @@ import for_mathlib.has_homology_aux
 import for_mathlib.exact_functor
 import for_mathlib.derived.Ext_lemmas
 import for_mathlib.endomorphisms.homology
+import for_mathlib.yoneda_left_exact
 
 .
 
@@ -124,8 +125,6 @@ begin
         simpa [← is_zero.iff_id_eq_zero] using hP₁ i hi,
       end)).symm ≪≫
     e'.symm,
-  haveI : is_iso (kernel_comparison (P₁.as.op.d 0 (-1)) (preadditive_yoneda.obj B)) :=
-    sorry,
   refine (preadditive_yoneda.obj B).map_iso _ ≪≫
     as_iso (kernel_comparison (P₁.as.op.d 0 (-1)) (preadditive_yoneda.obj B)) ≪≫
     (kernel.map_iso _ ((((preadditive_yoneda.obj B).map_homological_complex
