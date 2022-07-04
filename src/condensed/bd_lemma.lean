@@ -61,6 +61,95 @@ presheaf_to_Condensed_Ab.map_iso begin
 
 end eval_freeCond'_iso
 
+open_locale big_operators
+open category_theory.preadditive
+
+lemma eval_freeCond'_iso_component_aux₀ (M : Condensed.{u} Ab.{u+1}) :
+  (eval_freeCond'_iso.component_neg BD M 0).hom ≫
+    ((presheaf_to_Condensed_Ab.map_homological_complex (complex_shape.up ℤ)).obj
+       ((BD.eval' freeFunc).obj (Condensed_Ab_to_presheaf.obj M))).d
+      -[1+ 0] (int.of_nat 0) =
+  ((BD.eval' freeCond').obj M).d -[1+ 0] (int.of_nat 0) ≫
+  (eval_freeCond'_iso.component_zero BD M).hom :=
+begin
+  dsimp [eval_freeCond'_iso.component_neg, eval_freeCond'_iso.component_zero, package.eval',
+    homological_complex.embed, homological_complex.embed.obj],
+  erw homological_complex.embed.d_some_some,
+  erw homological_complex.embed.d_some_some,
+  dsimp [data.eval_functor', universal_map.eval_Pow],
+  simp_rw free_abelian_group.lift_eq_sum,
+  simp only [nat_trans.app_sum, nat_trans.app_zsmul],
+  --dsimp,
+  rw [functor.map_sum, sum_comp, comp_sum],
+  refine finset.sum_congr rfl _, rintro x -,
+  rw [functor.map_zsmul, zsmul_comp, comp_zsmul],
+  refine congr_arg2 _ rfl _,
+  dsimp,
+  rw ← presheaf_to_Condensed_Ab.map_comp,
+  erw ← presheaf_to_Condensed_Ab.map_comp,
+  congr' 1,
+  ext t : 2, dsimp only [nat_trans.comp_app, whisker_right_app, functor.associator],
+  simp only [category.id_comp, category.comp_id],
+  simp only [← functor.map_comp],
+  congr' 1, simp only [← nat_trans.comp_app], congr' 1,
+  apply biproduct.hom_ext, intros j,
+  simp only [category.assoc, biproduct.matrix_π, biproduct.lift_π],
+  dsimp only [functor.map_bicone],
+  rw biproduct.lift_desc,
+  erw [← Condensed_Ab_to_presheaf.map_comp, biproduct.matrix_π],
+  simp_rw [comp_zsmul, category.comp_id, ← functor.map_zsmul, ← functor.map_sum],
+  congr' 1,
+  apply biproduct.hom_ext', intros k,
+  rw [biproduct.ι_desc, comp_sum],
+  rw finset.sum_eq_single_of_mem k (finset.mem_univ _),
+  { simp },
+  { rintros b - hb, dsimp, rw comp_zsmul, rw biproduct.ι_π,
+    rw [dif_neg hb.symm, zsmul_zero] }
+end
+
+lemma eval_freeCond'_iso_component_aux_i (M : Condensed.{u} Ab.{u+1}) (i : ℕ) :
+(eval_freeCond'_iso.component_neg BD M (i+1)).hom ≫
+    ((presheaf_to_Condensed_Ab.map_homological_complex (complex_shape.up ℤ)).obj
+       ((BD.eval' freeFunc).obj (Condensed_Ab_to_presheaf.obj M))).d
+      -[1+ (i+1)] -[1+ i] =
+  ((BD.eval' freeCond').obj M).d -[1+ (i+1)] -[1+ i] ≫
+  (eval_freeCond'_iso.component_neg BD M i).hom :=
+begin
+  dsimp [eval_freeCond'_iso.component_neg, eval_freeCond'_iso.component_zero, package.eval',
+    homological_complex.embed, homological_complex.embed.obj],
+  erw homological_complex.embed.d_some_some,
+  erw homological_complex.embed.d_some_some,
+  dsimp [data.eval_functor', universal_map.eval_Pow],
+  simp_rw free_abelian_group.lift_eq_sum,
+  simp only [nat_trans.app_sum, nat_trans.app_zsmul],
+  --dsimp,
+  rw [functor.map_sum, sum_comp, comp_sum],
+  refine finset.sum_congr rfl _, rintro x -,
+  rw [functor.map_zsmul, zsmul_comp, comp_zsmul],
+  refine congr_arg2 _ rfl _,
+  dsimp,
+  rw ← presheaf_to_Condensed_Ab.map_comp,
+  erw ← presheaf_to_Condensed_Ab.map_comp,
+  congr' 1,
+  ext t : 2, dsimp only [nat_trans.comp_app, whisker_right_app, functor.associator],
+  simp only [category.id_comp, category.comp_id],
+  simp only [← functor.map_comp],
+  congr' 1, simp only [← nat_trans.comp_app], congr' 1,
+  apply biproduct.hom_ext, intros j,
+  simp only [category.assoc, biproduct.matrix_π, biproduct.lift_π],
+  dsimp only [functor.map_bicone],
+  rw biproduct.lift_desc,
+  erw [← Condensed_Ab_to_presheaf.map_comp, biproduct.matrix_π],
+  simp_rw [comp_zsmul, category.comp_id, ← functor.map_zsmul, ← functor.map_sum],
+  congr' 1,
+  apply biproduct.hom_ext', intros k,
+  rw [biproduct.ι_desc, comp_sum],
+  rw finset.sum_eq_single_of_mem k (finset.mem_univ _),
+  { simp },
+  { rintros b - hb, dsimp, rw comp_zsmul, rw biproduct.ι_π,
+    rw [dif_neg hb.symm, zsmul_zero] }
+end
+
 def eval_freeCond'_iso_component (M : Condensed.{u} Ab.{u+1}) :
   ((BD.eval' freeCond').obj M) ≅
   (presheaf_to_Condensed_Ab.map_homological_complex _).obj
@@ -80,16 +169,9 @@ begin
   { apply is_zero.eq_of_tgt,
     apply functor.map_is_zero,
     apply is_zero_zero },
-  { dsimp only [eval_freeCond'_iso_component._match_1],
-    dsimp [eval_freeCond'_iso.component_neg, eval_freeCond'_iso.component_zero, package.eval',
-      homological_complex.embed, homological_complex.embed.obj],
-    erw homological_complex.embed.d_some_some,
-    erw homological_complex.embed.d_some_some,
-    dsimp [data.eval_functor', universal_map.eval_Pow],
-    sorry,
-  },
-  { sorry },
-  { sorry },
+  { apply eval_freeCond'_iso_component_aux₀ },
+  { apply eval_freeCond'_iso_component_aux_i },
+  { apply eval_freeCond'_iso_component_aux_i },
 end
 .
 
