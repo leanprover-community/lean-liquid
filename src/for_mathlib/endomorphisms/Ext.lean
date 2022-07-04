@@ -418,50 +418,6 @@ begin
     sorry },
 end
 
--- this code is almost certainly removable but I'm just leaving it
--- until I've got the above proof finished.
-/-
-lemma Ext_is_zero_iff' (X Y : bounded_homotopy_category (endomorphisms 𝓐)) :
-  (∀ i, is_zero (((Ext i).obj (op $ X)).obj $ Y)) ↔
-  (∀ i, is_iso $
-    ((Ext i).map (quiver.hom.op X.e)).app Y.unEnd - ((Ext i).obj (op X.unEnd)).map Y.e) :=
-begin
-  -- update: this proof plan might well not work.
-  -- this might be refactored out
-  obtain ⟨P, _inst, f, h1, h2⟩ := exists_K_projective_replacement X.unEnd,
-  resetI,
-  let fP := (functor.map_homological_complex (functor.free 𝓐) (complex_shape.up ℤ)).obj P.val.as,
-  obtain ⟨N, hN⟩ := P.bdd,
-  have hN' : ∀ (i : ℤ), N ≤ i →
-    is_zero (((homotopy_category.quotient (endomorphisms 𝓐) (complex_shape.up ℤ)).obj fP).as.X i),
-  { exact λ i hNi, (functor.free 𝓐).map_is_zero (hN i hNi), },
-  have hfPbdd : homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj fP),
-  { exact ⟨⟨N, hN'⟩⟩, },
-  haveI hproj : ∀ i, projective (fP.X i),
-  { intro i,
-    apply free.projective, },
-  let fP' : bounded_homotopy_category (endomorphisms 𝓐) :=
-    { val := (homotopy_category.quotient _ _).obj fP,
-      bdd := hfPbdd },
-
-  /-
-  * Then use an argument similar to the proof of this lemma
-    https://github.com/leanprover-community/lean-liquid/blob/0e192c63da9d578301d4ca75c778abe342f7474f/src/for_mathlib/derived/lemmas.lean#L536
-    to see that the complex you have obtained is a K_projective
-    replacement of A and of A.unEnd.
-  -/
-  haveI : ((homotopy_category.quotient _ _).obj fP).is_K_projective,
-  { refine ⟨_⟩,
-    intros Y hY f,
-    convert homotopy_category.eq_of_homotopy _ _
-      (projective.null_homotopic_of_projective_to_acyclic f.out N hproj hN' hY.1),
-    { simp }, },
-  /-
-  * Use Ext_iso to calculate both Ext(A,B) and Ext(A.unEnd, B.unEnd) with this replacement.
-  -/
-end
--/
-
 open_locale zero_object
 
 def single_unEnd (X : endomorphisms 𝓐) : ((single _ 0).obj X).unEnd ≅ (single _ 0).obj X.X :=
