@@ -228,6 +228,30 @@ def tensor_functor : AddCommGroup.{u} ⥤ AddCommGroup.{u} ⥤ AddCommGroup.{u} 
     ext B : 2,
     dsimp, exact map_tensor_comp_left _ _,
   end }
+.
+
+open opposite
+
+def tensor_adj (B : AddCommGroup.{u}) :
+  tensor_functor.flip.obj B ⊣ preadditive_coyoneda.obj (op B) :=
+adjunction.mk_of_hom_equiv
+{ hom_equiv := λ A C, (tensor_curry_equiv A B C).to_equiv,
+  hom_equiv_naturality_left_symm' := λ A A' C f g, begin
+    ext1 x,
+    erw [tensor_curry_equiv_symm_apply, comp_apply, tensor_curry_equiv_symm_apply],
+    dsimp only [tensor_uncurry, functor.flip_obj_map, tensor_functor_map_app, map_tensor,
+      linear_map.to_add_monoid_hom_coe],
+    rw [← linear_map.comp_apply], congr' 1, clear x,
+    apply tensor_product.ext', intros x y,
+    simp only [linear_map.comp_apply, tensor_product.lift.tmul, tensor_product.map_tmul,
+      add_monoid_hom.coe_to_int_linear_map, id_apply, comp_apply],
+  end,
+  hom_equiv_naturality_right' := λ A C C' f g, by { ext x y : 2, refl } }
+.
+
+instance tensor_flip_preserves_colimits (B : AddCommGroup.{u}) :
+  limits.preserves_colimits (tensor_functor.flip.obj B) :=
+(tensor_adj B).left_adjoint_preserves_colimits
 
 def tensor_explicit_pi_comparison {α : Type u} [fintype α] (X : α → AddCommGroup.{u+1})
   (B : AddCommGroup.{u+1}) :

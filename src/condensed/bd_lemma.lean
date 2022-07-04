@@ -9,6 +9,8 @@ import for_mathlib.map_to_sheaf_is_iso
 import condensed.is_iso_iff_extrdisc
 import Lbar.torsion_free_condensed
 import condensed.ab5
+import condensed.ab4
+import for_mathlib.endomorphisms.ab4
 
 .
 
@@ -217,7 +219,7 @@ def tensor_to_homology (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
 
 instance preserves_filtered_colimits_tensor_flip (A) :
   preserves_filtered_colimits (AddCommGroup.tensor_functor.flip.obj A) :=
-sorry
+infer_instance
 
 instance preserves_filtered_colimits_tensor_flip_eval' (i : ℤ) :
   preserves_filtered_colimits
@@ -319,8 +321,6 @@ def homology_bd_eval (M : Condensed.{u} Ab.{u+1})
     category_theory.forget AddCommGroup ⋙ AddCommGroup.free).obj
       (AddCommGroup.free.obj punit)).val.as.homology i) :=
 (as_iso (tensor_to_homology BD M i)).symm
-
-instance : AB4.{u+1 u+2} (endomorphisms (Condensed.{u} Ab.{u+1})) := sorry
 
 def eval_freeCond_homology_zero :
   ((data.eval_functor freeCond').obj breen_deligne.eg.data) ⋙ homology_functor _ _ 0 ≅ 𝟭 _ :=
