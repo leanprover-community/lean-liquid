@@ -169,7 +169,7 @@ begin
         limits.kernel_subobject_map_arrow],
       dsimp [chain_complex.single₀_comp_embed_iso_single,
         chain_complex.single₀_comp_embed_iso_single_component],
-      simpa,
+      simp,
       apply_instance },
     { apply_instance } },
   { refine limits.is_zero.is_iso _ _ _; refine exact.homology_is_zero _ _ (exact_of_zero _ _), },

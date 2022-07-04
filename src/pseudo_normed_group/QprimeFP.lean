@@ -571,13 +571,32 @@ commsq.of_eq begin
     homological_complex.functor_eval_map_app_f, data.eval_functor'_obj_X_map, functor.comp_map,
     QprimeFP_nat.Tinv, whisker_right_app, functor.map_homological_complex_map_f],
   rw [map_FreeAb_comp_map],
-  dsimp only [FreeAb.eval, functor.map_FreeAb, FPsystem.Tinv, FP2.Tinv_app,
-    FreeAb.of_functor],
+  dsimp only [FreeAb.eval, functor.map_FreeAb, FPsystem.Tinv, FP2.Tinv_app, FreeAb.of_functor],
   simp only [free_abelian_group.lift_map, function.comp, function.comp.left_id],
   rw [free_abelian_group.lift.of],
   simp only [← functor.map_comp],
   congr' 1,
-  sorry
+  ext1,
+  let x := biproduct.is_limit (λ (i : ulift (fin (BD.data.X n))), M.to_Condensed),
+  let y := is_limit_of_preserves (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf) x,
+  apply y.hom_ext, intro k,
+  simp only [Sheaf.hom.comp_val, category.assoc, QprimeFP_incl_aux, y.fac],
+  rw [← CondensedSet_to_presheaf_map, ← functor.comp_map],
+  simp only [functor.map_cone_π_app, bicone.to_cone_π_app, biproduct.bicone_π],
+  rw [← functor.map_comp, biproduct.map_π, functor.map_comp],
+  have : ((Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).map_cone
+    (biproduct.bicone (λ (i : ulift (fin (BD.data.X n))), M.to_Condensed)).to_cone).π.app k =
+    (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).map
+    (biproduct.π (λ (j : ulift (fin (BD.data.X n))), M.to_Condensed) k) := rfl,
+  rw [← this, ← category.assoc, y.fac], clear this y x,
+  ext S : 2,
+  dsimp only [nat_trans.comp_app, QprimeFP_incl_aux', functor.comp_map,
+    Condensed_Ab_to_CondensedSet_map, CondensedSet_to_presheaf_map,
+    Profinite_to_Condensed_map_val, whisker_right_app, ProFiltPseuNormGrpWithTinv₁.Tinv_cond,
+    forget_map_eq_coe, yoneda_map_app, CompHausFiltPseuNormGrp.to_Condensed_map,
+    Ab.ulift_map_apply],
+  simp only [← ulift_functor.map_comp],
+  refl
 end
 
 lemma commsq_sigma_proj_ι [∀ (c : ℝ≥0) (n : ℕ), fact (κ₂ c n ≤ κ c n)] :
@@ -588,10 +607,33 @@ commsq.of_eq begin
   apply colimit.hom_ext, intro j,
   simp only [QprimeFP_sigma_proj, sigma_map, colimit.ι_desc_assoc, colimit.ι_desc,
     cofan.mk_ι_app, category.assoc, nat_trans.naturality_assoc],
-  sorry
+  dsimp only [QprimeFP_incl, QprimeFP_int.ι, whisker_right_app,
+    package.eval', functor.comp_map],
+  rw [← functor.map_comp],
+  refine congr_arg _ _,
+  ext n : 2,
+  dsimp only [homological_complex.comp_f, data.eval_functor, functor.comp_obj, functor.flip_obj_map,
+    homological_complex.functor_eval_map_app_f, data.eval_functor'_obj_X_map, functor.comp_map,
+    QprimeFP_nat.ι, whisker_right_app, functor.map_homological_complex_map_f],
+  rw [map_FreeAb_comp_map],
+  dsimp only [FreeAb.eval, functor.map_FreeAb, FPsystem.res, FP2.res_app, FreeAb.of_functor],
+  simp only [free_abelian_group.lift_map, function.comp, function.comp.left_id],
+  rw [free_abelian_group.lift.of, ← functor.map_comp],
+  refine congr_arg _ _,
+  ext1,
+  let x := biproduct.is_limit (λ (i : ulift (fin (BD.data.X n))), M.to_Condensed),
+  let y := is_limit_of_preserves (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf) x,
+  apply y.hom_ext, intro k,
+  simp only [Sheaf.hom.comp_val, category.assoc, QprimeFP_incl_aux, y.fac],
+  rw [← CondensedSet_to_presheaf_map, ← functor.comp_map],
+  ext S : 2,
+  dsimp only [nat_trans.comp_app, QprimeFP_incl_aux', functor.comp_map,
+    Condensed_Ab_to_CondensedSet_map, CondensedSet_to_presheaf_map,
+    Profinite_to_Condensed_map_val, whisker_right_app,
+    forget_map_eq_coe, yoneda_map_app, CompHausFiltPseuNormGrp.to_Condensed_map,
+    Ab.ulift_map_apply],
+  simp only [← ulift_functor.map_comp],
+  refl,
 end
 
 end step6
-
--- variables (f : ℕ → ℝ≥0)
--- #check ∐ (λ i, (QprimeFP r' BD κ M).obj (f i))

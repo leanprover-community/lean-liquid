@@ -80,8 +80,8 @@ nat_iso.of_components (λ C, homological_complex.hom.iso_of_components
 begin
   intros C₁ C₂ f, ext ((_|n)|n) : 2,
   { rw [homological_complex.comp_f, homological_complex.comp_f],
-    dsimp, erw [category.id_comp, category.comp_id], refl, },
+    dsimp, erw [category.id_comp, category.comp_id], },
   { apply is_zero.eq_of_tgt, apply is_zero_zero, },
   { rw [homological_complex.comp_f, homological_complex.comp_f],
-    dsimp, erw [category.id_comp, category.comp_id], refl, },
+    dsimp, erw [category.id_comp, category.comp_id], },
 end
