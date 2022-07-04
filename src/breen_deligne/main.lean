@@ -76,6 +76,39 @@ begin
   exact hC 1 (by refl),
 end
 
+def _root_.category_theory.functor.quotient_op_map_homology_nat_iso {A B : Type*}
+  [category A] [category B] [abelian A] [abelian B] (F : Aᵒᵖ ⥤ B)
+  {ι : Type*} (c : complex_shape ι)
+  [functor.additive F] (i : ι) :
+  (homotopy_category.quotient A c).op ⋙ homotopy_category.op_functor ⋙
+    functor.map_homotopy_category c.symm F ⋙ homotopy_category.homology_functor _ _ i ≅
+    homological_complex.op_functor ⋙ F.map_homological_complex c.symm ⋙
+   homology_functor _ _ i :=
+begin
+   sorry
+end
+
+def _root_.category_theory.functor.quotient_op_map_homology_iso {A B : Type*}
+  [category A] [category B] [abelian A] [abelian B] (F : Aᵒᵖ ⥤ B)
+  {ι : Type*} {c : complex_shape ι}
+  [functor.additive F] (X : homotopy_category A c) (i : ι) :
+  (homotopy_category.op_functor ⋙
+    functor.map_homotopy_category c.symm F ⋙
+    homotopy_category.homology_functor _ _ i).obj (op X) ≅
+  (F.map_homological_complex c.symm ⋙ homology_functor _ _ i).obj X.as.op :=
+begin
+  have e : op X ≅ (homotopy_category.quotient A c).op.obj (op X.as),
+  { dsimp,
+    apply iso.op,
+    apply eq_to_iso,
+    cases X,
+    refl, },
+  refine _ ≪≫ (F.quotient_op_map_homology_nat_iso c i).app (op X.as) ≪≫ _,
+  { exact (homotopy_category.op_functor ⋙ functor.map_homotopy_category c.symm F ⋙
+     homotopy_category.homology_functor B c.symm i).map_iso e, },
+  { refl, },
+end
+
 def IH_0_aux (C : bounded_homotopy_category 𝓐) (hC : C.val.bounded_by 1) :
   ((Ext' 0).flip.obj B).obj (op (C.val.as.homology 0)) ≅
   ((Ext 0).obj (op C)).obj ((single 𝓐 0).obj B) :=
@@ -104,10 +137,12 @@ begin
     (((preadditive_yoneda.obj B).map_homological_complex
     (complex_shape.up ℤ).symm).obj P.val.as.op).homology 0 :=
   begin
-    let F := functor.map_homotopy_category (complex_shape.down ℤ) (preadditive_yoneda.obj B)
-      ⋙ homotopy_category.homology_functor _ _ 0,
-    refine _ ≪≫ F.map_iso (homotopy_category.op_functor.map_iso e.op) ≪≫ _,
-    all_goals { sorry, },
+    refine _ ≪≫ (functor.map_homotopy_category (complex_shape.down ℤ)
+      (preadditive_yoneda.obj B) ⋙ homotopy_category.homology_functor _ _ 0).map_iso
+        (homotopy_category.op_functor.map_iso e.op.symm) ≪≫ _,
+    { symmetry,
+      exact (preadditive_yoneda.obj B).quotient_op_map_homology_iso C.replace.val 0, },
+    { exact (preadditive_yoneda.obj B).quotient_op_map_homology_iso P.val 0, },
   end,
   refine  _ ≪≫
     (homology_iso_deg_0_of_bounded_by_1_down
