@@ -47,14 +47,15 @@ begin
   { apply Ext'_is_zero_of_neg, linarith only [hj, hij] }
 end
 
-def homology_iso_deg_0_of_bounded_by_1 (C : bounded_homotopy_category 𝓐)
-  (hC : C.val.bounded_by 1) : C.val.as.homology 0 ≅ cokernel (C.val.as.d_to 0) :=
+/-- the assumption hC is very suboptimal! -/
+def homology_iso_deg_0_of_bounded_by_1 (C : homological_complex 𝓐 (complex_shape.up ℤ))
+  (hC : ∀ (i : ℤ), 1 ≤ i → is_zero (C.X i)) : C.homology 0 ≅ cokernel (C.d_to 0) :=
 begin
-  refine (short_complex.homology_functor_iso 𝓐 _ 0).app C.val.as ≪≫
+  refine (short_complex.homology_functor_iso 𝓐 _ 0).app C ≪≫
     (homology_iso_datum.of_g_is_zero _ _ _).iso.symm,
   dsimp,
-  rw C.val.as.d_from_eq (zero_add 1),
-  suffices : C.val.as.d 0 1 = 0,
+  rw C.d_from_eq (zero_add 1),
+  suffices : C.d 0 1 = 0,
   { rw [this, zero_comp], },
   apply is_zero.eq_of_tgt,
   exact hC 1 (by refl),
@@ -94,7 +95,7 @@ begin
   let P : bounded_homotopy_category 𝓐 := ⟨P₁⟩,
   haveI : P.val.is_K_projective := h.some_spec.some,
   let ψ : P ⟶ C := h.some_spec.some_spec.some_spec.some,
-  haveI : homotopy_category.is_quasi_iso ψ := h.some_spec.some_spec.some_spec.some_spec.1,
+  haveI hψ : homotopy_category.is_quasi_iso ψ := h.some_spec.some_spec.some_spec.some_spec.1,
   let e : C.replace ≅ P :=
   { hom := bounded_homotopy_category.lift C.π ψ,
     inv := bounded_homotopy_category.lift ψ C.π,
@@ -111,8 +112,8 @@ begin
     (complex_shape.up ℤ).symm).obj C.replace.val.as.op).homology 0 ≅
     (((preadditive_yoneda.obj B).map_homological_complex
     (complex_shape.up ℤ).symm).obj P.val.as.op).homology 0 := sorry,
-  refine (preadditive_yoneda.obj B).map_iso (homology_iso_deg_0_of_bounded_by_1 C hC).op.symm ≪≫
-    _ ≪≫ (homology_iso_deg_0_of_bounded_by_1_down
+    refine  _ ≪≫
+     (homology_iso_deg_0_of_bounded_by_1_down
       (((preadditive_yoneda.obj B).map_homological_complex
       (complex_shape.up ℤ).symm).obj P.val.as.op)
       (λ i hi, begin dsimp only [functor.map_homological_complex],
@@ -123,7 +124,18 @@ begin
         simpa [← is_zero.iff_id_eq_zero] using hP₁ i hi,
       end)).symm ≪≫
     e'.symm,
-  sorry,
+  haveI : is_iso (kernel_comparison (P₁.as.op.d 0 (-1)) (preadditive_yoneda.obj B)) :=
+    sorry,
+  refine (preadditive_yoneda.obj B).map_iso _ ≪≫
+    as_iso (kernel_comparison (P₁.as.op.d 0 (-1)) (preadditive_yoneda.obj B)) ≪≫
+    (kernel.map_iso _ ((((preadditive_yoneda.obj B).map_homological_complex
+      (complex_shape.up ℤ).symm).obj P.val.as.op).d 0 (-(1 : ℤ))) (iso.refl _)
+    (homological_complex.X_next_iso _ (by { dsimp, refl })) (by simpa)).symm,
+  refine iso.op _ ≪≫ (kernel_op_op (P₁.as.d (-1) 0)).symm,
+  refine (cokernel.map_iso _ _ (P₁.as.X_prev_iso rfl) (iso.refl _)
+    (begin simpa only [iso.refl_hom, category.comp_id] using P₁.as.d_to_eq _, end )).symm ≪≫
+    (homology_iso_deg_0_of_bounded_by_1 P₁.as hP₁).symm ≪≫
+    as_iso ((homotopy_category.homology_functor 𝓐 (complex_shape.up ℤ) 0).map ψ),
 end
 
 variables (hH0 : ((BD.eval F).obj A).val.as.homology 0 ≅ A)
