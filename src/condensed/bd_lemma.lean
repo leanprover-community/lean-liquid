@@ -60,6 +60,16 @@ lemma eval_freeCond'_iso_component_hom_zero (M : Condensed.{u} Ab.{u+1}) :
     refine (Condensed_Ab_to_presheaf.map_biproduct _).hom,
   end := rfl
 
+lemma eval_freeCond'_iso_component_hom_neg (M : Condensed.{u} Ab.{u+1}) (i : ℕ) :
+  (eval_freeCond'_iso_component BD M).hom.f (-[1+i]) =
+  begin
+    refine presheaf_to_Condensed_Ab.map _,
+    refine _ ≫ (functor.associator _ _ _).hom,
+    refine whisker_right _ _,
+    refine whisker_right _ _,
+    refine (Condensed_Ab_to_presheaf.map_biproduct _).hom,
+  end := rfl
+
 def eval_freeAb_iso_component (M : Condensed.{u} Ab.{u+1}) (S : ExtrDisc.{u}) :
   (((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj (op S.val)).map_homological_complex
     (complex_shape.up ℤ)).obj
@@ -123,6 +133,41 @@ begin
     biproduct.map_π],
 end
 
+lemma eval_freeCond'_iso_aux_neg
+  (X Y: Condensed Ab) (f: X ⟶ Y) (i : ℕ) :
+  ((BD.eval' freeCond').map f ≫ (eval_freeCond'_iso_component BD Y).hom).f (-[1+i]) =
+  ((eval_freeCond'_iso_component BD X).hom ≫
+     (Condensed_Ab_to_presheaf ⋙
+        BD.eval' freeFunc ⋙ presheaf_to_Condensed_Ab.map_homological_complex
+        (complex_shape.up ℤ)).map f).f (-[1+i]) :=
+begin
+  dsimp only [
+    homological_complex.hom.iso_of_components,
+    homological_complex.comp_f, package.eval', data.eval_functor', data.eval_functor,
+    functor.comp_map, int.of_nat_zero,
+    homological_complex.embed_nat_obj_down_up_zero_f,
+    homological_complex.comp_f, functor.map_homological_complex_map_f,
+    functor.comp_obj, functor.flip,
+    homological_complex.functor_eval, universal_map.eval_Pow_functor,
+    functor.map_homological_complex],
+  rw eval_freeCond'_iso_component_hom_neg,
+  rw eval_freeCond'_iso_component_hom_neg,
+  dsimp,
+  rw ← presheaf_to_Condensed_Ab.map_comp,
+  erw ← presheaf_to_Condensed_Ab.map_comp,
+  congr' 1, -- we got rid of the sheafification :)
+  ext t : 2,
+  dsimp,
+  simp only [category.id_comp, category.comp_id, ← functor.map_comp],
+  congr' 2,
+  simp_rw ← nat_trans.comp_app, congr' 1,
+  dsimp [functor.map_bicone],
+  apply biproduct.hom_ext, intros j,
+  simp only [category.assoc, biproduct.map_π, biproduct.lift_π_assoc, biproduct.lift_π],
+  erw [← Condensed_Ab_to_presheaf.map_comp, ← Condensed_Ab_to_presheaf.map_comp,
+    biproduct.map_π],
+end
+
 def eval_freeCond'_iso :
   BD.eval' freeCond' ≅
   Condensed_Ab_to_presheaf ⋙ BD.eval' freeFunc ⋙ presheaf_to_Condensed_Ab.map_homological_complex _ :=
@@ -133,7 +178,7 @@ begin
   ext ((_|i)|i) : 2,
   { apply eval_freeCond'_iso_aux_zero },
   { apply is_zero.eq_of_src, apply is_zero_zero },
-  { sorry }
+  { apply eval_freeCond'_iso_aux_neg },
 end
 
 def eval_freeAb_iso (S : ExtrDisc.{u}) :
