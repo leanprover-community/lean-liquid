@@ -369,9 +369,9 @@ begin
       let AAA := ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj
              (chain_complex.to_bounded_homotopy_category.obj (homological_complex.mk_end X f))),
       let BBB := (chain_complex.to_bounded_homotopy_category.obj X),
-      have : AAA = BBB := rfl,
-      let foo := Ext_iso i _ _ ((single 𝓐 0).obj Y) fP',
-      refine iso.trans foo _,
+      --have : AAA = BBB := rfl,
+      --let foo := Ext_iso i _ _ ((single 𝓐 0).obj Y) fP',
+      --refine iso.trans foo _,
       sorry },
     delta map₂ C₂,
     sorry },
