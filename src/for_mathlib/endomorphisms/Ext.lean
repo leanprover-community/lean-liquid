@@ -180,6 +180,16 @@ begin
 end
 .
 
+instance {P Q : bounded_homotopy_category (endomorphisms 𝓐)} (f : P ⟶ Q)
+  [homotopy_category.is_quasi_iso f] :
+homotopy_category.is_quasi_iso (((endomorphisms.forget _).map_bounded_homotopy_category).map f) :=
+sorry
+
+instance forget_preserves_K_projective {P : bounded_homotopy_category (endomorphisms 𝓐)}
+  [P.val.is_K_projective] :
+((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P).val.is_K_projective :=
+sorry
+
 /-
 
 Mathematical summary of the `Ext_is_zero_iff` `sorry` according to kmb's
@@ -302,9 +312,21 @@ begin
   sorry
 end
 
+example (X : chain_complex 𝓐 ℕ) (f : X ⟶ X) :
+  (endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj
+    (chain_complex.to_bounded_homotopy_category.obj (homological_complex.mk_end X f)) =
+  chain_complex.to_bounded_homotopy_category.obj X :=
+begin
+  dsimp,
+  congr' 1,
+  congr' 1,
+  sorry,
+end
+
 lemma Ext_is_zero_iff (X : chain_complex 𝓐 ℕ) (Y : 𝓐)
   (f : X ⟶ X) (g : Y ⟶ Y) :
-  (∀ i, is_zero (((Ext i).obj (op $ chain_complex.to_bounded_homotopy_category.obj (X.mk_end f))).obj $ (single _ 0).obj ⟨Y, g⟩)) ↔
+  (∀ i, is_zero (((Ext i).obj (op $ chain_complex.to_bounded_homotopy_category.obj
+    (X.mk_end f))).obj $ (single _ 0).obj ⟨Y, g⟩)) ↔
   (∀ i, is_iso $ ((Ext i).map (chain_complex.to_bounded_homotopy_category.map f).op).app _ -
                  ((Ext i).obj (op _)).map ((single _ 0).map g)) :=
 begin
@@ -340,6 +362,18 @@ begin
     -- Note that I'm unclear whether the next line is `rw foo` or not.
     apply forall_congr, -- could have a sign problem now
     intro i,
+    let fP' := ((endomorphisms.forget _).map_bounded_homotopy_category).map fP,
+    let j : (((Ext i).obj (op (chain_complex.to_bounded_homotopy_category.obj X))).obj ((single 𝓐 0).obj Y))
+    ≅ ((homology_functor AddCommGroup (complex_shape.up ℤ).symm i).obj (C₂ Y P)),
+    { -- need fP.unend
+      let AAA := ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj
+             (chain_complex.to_bounded_homotopy_category.obj (homological_complex.mk_end X f))),
+      let BBB := (chain_complex.to_bounded_homotopy_category.obj X),
+      have : AAA = BBB := rfl,
+      let foo := Ext_iso i _ _ ((single 𝓐 0).obj Y) fP',
+      refine iso.trans foo _,
+      sorry },
+    delta map₂ C₂,
     sorry },
 end
 
