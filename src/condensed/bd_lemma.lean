@@ -394,7 +394,7 @@ begin
   constructor,
   refine ⟨add_monoid_hom.mk' (λ a, free_abelian_group.of punit.star ⊗ₜ a) _, _, _⟩,
   { intros, rw tensor_product.tmul_add, },
-  sorry { apply AddCommGroup.tensor_ext, intros x y,
+  { apply AddCommGroup.tensor_ext, intros x y,
     erw [comp_apply, id_apply],
     dsimp only [AddCommGroup.tensor_uncurry, add_monoid_hom.mk'_apply,
       linear_map.to_add_monoid_hom_coe],
