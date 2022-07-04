@@ -86,7 +86,10 @@ begin
   ext ((_|i)|i) : 2,
   { dsimp only [eval_freeCond'_iso_component, homological_complex.hom.iso_of_components,
       homological_complex.comp_f, package.eval', data.eval_functor', data.eval_functor,
-      functor.comp_map],
+      functor.comp_map, int.of_nat_zero,
+      homological_complex.embed_nat_obj_down_up_zero_f,
+      homological_complex.comp_f, functor.map_homological_complex_map_f,
+      functor.comp_obj, functor.flip],
     sorry
 
   },
