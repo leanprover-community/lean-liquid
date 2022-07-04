@@ -15,7 +15,8 @@ variables {C D : Type*} [category.{v} C] [category.{v} D] [has_zero_morphisms C]
 
 lemma kernel_comparison_is_iso_of_is_limit {A₁ A₂ : C} (f : A₁ ⟶ A₂) [has_kernel f]
   [has_kernel (F.map f)] (s : kernel_fork f) (hs₁ : is_limit s)
-    (hs₂ : is_limit (kernel_fork.of_ι (F.map s.ι) (show _ ≫ F.map f = 0, by { rw [← F.map_comp, kernel_fork.condition, F.map_zero],}))) :
+    (hs₂ : is_limit (kernel_fork.of_ι (F.map s.ι) (show _ ≫ F.map f = 0,
+      by { rw [← F.map_comp, kernel_fork.condition, F.map_zero],}))) :
   is_iso (limits.kernel_comparison f F) :=
 begin
   let α : kernel f ≅ s.X := is_limit.cone_point_unique_up_to_iso (limit.is_limit _) hs₁,
@@ -42,7 +43,20 @@ lemma _root_.AddCommGroup.kernel_fork_is_limit {X Y : AddCommGroup} (φ : X ⟶ 
     (hs₂ : ∀ (x : X), φ x = 0 → ∃ (z : s.X), s.ι z = x) :
   is_limit s :=
 begin
-  sorry,
+  refine is_limit.of_iso_limit (AddCommGroup.kernel_is_limit φ) _,
+  let e : s.X ≃+ φ.ker :=
+  { to_fun := λ w, ⟨s.ι w, by { rw add_monoid_hom.mem_ker,
+      exact congr_arg (λ (f : s.X ⟶ Y), (f w : Y)) s.condition, }⟩,
+    inv_fun := λ x, (hs₂ x.1 x.2).some,
+    left_inv := λ w, by { apply hs₁, exact (hs₂ _ _).some_spec, },
+    right_inv := λ x, by { ext, exact (hs₂ x.1 x.2).some_spec, },
+    map_add' := λ w₁ w₂, by { ext, simp only [map_add, add_submonoid.mk_add_mk,
+      set_like.coe_mk], } },
+  symmetry,
+  refine cones.ext (add_equiv.to_AddCommGroup_iso e) _,
+  rintro (_|_),
+  { ext, refl, },
+  { ext, dsimp [e], simp only [kernel_fork.app_one, comp_zero], },
 end
 
 instance preadditive_yoneda_kernel_comparison_is_iso (B : C) {A₁ A₂ : Cᵒᵖ} (f : A₁ ⟶ A₂)
