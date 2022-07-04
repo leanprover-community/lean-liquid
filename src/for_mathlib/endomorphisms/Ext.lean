@@ -234,6 +234,42 @@ of cohomology.
 
 -/
 
+variables (Y : 𝓐) (g : Y ⟶ Y) (P : bounded_homotopy_category (endomorphisms 𝓐))
+
+def C₁ (Y : endomorphisms 𝓐) (P : bounded_homotopy_category (endomorphisms 𝓐)) :=
+((preadditive_yoneda.obj Y).map_homological_complex _).obj P.val.as.op
+
+def C₂  (Y : 𝓐) (P : bounded_homotopy_category (endomorphisms 𝓐)) :=
+((preadditive_yoneda.obj Y).map_homological_complex _).obj P.unEnd.val.as.op
+
+def map₁ : C₁ ⟨Y,g⟩ P ⟶ C₂ Y P :=
+{ f := λ i,
+  { to_fun := endomorphisms.hom.f,
+    map_zero' := rfl,
+    map_add' := λ _ _, rfl },
+  comm' := λ i j h, rfl }
+
+open category_theory.preadditive
+
+def map₂ : C₂ Y P ⟶ C₂ Y P :=
+{ f := λ i, add_monoid_hom.mk' (λ ψ, (P.val.as.X i).e ≫ ψ - ψ ≫ g) begin
+      intros a b,
+      simp only [comp_add, add_comp, sub_eq_add_neg, neg_add, add_assoc],
+      congr' 1, apply add_left_comm,
+    end,
+  comm' := λ i j, begin
+    rintro (rfl : _ = _),
+    dsimp only [C₂],
+    ext1 x,
+    dsimp,
+    simp only [comp_apply, add_monoid_hom.mk'_apply, linear_map.to_add_monoid_hom_coe,
+      preadditive_yoneda_obj_map_apply, comp_sub, ← category.assoc],
+    congr' 1,
+    have := (endomorphisms.hom.comm (P.val.as.d j (j+1))).symm,
+    sorry
+  end }
+
+
 lemma Ext_is_zero_iff (X : chain_complex 𝓐 ℕ) (Y : 𝓐)
   (f : X ⟶ X) (g : Y ⟶ Y) :
   (∀ i, is_zero (((Ext i).obj (op $ chain_complex.to_bounded_homotopy_category.obj (X.mk_end f))).obj $ (single _ 0).obj ⟨Y, g⟩)) ↔
@@ -246,37 +282,11 @@ begin
   resetI,
 --  have := hom_single_iso P ⟨Y,g⟩,
 --  have := hom_single_iso P.unEnd Y,
-  let obj1 :=
-    ((preadditive_yoneda.obj ({X := Y, e := g} : endomorphisms 𝓐)).map_homological_complex
-      (complex_shape.up ℤ).symm).obj P.val.as.op,
-  let obj2 := ((preadditive_yoneda.obj Y).map_homological_complex (complex_shape.up ℤ).symm).obj
-    P.unEnd.val.as.op,
-  let obj3 := ((preadditive_yoneda.obj Y).map_homological_complex (complex_shape.up ℤ).symm).obj
-    P.unEnd.val.as.op,
-  let map1 : obj1 ⟶ obj2 :=
-  { f := λ i,
-    { to_fun := endomorphisms.hom.f,
-      map_zero' := rfl,
-      map_add' := λ _ _, rfl },
-    comm' := λ i j h, rfl },
-  let map2 : obj2 ⟶ obj3 :=
-  { f := λ i,
-    { to_fun := λ ψ, (P.val.as.X i).e ≫ ψ - ψ ≫ g,
-      map_zero' := by simp only [comp_zero, zero_comp, sub_self],
-      map_add' := λ a b, begin
-        simp only [preadditive.comp_add, preadditive.add_comp],
-        abel,
-      end, },
-    comm' := λ i j, by sorry;{ -- this sorry is removable and just there for time purposes
-      rintro (rfl : _ = _),
-      ext1,
-      dsimp,
-      simp,
-      let bar := (endomorphisms.hom.comm (P.val.as.d j (j+1))).symm,
-      rw [← category.assoc, ← category.assoc],
-      congr' 1,
-    } },
-  have foo : exact map1 map2,
+  let obj1 := C₁ ⟨Y,g⟩ P,
+  let obj2 := C₂ Y P,
+  let map1 : obj1 ⟶ obj2 := map₁ Y g P,
+  let map2 : obj2 ⟶ obj2 := map₂ Y g P,
+  have foo : ∀ n, short_exact (map1.f n) (map2.f n),
   { sorry },
   sorry,
 end
