@@ -423,8 +423,9 @@ begin
   erw [← functor.map_comp, ← functor.map_comp], congr' 1,
   ext ((_|i)|i),
   { dsimp,
+    simp_rw [category.comp_id, category.id_comp],
     erw [category.comp_id, category.id_comp],
-    convert rfl, },
+    refl, },
   { apply is_zero.eq_of_src, apply is_zero_zero },
   { apply is_zero.eq_of_src, apply is_zero_zero },
 end

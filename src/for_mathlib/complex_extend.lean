@@ -315,6 +315,21 @@ lemma embed_nat_obj_down_up_pos
   (C : chain_complex 𝒞 ℕ) (i : ℕ) :
   ((embed complex_shape.embedding.nat_down_int_up).obj C).X (i+1) = 0 := rfl
 
+@[simp]
+lemma embed_nat_obj_down_up_succ_f
+  (C₁ C₂ : chain_complex 𝒞 ℕ) (f : C₁ ⟶ C₂) (i : ℕ) :
+  ((embed complex_shape.embedding.nat_down_int_up).map f).f (-[1+i]) = f.f (i+1) := rfl
+
+@[simp]
+lemma embed_nat_obj_down_up_zero_f
+  (C₁ C₂ : chain_complex 𝒞 ℕ) (f : C₁ ⟶ C₂) :
+  ((embed complex_shape.embedding.nat_down_int_up).map f).f 0 = f.f 0 := rfl
+
+@[simp]
+lemma embed_nat_obj_down_up_zero_pos
+  (C₁ C₂ : chain_complex 𝒞 ℕ) (f : C₁ ⟶ C₂) (i : ℕ) :
+  ((embed complex_shape.embedding.nat_down_int_up).map f).f (i+1) = 0 := rfl
+
 end embedding_change_of_complex
 
 section homotopy
@@ -699,9 +714,9 @@ nat_iso.of_components
     ext ((_|i)|i);
     refine (category.comp_id _).trans (eq.trans _ (category.id_comp _).symm);
     dsimp [homological_complex.single],
-    { simp only [eq_self_iff_true, category.comp_id, category.id_comp, if_true], refl },
-    { rw dif_neg, swap, dec_trivial, refl, },
-    { rw dif_neg, swap, dec_trivial, refl, }
+    { simp only [eq_self_iff_true, category.comp_id, category.id_comp, if_true] },
+    { rw dif_neg, swap, dec_trivial },
+    { rw dif_neg, swap, dec_trivial }
   end
 
 end chain_complex

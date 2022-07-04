@@ -84,7 +84,12 @@ nat_iso.of_components
 begin
   intros X Y f,
   ext ((_|i)|i) : 2,
-  { sorry },
+  { dsimp only [eval_freeCond'_iso_component, homological_complex.hom.iso_of_components,
+      homological_complex.comp_f, package.eval', data.eval_functor', data.eval_functor,
+      functor.comp_map],
+    sorry
+
+  },
   { apply is_zero.eq_of_src, apply is_zero_zero },
   { sorry }
 end
