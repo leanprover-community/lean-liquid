@@ -183,11 +183,14 @@ end
 instance {P Q : bounded_homotopy_category (endomorphisms 𝓐)} (f : P ⟶ Q)
   [homotopy_category.is_quasi_iso f] :
 homotopy_category.is_quasi_iso (((endomorphisms.forget _).map_bounded_homotopy_category).map f) :=
+-- This presumably isn't so bad
 sorry
 
 instance forget_preserves_K_projective {P : bounded_homotopy_category (endomorphisms 𝓐)}
   [P.val.is_K_projective] :
 ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P).val.is_K_projective :=
+-- Adam says that he knows a messy proof of this but it might need AB4 (i.e. this sorry
+-- might no even be true in this generality)
 sorry
 
 def forget_mk_end (X : chain_complex 𝓐 ℕ) (f : X ⟶ X) :
@@ -204,6 +207,7 @@ match m with
 end)
 begin
   rintros i j (rfl : _ = _),
+  -- I have no idea how hard this sorry is. Probably just a grotty case bash.
   sorry,
 end
 
@@ -327,6 +331,7 @@ lemma homology_is_zero_iff_is_iso (h : ∀ n, projective (P.val.as.X n)) :
   (∀ j, is_iso ((homology_functor _ _ j).map (map₂ Y g P))) :=
 begin
   -- a similar result is proved as `is_zero_iff_epi_and_is_iso` in `derived/les_facts`
+  -- This shouldn't be too bad.
   sorry
 end
 
@@ -375,15 +380,17 @@ begin
       -- ((endomorphisms.forget _).map_bounded_homotopy_category).map fP,
       -- however unfortunately we now need to post-compose with something
       -- which is close to, but not equal to, 𝟙.
+      -- This should hopefully be straightforward
       haveI : homotopy_category.is_quasi_iso fP' := sorry,
       refine iso.trans (Ext_iso (-i) _ _ ((single 𝓐 0).obj Y) fP') _,
 --      delta C₂,
-      have := hom_single_iso ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P) Y i,
-      refine iso.trans _ this, clear this,
+      refine iso.trans _ (hom_single_iso ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P) Y i),
       have := (shift_single_iso 0 (-i) : single 𝓐 0 ⋙ _ ≅ _),
+      -- guide Lean the right way
       change (preadditive_coyoneda.obj (op ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P))).obj _ ≅ _,
       apply (preadditive_coyoneda.obj _).map_iso,
-      convert iso.app this _,
+      convert iso.app this _, -- I just used `convert` to define data but I think it's OK because
+      -- it's only a proof which needs converting.
       ring, },
     -- Goal is `is_iso f : A ⟶ A` iff `is_iso f' : A' ⟶ A'` and we have an
     -- iso `j : A ⟶ A'` so it suffices to prove that the square
@@ -398,6 +405,8 @@ begin
     -- It's of the form j ≫ (a - b) = (c - d) ≫ j
     -- and in fact j ≫ a = c ≫ j and j ≫ b = d ≫ j are both true
     -- so perhaps the next goal is reducing to that.
+    -- I don't know how horrible this will be. Maybe `j` will be
+    -- horrible to work with.
     sorry },
 end
 
