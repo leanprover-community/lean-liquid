@@ -420,6 +420,15 @@ begin
   apply plain_eval_comparison_is_iso_aux
 end
 
+lemma AddCommGroup.free_punit_is_tensor_unit :
+  (AddCommGroup.free.{u+1}.obj punit.{u+2}).is_tensor_unit :=
+begin
+  constructor, intros B, swap, exact free_abelian_group.of punit.star,
+  split, { intros f g h, ext ⟨⟩, exact h },
+  intros b, refine ⟨free_abelian_group.lift (point b), _⟩,
+  dsimp only, rw [free_abelian_group.lift.of], refl,
+end
+
 instance is_iso_map_tensor_to_homology_aux_comp (M : Condensed.{u} Ab.{u+1}) (i : ℤ)
   [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (M.val.obj (op S.val))] :
   is_iso (tensor_to_homology_aux BD M i) :=
@@ -434,7 +443,7 @@ begin
   { resetI, apply is_iso.comp_is_iso },
   apply AddCommGroup.is_iso_of_preserves_of_is_tensor_unit.{u+1 u+2} _ _
     (plain_eval_comparison BD i) (AddCommGroup.free.obj punit),
-  sorry
+  apply AddCommGroup.free_punit_is_tensor_unit,
 end
 
 instance is_iso_tensor_to_homology (M : Condensed.{u} Ab.{u+1}) (i : ℤ)
