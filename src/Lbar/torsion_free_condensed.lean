@@ -29,15 +29,6 @@ end
 
 end CompHausFiltPseuNormGrp
 
-namespace Profinite
-
-lemma extend_torsion_free (A : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁)
-  (hA : ∀ X, no_zero_smul_divisors ℤ (A.obj X)) (S : Profinite) :
-  no_zero_smul_divisors ℤ ((Profinite.extend A).obj S) :=
-sorry
-
-end Profinite
-
 namespace Lbar
 
 variables (r' : ℝ≥0) [fact (0 < r')]
