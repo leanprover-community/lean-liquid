@@ -547,17 +547,31 @@ end has_homology
 
 variables (f g)
 
-def of_Z_is_zero (hX : is_zero Z) : homology_iso_datum f g (cokernel f) :=
-{ w := is_zero.eq_of_tgt hX _ _,
+def of_f_is_zero (hf : f = 0) : homology_iso_datum f g (kernel g) :=
+{ w := by rw [hf, zero_comp],
+  K := kernel g,
+  ι := kernel.ι g,
+  f' := 0,
+  fac' := by rw [hf, zero_comp],
+  zero₁' := kernel.condition g,
+  π := 𝟙 _,
+  zero₂' := by rw zero_comp,
+  fork_is_limit := kernel_is_kernel g,
+  cofork_is_colimit := is_colimit_aux _ (λ s, s.π) (λ s, by apply category.id_comp)
+    (λ s m hm, begin rw [← hm], symmetry, apply category.id_comp, end), }
+
+def of_g_is_zero (hg : g = 0) : homology_iso_datum f g (cokernel f) :=
+{ w := by rw [hg, comp_zero],
   K := Y,
   ι := 𝟙 Y,
   f' := f,
   fac' := category.comp_id _,
-  zero₁' := is_zero.eq_of_tgt hX _ _,
+  zero₁' := by rw [hg, comp_zero],
   π := cokernel.π f,
   zero₂' := cokernel.condition f,
   fork_is_limit := is_limit_aux _ (λ s, s.ι) (λ s, by apply category.comp_id)
       (λ s m hm, begin rw [← hm], symmetry, apply category.comp_id, end),
   cofork_is_colimit := by apply cokernel_is_cokernel, }
+
 
 end homology_iso_datum

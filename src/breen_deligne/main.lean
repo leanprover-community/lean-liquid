@@ -50,18 +50,27 @@ end
 def homology_iso_deg_0_of_bounded_by_1 (C : bounded_homotopy_category 𝓐)
   (hC : C.val.bounded_by 1) : C.val.as.homology 0 ≅ cokernel (C.val.as.d_to 0) :=
 begin
-  let S := short_complex.mk (C.val.as.d_to 0) (0 : _ ⟶ 0) (by rw comp_zero),
-  let e : (short_complex.functor_homological_complex 𝓐 (complex_shape.up ℤ) 0 ⋙ short_complex.homology_functor).obj C.val.as
-    ≅ S.homology := short_complex.homology_functor.map_iso begin
-    refine short_complex.iso_mk (iso.refl _) (iso.refl _)
-      (C.val.as.X_next_iso (zero_add 1) ≪≫ is_zero.iso_zero (hC 1 (by refl))) _ _,
-    { dsimp, simp only [category.comp_id, category.id_comp], },
-    { dsimp,
-      apply is_zero.eq_of_tgt,
-      apply is_zero_zero, },
-  end,
-  exact (short_complex.homology_functor_iso 𝓐 _ 0).app C.val.as ≪≫ e ≪≫
-    (homology_iso_datum.of_Z_is_zero (C.val.as.d_to 0) (0 : _ ⟶ 0) (is_zero_zero _)).iso.symm,
+  refine (short_complex.homology_functor_iso 𝓐 _ 0).app C.val.as ≪≫
+    (homology_iso_datum.of_g_is_zero _ _ _).iso.symm,
+  dsimp,
+  rw C.val.as.d_from_eq (zero_add 1),
+  suffices : C.val.as.d 0 1 = 0,
+  { rw [this, zero_comp], },
+  apply is_zero.eq_of_tgt,
+  exact hC 1 (by refl),
+end
+
+def homology_iso_deg_0_of_bounded_by_1_down (C : homological_complex 𝓐 (complex_shape.down ℤ))
+  (hC : ∀ (i : ℤ), 1 ≤ i → is_zero (C.X i)) : C.homology 0 ≅ kernel (C.d_from 0) :=
+begin
+  refine (short_complex.homology_functor_iso 𝓐 _ 0).app C ≪≫
+    (homology_iso_datum.of_f_is_zero _ _ _).iso.symm,
+  dsimp,
+  rw C.d_to_eq (zero_add 1),
+  suffices : C.d 1 0 = 0,
+  { rw [this, comp_zero], },
+  apply is_zero.eq_of_src,
+  exact hC 1 (by refl),
 end
 
 def IH_0_aux (C : bounded_homotopy_category 𝓐) (hC : C.val.bounded_by 1) :
@@ -98,9 +107,23 @@ begin
     (preadditive_yoneda.obj B) ⋙ homotopy_category.homology_functor _ _ 0).map_iso
       to the iso above
    -/
+   let e' : (((preadditive_yoneda.obj B).map_homological_complex
+    (complex_shape.up ℤ).symm).obj C.replace.val.as.op).homology 0 ≅
+    (((preadditive_yoneda.obj B).map_homological_complex
+    (complex_shape.up ℤ).symm).obj P.val.as.op).homology 0 := sorry,
   refine (preadditive_yoneda.obj B).map_iso (homology_iso_deg_0_of_bounded_by_1 C hC).op.symm ≪≫
-    _,
-  sorry
+    _ ≪≫ (homology_iso_deg_0_of_bounded_by_1_down
+      (((preadditive_yoneda.obj B).map_homological_complex
+      (complex_shape.up ℤ).symm).obj P.val.as.op)
+      (λ i hi, begin dsimp only [functor.map_homological_complex],
+        rw is_zero.iff_id_eq_zero, rw ← (preadditive_yoneda.obj B).map_id,
+        suffices : 𝟙 (P₁.as.op.X i) = 0,
+        { rw [this, functor.map_zero], },
+        apply quiver.hom.unop_inj, dsimp,
+        simpa [← is_zero.iff_id_eq_zero] using hP₁ i hi,
+      end)).symm ≪≫
+    e'.symm,
+  sorry,
 end
 
 variables (hH0 : ((BD.eval F).obj A).val.as.homology 0 ≅ A)
