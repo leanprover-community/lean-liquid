@@ -160,18 +160,18 @@ begin
   { rintro j - hj, rw [biproduct.ι_π_ne_assoc, zero_comp], exact hj.symm }
 end
 
-instance group_of_sections (A B : Condensed.{u} Ab.{u+1}) (S : Profinite.{u}ᵒᵖ) :
+instance group_of_sections (A : Condensed.{u} Ab.{u+1}) (X : Profinite.{u}ᵒᵖ ⥤ Type (u+1))
+  (S : Profinite.{u}ᵒᵖ) :
   add_comm_group
-  (((Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).obj A).obj S ⟶
-    ((Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).obj B).obj S) :=
+  (X.obj S ⟶
+    ((Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).obj A).obj S) :=
 -- generated using `show_term {dsimp, apply_instance}` with `pp.implicit true`
-@pi.add_comm_group
-  ↥((@Sheaf.val Profinite Profinite.category proetale_topology Ab AddCommGroup.large_category A).obj S)
-  (λ (ᾰ : ↥((@Sheaf.val Profinite Profinite.category proetale_topology Ab AddCommGroup.large_category A).obj S)),
-     ↥((@Sheaf.val Profinite Profinite.category proetale_topology Ab AddCommGroup.large_category B).obj S))
-  (λ (i : ↥((@Sheaf.val Profinite Profinite.category proetale_topology Ab AddCommGroup.large_category A).obj S)),
+@pi.add_comm_group (X.obj S)
+  (λ (ᾰ : (X.obj S)),
+     ↥((@Sheaf.val Profinite Profinite.category proetale_topology Ab AddCommGroup.large_category A).obj S))
+  (λ (i : (X.obj S)),
      AddCommGroup.add_comm_group_instance
-       ((@Sheaf.val Profinite Profinite.category proetale_topology Ab AddCommGroup.large_category B).obj S))
+       ((@Sheaf.val Profinite Profinite.category proetale_topology Ab AddCommGroup.large_category A).obj S))
 
 instance group_of_homs (X) (A : Condensed.{u} Ab.{u+1}) :
   add_comm_group (X ⟶ (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).obj A) :=
@@ -182,6 +182,14 @@ lemma QprimeFP_incl_aux1 {A B : Condensed.{u} Ab.{u+1}} {ι : Type*} {X}
   (s : finset ι) (n : ι → ℤ) (g : ι → (A ⟶ B)) :
   f ≫ (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).map (∑ i in s, n i • g i) =
   ∑ i in s, n i • (f ≫ (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).map (g i)) :=
+begin
+  sorry
+end
+
+lemma QprimeFP_incl_aux2 {A : Condensed.{u} Ab.{u+1}} {ι : Type*} {X}
+  (s : finset ι) (n : ι → ℤ)
+  (f : ι → (X ⟶ (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).obj A)) (S) :
+  (∑ i in s, n i • f i).app S = ∑ i in s, n i • ((f i).app S) :=
 begin
   sorry
 end
@@ -229,10 +237,12 @@ def QprimeFP_incl (c : ℝ≥0) :
       (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).map
         (biproduct.π (λ (i : ulift (fin (BD.data.X n))), M.to_Condensed) i),
     { intros, refl },
-    simp only [← help, (y _).fac],
+    simp only [← help, (y _).fac], clear help,
     dsimp only [basic_universal_map.eval_FP, Profinite_to_Condensed_map_val,
       basic_universal_map.eval_png₀],
     ext S : 2,
+    -- rw ← QprimeFP_incl_aux2,
+    dsimp only [nat_trans.comp_app, whisker_right_app, QprimeFP_incl_aux', yoneda_map_app],
     -- dsimp,
     sorry,
   end }

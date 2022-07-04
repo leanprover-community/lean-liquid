@@ -269,31 +269,82 @@ def map₂ : C₂ Y P ⟶ C₂ Y P :=
     exact this,
   end }
 
+lemma map₁_mono (n : ℤ) : mono ((map₁ Y g P).f n) :=
+begin
+  -- this should be easy
+  sorry
+end
+
+lemma map₂_epi {n : ℤ} (h : projective (P.val.as.X n)) : epi ((map₂ Y g P).f n) :=
+begin
+  -- this is Joel Riou's argument, reduce to `free` and do an explicit calculation
+  sorry
+end
+
+lemma map₁₂_exact {n : ℤ} (h : projective (P.val.as.X n)) :
+  exact ((map₁ Y g P).f n) ((map₂ Y g P).f n) :=
+begin
+  -- this should be easy
+  sorry
+end
+
+lemma map₁₂_short_exact {n : ℤ} (h : projective (P.val.as.X n)) :
+  short_exact ((map₁ Y g P).f n) ((map₂ Y g P).f n) :=
+{ mono := map₁_mono _ _ _ _,
+  epi := map₂_epi _ _ _ h,
+  exact := map₁₂_exact _ _ _ h }
+
+lemma homology_is_zero_iff_is_iso (h : ∀ n, projective (P.val.as.X n)) :
+  (∀ i, is_zero ((homology_functor _ _ i).obj (C₁ ⟨Y, g⟩ P))) ↔
+  (∀ j, is_iso ((homology_functor _ _ j).map (map₂ Y g P))) :=
+begin
+  -- a similar result is proved as `is_zero_iff_epi_and_is_iso` in `derived/les_facts`
+  sorry
+end
+
 lemma Ext_is_zero_iff (X : chain_complex 𝓐 ℕ) (Y : 𝓐)
   (f : X ⟶ X) (g : Y ⟶ Y) :
   (∀ i, is_zero (((Ext i).obj (op $ chain_complex.to_bounded_homotopy_category.obj (X.mk_end f))).obj $ (single _ 0).obj ⟨Y, g⟩)) ↔
   (∀ i, is_iso $ ((Ext i).map (chain_complex.to_bounded_homotopy_category.map f).op).app _ -
                  ((Ext i).obj (op _)).map ((single _ 0).map g)) :=
 begin
-  -- this might be refactored out
   obtain ⟨P, _inst, fP, h1, h2⟩ := exists_K_projective_replacement
     (chain_complex.to_bounded_homotopy_category.obj (X.mk_end f)),
   resetI,
---  have := hom_single_iso P ⟨Y,g⟩,
---  have := hom_single_iso P.unEnd Y,
-  let obj1 := C₁ ⟨Y,g⟩ P,
-  let obj2 := C₂ Y P,
-  let map1 : obj1 ⟶ obj2 := map₁ Y g P,
-  let map2 : obj2 ⟶ obj2 := map₂ Y g P,
-  have foo : ∀ n, short_exact (map1.f n) (map2.f n),
-  { sorry },
-  sorry,
+  have foo : ∀ (h : ℤ → Prop), (∀ i, h i) ↔ (∀ i, h (-i)),
+  { intro h, split,
+    { intros h1 i, apply h1 (-i) },
+    { intros h1 i, specialize h1 (-i), rwa neg_neg at h1, } },
+  convert homology_is_zero_iff_is_iso Y g P h2,
+  { apply propext,
+    rw foo,
+    apply forall_congr,
+    intro i,
+    have := Ext_iso (-i) P
+      (chain_complex.to_bounded_homotopy_category.obj (homological_complex.mk_end X f))
+      ((single (endomorphisms 𝓐) 0).obj {X := Y, e := g}) fP,
+    rw iso.is_zero_iff this, clear this,
+    delta C₁,
+    apply iso.is_zero_iff,
+    have := hom_single_iso P ⟨Y, g⟩ i,
+    refine iso.trans _ this, clear this,
+    have := (shift_single_iso 0 (-i) : single (endomorphisms 𝓐) 0 ⋙ _ ≅ _),
+    change (preadditive_coyoneda.obj (op P)).obj _ ≅
+      (preadditive_coyoneda.obj (op P)).obj _,
+    apply (preadditive_coyoneda.obj (op P)).map_iso,
+    convert iso.app this ⟨Y, g⟩, -- I ♥ you Lean, this just worked first time
+    ring, },
+  { apply propext,
+    -- this might be a nightmare, but who knows. The first part
+    -- wasn't so bad.
+    -- Note that I'm unclear whether the next line is `rw foo` or not.
+    apply forall_congr, -- could have a sign problem now
+    intro i,
+    sorry },
 end
 
--- this is an older version; there might be a couple of useful
--- things here. The first line is not right though, we can't
--- use `exists_K_projective_replacement`, the idea is
--- to use `exists_K_projective_endomorphism_replacement` instead.
+-- this code is almost certainly removable but I'm just leaving it
+-- until I've got the above proof finished.
 /-
 lemma Ext_is_zero_iff' (X Y : bounded_homotopy_category (endomorphisms 𝓐)) :
   (∀ i, is_zero (((Ext i).obj (op $ X)).obj $ Y)) ↔
