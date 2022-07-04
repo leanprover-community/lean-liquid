@@ -330,15 +330,6 @@ begin
   sorry
 end
 
--- example (X : chain_complex 𝓐 ℕ) (f : X ⟶ X) (m : ℤ) :
--- ((chain_complex.to_bounded_homotopy_category.obj (homological_complex.mk_end X f)).val.as.X m).X =
---     ((homological_complex.embed complex_shape.embedding.nat_down_int_up).obj X).X m
--- :=
--- begin
---   cases m,
---   refl,refl,
--- end
-
 lemma Ext_is_zero_iff (X : chain_complex 𝓐 ℕ) (Y : 𝓐)
   (f : X ⟶ X) (g : Y ⟶ Y) :
   (∀ i, is_zero (((Ext i).obj (op $ chain_complex.to_bounded_homotopy_category.obj
@@ -373,17 +364,9 @@ begin
     convert iso.app this ⟨Y, g⟩, -- I ♥ you Lean, this just worked first time
     ring, },
   { apply propext,
-    -- this might be a nightmare, but who knows. The first part
-    -- wasn't so bad.
-    -- Note that I'm unclear whether the next line is `rw foo` or not.
     rw foo,
-    apply forall_congr, -- could have a sign problem now
+    apply forall_congr,
     intro i,
-    -- let fP' : (endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P ⟶
-    --   chain_complex.to_bounded_homotopy_category.obj X :=
-    --  (homotopy_category.quotient _ _).map
-    --  { f := λ m, (fP.out.f m).f ≫ _,
-    --    comm' := _ },--((F.map_homological_complex c).map (quot.out f)),
     let fP' := ((endomorphisms.forget _).map_bounded_homotopy_category).map fP ≫ (forget_mk_end X f).hom,
     let j : (((Ext (-i)).obj (op (chain_complex.to_bounded_homotopy_category.obj X))).obj ((single 𝓐 0).obj Y))
     ≅ ((homology_functor AddCommGroup (complex_shape.up ℤ).symm i).obj (C₂ Y P)),
