@@ -89,7 +89,9 @@ begin
       functor.comp_map, int.of_nat_zero,
       homological_complex.embed_nat_obj_down_up_zero_f,
       homological_complex.comp_f, functor.map_homological_complex_map_f,
-      functor.comp_obj, functor.flip],
+      functor.comp_obj, functor.flip,
+      homological_complex.functor_eval, universal_map.eval_Pow_functor,
+      functor.map_homological_complex],
     sorry
 
   },
