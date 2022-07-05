@@ -4,6 +4,7 @@ import for_mathlib.abelian_category
 import for_mathlib.equalizers
 import for_mathlib.homology_map_datum
 import for_mathlib.short_complex
+import for_mathlib.derived.defs
 
 namespace category_theory
 
@@ -244,6 +245,41 @@ begin
   erw category.id_comp,
   apply naturality_homology_functor_iso_hom_app,
 end
+
+variable (F)
+
+def homology_functor_iso_on_homotopy_category {M : Type*} (c : complex_shape M) (i : M) :
+  homotopy_category.homology_functor A c i ⋙ F ≅
+  F.map_homotopy_category _ ⋙ homotopy_category.homology_functor B c i :=
+nat_iso.of_components
+(λ X, (F.homology_functor_iso c i).app X.as)
+(λ X Y f, begin
+  nth_rewrite 0 ← homotopy_category.quotient_map_out f,
+  erw (F.homology_functor_iso c i).hom.naturality (quot.out f),
+  refl,
+end)
+
+def map_quasi_iso_on_homotopy_category {M : Type*} {c : complex_shape M}
+  {X₁ X₂ : homotopy_category A c} (φ : X₁ ⟶ X₂) [hφ : homotopy_category.is_quasi_iso φ] :
+  homotopy_category.is_quasi_iso ((F.map_homotopy_category c).map φ) :=
+⟨begin
+  intro i,
+  let F₁ := homotopy_category.homology_functor A c i ⋙ F,
+  let F₂ := map_homotopy_category c F ⋙ homotopy_category.homology_functor B c i,
+  change is_iso (F₂.map φ),
+  let e : F₁ ≅ F₂ := F.homology_functor_iso_on_homotopy_category c i,
+  have h := e.hom.naturality φ,
+  rw [← cancel_epi (e.inv.app X₁)] at h,
+  conv_rhs at h { rw [← category.assoc, ← nat_trans.comp_app, e.inv_hom_id], },
+  rw [nat_trans.id_app, category.id_comp] at h,
+  rw ← h,
+  haveI : is_iso (F₁.map φ) := begin
+    haveI := hφ.cond,
+    dsimp only [F₁, functor.comp],
+    apply functor.map_is_iso,
+  end,
+  apply_instance,
+end⟩
 
 end functor
 

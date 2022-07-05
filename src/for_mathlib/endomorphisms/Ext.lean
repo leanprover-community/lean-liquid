@@ -1,6 +1,7 @@
 import for_mathlib.endomorphisms.basic
 import for_mathlib.derived.les_facts
 import for_mathlib.additive_functor
+import for_mathlib.exact_functor
 
 noncomputable theory
 
@@ -183,8 +184,7 @@ end
 instance {P Q : bounded_homotopy_category (endomorphisms 𝓐)} (f : P ⟶ Q)
   [homotopy_category.is_quasi_iso f] :
 homotopy_category.is_quasi_iso (((endomorphisms.forget _).map_bounded_homotopy_category).map f) :=
--- This presumably isn't so bad
-sorry
+(endomorphisms.forget 𝓐).map_quasi_iso_on_homotopy_category f
 
 instance forget_preserves_K_projective {P : bounded_homotopy_category (endomorphisms 𝓐)}
   [P.val.is_K_projective] :
