@@ -429,7 +429,17 @@ begin
   let h := (preadditive_yoneda.obj B).right_op.map_homotopy (homotopy_category.homotopy_out_map f),
   refine ⟨λ i j, (h.hom j i).unop, _, _⟩,
   { intros i j hij, rw [h.zero, unop_zero], exact hij },
-  { intros i, sorry }
+  { intros i,
+    conv_rhs { congr, rw add_comm, },
+    convert congr_arg quiver.hom.unop (h.comm i),
+    { dsimp [op_equiv, prev_d, d_next],
+      have hi := (complex_shape.up ℤ).next_eq_some (show i+1=i+1, by refl),
+      have hi' := (complex_shape.up ℤ).symm.prev_eq_some (show i+1=i+1, by refl),
+      simpa only [hi, hi'], },
+    { dsimp [op_equiv, prev_d, d_next],
+      have hi := (complex_shape.up ℤ).prev_eq_some (show i-1+1=i, by linarith),
+      have hi' := (complex_shape.up ℤ).symm.next_eq_some (show i-1+1=i, by linarith),
+      simpa only [hi, hi'], }, },
 end
 
 end bounded_homotopy_category
