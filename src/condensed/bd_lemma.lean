@@ -30,38 +30,50 @@ attribute [simps map] AddCommGroup.free
 
 lemma oof (A B : AddCommGroup.{u}) : (A →+ B) = (A ⟶ B) := rfl
 
-def eval_free_homology_zero_exact (A : AddCommGroup.{u}) :
+lemma reorder {M : Type*} [add_comm_monoid M] (a b c d : M) :
+  (a + b) + (c + d) = (a + c) + (b + d) :=
+by { simp only [add_assoc, add_left_comm b c d], }
+
+lemma eval_free_homology_zero_comp_zero (A : AddCommGroup.{u}) :
+  ((((data.eval_functor (forget _ ⋙ AddCommGroup.free)).obj breen_deligne.eg.data).obj A).d 1 0) ≫
+  (free_abelian_group.lift id) = 0 :=
+begin
+  dsimp only [eg, eg.BD, data.eval_functor_obj_obj_d], rw [dif_pos rfl],
+  dsimp only [universal_map.eval_Pow], rw [lift_app],
+  dsimp only [whisker_right_app, eg.map, eg.σπ, universal_map.proj, universal_map.sum],
+  simp only [add_monoid_hom.map_sub, add_monoid_hom.map_sum, free_abelian_group.lift.of,
+    basic_universal_map.eval_Pow_app, functor.comp_map, forget_map_eq_coe, sub_comp, sum_comp,
+    preadditive.Pow_obj, forget_obj_eq_coe],
+
+  ext (x : ((preadditive.Pow 2).obj A : AddCommGroup.{u})),
+  have hx := id_apply x,
+  erw [← biproduct.total, ← equiv.ulift.symm.sum_comp] at hx, swap, apply_instance,
+  rw [← add_monoid_hom.eval_apply_apply, add_monoid_hom.map_sub, add_monoid_hom.map_sum,
+    AddCommGroup.zero_apply, ← hx],
+  simp only [add_monoid_hom.eval_apply_apply, comp_apply,
+    free_abelian_group.lift.of, free_abelian_group.lift_id_map, AddCommGroup.free_map],
+  simp only [← comp_apply, sum_comp, category.assoc, biproduct.ι_matrix],
+  simp only [fin.sum_univ_two, ← comp_apply, ← add_monoid_hom.add_apply, ← add_monoid_hom.sub_apply],
+  conv_rhs { rw [← AddCommGroup.zero_apply ((preadditive.Pow 2).obj A) ((preadditive.Pow 1).obj A) x], },
+  congr' 1,
+  dsimp only [oof],
+  apply biproduct.hom_ext, rintro ⟨j⟩, fin_cases j,
+  simp only [sub_comp, add_comp, biproduct.lift_π, category.assoc, zero_comp,
+    comp_zsmul, category.comp_id],
+  rw [sub_eq_zero, reorder, ← add_smul, ← add_smul],
+  refl,
+end
+
+lemma eval_free_homology_zero_exact (A : AddCommGroup.{u}) :
   exact
   ((((data.eval_functor (forget _ ⋙ AddCommGroup.free)).obj breen_deligne.eg.data).obj A).d 1 0)
   (free_abelian_group.lift id) :=
 begin
-  rw AddCommGroup.exact_iff', split,
-  { dsimp only [eg, eg.BD, data.eval_functor_obj_obj_d], rw [dif_pos rfl],
-    dsimp only [universal_map.eval_Pow], rw [lift_app],
-    dsimp only [whisker_right_app, eg.map, eg.σπ, universal_map.proj, universal_map.sum],
-    simp only [add_monoid_hom.map_sub, add_monoid_hom.map_sum, free_abelian_group.lift.of,
-      basic_universal_map.eval_Pow_app, functor.comp_map, forget_map_eq_coe, sub_comp, sum_comp,
-      preadditive.Pow_obj, forget_obj_eq_coe],
-
-    ext (x : ((preadditive.Pow 2).obj A : AddCommGroup.{u})),
-    have hx := id_apply x,
-    erw [← biproduct.total, ← equiv.ulift.symm.sum_comp] at hx, swap, apply_instance,
-    rw [← add_monoid_hom.eval_apply_apply, add_monoid_hom.map_sub, add_monoid_hom.map_sum,
-      AddCommGroup.zero_apply, ← hx],
-    simp only [add_monoid_hom.eval_apply_apply, comp_apply,
-      free_abelian_group.lift.of, free_abelian_group.lift_id_map, AddCommGroup.free_map],
-    simp only [← comp_apply, sum_comp, category.assoc, biproduct.ι_matrix],
-    simp only [fin.sum_univ_two, ← comp_apply, ← add_monoid_hom.add_apply, ← add_monoid_hom.sub_apply],
-    conv_rhs { rw [← AddCommGroup.zero_apply ((preadditive.Pow 2).obj A) ((preadditive.Pow 1).obj A) x], },
-    congr' 1,
-    dsimp only [oof],
-    apply biproduct.hom_ext, intro j,
-    simp only [sub_comp, add_comp, biproduct.lift_π, category.assoc, zero_comp],
-    sorry },
-  { sorry }
+  rw AddCommGroup.exact_iff', split, { apply eval_free_homology_zero_comp_zero },
+  sorry
 end
 
-def eval_free_homology_zero_surj (A : AddCommGroup) :
+lemma eval_free_homology_zero_surj (A : AddCommGroup) :
   function.surjective (free_abelian_group.lift (id : A → A)) :=
 λ a, ⟨free_abelian_group.of a, free_abelian_group.lift.of _ _⟩
 
