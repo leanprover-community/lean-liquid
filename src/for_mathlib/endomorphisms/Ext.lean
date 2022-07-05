@@ -191,7 +191,7 @@ instance forget_preserves_is_quasi_iso {P Q : bounded_homotopy_category 𝓐} (f
   homotopy_category.is_quasi_iso ((bounded_homotopy_category.forget 𝓐).map f) := hf
 
 instance forget_preserves_K_projective {P : bounded_homotopy_category (endomorphisms 𝓐)}
-  [P.val.is_K_projective] :
+  [P.val.is_K_projective] [∀ k, projective (P.val.as.X k)] :
 ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P).val.is_K_projective :=
 -- Adam says that he knows a messy proof of this but it might need AB4 (i.e. this sorry
 -- might no even be true in this generality)
