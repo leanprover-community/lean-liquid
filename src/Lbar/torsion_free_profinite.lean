@@ -55,43 +55,21 @@ lemma add_comm_group.limit_on_nat_torsion_free
 
 open CompHausFiltPseuNormGrp₁ category_theory
 
+instance : concrete_category.{u} PseuNormGrp₁.{u} :=
+{ forget :=
+  { obj := λ M, M,
+    map := λ M N f, f,
+    map_id' := λ M, rfl,
+    map_comp' := λ _ _ _ f g, rfl },
+  forget_faithful := { map_injective' := λ M N f g h, by { ext, dsimp at h, rw h, } } }
+
 lemma PNG₁.iso_injective {X Y : PseuNormGrp₁.{u}} (f : X ≅ Y) :
   function.injective f.hom :=
 begin
-  -- have f1 := f.1,
-  -- have f2:= f.2,
-  -- let f3 := f.3,
-  -- have := f3,
-  -- have f4 := f.4,
-  -- intro,
-  -- apply category_theory.iso.Mon_iso_to_mul_equiv,
-  -- have : X ≃ Y,
-  -- fconstructor,
-  -- use f.1,
-  -- use f.2,
-  -- have := f.inv_hom_id,
-  -- haveI : concrete_category.{u} PseuNormGrp₁.{u}, sorry,
-  -- have := @category_theory.coe_comp.{u+1 u u} PseuNormGrp₁.{u} _ _ X Y X f.1 f.2,
-  -- intro x,
-  -- rw ← function.comp_app f.inv f.hom x,
-  -- have := f.inv_hom_id,
-  -- have ciao := @category_theory.coe_comp.{u+1 u u} PseuNormGrp₁.{u} _ _ X Y X f.1 f.2,
-  -- simp only [function.comp_app],
-  -- simp [iso.hom_inv_id, iso.inv_hom_id, eq_self_iff_true] at ciao,
-  -- simp [*] at *,
-  -- have := CompHausFiltPseuNormGrp.id_apply,
-  -- have id_f:= @cate/gory_theory.id_apply.{u+1 u u} PseuNormGrp₁.{u} _ _ X x,
-  -- rw ← this,
-  -- rw ← this,
-  -- use f.4,
-  -- simp [category_theory.coe_comp, comp_apply],
-  -- use f.4,
-  -- have f3 := f.3,
-  -- unfold_coes at f3,
-  -- rw category_theory.coe_id at f3,
-  -- obviously,
-  -- let := ⟨f.1 f.2 f.3 f.4⟩,
-  sorry,
+  intros x y h,
+  apply_fun f.inv at h,
+  simp only [← category_theory.comp_apply, f.hom_inv_id] at h,
+  exact h,
 end
 
 lemma PNG₁.map_zsmul {X Y : PseuNormGrp₁} (f : X ⟶ Y) (n : ℤ) (x : X) :
