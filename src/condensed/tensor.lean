@@ -675,6 +675,9 @@ def tensor_functor : ExtrSheaf.{u} Ab.{u+1} ⥤ Ab.{u+1} ⥤ ExtrSheaf.{u} Ab.{u
     rw [map_tensor_comp],
   end }
 
+instance (α : Type (u+1)) (N : ExtrSheaf.{u} Ab.{u+1}) :
+  limits.preserves_colimits_of_shape (discrete α) (tensor_functor.obj N) := sorry
+
 end ExtrSheaf
 
 namespace Condensed
@@ -857,8 +860,16 @@ begin
   simpa,
 end
 
-instance (α : Type (u+1)) (M : endomorphisms (Condensed.{u} Ab.{u+1})) :
-  limits.preserves_colimits_of_shape (discrete α) (tensor_functor.obj M.X) := sorry
+def tensor_functor_iso_ExtrSheaf_tensor_functor (M : Condensed.{u} Ab.{u+1}) :
+  tensor_functor.obj M ≅
+    (ExtrSheaf.tensor_functor.obj
+      ((Condensed_ExtrSheaf_equiv _).inverse.obj M)) ⋙
+    (Condensed_ExtrSheaf_equiv _).functor := by refl
+
+instance (α : Type (u+1)) (M : Condensed.{u} Ab.{u+1}) :
+  limits.preserves_colimits_of_shape (discrete α) (tensor_functor.obj M) :=
+limits.preserves_colimits_of_shape_of_nat_iso
+    (tensor_functor_iso_ExtrSheaf_tensor_functor M).symm
 
 /-- A variant of the tensor product functor for the endormophism category. -/
 def endo_tensor :
