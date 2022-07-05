@@ -703,6 +703,8 @@ def plain_eval_comparison (i : ℤ) :
 { app := λ A, AddCommGroup.tensor_uncurry $ plain_eval_comparison_component _ _ _,
   naturality' := λ A B f, by apply plain_eval_comparison_natural' }
 
+local attribute [-simp] homology_functor_map
+
 lemma tensor_to_unsheafified_homology_app_eq
   (M : Condensed.{u} Ab.{u+1}) (i : ℤ) (S : ExtrDisc.{u}) :
   (tensor_to_unsheafified_homology BD M i).app (op S) =
@@ -710,7 +712,31 @@ lemma tensor_to_unsheafified_homology_app_eq
   (homology_functor _ _ _).map
   ((eval_freeAb_iso_component _ _ _).inv) ≫
   (((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj
-    (op S.val)).homology_functor_iso _ _).inv.app _  := sorry --- possibly challenging
+    (op S.val)).homology_functor_iso _ _).inv.app _  :=
+begin
+  rw [← nat_iso.app_inv, ← category.assoc, iso.eq_comp_inv, ← functor.map_iso_inv,
+    iso.eq_comp_inv, category.assoc, functor.map_iso_hom, nat_iso.app_hom],
+  apply_fun AddCommGroup.tensor_curry_equiv _ _ _,
+  swap, apply add_equiv.injective,
+  dsimp [plain_eval_comparison, tensor_to_unsheafified_homology],
+  rw AddCommGroup.tensor_curry_uncurry,
+  rw AddCommGroup.tensor_curry_uncurry_comp,
+  ext x y,
+  dsimp [plain_eval_comparison_component,
+    tensor_to_unsheafified_homology_component],
+  simp only [comp_apply],
+  dsimp [preadditive_yoneda],
+  simp only [comp_apply],
+  dsimp [tensor_to_unsheafified_homology_component_applied],
+  simp only [← comp_apply, category.assoc],
+  dsimp only [← nat_iso.app_inv, ← nat_iso.app_hom],
+  simp only [iso.inv_hom_id_assoc],
+  congr' 2,
+  simp only [← category.assoc],
+  congr' 1,
+  simp only [category.assoc, iso.inv_hom_id, category.comp_id,
+    ← functor.map_iso_hom, ← functor.map_iso_inv],
+end
 
 def tensor_to_homology_aux (M : Condensed.{u} Ab.{u+1}) (i : ℤ) :
 ((Condensed_ExtrSheaf_equiv Ab).inverse.obj M).tensor
