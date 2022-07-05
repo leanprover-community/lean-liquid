@@ -186,6 +186,10 @@ instance {P Q : bounded_homotopy_category (endomorphisms 𝓐)} (f : P ⟶ Q)
 homotopy_category.is_quasi_iso (((endomorphisms.forget _).map_bounded_homotopy_category).map f) :=
 (endomorphisms.forget 𝓐).map_quasi_iso_on_homotopy_category f
 
+instance forget_preserves_is_quasi_iso {P Q : bounded_homotopy_category 𝓐} (f : P ⟶ Q)
+  [hf : homotopy_category.is_quasi_iso f] :
+  homotopy_category.is_quasi_iso ((bounded_homotopy_category.forget 𝓐).map f) := hf
+
 instance forget_preserves_K_projective {P : bounded_homotopy_category (endomorphisms 𝓐)}
   [P.val.is_K_projective] :
 ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P).val.is_K_projective :=
