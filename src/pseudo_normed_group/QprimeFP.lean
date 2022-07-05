@@ -160,22 +160,63 @@ begin
   { rintro j - hj, rw [biproduct.ι_π_ne_assoc, zero_comp], exact hj.symm }
 end
 
-instance group_of_sections (A : Condensed.{u} Ab.{u+1}) (X : Profinite.{u}ᵒᵖ ⥤ Type (u+1))
+instance group_of_sections (A : Condensed.{u} Ab.{u+1})
   (S : Profinite.{u}ᵒᵖ) :
-  add_comm_group
-  (X.obj S ⟶
-    ((Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).obj A).obj S) :=
--- generated using `show_term {dsimp, apply_instance}` with `pp.implicit true`
-@pi.add_comm_group (X.obj S)
-  (λ (ᾰ : (X.obj S)),
-     ↥((@Sheaf.val Profinite Profinite.category proetale_topology Ab AddCommGroup.large_category A).obj S))
-  (λ (i : (X.obj S)),
-     AddCommGroup.add_comm_group_instance
-       ((@Sheaf.val Profinite Profinite.category proetale_topology Ab AddCommGroup.large_category A).obj S))
+  add_comm_group (((Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).obj A).obj S) :=
+AddCommGroup.add_comm_group_instance
+  ((@Sheaf.val Profinite Profinite.category proetale_topology Ab AddCommGroup.large_category A).obj S)
 
-instance group_of_homs (X) (A : Condensed.{u} Ab.{u+1}) :
+instance group_of_homs (X A : Type u) [add_comm_group A] :
+  add_comm_group (X ⟶ A) :=
+@pi.add_comm_group X _ _
+
+instance ulift_functor_group (A : Type u) [add_comm_group A] :
+  add_comm_group (ulift_functor.obj A) :=
+ulift.add_comm_group
+
+lemma QprimeFP_incl_aux3 {X A : Type u} [add_comm_group A] {ι : Type*}
+  (s : finset ι) (n : ι → ℤ) (f : ι → (X ⟶ A)) :
+  (∑ i in s, n i • (ulift_functor.{v}).map (f i)) = ulift_functor.map (∑ i in s, n i • (f i)) :=
+begin
+  let φ := add_monoid_hom.mk' (λ g : X ⟶ A, ulift_functor.{v}.map g) _,
+  { show ∑ i in s, n i • φ (f i) = _, simp only [← φ.map_sum, ← φ.map_zsmul], refl },
+  intros g₁ g₂, refl,
+end
+
+instance group_of_sheaf_homs (X) (A : Condensed.{u} Ab.{u+1}) :
   add_comm_group (X ⟶ (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).obj A) :=
-sorry
+{ add := λ f g, ⟨λ S, f.app S + g.app S,
+    by { intros S T φ, show X.map φ ≫ f.app T + X.map φ ≫ g.app T = _,
+      simp only [nat_trans.naturality], ext1 x, symmetry,
+      exact (A.val.map φ).map_add (f.app S x) (g.app S x) }⟩,
+  add_assoc := by { intros, ext : 2, apply add_assoc },
+  zero := ⟨λ S, 0, by { intros S T φ, ext1 x, symmetry, exact (A.val.map φ).map_zero }⟩,
+  zero_add := by { intros, ext : 2, apply zero_add },
+  add_zero := by { intros, ext : 2, apply add_zero },
+  nsmul := λ n f, ⟨λ S, n • f.app S,
+    by { intros S T φ, show n • (X.map φ ≫ f.app T) = _,
+      simp only [nat_trans.naturality], ext1 x, symmetry,
+      exact (A.val.map φ).map_nsmul (f.app S x) n }⟩,
+  nsmul_zero' := by { intros, ext : 2, apply add_comm_group.nsmul_zero' },
+  nsmul_succ' := by { intros, ext : 2, apply add_comm_group.nsmul_succ' },
+  neg := λ f, ⟨λ S, -f.app S,
+    by { intros S T φ, show -(X.map φ ≫ f.app T) = _,
+      simp only [nat_trans.naturality], ext1 x, symmetry,
+      exact (A.val.map φ).map_neg (f.app S x) }⟩,
+  sub := λ f g, ⟨λ S, f.app S - g.app S,
+    by { intros S T φ, show X.map φ ≫ f.app T - X.map φ ≫ g.app T = _,
+      simp only [nat_trans.naturality], ext1 x, symmetry,
+      exact (A.val.map φ).map_sub (f.app S x) (g.app S x) }⟩,
+  sub_eq_add_neg := by { intros, ext : 2, apply sub_eq_add_neg },
+  zsmul := λ n f, ⟨λ S, n • f.app S,
+    by { intros S T φ, show n • (X.map φ ≫ f.app T) = _,
+      simp only [nat_trans.naturality], ext1 x, symmetry,
+      exact (A.val.map φ).map_zsmul (f.app S x) n }⟩,
+  zsmul_zero' := by { intros, ext : 2, apply add_comm_group.zsmul_zero' },
+  zsmul_succ' := by { intros, ext : 2, apply add_comm_group.zsmul_succ' },
+  zsmul_neg' := by { intros, ext : 2, apply add_comm_group.zsmul_neg' },
+  add_left_neg := by { intros, ext : 2, apply add_left_neg },
+  add_comm := by { intros, ext : 2, apply add_comm } }
 
 lemma QprimeFP_incl_aux1 {A B : Condensed.{u} Ab.{u+1}} {ι : Type*} {X}
   (f : X ⟶ (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).obj A)
@@ -183,7 +224,9 @@ lemma QprimeFP_incl_aux1 {A B : Condensed.{u} Ab.{u+1}} {ι : Type*} {X}
   f ≫ (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).map (∑ i in s, n i • g i) =
   ∑ i in s, n i • (f ≫ (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).map (g i)) :=
 begin
-  sorry
+  let φ := add_monoid_hom.mk' (λ g : A ⟶ B, f ≫ (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).map g) _,
+  { show φ _ = _, simp only [φ.map_sum, φ.map_zsmul], refl },
+  intros g₁ g₂, refl,
 end
 
 lemma QprimeFP_incl_aux2 {A : Condensed.{u} Ab.{u+1}} {ι : Type*} {X}
@@ -191,8 +234,21 @@ lemma QprimeFP_incl_aux2 {A : Condensed.{u} Ab.{u+1}} {ι : Type*} {X}
   (f : ι → (X ⟶ (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).obj A)) (S) :
   (∑ i in s, n i • f i).app S = ∑ i in s, n i • ((f i).app S) :=
 begin
-  sorry
+  let φ := add_monoid_hom.mk' (λ g : X ⟶ (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).obj A, nat_trans.app g S) _,
+  { show φ _ = _, simp only [φ.map_sum, φ.map_zsmul], refl },
+  intros g₁ g₂, refl,
 end
+
+-- move me
+-- lemma _root_.comphaus_filtered_pseudo_normed_group_hom.coe_to_add_monoid_hom
+--   {M N : Type*} [comphaus_filtered_pseudo_normed_group M] [comphaus_filtered_pseudo_normed_group N]
+--   (f : comphaus_filtered_pseudo_normed_group_hom M N) :
+--   ⇑f.to_add_monoid_hom = f := rfl
+
+@[simps] def _root_.CompHausFiltPseuNormGrp.presheaf_incl
+  (A : CompHausFiltPseuNormGrp.{u}) (S : Profinite.{u}) :
+  CompHausFiltPseuNormGrp.presheaf A S →+ (S → A) :=
+add_monoid_hom.mk' subtype.val $ λ _ _, rfl
 
 def QprimeFP_incl (c : ℝ≥0) :
   (QprimeFP_int r' BD.data κ M).obj c ⟶
@@ -241,10 +297,28 @@ def QprimeFP_incl (c : ℝ≥0) :
     dsimp only [basic_universal_map.eval_FP, Profinite_to_Condensed_map_val,
       basic_universal_map.eval_png₀],
     ext S : 2,
-    -- rw ← QprimeFP_incl_aux2,
-    dsimp only [nat_trans.comp_app, whisker_right_app, QprimeFP_incl_aux', yoneda_map_app],
-    -- dsimp,
-    sorry,
+    erw QprimeFP_incl_aux2,
+    dsimp only [nat_trans.comp_app, whisker_right_app, QprimeFP_incl_aux'],
+    rw [← ulift_functor.map_comp, types_comp, QprimeFP_incl_aux3],
+    congr' 1,
+    dsimp only [function.comp, yoneda_map_app, yoneda_obj_obj, chain_complex.of_X,
+      Profinite.coe_comp_apply, continuous_map.coe_mk, QprimeFP_incl_aux''],
+    ext f s, clear y x,
+    dsimp only [subtype.coe_mk, Filtration_obj_map_to_fun, add_monoid_hom.mk'_apply,
+      comphaus_filtered_pseudo_normed_group_with_Tinv_hom.level, pseudo_normed_group.level,
+      profinitely_filtered_pseudo_normed_group_with_Tinv.pi_proj,
+      comphaus_filtered_pseudo_normed_group_with_Tinv_hom.coe_mk,
+      pi.eval_add_monoid_hom_apply, breen_deligne.basic_universal_map.eval_png₀,
+      breen_deligne.basic_universal_map.eval_png,
+      comphaus_filtered_pseudo_normed_group.pi_lift,
+      comphaus_filtered_pseudo_normed_group_hom.coe_mk, add_monoid_hom.mk_to_pi_apply],
+    simp only [← comphaus_filtered_pseudo_normed_group_hom.to_add_monoid_hom_hom_apply,
+      add_monoid_hom.map_sum],
+    rw [fintype.sum_apply, ← add_monoid_hom.eval_apply_apply, add_monoid_hom.map_sum,
+      ← CompHausFiltPseuNormGrp.presheaf_incl_apply, add_monoid_hom.map_sum, fintype.sum_apply],
+    rw [← equiv.ulift.{u+1 0}.sum_comp],
+    refine finset.sum_congr rfl _,
+    intros t ht, refl,
   end }
 
 variables (ι : ulift.{u+1} ℕ → ℝ≥0) (hι : monotone ι)
