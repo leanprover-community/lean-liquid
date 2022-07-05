@@ -28,6 +28,8 @@ open category_theory.preadditive
 
 attribute [simps map] AddCommGroup.free
 
+lemma oof (A B : AddCommGroup.{u}) : (A →+ B) = (A ⟶ B) := rfl
+
 def eval_free_homology_zero_exact (A : AddCommGroup.{u}) :
   exact
   ((((data.eval_functor (forget _ ⋙ AddCommGroup.free)).obj breen_deligne.eg.data).obj A).d 1 0)
@@ -49,7 +51,12 @@ begin
     simp only [add_monoid_hom.eval_apply_apply, comp_apply,
       free_abelian_group.lift.of, free_abelian_group.lift_id_map, AddCommGroup.free_map],
     simp only [← comp_apply, sum_comp, category.assoc, biproduct.ι_matrix],
-    simp only [fin.sum_univ_two],
+    simp only [fin.sum_univ_two, ← comp_apply, ← add_monoid_hom.add_apply, ← add_monoid_hom.sub_apply],
+    conv_rhs { rw [← AddCommGroup.zero_apply ((preadditive.Pow 2).obj A) ((preadditive.Pow 1).obj A) x], },
+    congr' 1,
+    dsimp only [oof],
+    apply biproduct.hom_ext, intro j,
+    simp only [sub_comp, add_comp, biproduct.lift_π, category.assoc, zero_comp],
     sorry },
   { sorry }
 end
