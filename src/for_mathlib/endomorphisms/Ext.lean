@@ -415,6 +415,18 @@ begin
   sorry
 end
 
+@[reassoc]
+lemma flip_obj_map_comm {C D E : Type*} [category C] [category D] [category E]
+  (F : C ⥤ D ⥤ E) {c : C} {d : D} (f : c ⟶ c) (g : d ⟶ d) :
+  (F.flip.obj d).map f ≫ (F.obj c).map g = (F.obj c).map g ≫ (F.flip.obj d).map f :=
+(nat_trans.naturality _ _).symm
+
+@[reassoc]
+lemma flip_map_app_comm {C D E : Type*} [category C] [category D] [category E]
+  (F : C ⥤ D ⥤ E) {c : C} {d : D} (f : c ⟶ c) (g : d ⟶ d) :
+  (F.flip.map g).app c ≫ (F.map f).app d = (F.map f).app d ≫ (F.flip.map g).app c  :=
+(nat_trans.naturality _ _).symm
+
 lemma Ext_is_zero_iff (X : chain_complex 𝓐 ℕ) (Y : 𝓐)
   (f : X ⟶ X) (g : Y ⟶ Y) :
   (∀ i, is_zero (((Ext i).obj (op $ chain_complex.to_bounded_homotopy_category.obj
@@ -468,12 +480,10 @@ begin
 --      delta C₂,
       refine iso.trans _ (hom_single_iso ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P) Y i),
       let := (shift_single_iso 0 (-i) : single 𝓐 0 ⋙ _ ≅ _),
-      -- guide Lean the right way
-      change (preadditive_yoneda.flip.obj (op ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P))).obj _ ≅ _,
-      apply (preadditive_yoneda.flip.obj _).map_iso,
-      convert iso.app this _, -- I just used `convert` to define data but I think it's OK because
-      -- it's only a proof which needs converting.
-      ring, },
+      refine (preadditive_yoneda.flip.obj (op ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P))).map_iso _,
+      let e := this.app Y,
+      refine e ≪≫ eq_to_iso _,
+      ring_nf, },
     -- Goal is `is_iso f : A ⟶ A` iff `is_iso f' : A' ⟶ A'` and we have an
     -- iso `j : A ⟶ A'` so it suffices to prove that the square
     -- (with `j` on two sides) commutes.
@@ -484,14 +494,20 @@ begin
     delta map₂,
     rw [functor.map_sub, comp_sub, sub_comp],
     refine congr_arg2 _ _ _,
-    --simp only [j],
-    -- this looks horrible
-    -- It's of the form j ≫ (a - b) = (c - d) ≫ j
-    -- and in fact j ≫ a = c ≫ j and j ≫ b = d ≫ j are both true
-    -- so perhaps the next goal is reducing to that.
-    -- I don't know how horrible this will be. Maybe `j` will be
-    -- horrible to work with.
-    sorry,
+    { dsimp only [j, iso.trans_hom, Ext_iso, Ext, Ext0, functor.map_iso_hom, functor.comp_map,
+        whiskering_left_obj_map, whisker_left_app, functor.flip_obj_map, functor.flip_map_app,
+        iso.op_hom], clear j,
+      simp only [nat_trans.naturality, nat_trans.naturality_assoc],
+      erw [nat_trans.naturality_assoc, ← functor.map_comp_assoc],
+      simp only [← op_comp],
+      simp only [category.assoc],
+      -- rw [hom_single_iso_naturality], -- jmc : this doesn't look like a useful rewrite to me
+      -- have := hom_single_iso_naturality
+      --   ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P)
+      --   ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P) Y i,
+      -- simp only [category.assoc],
+      sorry,
+       },
     sorry },
 end
 
