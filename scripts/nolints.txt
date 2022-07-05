@@ -23,10 +23,6 @@ apply_nolint invpoly.to_laurent_measures_fun unused_arguments
 apply_nolint laurent_measures.to_Lbar unused_arguments
 apply_nolint laurent_measures.to_Lbar_section unused_arguments
 
--- Lbar/torsion_free_profinite.lean
-apply_nolint to_Ab unused_arguments
-apply_nolint to_PseuNormGrp₁ unused_arguments
-
 -- breen_deligne/category.lean
 apply_nolint breen_deligne.FreeMat.kronecker_map_reindex_left unused_arguments
 apply_nolint breen_deligne.FreeMat.kronecker_map_reindex_right unused_arguments
@@ -45,6 +41,7 @@ apply_nolint breen_deligne.package.main_lemma.bdd_step unused_arguments
 apply_nolint breen_deligne.package.main_lemma.bdd_step₂ unused_arguments
 apply_nolint breen_deligne.package.main_lemma.bdd_step₅_aux'' unused_arguments
 apply_nolint breen_deligne.package.main_lemma.homology_iso_deg_0_of_bounded_by_1 unused_arguments
+apply_nolint breen_deligne.package.main_lemma.homology_iso_deg_0_of_bounded_by_1_down unused_arguments
 apply_nolint breen_deligne.package.main_lemma.shift_equiv_functor_additive unused_arguments
 
 -- breen_deligne/suitable.lean
@@ -65,6 +62,9 @@ apply_nolint ProFiltPseuNormGrpWithTinv₁.to_PNG₁ unused_arguments
 
 -- condensed/acyclic.lean
 apply_nolint condensed.acyclic_of_exact.induction_step_ex unused_arguments
+
+-- condensed/bd_lemma.lean
+apply_nolint Condensed.homology_functor.map_id_bo_ho_ca unused_arguments
 
 -- condensed/condensify.lean
 apply_nolint Tinv_nat_trans unused_arguments
@@ -145,7 +145,10 @@ apply_nolint category_theory.colimit_homology_functor_iso unused_arguments
 apply_nolint category_theory.eval_functor_colimit_iso unused_arguments
 
 -- for_mathlib/abelian_category.lean
+apply_nolint category_theory.limits.image_iso_of_eq unused_arguments
 apply_nolint category_theory.limits.is_zero_of_iso_of_zero unused_arguments
+apply_nolint category_theory.limits.map_is_iso_of_iso_of_map_is_iso unused_arguments
+apply_nolint category_theory.limits.obj_is_zero_of_iso unused_arguments
 apply_nolint category_theory.limits.preserves_zero_of_preserves_initial instance_priority
 apply_nolint category_theory.limits.preserves_zero_of_preserves_terminal instance_priority
 
@@ -221,10 +224,15 @@ apply_nolint category_theory.functor.left_derived.α unused_arguments
 apply_nolint category_theory.functor.left_derived.β unused_arguments
 
 -- for_mathlib/endomorphisms/Ext.lean
+apply_nolint category_theory.endomorphisms.C₁ unused_arguments
+apply_nolint category_theory.endomorphisms.C₂ unused_arguments
 apply_nolint category_theory.endomorphisms.embed_single unused_arguments
 apply_nolint category_theory.endomorphisms.mk_bo_ho_ca' unused_arguments
 apply_nolint category_theory.endomorphisms.quot_out_single_map unused_arguments
 apply_nolint category_theory.endomorphisms.single_unEnd unused_arguments
+
+-- for_mathlib/endomorphisms/ab4.lean
+apply_nolint category_theory.endomorphisms.category_theory.AB4 unused_arguments
 
 -- for_mathlib/endomorphisms/basic.lean
 apply_nolint category_theory.endomorphisms.f_epi unused_arguments
@@ -278,8 +286,6 @@ apply_nolint short_exact_sequence.horseshoe_ker unused_arguments
 -- for_mathlib/imker.lean
 apply_nolint cochain_complex.imker.cokernel.desc_is_iso unused_arguments
 apply_nolint cochain_complex.imker.homology_functor.is_iso_of_is_zero_of_is_zero_of_is_zero unused_arguments
-apply_nolint cochain_complex.imker.map_is_iso_of_iso_of_map_is_iso unused_arguments
-apply_nolint cochain_complex.imker.obj_is_zero_of_iso unused_arguments
 
 -- for_mathlib/internal_hom.lean
 apply_nolint category_theory.monoidal.split_left unused_arguments
@@ -392,6 +398,9 @@ apply_nolint category_theory.triangulated.triangle.shift_comm_eq_eq_to_hom unuse
 
 -- for_mathlib/truncation.lean
 apply_nolint category_theory.limits.eq_to_hom_comp_image.ι unused_arguments
+
+-- for_mathlib/yoneda_left_exact.lean
+apply_nolint AddCommGroup.kernel_fork_is_limit def_lemma
 
 -- free_pfpng/epi.lean
 apply_nolint exists_signed_sum_aux decidable_classical unused_arguments
