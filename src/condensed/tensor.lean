@@ -380,7 +380,12 @@ linear_equiv_to_iso (tensor_product.comm _ _ _)
 def tensor_functor_iso_flip :
   tensor_functor.flip ≅ tensor_functor :=
 nat_iso.of_components (λ A,
-  nat_iso.of_components (λ B, tensor_flip _ _) sorry) sorry
+  nat_iso.of_components (λ B, tensor_flip _ _) begin
+    intros U B f, apply tensor_ext, intros a b, refl,
+  end) begin
+    intros U V f, ext A : 2, apply tensor_ext, intros a b,
+    refl,
+  end
 
 instance preserves_colimits_tensor_obj (A : AddCommGroup.{u}) :
   limits.preserves_colimits (tensor_functor.obj A) :=
