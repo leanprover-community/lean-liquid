@@ -6,7 +6,7 @@ import for_mathlib.derived.example
 import breen_deligne.eval2
 import system_of_complexes.shift_sub_id
 import for_mathlib.AddCommGroup.explicit_products
-import for_mathlib.free_abelian_group2
+import condensed.Qprime_isoms
 
 noncomputable theory
 
@@ -42,8 +42,6 @@ variables {r' : ℝ≥0}
 variables (BD : breen_deligne.package) (κ : ℝ≥0 → ℕ → ℝ≥0)
 variables [∀ c, BD.data.suitable (κ c)] [∀ n, fact (monotone (function.swap κ n))]
 variables (M : ProFiltPseuNormGrpWithTinv₁.{u} r')
-
-abbreviation freeCond' := Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_Condensed_Ab
 
 def ProFiltPseuNormGrpWithTinv₁.to_Condensed : Condensed.{u} Ab.{u+1} :=
 (PFPNGT₁_to_CHFPNG₁ₑₗ r' ⋙ CHFPNG₁_to_CHFPNGₑₗ.{u} ⋙
