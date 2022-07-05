@@ -290,23 +290,35 @@ def map₁ : C₁ ⟨Y,g⟩ P ⟶ C₂ Y P :=
 
 open category_theory.preadditive
 
-def map₂ : C₂ Y P ⟶ C₂ Y P :=
-{ f := λ i, add_monoid_hom.mk' (λ ψ, (P.val.as.X i).e ≫ ψ - ψ ≫ g) begin
-      intros a b,
-      simp only [comp_add, add_comp, sub_eq_add_neg, neg_add, add_assoc],
-      congr' 1, apply add_left_comm,
-    end,
+@[simps]
+def map₂_left : C₂ Y P ⟶ C₂ Y P :=
+{ f := λ i, add_monoid_hom.mk' (λ ψ, (P.val.as.X i).e ≫ ψ) (by { intros, rw [comp_add] }),
   comm' := λ i j, begin
     rintro (rfl : _ = _),
     dsimp only [C₂],
     ext1 x,
     dsimp,
     simp only [comp_apply, add_monoid_hom.mk'_apply, linear_map.to_add_monoid_hom_coe,
-      preadditive_yoneda_obj_map_apply, comp_sub, ← category.assoc],
-    congr' 2,
+      preadditive_yoneda_obj_map_apply, ← category.assoc],
+    congr' 1,
     have := (endomorphisms.hom.comm (P.val.as.d j (j+1))).symm,
     exact this,
   end }
+
+@[simps]
+def map₂_right : C₂ Y P ⟶ C₂ Y P :=
+{ f := λ i, add_monoid_hom.mk' (λ ψ, ψ ≫ g) (by { intros, rw [add_comp] }),
+  comm' := λ i j, begin
+    rintro (rfl : _ = _),
+    dsimp only [C₂],
+    ext1 x,
+    dsimp,
+    simp only [comp_apply, add_monoid_hom.mk'_apply, linear_map.to_add_monoid_hom_coe,
+      preadditive_yoneda_obj_map_apply, category.assoc],
+  end }
+
+def map₂ : C₂ Y P ⟶ C₂ Y P :=
+map₂_left Y P - map₂_right Y g P
 
 lemma map₁_mono (n : ℤ) : mono ((map₁ Y g P).f n) :=
 begin
@@ -375,11 +387,16 @@ lemma map₁₂_exact {n : ℤ} (h : projective (P.val.as.X n)) :
   exact ((map₁ Y g P).f n) ((map₂ Y g P).f n) :=
 begin
   rw AddCommGroup.exact_iff', split,
-  { ext φ, rw [comp_apply], dsimp only [map₁, map₂, add_monoid_hom.mk'_apply, add_monoid_hom.coe_mk],
+  { rw [map₂, homological_complex.sub_f_apply, comp_sub],
+    ext φ,
+    simp only [map₁, map₂_left_f, map₂_right_f, add_monoid_hom.sub_apply, comp_apply,
+      add_monoid_hom.mk'_apply, AddCommGroup.zero_apply, add_monoid_hom.coe_mk],
     rw [endomorphisms.hom.comm], apply sub_self },
   intros φ hφ,
   refine ⟨⟨φ, _⟩, _⟩,
-  { simpa only [add_monoid_hom.mem_ker, map₂, add_monoid_hom.mk'_apply, sub_eq_zero] using hφ, },
+  { simpa only [add_monoid_hom.mem_ker, map₂, map₂_left_f, map₂_right_f,
+      homological_complex.sub_f_apply,
+      add_monoid_hom.mk'_apply, add_monoid_hom.sub_apply, sub_eq_zero] using hφ, },
   { refl },
 end
 
@@ -417,18 +434,18 @@ begin
     rw foo,
     apply forall_congr,
     intro i,
-    have := Ext_iso (-i) P
+    let := Ext_iso (-i) P
       (chain_complex.to_bounded_homotopy_category.obj (homological_complex.mk_end X f))
       ((single (endomorphisms 𝓐) 0).obj {X := Y, e := g}) fP,
     rw iso.is_zero_iff this, clear this,
     delta C₁,
     apply iso.is_zero_iff,
-    have := hom_single_iso P ⟨Y, g⟩ i,
+    let := hom_single_iso P ⟨Y, g⟩ i,
     refine iso.trans _ this, clear this,
-    have := (shift_single_iso 0 (-i) : single (endomorphisms 𝓐) 0 ⋙ _ ≅ _),
-    change (preadditive_coyoneda.obj (op P)).obj _ ≅
-      (preadditive_coyoneda.obj (op P)).obj _,
-    apply (preadditive_coyoneda.obj (op P)).map_iso,
+    let := (shift_single_iso 0 (-i) : single (endomorphisms 𝓐) 0 ⋙ _ ≅ _),
+    change (preadditive_yoneda.flip.obj (op P)).obj _ ≅
+      (preadditive_yoneda.flip.obj (op P)).obj _,
+    apply (preadditive_yoneda.flip.obj (op P)).map_iso,
     convert iso.app this ⟨Y, g⟩, -- I ♥ you Lean, this just worked first time
     ring, },
   { apply propext,
@@ -450,10 +467,10 @@ begin
       refine iso.trans (Ext_iso (-i) _ _ ((single 𝓐 0).obj Y) fP') _,
 --      delta C₂,
       refine iso.trans _ (hom_single_iso ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P) Y i),
-      have := (shift_single_iso 0 (-i) : single 𝓐 0 ⋙ _ ≅ _),
+      let := (shift_single_iso 0 (-i) : single 𝓐 0 ⋙ _ ≅ _),
       -- guide Lean the right way
-      change (preadditive_coyoneda.obj (op ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P))).obj _ ≅ _,
-      apply (preadditive_coyoneda.obj _).map_iso,
+      change (preadditive_yoneda.flip.obj (op ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P))).obj _ ≅ _,
+      apply (preadditive_yoneda.flip.obj _).map_iso,
       convert iso.app this _, -- I just used `convert` to define data but I think it's OK because
       -- it's only a proof which needs converting.
       ring, },
@@ -465,6 +482,8 @@ begin
       ((Ext (-i)).obj (op (chain_complex.to_bounded_homotopy_category.obj X))).map ((single 𝓐 0).map g)) ≫ j.hom,
     { rw [← is_iso_iff_is_iso_comp_left j.hom, this, is_iso_iff_is_iso_comp_right], },
     delta map₂,
+    rw [functor.map_sub, comp_sub, sub_comp],
+    refine congr_arg2 _ _ _,
     --simp only [j],
     -- this looks horrible
     -- It's of the form j ≫ (a - b) = (c - d) ≫ j
@@ -472,6 +491,7 @@ begin
     -- so perhaps the next goal is reducing to that.
     -- I don't know how horrible this will be. Maybe `j` will be
     -- horrible to work with.
+    sorry,
     sorry },
 end
 
