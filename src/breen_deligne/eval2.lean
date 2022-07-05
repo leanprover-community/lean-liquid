@@ -37,6 +37,12 @@ lemma eval'_obj_X (X : 𝒜) (n : ℕ) :
   ((BD.eval' F).obj X).X (-n:ℤ) = F.obj ((Pow (BD.data.X n)).obj X) :=
 by { cases n; apply eval_functor_obj_X }
 
+lemma eval'_obj_X_0 (X : 𝒜) :
+  ((BD.eval' F).obj X).X 0 = F.obj ((Pow (BD.data.X 0)).obj X) := rfl
+
+lemma eval'_obj_X_succ (X : 𝒜) (n : ℕ) :
+  ((BD.eval' F).obj X).X -[1+ n] = F.obj ((Pow (BD.data.X (n+1))).obj X) := rfl
+
 lemma eval'_obj_d (X : 𝒜) (m n : ℕ) :
   ((BD.eval' F).obj X).d (-(m+1:ℕ):ℤ) (-(n+1:ℕ):ℤ) =
     (universal_map.eval_Pow F (BD.data.d (m+1) (n+1))).app X := rfl

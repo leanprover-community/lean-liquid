@@ -458,9 +458,9 @@ lemma QprimeFP.mono (n : ℤ) :
   mono ((QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD.data κ M)).f n) :=
 begin
   rw mono_iff_ExtrDisc, intros T,
-  let e : ((∐ λ (k : ulift.{u+1 0} ℕ), (QprimeFP_int.{u} r' BD.data κ M).obj (ι k)).X n).val.obj
-    (op T.val) ≅ _ := coproduct_eval_iso _ _ _,
   let Q := QprimeFP_int r' BD.data κ M,
+  let e : ((∐ λ (k : ulift.{u+1 0} ℕ), Q.obj (ι k)).X n).val.obj
+    (op T.val) ≅ _ := coproduct_eval_iso _ _ _,
   let φ : ulift.{u+1} ℕ → Ab.{u+1} := λ k, ((Q.obj (ι k)).X n).val.obj (op T.val),
   let D := AddCommGroup.direct_sum_cofan.{u+1 u+1} φ,
   let hD := AddCommGroup.is_colimit_direct_sum_cofan.{u+1 u+1} φ,
@@ -525,6 +525,41 @@ begin
 end
 .
 
+lemma QprimeFP_sigma_proj_eq_0 (n : ℕ) : ((QprimeFP_sigma_proj BD κ M ι).f (n+1:ℤ)) = 0 :=
+by { apply is_zero.eq_of_tgt, apply is_zero_zero }
+
+-- move me
+lemma AddCommGroup.eq_of_is_zero (A : AddCommGroup) (hA : is_zero A) (x y : A) : x = y :=
+begin
+  rw [← Ab.pt_apply' x, ← Ab.pt_apply' y], congr' 1, apply hA.eq_of_tgt,
+end
+
+attribute [simps] Condensed_Ab_to_presheaf
+
+lemma QprimeFP.epi (n : ℤ) : epi ((QprimeFP_sigma_proj BD κ M ι).f n) :=
+begin
+  rw is_epi_iff_forall_surjective,
+  intros S,
+  rcases n with ((_|n)|n),
+  swap,
+  { intro f,
+    refine ⟨0, _⟩, apply AddCommGroup.eq_of_is_zero,
+    rw [← evaluation_obj_obj, ← Condensed_Ab_to_presheaf_obj],
+    apply functor.map_is_zero, apply functor.map_is_zero, exact is_zero_zero _, },
+  { sorry },
+  { sorry },
+end
+
+lemma QprimeFP.exact (n : ℤ) :
+  exact
+    ((QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD.data κ M)).f n)
+    ((QprimeFP_sigma_proj BD κ M ι).f n) :=
+begin
+  rw Condensed.exact_iff_ExtrDisc,
+  intro S,
+  sorry
+end
+
 lemma QprimeFP.short_exact (n : ℤ) :
   short_exact
     ((QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD.data κ M)).f n)
@@ -532,12 +567,8 @@ lemma QprimeFP.short_exact (n : ℤ) :
 begin
   apply_with short_exact.mk {instances:=ff},
   { apply QprimeFP.mono },
-  { rw is_epi_iff_forall_surjective,
-    intro S,
-    sorry },
-  { rw Condensed.exact_iff_ExtrDisc,
-    intro S,
-    sorry },
+  { apply QprimeFP.epi },
+  { apply QprimeFP.exact },
 end
 
 end step4
