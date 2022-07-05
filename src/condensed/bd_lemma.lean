@@ -565,7 +565,13 @@ end
 instance preserves_filtered_colimits_homology (i : ℤ) :
   preserves_filtered_colimits.{u+1 u+2 u+2}
     (homology_functor.{u+1 u+2 0} AddCommGroup.{u+1} (complex_shape.up.{0} ℤ) i) :=
-sorry
+⟨λ J, begin
+  introI,
+  introI,
+  constructor,
+  intro K,
+  apply_instance,
+end⟩
 
 instance preserves_filtered_colimits_eval'_forget_free_homology (i : ℤ) :
   preserves_filtered_colimits
