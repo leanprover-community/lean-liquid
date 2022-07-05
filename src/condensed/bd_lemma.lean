@@ -74,9 +74,18 @@ def eval_freeCond_homology_zero :
   ((data.eval_functor freeCond').obj breen_deligne.eg.data) ⋙ homology_functor _ _ 0 ≅ 𝟭 _ :=
 sorry
 
-instance (α : Type (u+1)) (M) :
+instance endo_tensor_preserves_colimits_of_shape (α : Type (u+1)) (M) :
   preserves_colimits_of_shape (discrete α) (endo_tensor.obj M) :=
-sorry
+begin
+  haveI : reflects_colimits_of_shape (discrete α) (endomorphisms.forget
+    (Condensed.{u} Ab.{u+1})) := { },
+  haveI : preserves_colimits_of_shape (discrete α) (endo_tensor.obj M
+    ⋙ endomorphisms.forget (Condensed.{u} Ab.{u+1})),
+  { apply preserves_colimits_of_shape_of_nat_iso (endo_tensor_comp_forget M).symm,
+    apply_instance, },
+  exact preserves_colimits_of_shape_of_reflects_of_preserves
+    (endo_tensor.obj M) (endomorphisms.forget _),
+end
 
 lemma bd_lemma (A : Condensed.{u} Ab.{u+1}) (B : Condensed.{u} Ab.{u+1})
   [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (A.val.obj (op S.val))]

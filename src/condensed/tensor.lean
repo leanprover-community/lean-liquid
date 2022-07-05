@@ -857,6 +857,9 @@ begin
   simpa,
 end
 
+instance (α : Type (u+1)) (M : endomorphisms (Condensed.{u} Ab.{u+1})) :
+  limits.preserves_colimits_of_shape (discrete α) (tensor_functor.obj M.X) := sorry
+
 /-- A variant of the tensor product functor for the endormophism category. -/
 def endo_tensor :
   (endomorphisms $ Condensed.{u} Ab.{u+1}) ⥤ Ab.{u+1} ⥤
@@ -864,5 +867,8 @@ def endo_tensor :
 functor.flip $
 { obj := λ A, (tensor_functor.flip.obj A).map_endomorphisms,
   map := λ A B f, nat_trans.map_endomorphisms $ tensor_functor.flip.map f }
+
+def endo_tensor_comp_forget (M : endomorphisms (Condensed.{u} Ab.{u+1})) :
+  endo_tensor.obj M ⋙ endomorphisms.forget _ ≅ tensor_functor.obj M.X := by refl
 
 end Condensed
