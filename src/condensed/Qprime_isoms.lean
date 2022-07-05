@@ -196,6 +196,118 @@ lemma eval_freeCond'_iso_component_hom_neg (M : Condensed.{u} Ab.{u+1}) (i : ℕ
     refine (Condensed_Ab_to_presheaf.map_biproduct _).hom,
   end := rfl
 
+namespace eval_freeAb_iso
+
+def component_zero (M : Condensed.{u} Ab.{u+1}) (S : ExtrDisc.{u}) :
+  ((((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj
+  (op S.val)).map_homological_complex (complex_shape.up ℤ)).obj
+  ((BD.eval' freeFunc).obj (Condensed_Ab_to_presheaf.obj M))).X (int.of_nat 0) ≅
+  ((BD.eval' (forget AddCommGroup ⋙ AddCommGroup.free)).obj (M.val.obj (op S.val))).X
+  (int.of_nat 0) :=
+begin
+  refine AddCommGroup.free.map_iso _,
+  refine (category_theory.forget _).map_iso _,
+  refine ((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj (op S.val)).map_biproduct _
+end
+
+def component_pos (M : Condensed.{u} Ab.{u+1}) (S : ExtrDisc.{u}) (i : ℕ) :
+  ((((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj
+    (op S.val)).map_homological_complex (complex_shape.up ℤ)).obj
+    ((BD.eval' freeFunc).obj (Condensed_Ab_to_presheaf.obj M))).X
+    (int.of_nat (i + 1)) ≅
+  ((BD.eval' (forget AddCommGroup ⋙ AddCommGroup.free)).obj
+  (M.val.obj (op S.val))).X (int.of_nat (i + 1)) :=
+is_zero.iso (functor.map_is_zero _ $ is_zero_zero _) (is_zero_zero _)
+
+def component_neg (M : Condensed.{u} Ab.{u+1}) (S : ExtrDisc.{u}) (i : ℕ) :
+  ((((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj (op S.val)).map_homological_complex
+    (complex_shape.up ℤ)).obj
+    ((BD.eval' freeFunc).obj (Condensed_Ab_to_presheaf.obj M))).X -[1+ i] ≅
+  ((BD.eval' (forget AddCommGroup ⋙ AddCommGroup.free)).obj (M.val.obj (op S.val))).X -[1+ i] :=
+begin
+  refine AddCommGroup.free.map_iso _,
+  refine (category_theory.forget _).map_iso _,
+  refine ((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj (op S.val)).map_biproduct _
+end
+
+end eval_freeAb_iso
+
+local attribute [-simp] forget_map_eq_coe
+
+lemma eval_freeAb_iso_component_aux₀ (M : Condensed.{u} Ab.{u+1}) (S : ExtrDisc.{u}) :
+  (eval_freeAb_iso.component_neg BD M S 0).hom ≫
+    ((BD.eval' (forget AddCommGroup ⋙ AddCommGroup.free)).obj (M.val.obj (op S.val))).d
+      -[1+ 0] (int.of_nat 0) =
+  ((((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj (op S.val)).map_homological_complex
+    (complex_shape.up ℤ)).obj
+      ((BD.eval' freeFunc).obj (Condensed_Ab_to_presheaf.obj M))).d -[1+ 0] (int.of_nat 0) ≫
+  (eval_freeAb_iso.component_zero BD M S).hom :=
+begin
+  dsimp only [eval_freeAb_iso.component_neg, eval_freeAb_iso.component_zero, functor.map_iso,
+    package.eval', data.eval_functor', functor.map_homological_complex,
+    category_theory.evaluation, functor.comp_obj, homological_complex.embed,
+    homological_complex.embed.obj],
+  erw homological_complex.embed.d_some_some,
+  erw homological_complex.embed.d_some_some,
+  dsimp only [data.eval_functor, data.eval_functor', functor.comp_obj, functor.flip,
+    homological_complex.functor_eval, homological_complex.functor_eval.obj,
+    category_theory.evaluation, functor.map_homological_complex,
+    universal_map.eval_Pow_functor, universal_map.eval_Pow, functor.map_biproduct],
+  simp only [free_abelian_group.lift_eq_sum, sum_comp, comp_sum, nat_trans.app_sum],
+  apply finset.sum_congr rfl, rintro x -,
+  simp only [nat_trans.app_zsmul],
+  dsimp [functor.map_bicone],
+  simp only [zsmul_comp, comp_zsmul, ← functor.map_comp], congr' 3,
+  apply biproduct.hom_ext, intros j,
+  simp only [category.assoc, biproduct.lift_π, biproduct.matrix_π, biproduct.lift_desc],
+  erw biproduct.lift_π,
+  rw [← nat_trans.comp_app, biproduct.matrix_π],
+  simp_rw [← nat_trans.id_app, ← nat_trans.app_zsmul, ← nat_trans.comp_app,
+    ← nat_trans.app_sum], congr' 1,
+  apply biproduct.hom_ext', intro k, simp only [comp_sum, biproduct.ι_desc],
+  rw [finset.sum_eq_single_of_mem k (finset.mem_univ _),
+  biproduct.ι_π_assoc, dif_pos rfl],
+  { simpa, },
+  { rintros b - hb, rw [biproduct.ι_π_assoc, dif_neg hb.symm, zero_comp] }
+end
+
+lemma eval_freeAb_iso_component_aux (M : Condensed.{u} Ab.{u+1}) (S : ExtrDisc.{u}) (i : ℕ) :
+  (eval_freeAb_iso.component_neg BD M S (i+1)).hom ≫
+    ((BD.eval' (forget AddCommGroup ⋙ AddCommGroup.free)).obj
+    (M.val.obj (op S.val))).d -[1+ (i+1)] -[1+ i] =
+  ((((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj
+    (op S.val)).map_homological_complex (complex_shape.up ℤ)).obj
+       ((BD.eval' freeFunc).obj (Condensed_Ab_to_presheaf.obj M))).d -[1+ (i+1)] -[1+ i] ≫
+    (eval_freeAb_iso.component_neg BD M S i).hom :=
+begin
+  dsimp only [eval_freeAb_iso.component_neg, eval_freeAb_iso.component_zero, functor.map_iso,
+    package.eval', data.eval_functor', functor.map_homological_complex,
+    category_theory.evaluation, functor.comp_obj, homological_complex.embed,
+    homological_complex.embed.obj],
+  erw homological_complex.embed.d_some_some,
+  erw homological_complex.embed.d_some_some,
+  dsimp only [data.eval_functor, data.eval_functor', functor.comp_obj, functor.flip,
+    homological_complex.functor_eval, homological_complex.functor_eval.obj,
+    category_theory.evaluation, functor.map_homological_complex,
+    universal_map.eval_Pow_functor, universal_map.eval_Pow, functor.map_biproduct],
+  simp only [free_abelian_group.lift_eq_sum, sum_comp, comp_sum, nat_trans.app_sum],
+  apply finset.sum_congr rfl, rintro x -,
+  simp only [nat_trans.app_zsmul],
+  dsimp [functor.map_bicone],
+  simp only [zsmul_comp, comp_zsmul, ← functor.map_comp], congr' 3,
+  apply biproduct.hom_ext, intros j,
+  simp only [category.assoc, biproduct.lift_π, biproduct.matrix_π, biproduct.lift_desc],
+  erw biproduct.lift_π,
+  rw [← nat_trans.comp_app, biproduct.matrix_π],
+  simp_rw [← nat_trans.id_app, ← nat_trans.app_zsmul, ← nat_trans.comp_app,
+    ← nat_trans.app_sum], congr' 1,
+  apply biproduct.hom_ext', intro k, simp only [comp_sum, biproduct.ι_desc],
+  rw [finset.sum_eq_single_of_mem k (finset.mem_univ _),
+  biproduct.ι_π_assoc, dif_pos rfl],
+  { simpa, },
+  { rintros b - hb, rw [biproduct.ι_π_assoc, dif_neg hb.symm, zero_comp] }
+end
+
 def eval_freeAb_iso_component (M : Condensed.{u} Ab.{u+1}) (S : ExtrDisc.{u}) :
   (((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj (op S.val)).map_homological_complex
     (complex_shape.up ℤ)).obj
@@ -204,25 +316,21 @@ def eval_freeAb_iso_component (M : Condensed.{u} Ab.{u+1}) (S : ExtrDisc.{u}) :
 homological_complex.hom.iso_of_components
 (λ i,
 match i with
-| int.of_nat 0 := begin
-    refine AddCommGroup.free.map_iso _,
-    refine (category_theory.forget _).map_iso _,
-    refine ((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj (op S.val)).map_biproduct _
-  end
-| int.of_nat (i+1) := is_zero.iso (functor.map_is_zero _ $ is_zero_zero _) (is_zero_zero _)
-| -[1+i] := begin
-    refine AddCommGroup.free.map_iso _,
-    refine (category_theory.forget _).map_iso _,
-    refine ((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj (op S.val)).map_biproduct _
-  end
+| int.of_nat 0 :=  eval_freeAb_iso.component_zero _ _ _
+| int.of_nat (i+1) := eval_freeAb_iso.component_pos _ _ _ _
+| -[1+i] := eval_freeAb_iso.component_neg _ _ _ _
 end )
 begin
-  rintro i _ (rfl : _=_),
-  sorry
+  rintros ((_|i)|(_|i)) ((_|j)|(_|j)) ⟨rfl⟩,
+  { apply is_zero.eq_of_tgt,
+    apply is_zero_zero },
+  { apply is_zero.eq_of_tgt,
+    apply is_zero_zero },
+  { apply eval_freeAb_iso_component_aux₀ },
+  { apply eval_freeAb_iso_component_aux },
+  { apply eval_freeAb_iso_component_aux },
 end
 .
-
-local attribute [-simp] forget_map_eq_coe
 
 lemma eval_freeCond'_iso_aux_zero
   (X Y : Condensed Ab) (f : X ⟶ Y) :
