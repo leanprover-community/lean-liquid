@@ -333,6 +333,16 @@ begin
 end
 .
 
+@[simp]
+lemma eval_freeAb_iso_component_zero (M : Condensed.{u} Ab.{u+1}) (S : ExtrDisc.{u}) :
+  (eval_freeAb_iso_component BD M S).hom.f 0 =
+  (eval_freeAb_iso.component_zero BD M S).hom := rfl
+
+@[simp]
+lemma eval_freeAb_iso_component_neg (M : Condensed.{u} Ab.{u+1}) (S : ExtrDisc.{u}) (i : ℕ) :
+  (eval_freeAb_iso_component BD M S).hom.f (-[1+i]) =
+  (eval_freeAb_iso.component_neg BD M S i).hom := rfl
+
 lemma eval_freeCond'_iso_aux_zero
   (X Y : Condensed Ab) (f : X ⟶ Y) :
   ((BD.eval' freeCond').map f ≫ (eval_freeCond'_iso_component BD Y).hom).f (int.of_nat 0) =
@@ -425,9 +435,25 @@ nat_iso.of_components
 begin
   intros X Y f,
   ext ((_|i)|i) : 2,
-  { sorry },
+  { dsimp [eval_freeAb_iso.component_zero, package.eval'],
+    simp only [← functor.map_comp], congr' 2,
+    apply biproduct.hom_ext, intros j,
+    dsimp [functor.map_bicone],
+    simp only [category.assoc, biproduct.map_π, biproduct.lift_π],
+    erw biproduct.lift_π_assoc,
+    erw biproduct.lift_π,
+    simp_rw [← nat_trans.comp_app, biproduct.map_π],
+    refl },
   { apply is_zero.eq_of_tgt, apply is_zero_zero },
-  { sorry }
+  { dsimp [eval_freeAb_iso.component_neg, package.eval'],
+    simp only [← functor.map_comp], congr' 2,
+    apply biproduct.hom_ext, intros j,
+    dsimp [functor.map_bicone],
+    simp only [category.assoc, biproduct.map_π, biproduct.lift_π],
+    erw biproduct.lift_π_assoc,
+    erw biproduct.lift_π,
+    simp_rw [← nat_trans.comp_app, biproduct.map_π],
+    refl }
 end
 
 -- Move this.
