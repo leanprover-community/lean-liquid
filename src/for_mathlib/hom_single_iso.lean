@@ -371,6 +371,25 @@ end
 
 .
 
+open opposite
+
+variables {X Y Z : cochain_complex C ℤ} (f : X ⟶ Y) (g : Y ⟶ Z)
+
+def of' (X : cochain_complex C ℤ)
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)] :
+  bounded_homotopy_category C :=
+of $ (homotopy_category.quotient _ _).obj X
+
+def of_hom (f : X ⟶ Y)
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Y)] :
+  of' X ⟶ of' Y :=
+(homotopy_category.quotient _ _).map f
+
+instance val_as_bdd_above (P : bounded_homotopy_category C) :
+  ((homotopy_category.quotient C (complex_shape.up ℤ)).obj P.val.as).is_bounded_above :=
+by { rcases P with ⟨P, ⟨a, ha⟩⟩, use a, intros i hi, exact ha i hi }
+
 lemma hom_single_iso_naturality
   (P₁ P₂ : bounded_homotopy_category C) (B : C) (i : ℤ)
   (f : P₁ ⟶ P₂) :
@@ -393,6 +412,24 @@ begin
   simp_rw category.assoc,
   rw ← aux₁_naturality,
   refl,
+end
+
+lemma hom_single_iso_naturality'
+  (P₁ P₂ : bounded_homotopy_category C) (B : C) (i : ℤ)
+  (f : P₁.val.as ⟶ P₂.val.as) :
+  (preadditive_yoneda.obj ((single C i).obj B)).map (of_hom f).op ≫ (hom_single_iso P₁ B i).hom =
+  (hom_single_iso P₂ B i).hom ≫
+  (((preadditive_yoneda.obj B).right_op.map_homological_complex _ ⋙
+      homological_complex.unop_functor.right_op ⋙
+      (_root_.homology_functor _ _ _).op).map f).unop :=
+begin
+  erw hom_single_iso_naturality P₁ P₂ B i (of_hom f),
+  refine congr_arg2 _ rfl _,
+  apply homology_map_eq_of_homotopy,
+  let h := (preadditive_yoneda.obj B).right_op.map_homotopy (homotopy_category.homotopy_out_map f),
+  refine ⟨λ i j, (h.hom j i).unop, _, _⟩,
+  { intros i j hij, rw [h.zero, unop_zero], exact hij },
+  { intros i, sorry }
 end
 
 end bounded_homotopy_category

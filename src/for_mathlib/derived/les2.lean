@@ -315,11 +315,6 @@ def cone
       linarith }
   end }
 
-def of' (X : cochain_complex A ℤ)
-  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)] :
-  bounded_homotopy_category A :=
-of $ (homotopy_category.quotient _ _).obj X
-
 def cone.π
   [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)]
   [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Y)]
@@ -334,12 +329,6 @@ instance is_quasi_iso_cone_π
   (w : ∀ i, short_exact (f.f i) (g.f i)) :
   homotopy_category.is_quasi_iso (cone.π f g _) :=
 homological_complex.is_quasi_iso_map_cone_π _ _ w
-
-def of_hom (f : X ⟶ Y)
-  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)]
-  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Y)] :
-  of' X ⟶ of' Y :=
-(homotopy_category.quotient _ _).map f
 
 def cone_triangle
   [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)]
