@@ -10,6 +10,7 @@ import condensed.ab4
 import for_mathlib.endomorphisms.ab4
 import for_mathlib.homology_exact
 import for_mathlib.free_abelian_group2
+import for_mathlib.embed_preserves_colimits
 
 .
 
@@ -667,7 +668,11 @@ begin
   apply_with limits.comp_preserves_filtered_colimits.{u+1 u+2 _ u+2} {instances:=ff},
   { apply_with data.eval_functor_preserves_filtered_colimits {instances:=ff},
     apply limits.comp_preserves_filtered_colimits.{u+1 u+2 _ u+2}, },
-  { sorry }
+  { constructor,
+    intro J,
+    introI,
+    introI,
+    apply_instance, },
 end
 
 instance preserves_filtered_colimits_homology (i : ℤ) :

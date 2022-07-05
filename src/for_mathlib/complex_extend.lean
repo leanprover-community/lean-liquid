@@ -462,7 +462,7 @@ end homotopy
 
 section homology_comparison
 
-def congr_eval (𝓐 : Type*) [category 𝓐] [abelian 𝓐] (c₁ : complex_shape ι₁) (i j : ι₁)
+def congr_eval (𝓐 : Type*) [category 𝓐] [preadditive 𝓐] (c₁ : complex_shape ι₁) (i j : ι₁)
   (h : i = j) : eval 𝓐 c₁ i ≅ eval 𝓐 c₁ j := eq_to_iso (by rw h)
 
 def congr_prev_functor (𝓐 : Type*) [category 𝓐] [abelian 𝓐] (c₁ : complex_shape ι₁) (i j : ι₁)
@@ -471,7 +471,7 @@ def congr_prev_functor (𝓐 : Type*) [category 𝓐] [abelian 𝓐] (c₁ : com
 def congr_next_functor (𝓐 : Type*) [category 𝓐] [abelian 𝓐] (c₁ : complex_shape ι₁) (i j : ι₁)
   (h : i = j) : next_functor 𝓐 c₁ i ≅ next_functor 𝓐 c₁ j := eq_to_iso (by rw h)
 
-def embed_comp_eval (𝓐 : Type*) [category 𝓐] [abelian 𝓐]
+def embed_comp_eval (𝓐 : Type*) [category 𝓐] [preadditive 𝓐] [has_zero_object 𝓐]
   {c₁ : complex_shape ι₁} {c₂ : complex_shape ι₂} (e : c₁.embedding c₂) (i₁ : ι₁) :
   embed e ⋙ eval 𝓐 c₂ (e.f i₁) ≅ eval 𝓐 c₁ i₁ :=
 nat_iso.of_components
