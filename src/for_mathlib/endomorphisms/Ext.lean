@@ -191,6 +191,8 @@ instance forget_preserves_K_projective {P : bounded_homotopy_category (endomorph
 ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P).val.is_K_projective :=
 -- Adam says that he knows a messy proof of this but it might need AB4 (i.e. this sorry
 -- might no even be true in this generality)
+-- jmc: there is absolutely no harm in assuming that `P.val.as.X i` is projective for all `i`
+-- because that's true for the `P` that we'll apply this to.
 sorry
 
 def forget_mk_end (X : chain_complex 𝓐 ℕ) (f : X ⟶ X) :
@@ -206,9 +208,10 @@ match m with
 | -[1+i] := iso.refl _
 end)
 begin
-  rintros i j (rfl : _ = _),
-  -- I have no idea how hard this sorry is. Probably just a grotty case bash.
-  sorry,
+  rintros (i|(_|i)) j (rfl : _ = _),
+  { apply (is_zero_zero _).eq_of_tgt, },
+  { erw [iso.refl_hom, iso.refl_hom, category.id_comp, category.comp_id], refl },
+  { erw [iso.refl_hom, iso.refl_hom, category.id_comp, category.comp_id], refl },
 end
 
 
@@ -303,8 +306,8 @@ def map₂ : C₂ Y P ⟶ C₂ Y P :=
 
 lemma map₁_mono (n : ℤ) : mono ((map₁ Y g P).f n) :=
 begin
-  -- this should be easy
-  sorry
+  rw [AddCommGroup.mono_iff_injective, injective_iff_map_eq_zero],
+  intros φ hφ, ext, exact hφ
 end
 
 lemma map₂_epi {n : ℤ} (h : projective (P.val.as.X n)) : epi ((map₂ Y g P).f n) :=
@@ -350,14 +353,30 @@ begin
     rw [τ.naturality_assoc, τ.naturality_assoc, cancel_epi (τ.app (op (free Q.X)))] at hq₁,
     simpa only [← F.map_comp_assoc, ← op_comp, hs, op_id, F.map_id, category.id_comp]
       using congr_arg (λ (q : _ ⟶ _), (F.map π.op) ≫ q) hq₁, },
-  sorry
+  introsI A hA,
+  rw AddCommGroup.epi_iff_surjective,
+  intros φ,
+  let ψ : (free A).X ⟶ Y,
+  { refine sigma.desc _, rintro ⟨i⟩, refine nat.rec_on i 0 (λ j ψ, _),
+    refine ((sigma.ι (λ (i : ulift ℕ), A) (ulift.up j)) ≫ φ) + (ψ ≫ g) },
+  refine ⟨ψ, _⟩,
+  ext ⟨i⟩,
+  dsimp only [τ, add_monoid_hom.mk'_apply, free, unop_op, op_unop, ψ],
+  rw [comp_sub, sub_eq_iff_eq_add],
+  simp only [colimit.ι_desc_assoc, colimit.ι_desc, limits.cofan.mk_ι_app],
+  refl,
 end
 
 lemma map₁₂_exact {n : ℤ} (h : projective (P.val.as.X n)) :
   exact ((map₁ Y g P).f n) ((map₂ Y g P).f n) :=
 begin
-  -- this should be easy
-  sorry
+  rw AddCommGroup.exact_iff', split,
+  { ext φ, rw [comp_apply], dsimp only [map₁, map₂, add_monoid_hom.mk'_apply, add_monoid_hom.coe_mk],
+    rw [endomorphisms.hom.comm], apply sub_self },
+  intros φ hφ,
+  refine ⟨⟨φ, _⟩, _⟩,
+  { simpa only [add_monoid_hom.mem_ker, map₂, add_monoid_hom.mk'_apply, sub_eq_zero] using hφ, },
+  { refl },
 end
 
 lemma map₁₂_short_exact {n : ℤ} (h : projective (P.val.as.X n)) :
@@ -412,7 +431,8 @@ begin
     rw foo,
     apply forall_congr,
     intro i,
-    let fP' := ((endomorphisms.forget _).map_bounded_homotopy_category).map fP ≫ (forget_mk_end X f).hom,
+    let fP' := (bounded_homotopy_category.forget _).map
+      (((endomorphisms.forget _).map_bounded_homotopy_category).map fP ≫ (forget_mk_end X f).hom),
     let j : (((Ext (-i)).obj (op (chain_complex.to_bounded_homotopy_category.obj X))).obj ((single 𝓐 0).obj Y))
     ≅ ((homology_functor AddCommGroup (complex_shape.up ℤ).symm i).obj (C₂ Y P)),
     { -- need that post-composing with an iso sends quasi-isos to quasi-isos! More precisely:
@@ -421,7 +441,8 @@ begin
       -- however unfortunately we now need to post-compose with something
       -- which is close to, but not equal to, 𝟙.
       -- This should hopefully be straightforward
-      haveI : homotopy_category.is_quasi_iso fP' := sorry,
+      haveI : homotopy_category.is_quasi_iso fP',
+      { dsimp only [fP'], rw functor.map_comp, apply_instance, },
       refine iso.trans (Ext_iso (-i) _ _ ((single 𝓐 0).obj Y) fP') _,
 --      delta C₂,
       refine iso.trans _ (hom_single_iso ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P) Y i),
