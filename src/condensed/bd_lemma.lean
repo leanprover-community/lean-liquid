@@ -21,6 +21,49 @@ noncomputable theory
 universes u
 
 open category_theory category_theory.limits breen_deligne opposite
+open_locale big_operators
+
+section
+open category_theory.preadditive
+
+attribute [simps map] AddCommGroup.free
+
+def eval_free_homology_zero_exact (A : AddCommGroup.{u}) :
+  exact
+  ((((data.eval_functor (forget _ ⋙ AddCommGroup.free)).obj breen_deligne.eg.data).obj A).d 1 0)
+  (free_abelian_group.lift id) :=
+begin
+  rw AddCommGroup.exact_iff', split,
+  { dsimp only [eg, eg.BD, data.eval_functor_obj_obj_d], rw [dif_pos rfl],
+    dsimp only [universal_map.eval_Pow], rw [lift_app],
+    dsimp only [whisker_right_app, eg.map, eg.σπ, universal_map.proj, universal_map.sum],
+    simp only [add_monoid_hom.map_sub, add_monoid_hom.map_sum, free_abelian_group.lift.of,
+      basic_universal_map.eval_Pow_app, functor.comp_map, forget_map_eq_coe, sub_comp, sum_comp,
+      preadditive.Pow_obj, forget_obj_eq_coe],
+
+    ext (x : ((preadditive.Pow 2).obj A : AddCommGroup.{u})),
+    have hx := id_apply x,
+    erw [← biproduct.total, ← equiv.ulift.symm.sum_comp] at hx, swap, apply_instance,
+    rw [← add_monoid_hom.eval_apply_apply, add_monoid_hom.map_sub, add_monoid_hom.map_sum,
+      AddCommGroup.zero_apply, ← hx],
+    simp only [add_monoid_hom.eval_apply_apply, comp_apply,
+      free_abelian_group.lift.of, free_abelian_group.lift_id_map, AddCommGroup.free_map],
+    simp only [← comp_apply, sum_comp, category.assoc, biproduct.ι_matrix],
+    simp only [fin.sum_univ_two],
+    sorry },
+  { sorry }
+end
+
+def eval_free_homology_zero_surj (A : AddCommGroup) :
+  function.surjective (free_abelian_group.lift (id : A → A)) :=
+λ a, ⟨free_abelian_group.of a, free_abelian_group.lift.of _ _⟩
+
+def eval_free_homology_zero :
+  ((data.eval_functor (forget _ ⋙ AddCommGroup.free)).obj breen_deligne.eg.data) ⋙ homology_functor _ _ 0 ≅ 𝟭 _ :=
+sorry
+
+end
+
 open bounded_homotopy_category
 
 namespace Condensed
