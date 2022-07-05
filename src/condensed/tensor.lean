@@ -377,6 +377,15 @@ end
 def tensor_flip (A B : AddCommGroup.{u}) : A.tensor B ≅ B.tensor A :=
 linear_equiv_to_iso (tensor_product.comm _ _ _)
 
+def tensor_functor_iso_flip :
+  tensor_functor.flip ≅ tensor_functor :=
+nat_iso.of_components (λ A,
+  nat_iso.of_components (λ B, tensor_flip _ _) sorry) sorry
+
+instance preserves_colimits_tensor_obj (A : AddCommGroup.{u}) :
+  limits.preserves_colimits (tensor_functor.obj A) :=
+limits.preserves_colimits_of_nat_iso (tensor_functor_iso_flip.app _)
+
 end AddCommGroup
 
 namespace ExtrSheafProd
@@ -675,8 +684,29 @@ def tensor_functor : ExtrSheaf.{u} Ab.{u+1} ⥤ Ab.{u+1} ⥤ ExtrSheaf.{u} Ab.{u
     rw [map_tensor_comp],
   end }
 
+instance creates_colimits :
+  creates_colimits
+  (Sheaf_to_presheaf ExtrDisc.proetale_topology.{u} Ab.{u+1}) :=
+show creates_colimits ((ExtrSheaf_ExtrSheafProd_equiv _).functor ⋙
+  ExtrSheafProd_to_presheaf _), from infer_instance
+
+instance preserves_colimits_tensor_obj (M : ExtrSheaf.{u} Ab.{u+1}) :
+  limits.preserves_colimits (tensor_functor.obj M) :=
+begin
+  constructor, introsI J _, constructor, intros F, constructor, intros S hS,
+  let T := _, change (limits.is_colimit T),
+  apply limits.is_colimit_of_reflects
+    (Sheaf_to_presheaf ExtrDisc.proetale_topology.{u} Ab.{u+1}),
+  apply limits.evaluation_jointly_reflects_colimits,
+  intros Q,
+  change limits.is_colimit
+    ((AddCommGroup.tensor_functor.obj (M.val.obj Q)).map_cocone S),
+  apply limits.is_colimit_of_preserves,
+  exact hS,
+end
+
 instance (α : Type (u+1)) (N : ExtrSheaf.{u} Ab.{u+1}) :
-  limits.preserves_colimits_of_shape (discrete α) (tensor_functor.obj N) := sorry
+  limits.preserves_colimits_of_shape (discrete α) (tensor_functor.obj N) := infer_instance
 
 end ExtrSheaf
 
