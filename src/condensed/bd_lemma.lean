@@ -205,6 +205,7 @@ def endo_tensor_punit (A : endomorphisms (Condensed.{u} Ab.{u+1})) :
 endomorphisms.mk_iso (tensor_punit.app _) (nat_trans.naturality _ _)
 
 lemma endo_tensor_short_exact (A : endomorphisms (Condensed.{u} Ab.{u+1}))
+  [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (A.X.val.obj (op S.val))]
   {X Y Z : Ab} (f : X ⟶ Y) (g : Y ⟶ Z) (hfg : short_exact f g) :
   short_exact ((endo_tensor.obj A).map f) ((endo_tensor.obj A).map g) :=
 sorry
@@ -220,7 +221,7 @@ begin
   refine package.main_lemma _ _ _ _ _ _
     eval_freeCond_homology_zero (endo_tensor.obj ⟨A,f⟩)
     (endo_tensor_punit _) _ _,
-  { intros X Y Z _ _ h, apply endo_tensor_short_exact _ _ _ h, },
+  { intros X Y Z _ _ h, refine endo_tensor_short_exact _ _ _ h, },
   { sorry }
 end
 
