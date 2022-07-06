@@ -1,6 +1,7 @@
 import condensed.adjunctions
 import condensed.extr.equivalence
 import condensed.short_exact
+import condensed.acyclic
 
 import for_mathlib.AddCommGroup.tensor
 
@@ -228,6 +229,12 @@ begin
   simp,
 end
 
+instance tensor_functor_additive (M : ExtrSheafProd.{u} Ab.{u+1}) :
+  (tensor_functor.obj M).additive := { }
+
+instance tensor_functor_flip_additive (A : Ab.{u+1}) :
+  (tensor_functor.flip.obj A).additive := { }
+
 end ExtrSheafProd
 
 namespace ExtrSheaf
@@ -330,6 +337,9 @@ end
 
 example (α : Type (u+1)) (N : ExtrSheaf.{u} Ab.{u+1}) :
 limits.preserves_colimits_of_shape (discrete α) (tensor_functor.obj N) := infer_instance
+
+instance tensor_functor_additive (M : ExtrSheaf.{u} Ab.{u+1}) :
+  (tensor_functor.obj M).additive := { }
 
 end ExtrSheaf
 

@@ -192,6 +192,26 @@ begin
   simp,
 end
 
+@[simp]
+lemma map_tensor_add_right {A A' B B' : AddCommGroup.{u}} (f : A ⟶ A') (g₁ g₂ : B ⟶ B') :
+  map_tensor f (g₁ + g₂) = map_tensor f g₁ + map_tensor f g₂ :=
+begin
+  apply (tensor_curry_equiv _ _ _).injective,
+  ext a b,
+  dsimp [tensor_curry, map_tensor],
+  apply tensor_product.tmul_add,
+end
+
+@[simp]
+lemma map_tensor_add_left {A A' B B' : AddCommGroup.{u}} (f₁ f₂ : A ⟶ A') (g : B ⟶ B') :
+  map_tensor (f₁ + f₂) g = map_tensor f₁ g + map_tensor f₂ g :=
+begin
+  apply (tensor_curry_equiv _ _ _).injective,
+  ext a b,
+  dsimp [tensor_curry, map_tensor],
+  apply tensor_product.add_tmul,
+end
+
 lemma tensor_uncurry_comp_curry {A B C D : AddCommGroup.{u}} (f : A ⟶ B) (g : B.tensor C ⟶ D) :
   tensor_uncurry (f ≫ tensor_curry g) = map_tensor f (𝟙 _) ≫ g :=
 begin
@@ -527,5 +547,11 @@ begin
 end
 
 end preserves_finite_limits
+
+instance tensor_functor_additive (A : AddCommGroup.{u}) :
+  (tensor_functor.obj A).additive := { }
+
+instance tensor_functor_flip_additive (A : AddCommGroup.{u}) :
+  (tensor_functor.flip.obj A).additive := { }
 
 end AddCommGroup

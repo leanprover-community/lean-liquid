@@ -15,25 +15,6 @@ namespace AddCommGroup
 
 variables (A : AddCommGroup)
 
-instance tensor_functor_additive : (tensor_functor.obj A).additive :=
-{ map_add' := λ X Y f g, begin
-    dsimp [map_tensor], ext x,
-    dsimp only [linear_map.to_add_monoid_hom_coe, add_monoid_hom.add_apply],
-    rw [← linear_map.add_apply],
-    congr' 1, apply tensor_product.ext', intros x y,
-    apply tensor_product.tmul_add,
-  end }
-
-instance tensor_flip_additive : functor.additive
-  (tensor_functor.flip.obj A) :=
-{ map_add' := λ X Y f g, begin
-    dsimp [map_tensor], ext x,
-    dsimp only [linear_map.to_add_monoid_hom_coe, add_monoid_hom.add_apply],
-    rw [← linear_map.add_apply],
-    congr' 1, apply tensor_product.ext', intros x y,
-    apply tensor_product.add_tmul,
-  end }
-
 variables [no_zero_smul_divisors ℤ A]
 
 instance tensor_functor_preserves_finite_limits :
