@@ -444,16 +444,16 @@ begin
   apply category.comp_id,
 end
 
-/- the assumption H would be better if `h` was unoped -/
 lemma compatibility {Y : 𝓐} {P₁ P₂ P₃ : bounded_homotopy_category 𝓐} (g : P₁ ⟶ P₃) (f : P₂ ⟶ P₃)
-  (h : P₂.val.as.op ⟶ P₁.val.as.op)
-  (H : homotopy_category.op_functor.map (quiver.hom.op f) ≫ (quotient.functor _).map h =
-    homotopy_category.op_functor.map (quiver.hom.op g))
+  (h : P₁.val.as ⟶ P₂.val.as)
+  (H : (quotient.functor _).map h ≫ f = g)
   (i : ℤ) :
   (preadditive_yoneda.obj ((single 𝓐 i).obj Y)).map f.op ≫ (P₂.hom_single_iso Y i).hom ≫
     (homology_functor AddCommGroup _ i).map
-      (((preadditive_yoneda.obj Y).map_homological_complex _).map h) =
-  (preadditive_yoneda.obj ((single 𝓐 i).obj Y)).map g.op ≫ (P₁.hom_single_iso Y i).hom :=
+      (((preadditive_yoneda.obj Y).map_homological_complex _).map
+        (homological_complex.op_functor.map (quiver.hom.op h)))
+      = (preadditive_yoneda.obj ((single 𝓐 i).obj Y)).map g.op ≫
+        (P₁.hom_single_iso Y i).hom :=
 begin
   rw hom_single_iso_naturality,
   slice_lhs 1 2 { rw hom_single_iso_naturality, },
@@ -467,6 +467,9 @@ begin
   /- may need that op_functor and unop_functor are equivalences on homotopy categories? -/
   sorry,
 end
+
+--((preadditive_yoneda.obj Y).map_homological_complex _).map
+--  (homological_complex.op_functor.map
 
 lemma Ext_is_zero_iff (X : chain_complex 𝓐 ℕ) (Y : 𝓐)
   (f : X ⟶ X) (g : Y ⟶ Y) :
@@ -546,8 +549,8 @@ begin
       rw lift_unop_op,
       rw map₂_left_eq,
       apply compatibility,
-      /- when the assumption in `compatiblity` is suitably rephrased, this should reduce
-        to uniqueness of lift? -/
+      simp only [eq_to_hom_refl, category.comp_id],
+      /- use uniqueness of lift? and the commutation property of fP ?  -/
       sorry, },
     sorry },
 end
