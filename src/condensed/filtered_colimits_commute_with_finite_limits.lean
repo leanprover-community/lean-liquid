@@ -17,12 +17,17 @@ def colim_to_lim :
 colimit.desc (limit F) ⟨limit (colimit F.flip),
 { app := λ j, limit.lift (colimit F.flip) ⟨(limit F).obj j,
   { app := λ k, (limit.π F k).app j ≫ (colimit.ι F.flip j).app k,
-    naturality' := λ X Y f, begin
-      dsimp, simp only [category.id_comp, category.assoc],
+    naturality' := λ X Y f, by begin
+      erw [functor.const.obj_map, category.id_comp, category.assoc],
       rw [← nat_trans.naturality, ← category.assoc],
       simp only [functor.flip_obj_map, ← nat_trans.comp_app, limit.w],
     end }⟩,
-  naturality' := sorry }⟩
+  naturality' := λ X Y f, begin
+    erw [functor.const.obj_map, category.comp_id],
+    apply limit.hom_ext, intro k,
+    simp only [category.assoc, limit.lift_π, nat_trans.naturality_assoc],
+    simp only [← functor.flip_map_app, ← nat_trans.comp_app, colimit.w],
+  end }⟩
 
 noncomputable
 instance preserves_filtered_colimits :
