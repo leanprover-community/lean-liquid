@@ -31,10 +31,15 @@ variables {X : Type*} (a b : free_abelian_group X)
 def norm : ℕ := ∑ x in a.support, (coeff x a).nat_abs
 
 -- SELFCONTAINED
-@[simp] lemma norm_of (x : X) : (of x).norm = 1 := sorry
+@[simp] lemma norm_of (x : X) : (of x).norm = 1 := by {simp only [norm, support_of,
+  finset.sum_singleton, coeff_of_self, int.nat_abs_one]}
+
 
 -- SELFCONTAINED
-lemma norm_add : (a + b).norm ≤ a.norm + b.norm := sorry
+lemma norm_add : (a + b).norm ≤ a.norm + b.norm :=
+begin
+  sorry,
+end
 
 -- SELFCONTAINED
 @[simp] lemma norm_neg : (-a).norm = a.norm := sorry
