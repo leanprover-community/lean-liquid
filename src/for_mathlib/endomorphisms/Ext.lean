@@ -427,6 +427,17 @@ lemma flip_map_app_comm {C D E : Type*} [category C] [category D] [category E]
   (F.flip.map g).app c ≫ (F.map f).app d = (F.map f).app d ≫ (F.flip.map g).app c  :=
 (nat_trans.naturality _ _).symm
 
+lemma lift_unop_op {X Y : bounded_homotopy_category 𝓐}
+  [homotopy_category.is_K_projective X.val] (g : X ⟶ Y) (f : Y ⟶ Y) :
+  bounded_homotopy_category.lift g Y.π ≫
+    bounded_homotopy_category.lift ((unop (op Y)).π ≫ f.op.unop) (unop (op Y)).π =
+  lift (g ≫ f) Y.π ≫ eq_to_hom (by refl) :=
+begin
+  erw lift_comp_lift_comp,
+  symmetry,
+  apply category.comp_id,
+end
+
 lemma Ext_is_zero_iff (X : chain_complex 𝓐 ℕ) (Y : 𝓐)
   (f : X ⟶ X) (g : Y ⟶ Y) :
   (∀ i, is_zero (((Ext i).obj (op $ chain_complex.to_bounded_homotopy_category.obj
@@ -499,8 +510,10 @@ begin
         iso.op_hom], clear j,
       simp only [nat_trans.naturality, nat_trans.naturality_assoc],
       erw [nat_trans.naturality_assoc, ← functor.map_comp_assoc],
-      simp only [← op_comp],
-      simp only [category.assoc],
+      simp only [← op_comp, category.assoc],
+      congr' 1,
+      dsimp only [bounded_homotopy_category.replacement_iso],
+      rw lift_unop_op,
       -- rw [hom_single_iso_naturality], -- jmc : this doesn't look like a useful rewrite to me
       -- have := hom_single_iso_naturality
       --   ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P)
