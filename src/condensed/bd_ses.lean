@@ -1,5 +1,6 @@
 import condensed.filtered_colimits_commute_with_finite_limits
 import condensed.ab
+import condensed.short_exact
 import for_mathlib.nnreal_to_nat_colimit
 
 open category_theory
@@ -8,6 +9,7 @@ open category_theory.limits
 namespace Condensed
 
 open_locale nnreal
+open opposite
 
 noncomputable theory
 
@@ -94,5 +96,20 @@ begin
     refl },
 end
 
+def coproduct_to_coproduct :
+  (∐ (λ i : as_small.{u+1} ℕ, F.obj ((as_nat_diagram A c).obj i))) ⟶
+  (∐ (λ i : as_small.{u+1} ℕ, F.obj ((as_nat_diagram A c).obj i))) :=
+sigma.desc $ λ i, F.map ((as_nat_diagram A c).map $
+  as_small.up.map $ hom_of_le $ nat.le_succ _) ≫
+  sigma.ι (λ i : as_small.{u+1} ℕ, F.obj ((as_nat_diagram A c).obj i))
+  (ulift.up $ (ulift.down i) + 1)
+
+instance mono_coproduct_to_coproduct :
+  mono (coproduct_to_coproduct F A c - 𝟙 _) :=
+begin
+  rw mono_iff_ExtrDisc,
+  intros S, dsimp,
+  sorry -- TODO: same proof that we did in the other file...
+end
 
 end Condensed
