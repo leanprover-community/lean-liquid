@@ -3,6 +3,7 @@ import for_mathlib.derived.les_facts
 import for_mathlib.additive_functor
 import for_mathlib.exact_functor
 import for_mathlib.homotopy_category_op
+import for_mathlib.has_homology_aux
 
 noncomputable theory
 
@@ -468,9 +469,6 @@ begin
   sorry,
 end
 
---((preadditive_yoneda.obj Y).map_homological_complex _).map
---  (homological_complex.op_functor.map
-
 lemma Ext_is_zero_iff (X : chain_complex 𝓐 ℕ) (Y : 𝓐)
   (f : X ⟶ X) (g : Y ⟶ Y) :
   (∀ i, is_zero (((Ext i).obj (op $ chain_complex.to_bounded_homotopy_category.obj
@@ -550,8 +548,13 @@ begin
       rw map₂_left_eq,
       apply compatibility,
       simp only [eq_to_hom_refl, category.comp_id],
-      /- use uniqueness of lift? and the commutation property of fP ?  -/
-      sorry, },
+      /- use that fP commutes with the given endomorphisms... -/
+      have eq : fP' ≫ chain_complex.to_bounded_homotopy_category.map f =
+        (quotient.functor (homotopic 𝓐 (complex_shape.up ℤ))).map P.val.as.e ≫ fP' := sorry,
+      erw eq,
+      apply lift_unique,
+      erw category.assoc,
+      erw bounded_homotopy_category.lift_lifts, },
     sorry },
 end
 
