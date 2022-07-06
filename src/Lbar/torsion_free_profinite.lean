@@ -17,7 +17,7 @@ set_option pp.universes true
 open Lbar Profinite CommGroup category_theory.limits
 
 lemma limit_torsion_free_to_Ab
-  (C : Type u) [category_theory.small_category C] (J : C ⥤ Ab.{u})
+  {C : Type u} [category_theory.small_category C] (J : C ⥤ Ab.{u})
   (h_tf : ∀ j, no_zero_smul_divisors ℤ (J.obj j))
   : no_zero_smul_divisors ℤ (limit J).α :=
 begin
@@ -51,7 +51,7 @@ end
 lemma add_comm_group.limit_on_nat_torsion_free
   (J : (category_theory.as_small.{u} ℕ) ⥤ AddCommGroup.{u})
   (h_tf : ∀ j, no_zero_smul_divisors ℤ (J.obj j))
-  : no_zero_smul_divisors ℤ (limit J).α := limit_torsion_free_to_Ab (category_theory.as_small.{u} ℕ) J h_tf
+  : no_zero_smul_divisors ℤ (limit J).α := limit_torsion_free_to_Ab J h_tf
 
 open CompHausFiltPseuNormGrp₁ category_theory
 
@@ -84,6 +84,7 @@ lemma extend_torsion_free (A : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁)
 begin
   let T := Ab.explicit_limit_cone.{u u}
     ((S.fintype_diagram ⋙ A ⋙ to_PNG₁) ⋙ PseuNormGrp₁.to_Ab),
+  set T' := limit.cone.{u u} ((S.fintype_diagram ⋙ A ⋙ to_PNG₁) ⋙ PseuNormGrp₁.to_Ab) with hT',
   let hT : is_limit T := Ab.explicit_limit_cone_is_limit _,
   let E := PseuNormGrp₁.bounded_cone.{u} ⟨T,hT⟩,
   let hE : is_limit E := PseuNormGrp₁.bounded_cone_is_limit _,
@@ -100,10 +101,15 @@ begin
   apply function.injective.no_zero_smul_divisors ι (subtype.val_injective.{u+1}) ι.map_zero,
   any_goals { apply_instance },
   { intros c x, apply ι.map_zsmul, },
-  sorry,
-  --At this point, we have to show that the point of the explicit limit cone of plain
-  --abelian groups is torsion-free. This should already be defeq to a subtype of the product!
-  --The finite case should then give us the result.
+  let iso_pts := functor.map_iso (limits.cones.forget.{u} _)
+    (hT.unique_up_to_iso (limit_cone.is_limit.{u u u u+1} _)),
+  let φ := (@iso.AddCommGroup_iso_to_add_equiv.{u} T.X T'.X iso_pts),
+  apply function.injective.no_zero_smul_divisors φ φ.injective φ.map_zero,
+  { intros c x,
+    exact map_zsmul φ _ _ },
+  apply limit_torsion_free_to_Ab.{u},
+  intro j,
+  exact hA ((S.fintype_diagram).obj j),
 end
 
 end Profinite
