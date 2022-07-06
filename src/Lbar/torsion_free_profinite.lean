@@ -108,15 +108,8 @@ begin
   { intros c x,
     exact map_zsmul φ _ _ },
   apply limit_torsion_free_to_Ab.{u},
-  sorry,
-  -- apply this,
-  -- convert this,
-  -- exact hT,
-  -- rw ← hT' at this,
-  -- sorry,
-  --At this point, we have to show that the point of the explicit limit cone of plain
-  --abelian groups is torsion-free. This should already be defeq to a subtype of the product!
-  --The finite case should then give us the result.
+  intro j,
+  exact hA ((S.fintype_diagram).obj j),
 end
 
 end Profinite
