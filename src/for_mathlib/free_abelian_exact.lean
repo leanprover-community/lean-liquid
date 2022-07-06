@@ -68,7 +68,14 @@ begin
 end
 
 -- SELFCONTAINED
-@[simp] lemma norm_neg : (-a).norm = a.norm := sorry
+@[simp] lemma norm_neg : (-a).norm = a.norm :=
+begin
+  apply_fun (coe : ℕ → ℝ),
+  { rw [tsum_norm, tsum_norm, tsum_congr],
+    intro x,
+    rw [_root_.map_neg, int.cast_neg, abs_neg] },
+  exact nat.cast_injective,
+end
 
 -- SELFCONTAINED
 lemma norm_sub : (a - b).norm ≤ a.norm + b.norm := by {rw [sub_eq_add_neg, ← norm_neg b],
