@@ -196,6 +196,19 @@ begin
     (endo_tensor.obj M) (endomorphisms.forget _),
 end
 
+def tensor_punit :
+  tensor_functor.flip.obj (AddCommGroup.of (punit →₀ ℤ)) ≅ 𝟭 _ :=
+sorry
+
+def endo_tensor_punit (A : endomorphisms (Condensed.{u} Ab.{u+1})) :
+  (endo_tensor.obj A).obj (AddCommGroup.of (punit →₀ ℤ)) ≅ A :=
+endomorphisms.mk_iso (tensor_punit.app _) (nat_trans.naturality _ _)
+
+lemma endo_tensor_short_exact (A : endomorphisms (Condensed.{u} Ab.{u+1}))
+  {X Y Z : Ab} (f : X ⟶ Y) (g : Y ⟶ Z) (hfg : short_exact f g) :
+  short_exact ((endo_tensor.obj A).map f) ((endo_tensor.obj A).map g) :=
+sorry
+
 lemma bd_lemma (A : Condensed.{u} Ab.{u+1}) (B : Condensed.{u} Ab.{u+1})
   [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (A.val.obj (op S.val))]
   (f : A ⟶ A) (g : B ⟶ B) :
@@ -204,9 +217,10 @@ lemma bd_lemma (A : Condensed.{u} Ab.{u+1}) (B : Condensed.{u} Ab.{u+1})
     ((Ext i).map ((breen_deligne.eg.eval freeCond').map f).op).app ((single _ 0).obj B) -
     ((Ext i).obj (op $ (breen_deligne.eg.eval freeCond').obj A)).map ((single _ 0).map g)) :=
 begin
-  refine package.main_lemma _ _ _ _ _ _ eval_freeCond_homology_zero (endo_tensor.obj ⟨A,f⟩) _ _ _,
-  { sorry },
-  { sorry },
+  refine package.main_lemma _ _ _ _ _ _
+    eval_freeCond_homology_zero (endo_tensor.obj ⟨A,f⟩)
+    (endo_tensor_punit _) _ _,
+  { intros X Y Z _ _ h, apply endo_tensor_short_exact _ _ _ h, },
   { sorry }
 end
 
