@@ -1,6 +1,6 @@
 import breen_deligne.main
 import breen_deligne.eg
-import condensed.tensor
+import condensed.tensor_short_exact
 import condensed.evaluation_homology
 import condensed.sheafification_homology
 import pseudo_normed_group.QprimeFP
@@ -13,7 +13,6 @@ import condensed.ab4
 import for_mathlib.endomorphisms.ab4
 import for_mathlib.homology_exact
 import condensed.Qprime_isoms
-import condensed.short_exact
 import for_mathlib.free_abelian_exact
 
 .
@@ -183,42 +182,6 @@ def eval_freeCond_homology_zero :
 -- rewrite with isoms to reduce to checking on presheaves,
 -- then use `eval_free_homology_zero`
 sorry
-
-def tensor_punit :
-  tensor_functor.flip.obj (AddCommGroup.of (punit →₀ ℤ)) ≅ 𝟭 _ :=
-sorry
-
-lemma tensor_eval_iso_natural_right
-  (A : (Condensed.{u} Ab.{u+1})) {X Y : Ab} (f : X ⟶ Y) (S : ExtrDisc) :
-  AddCommGroup.map_tensor (𝟙 (A.val.obj (op S.val))) f ≫ (tensor_eval_iso A Y S).inv =
-  (tensor_eval_iso A X S).inv ≫ ((tensor_functor.obj A).map f).val.app (op S.val) :=
-begin
-  rw [iso.comp_inv_eq],
-  dsimp only [tensor_eval_iso, tensor_functor, map_tensor,
-    functor.map_iso_hom, iso.app_hom, functor.map_iso_inv, iso.app_inv, iso.symm_hom, iso.symm_inv,
-    Sheaf_to_presheaf_map, tensor_iso],
-  -- erw [equivalence.unit_app_inverse],
-  sorry
-end
-
-lemma tensor_short_exact (A : (Condensed.{u} Ab.{u+1}))
-  [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (A.val.obj (op S.val))]
-  {X Y Z : Ab} (f : X ⟶ Y) (g : Y ⟶ Z) (hfg : short_exact f g) :
-  short_exact ((tensor_functor.obj A).map f) ((tensor_functor.obj A).map g) :=
-begin
-  rw short_exact_iff_ExtrDisc, intro S,
-  let eX := tensor_eval_iso A X S,
-  let eY := tensor_eval_iso A Y S,
-  let eZ := tensor_eval_iso A Z S,
-  refine commsq.short_exact.of_iso eX.inv eY.inv eZ.inv _ _ _,
-  { refine (AddCommGroup.tensor_functor.obj _).map f, },
-  { refine (AddCommGroup.tensor_functor.obj _).map g, },
-  rotate,
-  { apply commsq.of_eq, apply tensor_eval_iso_natural_right },
-  { apply commsq.of_eq, apply tensor_eval_iso_natural_right },
-  dsimp,
-  sorry
-end
 
 lemma bd_lemma (A : Condensed.{u} Ab.{u+1}) (B : Condensed.{u} Ab.{u+1})
   [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (A.val.obj (op S.val))]
