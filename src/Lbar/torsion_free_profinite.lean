@@ -16,8 +16,41 @@ set_option pp.universes true
 
 open Lbar Profinite CommGroup category_theory.limits
 
+lemma limit_cone_torsion_free_to_Ab
+  {C : Type u} [category_theory.small_category C] (J : C ⥤ Ab.{u})
+  (h_tf : ∀ j, no_zero_smul_divisors ℤ (J.obj j))
+  : no_zero_smul_divisors ℤ (limit.cone J).X :=
+begin
+  sorry;{
+  let L := get_limit_cone _,
+  haveI := AddCommGroup.forget_preserves_limits.{u u},
+  have h_inj := @concrete.to_product_injective_of_is_limit AddCommGroup.{u} _ _
+    C _ J _ L.cone L.is_limit,
+  fconstructor,
+  intros c x hx,
+  let φ := λ x : (limit J), λ j, (L.cone.π.app j) x,
+  have h1: φ 0 = 0,
+  { ext j,
+    exact (L.cone.π.app j).2 },
+  have h2: φ (c • x) = c • φ x,
+  { ext j,
+    exact map_zsmul (L.cone.π.app j) _ _ },
+  apply_fun φ at hx,
+  simp only [h1, h2, pi.zero_def, function.funext_iff, pi.smul_apply, smul_eq_zero] at hx,
+  by_cases hc : c = 0,
+  { apply or.intro_left, exact hc},
+  { simp only [hc, false_or] at hx,
+    apply or.intro_right,
+    apply h_inj,
+    funext j,
+    specialize hx j,
+    simp only [_root_.map_zero],
+    exact hx },
+  }
+end
+
 lemma limit_torsion_free_to_Ab
-  (C : Type u) [category_theory.small_category C] (J : C ⥤ Ab.{u})
+  {C : Type u} [category_theory.small_category C] (J : C ⥤ Ab.{u})
   (h_tf : ∀ j, no_zero_smul_divisors ℤ (J.obj j))
   : no_zero_smul_divisors ℤ (limit J).α :=
 begin
@@ -51,7 +84,7 @@ end
 lemma add_comm_group.limit_on_nat_torsion_free
   (J : (category_theory.as_small.{u} ℕ) ⥤ AddCommGroup.{u})
   (h_tf : ∀ j, no_zero_smul_divisors ℤ (J.obj j))
-  : no_zero_smul_divisors ℤ (limit J).α := limit_torsion_free_to_Ab (category_theory.as_small.{u} ℕ) J h_tf
+  : no_zero_smul_divisors ℤ (limit J).α := limit_torsion_free_to_Ab J h_tf
 
 open CompHausFiltPseuNormGrp₁ category_theory
 
@@ -84,6 +117,7 @@ lemma extend_torsion_free (A : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁)
 begin
   let T := Ab.explicit_limit_cone.{u u}
     ((S.fintype_diagram ⋙ A ⋙ to_PNG₁) ⋙ PseuNormGrp₁.to_Ab),
+  set T' := limit.cone.{u u} ((S.fintype_diagram ⋙ A ⋙ to_PNG₁) ⋙ PseuNormGrp₁.to_Ab) with hT',
   let hT : is_limit T := Ab.explicit_limit_cone_is_limit _,
   let E := PseuNormGrp₁.bounded_cone.{u} ⟨T,hT⟩,
   let hE : is_limit E := PseuNormGrp₁.bounded_cone_is_limit _,
@@ -100,7 +134,27 @@ begin
   apply function.injective.no_zero_smul_divisors ι (subtype.val_injective.{u+1}) ι.map_zero,
   any_goals { apply_instance },
   { intros c x, apply ι.map_zsmul, },
+  -- have := limit_torsion_free_to_Ab.{u} ((S.fintype_diagram ⋙ A ⋙ to_PNG₁.{u})
+  --   ⋙ PseuNormGrp₁.to_Ab.{u}) _,
+  have h_tf := limit_cone_torsion_free_to_Ab.{u} ((S.fintype_diagram ⋙ A ⋙ to_PNG₁.{u})
+    ⋙ PseuNormGrp₁.to_Ab.{u}) _,
+  rw ← hT' at h_tf,
+  -- have prova : T.X = T'.X,
+  let iso_cones := @limits.is_limit.unique_up_to_iso _ _ _ _ ((S.fintype_diagram ⋙ A ⋙ to_PNG₁.{u}) ⋙ PseuNormGrp₁.to_Ab.{u}) T T' hT (limits.limit_cone.is_limit.{u u u u+1} _),
+  let iso_pts := functor.map_iso (limits.cones.forget.{u} _) iso_cones,
+  have φ := (@iso.AddCommGroup_iso_to_add_equiv.{u} T.X T'.X iso_pts),
+  -- have φ_inj : function.injective φ, sorry,
+  apply function.injective.no_zero_smul_divisors φ φ.injective φ.map_zero _,
+  apply_instance,
+  apply h_tf,
+  { intros c x,
+    exact map_zsmul φ _ _ },
   sorry,
+  -- apply this,
+  -- convert this,
+  -- exact hT,
+  -- rw ← hT' at this,
+  -- sorry,
   --At this point, we have to show that the point of the explicit limit cone of plain
   --abelian groups is torsion-free. This should already be defeq to a subtype of the product!
   --The finite case should then give us the result.
