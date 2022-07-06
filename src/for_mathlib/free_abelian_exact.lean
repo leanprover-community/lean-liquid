@@ -167,7 +167,20 @@ end
 
 -- SELFCONTAINED
 lemma norm_eq_one_iff : a.norm = 1 ↔ ∃ x, a = of x ∨ a = -of x :=
-sorry
+begin
+  -- have := exists_of_norm_eq_succ a 0,
+  split,
+  {intro h,
+    have := (exists_of_norm_eq_succ a 0 h),
+    simp only [norm_eq_zero_iff, exists_and_distrib_right, exists_eq_right, zero_add, zero_sub]
+    at this,
+    exact this },
+  { intro h,
+    rcases h with ⟨x, hx | hx⟩,
+    all_goals { rw hx},
+    any_goals {rw norm_neg},
+    all_goals {exact norm_of x}},
+end
 
 end norm
 
