@@ -417,9 +417,20 @@ lemma homology_is_zero_iff_is_iso (h : ∀ n, projective (P.val.as.X n)) :
   (∀ i, is_zero ((homology_functor _ _ i).obj (C₁ ⟨Y, g⟩ P))) ↔
   (∀ j, is_iso ((homology_functor _ _ j).map (map₂ Y g P))) :=
 begin
-  -- a similar result is proved as `is_zero_iff_epi_and_is_iso` in `derived/les_facts`
-  -- This shouldn't be too bad.
-  sorry
+  have LES := homological_complex.six_term_exact_seq (map₁ Y g P) (map₂ Y g P)
+    (λ n, map₁₂_short_exact _ _ _ (h n)),
+  split,
+  { intros H i,
+    obtain ⟨i, rfl⟩ : ∃ j, j + 1 = i := ⟨i-1, sub_add_cancel _ _⟩,
+    apply ((LES (i+1) i rfl)).is_iso_of_zero_of_zero,
+    { refine (H (i+1)).eq_of_src _ _, },
+    { refine (H i).eq_of_tgt _ _, }, },
+  { intros H i,
+    refine is_zero_of_exact_zero_zero' _ _ ((LES (i+1) i rfl).drop 2).pair _ _,
+    { refine ((LES (i+1) i rfl).drop 1).pair.epi_iff_eq_zero.mp _,
+      exact @is_iso.epi_of_iso _ _ _ _ _ (H _), },
+    { refine ((LES (i+1) i rfl).drop 3).pair.mono_iff_eq_zero.mp _,
+      exact @is_iso.mono_of_iso _ _ _ _ _ (H _), } }
 end
 
 @[reassoc]
