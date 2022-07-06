@@ -195,8 +195,8 @@ instance forget_preserves_is_quasi_iso {P Q : bounded_homotopy_category 𝓐} (f
 instance forget_preserves_K_projective {P : bounded_homotopy_category (endomorphisms 𝓐)}
   [P.val.is_K_projective] [∀ k, projective (P.val.as.X k)] :
 ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P).val.is_K_projective :=
--- Adam says that he knows a messy proof of this but it might need AB4 (i.e. this sorry
--- might no even be true in this generality)
+-- Adam says that he knows a messy proof of this but it might need AB4 (i.e. this
+-- might not even be true in this generality)
 -- jmc: there is absolutely no harm in assuming that `P.val.as.X i` is projective for all `i`
 -- because that's true for the `P` that we'll apply this to.
 sorry
@@ -223,7 +223,7 @@ end
 
 /-
 
-Mathematical summary of the `Ext_is_zero_iff` `sorry` according to kmb's
+Mathematical summary of the `Ext_is_zero_iff` proof according to kmb's
 possibly flawed understanding:
 
 The lemma will follow from the following things:
@@ -242,36 +242,6 @@ we have a short exact sequence of complexes
 where the surjection is e(P) - e(Y), with e the endomorphism.
 This can be checked to be surjective via an explicit construction;
 the trick is that Pⁱ is going to be `free Q` for some object `Q : 𝓐`
-
--/
-
--- We no longer need this lemma, which is true but whose proof will probably be a
--- huge hassle. Thanks Jo\"el Riou!
--- lemma exists_K_projective_endomorphism_replacement
---   (X : bounded_homotopy_category (endomorphisms 𝓐)) :
--- ∃ (P : bounded_homotopy_category (endomorphisms 𝓐))
---   (f : P ⟶ X),
---   homotopy_category.is_K_projective P.val ∧
---   homotopy_category.is_quasi_iso f
---   ∧ (∀ j, ∃ (Q : 𝓐) (i: P.val.as.X j ≅ free Q), projective Q)
--- --  ∧ ∀ k, projective (P.val.as.X k) -- should follow
--- --  ∧ ∀ k, projective (P.val.as.X k).X -- should follow
--- := sorry
-
-/-
-
-Next: make the complexes Hom_T(P^*,Y) and Hom(P^*,Y)
-Next: make the SES
-
--/
-/-
-
-Idea : We need a short exact sequence of complexes as above, and then
-the below follows from the associated long exact sequence
-of cohomology.
-
-* SES
-* six_term_exact_seq
 
 -/
 
