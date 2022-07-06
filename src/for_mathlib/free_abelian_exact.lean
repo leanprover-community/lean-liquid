@@ -55,7 +55,6 @@ end
 @[simp] lemma norm_of (x : X) : (of x).norm = 1 := by {simp only [norm, support_of,
   finset.sum_singleton, coeff_of_self, int.nat_abs_one]}
 
--- SELFCONTAINED
 lemma norm_add : (a + b).norm ≤ a.norm + b.norm :=
 begin
   rw [← @nat.cast_le ℝ _ _, tsum_norm, nat.cast_add, tsum_norm, tsum_norm, ← tsum_add
@@ -67,7 +66,6 @@ begin
   exact abs_add _ _ ,
 end
 
--- SELFCONTAINED
 @[simp] lemma norm_neg : (-a).norm = a.norm :=
 begin
   apply_fun (coe : ℕ → ℝ),
@@ -77,12 +75,32 @@ begin
   exact nat.cast_injective,
 end
 
--- SELFCONTAINED
 lemma norm_sub : (a - b).norm ≤ a.norm + b.norm := by {rw [sub_eq_add_neg, ← norm_neg b],
   exact norm_add _ _}
 
--- SELFCONTAINED
-@[simp] lemma norm_eq_zero_iff : a.norm = 0 ↔ a = 0 := sorry
+@[simp] lemma norm_eq_zero_iff : a.norm = 0 ↔ a = 0 :=
+begin
+  split,
+  { intro h,
+    rw [← @nat.cast_eq_zero ℝ _ _ _ _, tsum_norm] at h,
+    have H := (has_sum_zero_iff_of_nonneg _).mp (((summable_tsum_norm a).has_sum_iff).mpr h),
+    have h_cz : ∀ x : X, coeff x a = 0,
+    { intro x,
+      have := (function.funext_iff).mp H x,
+      simp only [pi.zero_apply, abs_eq_zero, int.cast_eq_zero] at this,
+      exact this },
+    apply_fun to_finsupp,
+    ext,
+    exacts [h_cz _, add_equiv.injective (equiv_finsupp X), (λ _, abs_nonneg _)] },
+  { intro h,
+    have h_cz : ∀ x : X, coeff x a = 0,
+    { intro x,
+      rw h,
+      simp only [_root_.map_zero, eq_self_iff_true] },
+    apply finset.sum_eq_zero,
+    rintros x -,
+    exact (int.nat_abs_eq_zero.mpr (h_cz x))}
+end
 
 lemma exists_of_norm_eq_succ_aux1 (n : ℤ) (H : 0 < n) :
   n.nat_abs = (n - 1).nat_abs + 1 :=
