@@ -12,14 +12,9 @@ open_locale nnreal
 noncomputable theory
 
 universes u
-variables (F : Condensed.{u} Ab.{u+1} ⥤ Condensed.{u} Ab.{u+1})
+variables (F : CondensedSet.{u} ⥤ Condensed.{u} Ab.{u+1})
   [preserves_filtered_colimits F] (A : CompHausFiltPseuNormGrp.{u})
   (c : ℝ≥0) [fact (0 < c)]
-
-/-
-Remark: In practice, `F` is going to be
-`Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_Condensed_Ab`
--/
 
 set_option pp.universes true
 
@@ -69,5 +64,35 @@ restrict_cocone c A.level_Condensed_diagram_cocone
 
 def is_colimit_as_nat_cocone : is_colimit (as_nat_cocone A c) :=
 is_colimit_restrict_cocone c _ (is_colimit_level_Condensed_diagram_cocone _)
+
+/-- The map `∐ F(A_≤(n * c)) ⟶ F(A)`-/
+def coproduct_presentation :
+  (∐ (λ i : as_small.{u+1} ℕ, F.obj ((as_nat_diagram A c).obj i))) ⟶
+  F.obj (as_nat_cocone A c).X :=
+sigma.desc $ λ i, F.map ((as_nat_cocone A c).ι.app i)
+
+instance epi_coproduct_presentation :
+  epi (coproduct_presentation F A c) :=
+begin
+  let G : cocone (as_nat_diagram A c ⋙ F) :=
+    F.map_cocone (as_nat_cocone A c),
+  let hG : is_colimit G := is_colimit_of_preserves F (is_colimit_as_nat_cocone _ _),
+  let e : F.obj (as_nat_cocone A c).X ≅ G.X :=
+    (is_colimit_of_preserves F (is_colimit_as_nat_cocone A c)).cocone_point_unique_up_to_iso hG,
+  suffices : epi (coproduct_presentation F A c ≫ e.hom),
+  { exact (epi_iso_comp_iff_epi (coproduct_presentation F A c) e).mp this },
+  constructor, intros Z a b w,
+  apply hG.hom_ext, intros j,
+  apply_fun (λ e, sigma.ι
+    (λ i : as_small.{u+1} ℕ, F.obj ((as_nat_diagram A c).obj i)) j ≫ e) at w,
+  convert w using 1,
+  all_goals
+  { dsimp [coproduct_presentation, e],
+    simp only [category.assoc, colimit.ι_desc_assoc], dsimp,
+    erw (is_colimit_of_preserves.{u+1 u+1 u+1 u+1 u+2 u+2} F
+      (is_colimit_as_nat_cocone.{u} A c)).fac_assoc,
+    refl },
+end
+
 
 end Condensed
