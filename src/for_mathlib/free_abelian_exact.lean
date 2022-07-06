@@ -1,3 +1,5 @@
+import analysis.normed.group.basic
+import topology.algebra.infinite_sum
 import for_mathlib.AddCommGroup.exact
 import for_mathlib.free_abelian_group2
 
@@ -26,19 +28,43 @@ end
 
 section norm
 
+open_locale nnreal
+
 variables {X : Type*} (a b : free_abelian_group X)
 
 def norm : ℕ := ∑ x in a.support, (coeff x a).nat_abs
 
--- SELFCONTAINED
+lemma tsum_norm : (a.norm : ℝ) = ∑' x, |((coeff x a) : ℝ)| :=
+begin
+  rw [@tsum_eq_sum _ _ _ _ _ (λ x : X, |((coeff x a) : ℝ)|) a.support _, norm, nat.cast_sum],
+  apply finset.sum_congr (refl a.support),
+  { exact (λ x _, (int.cast_nat_abs _))} ,
+  { intros x hx,
+    rw [abs_eq_zero, int.cast_eq_zero],
+    exact (not_mem_support_iff x a).mp hx },
+end
+
+lemma summable_tsum_norm : summable (λ x, |((coeff x a) : ℝ)|) :=
+begin
+  apply summable_of_ne_finset_zero,
+  { intros x hx,
+    rw [abs_eq_zero, int.cast_eq_zero],
+    exact (not_mem_support_iff x a).mp hx },
+end
+
 @[simp] lemma norm_of (x : X) : (of x).norm = 1 := by {simp only [norm, support_of,
   finset.sum_singleton, coeff_of_self, int.nat_abs_one]}
-
 
 -- SELFCONTAINED
 lemma norm_add : (a + b).norm ≤ a.norm + b.norm :=
 begin
-  sorry,
+  rw [← @nat.cast_le ℝ _ _, tsum_norm, nat.cast_add, tsum_norm, tsum_norm, ← tsum_add
+    (summable_tsum_norm a) (summable_tsum_norm b)],
+  refine tsum_le_tsum _
+    (summable_tsum_norm (a + b) ) (summable.add (summable_tsum_norm _) (summable_tsum_norm _)),
+  intro,
+  rw [_root_.map_add, int.cast_add],
+  exact abs_add _ _ ,
 end
 
 -- SELFCONTAINED
