@@ -488,6 +488,8 @@ begin
   exact H,
 end
 
+attribute [reassoc] nat_trans.comp_app
+
 lemma Ext_is_zero_iff (X : chain_complex 𝓐 ℕ) (Y : 𝓐)
   (f : X ⟶ X) (g : Y ⟶ Y) :
   (∀ i, is_zero (((Ext i).obj (op $ chain_complex.to_bounded_homotopy_category.obj
@@ -588,7 +590,25 @@ begin
       apply lift_unique,
       erw category.assoc,
       erw bounded_homotopy_category.lift_lifts, },
-    sorry },
+    { dsimp only [j, iso.trans_hom, Ext_iso, Ext, Ext0, functor.map_iso_hom, functor.comp_map,
+        whiskering_left_obj_map, whisker_left_app, functor.flip_obj_map, functor.flip_map_app,
+        iso.op_hom, functor.comp_obj, whiskering_left_obj_obj, unop_op, op_unop], clear j,
+      simp only [nat_trans.naturality, nat_trans.naturality_assoc],
+      erw [← nat_trans.comp_app_assoc],
+      simp only [← op_comp, category.assoc],
+      /-
+      -- jmc: the rest is just copied from the branch above, but it doesn't work
+      congr' 1,
+      dsimp only [bounded_homotopy_category.replacement_iso],
+      rw lift_unop_op,
+      rw map₂_left_eq,
+      apply compatibility,
+      simp only [eq_to_hom_refl, category.comp_id],
+      erw fP'_eq,
+      apply lift_unique,
+      erw category.assoc,
+      erw bounded_homotopy_category.lift_lifts,
+      -/ } }
 end
 
 open_locale zero_object
