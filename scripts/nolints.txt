@@ -60,11 +60,11 @@ apply_nolint lem98.hom_diagram unused_arguments
 -- combinatorial_lemma/profinite_setup.lean
 apply_nolint ProFiltPseuNormGrpWithTinv₁.to_PNG₁ unused_arguments
 
+-- condensed/Qprime_isoms.lean
+apply_nolint Condensed.homology_functor.map_id_bo_ho_ca unused_arguments
+
 -- condensed/acyclic.lean
 apply_nolint condensed.acyclic_of_exact.induction_step_ex unused_arguments
-
--- condensed/bd_lemma.lean
-apply_nolint Condensed.homology_functor.map_id_bo_ho_ca unused_arguments
 
 -- condensed/condensify.lean
 apply_nolint Tinv_nat_trans unused_arguments
@@ -227,6 +227,10 @@ apply_nolint category_theory.functor.left_derived.β unused_arguments
 apply_nolint category_theory.endomorphisms.C₁ unused_arguments
 apply_nolint category_theory.endomorphisms.C₂ unused_arguments
 apply_nolint category_theory.endomorphisms.embed_single unused_arguments
+apply_nolint category_theory.endomorphisms.forget_mk_end unused_arguments
+apply_nolint category_theory.endomorphisms.forget_preserves_is_quasi_iso unused_arguments
+apply_nolint category_theory.endomorphisms.map.homotopy_category.is_quasi_iso unused_arguments
+apply_nolint category_theory.endomorphisms.map₁₂_exact unused_arguments
 apply_nolint category_theory.endomorphisms.mk_bo_ho_ca' unused_arguments
 apply_nolint category_theory.endomorphisms.quot_out_single_map unused_arguments
 apply_nolint category_theory.endomorphisms.single_unEnd unused_arguments
@@ -243,6 +247,7 @@ apply_nolint homological_complex.tautological_endomorphism unused_arguments
 
 -- for_mathlib/exact_functor.lean
 apply_nolint category_theory.functor.exact unused_arguments
+apply_nolint category_theory.functor.map_quasi_iso_on_homotopy_category def_lemma
 apply_nolint category_theory.functor.naturality_homology_nat_iso_app def_lemma
 
 -- for_mathlib/exact_seq3.lean
