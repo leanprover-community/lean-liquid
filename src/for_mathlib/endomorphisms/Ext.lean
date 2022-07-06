@@ -445,6 +445,19 @@ begin
   apply category.comp_id,
 end
 
+lemma compatibility_aux {Y : 𝓐} {P₁ P₂ : bounded_homotopy_category 𝓐} (f : P₁ ⟶ P₂) :
+  (homotopy_category.quotient AddCommGroup (complex_shape.up ℤ).symm).map
+    (homological_complex.unop_functor.map
+      (((preadditive_yoneda.obj Y).right_op.map_homological_complex (complex_shape.up ℤ)).map (quot.out f)).op) =
+  (homotopy_category.quotient AddCommGroup (complex_shape.up ℤ).symm).map (
+      -- show ((preadditive_yoneda.obj Y).map_homological_complex _).obj P₂.val.as.op ⟶
+      --     ((preadditive_yoneda.obj Y).map_homological_complex _).obj P₁.val.as.op, from
+    ((preadditive_yoneda.obj Y).map_homological_complex (complex_shape.up ℤ).symm).map $
+      -- show homological_complex.op_functor.obj (op P₂.val.as) ⟶
+      --      homological_complex.op_functor.obj (op P₁.val.as), from
+           homological_complex.op_functor.map (f.out.op)) :=
+rfl
+
 lemma compatibility {Y : 𝓐} {P₁ P₂ P₃ : bounded_homotopy_category 𝓐} (g : P₁ ⟶ P₃) (f : P₂ ⟶ P₃)
   (h : P₁.val.as ⟶ P₂.val.as)
   (H : (quotient.functor _).map h ≫ f = g)
@@ -464,9 +477,15 @@ begin
   simp only [quiver.hom.unop_op, ← functor.map_comp,
     homotopy_category.homology_functor_map_factors],
   congr' 1,
-  simp only [functor.right_op_map, quiver.hom.unop_op, functor.map_comp],
-  /- may need that op_functor and unop_functor are equivalences on homotopy categories? -/
-  sorry,
+  simp only [functor.right_op_map, quiver.hom.unop_op, functor.map_comp, compatibility_aux],
+  simp only [← functor.map_comp],
+  apply homotopy_category.eq_of_homotopy,
+  apply functor.map_homotopy,
+  rw [← op_comp],
+  apply homological_complex.op_functor_map_homotopy,
+  apply homotopy_category.homotopy_of_eq,
+  simp only [functor.map_comp, homotopy_category.quotient_map_out],
+  exact H,
 end
 
 lemma Ext_is_zero_iff (X : chain_complex 𝓐 ℕ) (Y : 𝓐)
