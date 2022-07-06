@@ -415,7 +415,7 @@ end
 lemma QprimeFP.mono (n : ℤ) :
   mono ((QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD.data κ M)).f n) :=
 begin
-  rw mono_iff_ExtrDisc, intros T,
+  rw Condensed.mono_iff_ExtrDisc, intros T,
   let Q := QprimeFP_int r' BD.data κ M,
   let e : ((∐ λ (k : ulift.{u+1 0} ℕ), Q.obj (ι k)).X n).val.obj
     (op T.val) ≅ _ := coproduct_eval_iso _ _ _,
