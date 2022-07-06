@@ -71,7 +71,8 @@ end
 @[simp] lemma norm_neg : (-a).norm = a.norm := sorry
 
 -- SELFCONTAINED
-lemma norm_sub : (a - b).norm ≤ a.norm + b.norm := sorry
+lemma norm_sub : (a - b).norm ≤ a.norm + b.norm := by {rw [sub_eq_add_neg, ← norm_neg b],
+  exact norm_add _ _}
 
 -- SELFCONTAINED
 @[simp] lemma norm_eq_zero_iff : a.norm = 0 ↔ a = 0 := sorry
