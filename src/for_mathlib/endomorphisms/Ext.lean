@@ -306,6 +306,11 @@ def map₂_left : C₂ Y P ⟶ C₂ Y P :=
     exact this,
   end }
 
+/- this may have been a better definition for map₂_left ! -/
+lemma map₂_left_eq : map₂_left Y P =
+  ((preadditive_yoneda.obj Y).map_homological_complex _).map
+  (homological_complex.op_functor.map (quiver.hom.op P.val.as.e)) := by refl
+
 @[simps]
 def map₂_right : C₂ Y P ⟶ C₂ Y P :=
 { f := λ i, add_monoid_hom.mk' (λ ψ, ψ ≫ g) (by { intros, rw [add_comp] }),
@@ -439,14 +444,16 @@ begin
   apply category.comp_id,
 end
 
-/- an extra assumption between g f and φ must obviously be added ! -/
 lemma compatibility {Y : 𝓐} {P₁ P₂ P₃ : bounded_homotopy_category 𝓐} (g : P₁ ⟶ P₃) (f : P₂ ⟶ P₃)
-  (φ : ((preadditive_yoneda.obj Y).map_homological_complex _).obj P₂.val.as.op ⟶
-    ((preadditive_yoneda.obj Y).map_homological_complex _).obj P₁.val.as.op)
+  (h : P₁.val.as ⟶ P₂.val.as)
+  (H : (quotient.functor _).map h ≫ f = g)
   (i : ℤ) :
   (preadditive_yoneda.obj ((single 𝓐 i).obj Y)).map f.op ≫ (P₂.hom_single_iso Y i).hom ≫
-    (homology_functor AddCommGroup _ i).map φ =
-  (preadditive_yoneda.obj ((single 𝓐 i).obj Y)).map g.op ≫ (P₁.hom_single_iso Y i).hom :=
+    (homology_functor AddCommGroup _ i).map
+      (((preadditive_yoneda.obj Y).map_homological_complex _).map
+        (homological_complex.op_functor.map (quiver.hom.op h)))
+      = (preadditive_yoneda.obj ((single 𝓐 i).obj Y)).map g.op ≫
+        (P₁.hom_single_iso Y i).hom :=
 begin
   rw hom_single_iso_naturality,
   slice_lhs 1 2 { rw hom_single_iso_naturality, },
@@ -457,9 +464,12 @@ begin
     homotopy_category.homology_functor_map_factors],
   congr' 1,
   simp only [functor.right_op_map, quiver.hom.unop_op, functor.map_comp],
-  /- need to develop unop_functor for homotopy_category -/
+  /- may need that op_functor and unop_functor are equivalences on homotopy categories? -/
   sorry,
 end
+
+--((preadditive_yoneda.obj Y).map_homological_complex _).map
+--  (homological_complex.op_functor.map
 
 lemma Ext_is_zero_iff (X : chain_complex 𝓐 ℕ) (Y : 𝓐)
   (f : X ⟶ X) (g : Y ⟶ Y) :
@@ -537,10 +547,11 @@ begin
       congr' 1,
       dsimp only [bounded_homotopy_category.replacement_iso],
       rw lift_unop_op,
+      rw map₂_left_eq,
       apply compatibility,
-      /- the verification of some (easy?) extra condition should be inserted here when
-        the exact assumption for `compatibility` is found -/
-       },
+      simp only [eq_to_hom_refl, category.comp_id],
+      /- use uniqueness of lift? and the commutation property of fP ?  -/
+      sorry, },
     sorry },
 end
 

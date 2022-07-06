@@ -7,6 +7,7 @@ import breen_deligne.eval2
 import system_of_complexes.shift_sub_id
 import for_mathlib.AddCommGroup.explicit_products
 import condensed.Qprime_isoms
+import condensed.short_exact
 
 noncomputable theory
 
@@ -375,50 +376,9 @@ variables (ι : ulift.{u+1} ℕ → ℝ≥0) (hι : monotone ι)
 
 open opposite category_theory.preadditive
 
-lemma mono_iff_ExtrDisc {A B : Condensed.{u} Ab.{u+1}} (f : A ⟶ B) :
-  mono f ↔ ∀ S : ExtrDisc, mono (f.1.app $ ExtrDisc_to_Profinite.op.obj (op S)) :=
-begin
-  split,
-  { intros H S,
-    erw (abelian.tfae_mono (A.val.obj (op S.val)) (f.val.app (op S.val))).out 0 2,
-    erw (abelian.tfae_mono A f).out 0 2 at H,
-    rw Condensed.exact_iff_ExtrDisc at H,
-    apply H, },
-  { intro H,
-    apply exact.mono_of_exact_zero_left, swap, exact A,
-    rw Condensed.exact_iff_ExtrDisc,
-    intro S, specialize H S,
-    show exact 0 _,
-    erw (abelian.tfae_mono (A.val.obj (op S.val)) (f.val.app (op S.val))).out 2 0,
-    exact H, }
-end
-
-lemma short_exact_iff_ExtrDisc {A B C : Condensed.{u} Ab.{u+1}} (f : A ⟶ B) (g : B ⟶ C) :
-  short_exact f g ↔ ∀ S : ExtrDisc, short_exact
-      (f.1.app $ ExtrDisc_to_Profinite.op.obj (op S))
-      (g.1.app $ ExtrDisc_to_Profinite.op.obj (op S)) :=
-begin
-  split,
-  { intros H S,
-    apply_with short_exact.mk {instances:=ff},
-    { revert S, rw ← mono_iff_ExtrDisc, exact H.mono, },
-    { rw AddCommGroup.epi_iff_surjective,
-      revert S, erw ← is_epi_iff_forall_surjective, exact H.epi, },
-    { revert S, rw ← Condensed.exact_iff_ExtrDisc, exact H.exact } },
-  { intro H,
-    apply_with short_exact.mk {instances:=ff},
-    { rw mono_iff_ExtrDisc, intro S, exact (H S).mono, },
-    { simp only [is_epi_iff_forall_surjective, ← AddCommGroup.epi_iff_surjective],
-      intro S, exact (H S).epi, },
-    { rw Condensed.exact_iff_ExtrDisc, intro S, exact (H S).exact } }
-end
-.
-
 open_locale classical
 
 set_option pp.universes true
-
-.
 
 def coproduct_eval_iso
   {α : Type (u+1)} (X : α → homological_complex (Condensed.{u} Ab.{u+1}) (complex_shape.up ℤ))
@@ -455,7 +415,7 @@ end
 lemma QprimeFP.mono (n : ℤ) :
   mono ((QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD.data κ M)).f n) :=
 begin
-  rw mono_iff_ExtrDisc, intros T,
+  rw Condensed.mono_iff_ExtrDisc, intros T,
   let Q := QprimeFP_int r' BD.data κ M,
   let e : ((∐ λ (k : ulift.{u+1 0} ℕ), Q.obj (ι k)).X n).val.obj
     (op T.val) ≅ _ := coproduct_eval_iso _ _ _,

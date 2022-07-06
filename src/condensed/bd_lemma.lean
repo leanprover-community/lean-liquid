@@ -13,6 +13,7 @@ import condensed.ab4
 import for_mathlib.endomorphisms.ab4
 import for_mathlib.homology_exact
 import condensed.Qprime_isoms
+import condensed.short_exact
 import for_mathlib.free_abelian_exact
 
 .
