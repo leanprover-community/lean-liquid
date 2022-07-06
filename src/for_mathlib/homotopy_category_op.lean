@@ -55,4 +55,40 @@ def quotient_op_functor :
 nat_iso.of_components (λ X, eq_to_iso (by refl))
 (λ X Y f, by { dsimp, simpa only [category.comp_id, category.id_comp], })
 
+def unop_functor : (homotopy_category Cᵒᵖ c)ᵒᵖ ⥤ homotopy_category C c.symm :=
+functor.left_op (category_theory.quotient.lift _
+  (homological_complex.unop_functor ⋙ homotopy_category.quotient C c.symm).right_op
+(λ X Y f₁ f₂ h, begin
+  dsimp only [functor.right_op],
+  congr' 1,
+  dsimp only [functor.comp_map],
+  erw quotient.functor_map_eq_iff,
+  let H := h.some,
+  exact nonempty.intro
+  { hom := λ i j, (H.hom j i).unop,
+    zero' := λ i j hij, by rw [H.zero j i hij, unop_zero],
+    comm := λ i, begin
+      apply quiver.hom.op_inj,
+      simp only [homological_complex.unop_functor_map_f, op_add, quiver.hom.op_unop,
+        quiver.hom.unop_op, H.comm i],
+      conv_lhs { congr, rw add_comm, },
+      congr' 2,
+      { rcases hi : c.prev i with _ | ⟨j, hj⟩,
+        { dsimp [prev_d, d_next],
+          simpa only [hi], },
+        { have hj' : c.symm.rel i j := hj,
+          simpa only [prev_d_eq _ hj, d_next_eq _ hj'], }, },
+      { rcases hi : c.next i with _ | ⟨j, hj⟩,
+        { dsimp [prev_d, d_next],
+          simpa only [hi], },
+        { have hj' : c.symm.rel j i := hj,
+          simpa only [d_next_eq _ hj, prev_d_eq _ hj'], }, },
+    end, },
+end))
+
+def quotient_unop_functor :
+  (quotient Cᵒᵖ c).op ⋙ unop_functor ≅ homological_complex.unop_functor ⋙ quotient C c.symm :=
+nat_iso.of_components (λ X, eq_to_iso (by refl))
+(λ X Y f, by { dsimp, simpa only [category.comp_id, category.id_comp], })
+
 end homotopy_category

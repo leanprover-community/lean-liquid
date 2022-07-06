@@ -183,18 +183,15 @@ def eval_freeCond_homology_zero :
 -- then use `eval_free_homology_zero`
 sorry
 
-instance endo_tensor_preserves_colimits_of_shape (α : Type (u+1)) (M) :
-  preserves_colimits_of_shape (discrete α) (endo_tensor.obj M) :=
-begin
-  haveI : reflects_colimits_of_shape (discrete α) (endomorphisms.forget
-    (Condensed.{u} Ab.{u+1})) := { },
-  haveI : preserves_colimits_of_shape (discrete α) (endo_tensor.obj M
-    ⋙ endomorphisms.forget (Condensed.{u} Ab.{u+1})),
-  { apply preserves_colimits_of_shape_of_nat_iso (endo_tensor_comp_forget M).symm,
-    apply_instance, },
-  exact preserves_colimits_of_shape_of_reflects_of_preserves
-    (endo_tensor.obj M) (endomorphisms.forget _),
-end
+def tensor_punit :
+  tensor_functor.flip.obj (AddCommGroup.of (punit →₀ ℤ)) ≅ 𝟭 _ :=
+sorry
+
+lemma tensor_short_exact (A : (Condensed.{u} Ab.{u+1}))
+  [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (A.val.obj (op S.val))]
+  {X Y Z : Ab} (f : X ⟶ Y) (g : Y ⟶ Z) (hfg : short_exact f g) :
+  short_exact ((tensor_functor.obj A).map f) ((tensor_functor.obj A).map g) :=
+sorry
 
 lemma bd_lemma (A : Condensed.{u} Ab.{u+1}) (B : Condensed.{u} Ab.{u+1})
   [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (A.val.obj (op S.val))]
@@ -204,10 +201,16 @@ lemma bd_lemma (A : Condensed.{u} Ab.{u+1}) (B : Condensed.{u} Ab.{u+1})
     ((Ext i).map ((breen_deligne.eg.eval freeCond').map f).op).app ((single _ 0).obj B) -
     ((Ext i).obj (op $ (breen_deligne.eg.eval freeCond').obj A)).map ((single _ 0).map g)) :=
 begin
-  refine package.main_lemma _ _ _ _ _ _ eval_freeCond_homology_zero (endo_tensor.obj ⟨A,f⟩) _ _ _,
-  { sorry },
-  { sorry },
-  { sorry }
+  refine eg.main_lemma' _ A B f g
+    eval_freeCond_homology_zero tensor_functor tensor_punit _ _,
+  { intros X Y Z _ _ h, refine tensor_short_exact _ _ _ h, },
+  { intros t ht,
+    let HtQ'Z := ((eg.eval $
+      category_theory.forget AddCommGroup ⋙ AddCommGroup.free).obj
+        (AddCommGroup.free.obj punit)).val.as.homology t,
+    refine ⟨HtQ'Z, ⟨_⟩⟩,
+    -- somehow, use `homology_bd_eval`
+    sorry }
 end
 
 end Condensed

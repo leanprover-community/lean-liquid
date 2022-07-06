@@ -2,6 +2,7 @@ import for_mathlib.endomorphisms.basic
 import for_mathlib.derived.les_facts
 import for_mathlib.additive_functor
 import for_mathlib.exact_functor
+import for_mathlib.homotopy_category_op
 
 noncomputable theory
 
@@ -438,6 +439,28 @@ begin
   apply category.comp_id,
 end
 
+/- an extra assumption between g f and φ must obviously be added ! -/
+lemma compatibility {Y : 𝓐} {P₁ P₂ P₃ : bounded_homotopy_category 𝓐} (g : P₁ ⟶ P₃) (f : P₂ ⟶ P₃)
+  (φ : ((preadditive_yoneda.obj Y).map_homological_complex _).obj P₂.val.as.op ⟶
+    ((preadditive_yoneda.obj Y).map_homological_complex _).obj P₁.val.as.op)
+  (i : ℤ) :
+  (preadditive_yoneda.obj ((single 𝓐 i).obj Y)).map f.op ≫ (P₂.hom_single_iso Y i).hom ≫
+    (homology_functor AddCommGroup _ i).map φ =
+  (preadditive_yoneda.obj ((single 𝓐 i).obj Y)).map g.op ≫ (P₁.hom_single_iso Y i).hom :=
+begin
+  rw hom_single_iso_naturality,
+  slice_lhs 1 2 { rw hom_single_iso_naturality, },
+  simp only [category.assoc],
+  congr' 1,
+  dsimp only [functor.comp_map, functor.op],
+  simp only [quiver.hom.unop_op, ← functor.map_comp,
+    homotopy_category.homology_functor_map_factors],
+  congr' 1,
+  simp only [functor.right_op_map, quiver.hom.unop_op, functor.map_comp],
+  /- need to develop unop_functor for homotopy_category -/
+  sorry,
+end
+
 lemma Ext_is_zero_iff (X : chain_complex 𝓐 ℕ) (Y : 𝓐)
   (f : X ⟶ X) (g : Y ⟶ Y) :
   (∀ i, is_zero (((Ext i).obj (op $ chain_complex.to_bounded_homotopy_category.obj
@@ -514,12 +537,9 @@ begin
       congr' 1,
       dsimp only [bounded_homotopy_category.replacement_iso],
       rw lift_unop_op,
-      -- rw [hom_single_iso_naturality], -- jmc : this doesn't look like a useful rewrite to me
-      -- have := hom_single_iso_naturality
-      --   ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P)
-      --   ((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P) Y i,
-      -- simp only [category.assoc],
-      sorry,
+      apply compatibility,
+      /- the verification of some (easy?) extra condition should be inserted here when
+        the exact assumption for `compatibility` is found -/
        },
     sorry },
 end
