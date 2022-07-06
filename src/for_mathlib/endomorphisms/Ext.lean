@@ -608,7 +608,8 @@ begin
       apply lift_unique,
       erw category.assoc,
       erw bounded_homotopy_category.lift_lifts,
-      -/ } }
+      -/
+      sorry } }
 end
 
 open_locale zero_object
@@ -732,8 +733,6 @@ begin
   { rintro _ i (rfl : _ = _), apply is_zero.eq_of_src, rw is_zero_iff_id_eq_zero, ext, }
 end
 .
-
-attribute [reassoc] nat_trans.comp_app
 
 lemma Ext'_is_zero_iff (X Y : 𝓐) (f : X ⟶ X) (g : Y ⟶ Y) :
   (∀ i, is_zero (((Ext' i).obj (op $ endomorphisms.mk X f)).obj $ endomorphisms.mk Y g)) ↔
