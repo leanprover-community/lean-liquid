@@ -54,7 +54,32 @@ def is_colimit_restrict_cocone {F : as_small.{v} ℝ≥0 ⥤ C} (S : cocone F) (
       simp only [category.comp_id, ← category.assoc, ← F.map_comp],
       refl,
     end }⟩,
-  fac' := sorry,
-  uniq' := sorry }
+  fac' := begin
+    intros W j,
+    dsimp [restrict_cocone],
+    rw hS.fac,
+    dsimp,
+    let r := (nat_to_nnreal c).obj (ulift.down j),
+    let k := find_int_mul c r,
+    let l := (ulift.down j) ⊔ k,
+    let k' : as_small.{v} ℕ := as_small.up.obj k,
+    let l' : as_small.{v} ℕ := as_small.up.obj l,
+    let ιk : k' ⟶ l' := as_small.up.map (hom_of_le $ le_sup_right),
+    let ιj : j ⟶ l' := as_small.up.map (hom_of_le $ le_sup_left),
+    erw ← W.w ιk,
+    erw ← W.w ιj,
+    dsimp [restrict_diagram],
+    simp only [← category.assoc, ← F.map_comp],
+    refl,
+  end,
+  uniq' := begin
+    intros W m hm,
+    apply hS.hom_ext, intros j,
+    specialize hm (as_small.up.obj (find_int_mul c (ulift.down j))),
+    dsimp [restrict_cocone] at hm,
+    rw hS.fac,
+    dsimp,
+    erw [← hm, ← category.assoc, S.w],
+  end }
 
 end category_theory.limits
