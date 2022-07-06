@@ -13,6 +13,7 @@ import for_mathlib.derived.Ext_lemmas
 import for_mathlib.endomorphisms.homology
 import for_mathlib.yoneda_left_exact
 import for_mathlib.homotopy_category_functor_compatibilities
+import for_mathlib.preserves_exact
 
 .
 
@@ -732,6 +733,7 @@ begin
     apply eval_mk_end },
 end
 
+@[simps]
 def endo_T (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) : endomorphisms 𝓐 ⥤ Ab.{v} ⥤ endomorphisms 𝓐 :=
 functor.flip
 { obj := λ A, (T.flip.obj A).map_endomorphisms,
@@ -742,7 +744,19 @@ functor.flip
 def endo_T_comp_forget (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) (M : endomorphisms 𝓐) :
   (endo_T T).obj M ⋙ endomorphisms.forget _ ≅ T.obj M.X :=
 nat_iso.of_components (λ _, iso.refl _) $
-by { intros, dsimp, simp only [category.comp_id, category.id_comp], refl }
+by { intros, dsimp, simp only [category.comp_id, category.id_comp], }
+
+instance endo_T_additive (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) (A : endomorphisms 𝓐) [(T.obj A.X).additive] :
+  ((endo_T T).obj A).additive :=
+{ map_add' := λ X Y f g, by { ext, dsimp, rw functor.map_add } }
+
+instance endo_T_preserves_finite_limits (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) (A : endomorphisms 𝓐) :
+  preserves_finite_limits ((endo_T T).obj A) :=
+sorry
+
+instance endo_T_preserves_finite_colimits (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) (A : endomorphisms 𝓐) :
+  preserves_finite_colimits ((endo_T T).obj A) :=
+sorry
 
 instance endo_T_preserves_colimits_of_shape
   (α : Type v) (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) (M : endomorphisms 𝓐)
@@ -759,16 +773,19 @@ end
 
 lemma endo_T_short_exact
   (A : endomorphisms 𝓐) (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐)
+  [(T.obj A.X).additive]
   (hT : ∀ {X Y Z : Ab} (f : X ⟶ Y) (g : Y ⟶ Z),
     short_exact f g → short_exact ((T.obj A.X).map f) ((T.obj A.X).map g))
   {X Y Z : Ab} (f : X ⟶ Y) (g : Y ⟶ Z) (hfg : short_exact f g) :
   short_exact (((endo_T T).obj A).map f) (((endo_T T).obj A).map g) :=
-sorry
+begin
+  apply functor.map_short_exact, exact hfg
+end
 
 lemma main_lemma' [has_finite_limits 𝓐] [has_finite_colimits 𝓐]
   (A : 𝓐) (B : 𝓐) (f : A ⟶ A) (g : B ⟶ B)
   (hH0 : ((data.eval_functor F).obj BD.data) ⋙ homology_functor _ _ 0 ≅ 𝟭 _)
-  (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐)
+  (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) [(T.obj A).additive]
   [∀ M, Π (α : Type v), preserves_colimits_of_shape (discrete α) (T.obj M)]
   (hT0 : T.flip.obj (AddCommGroup.of (punit →₀ ℤ)) ≅ 𝟭 _)
   (hT : ∀ {X Y Z : Ab} (f : X ⟶ Y) (g : Y ⟶ Z),
@@ -785,7 +802,7 @@ begin
   { intro α, apply package.endo_T_preserves_colimits_of_shape.{v u} α, },
   apply BD.main_lemma F A B f g hH0 ((endo_T T).obj M),
   { exact endomorphisms.mk_iso (hT0.app _) (nat_trans.naturality _ _) },
-  { intros X Y Z _ _ hfg, apply endo_T_short_exact _ T _ _ _ hfg, exact @hT, },
+  { intros X Y Z _ _ hfg, apply endo_T_short_exact _ T _ _ _ hfg, assumption, exact @hT, },
   { exact hTA }
 end
 
