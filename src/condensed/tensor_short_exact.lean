@@ -39,11 +39,9 @@ begin
   refine commsq.short_exact.of_iso eX.inv eY.inv eZ.inv _ _ _,
   { refine (AddCommGroup.tensor_functor.obj _).map f, },
   { refine (AddCommGroup.tensor_functor.obj _).map g, },
-  rotate,
+  { apply AddCommGroup.tensor_short_exact, exact hfg },
   { apply commsq.of_eq, apply tensor_eval_iso_natural_right },
   { apply commsq.of_eq, apply tensor_eval_iso_natural_right },
-  dsimp,
-  sorry
 end
 
 end Condensed
