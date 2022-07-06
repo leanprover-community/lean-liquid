@@ -3,7 +3,9 @@ import linear_algebra.tensor_product
 
 import for_mathlib.AddCommGroup_instances
 import for_mathlib.AddCommGroup.explicit_products
+import for_mathlib.AddCommGroup
 import for_mathlib.split_exact
+import category_theory.limits.preserves.limits
 
 noncomputable theory
 
@@ -389,5 +391,74 @@ nat_iso.of_components (λ A,
 instance preserves_colimits_tensor_obj (A : AddCommGroup.{u}) :
   limits.preserves_colimits (tensor_functor.obj A) :=
 limits.preserves_colimits_of_nat_iso (tensor_functor_iso_flip.app _)
+
+section preserves_finite_limits
+
+variables {X Y : AddCommGroup.{u}} (f : X ⟶ Y) [mono f]
+  (A : AddCommGroup.{u})
+
+instance tensor_obj_map_preserves_mono [no_zero_smul_divisors ℤ A] :
+  mono ((tensor_functor.obj A).map f) :=
+begin
+  let D := A.diagram,
+  let T := A.cocone,
+  let hT : limits.is_colimit T := A.is_colimit_cocone,
+  let FX : A.index_cat ⥤ AddCommGroup :=
+    D ⋙ tensor_functor.flip.obj X,
+  let FY : A.index_cat ⥤ AddCommGroup :=
+    D ⋙ tensor_functor.flip.obj Y,
+  let η : FX ⟶ FY := whisker_left _ (tensor_functor.flip.map f),
+  let eX : tensor A X ≅ limits.colimit FX :=
+    (limits.is_colimit_of_preserves
+    (tensor_functor.flip.obj X) hT).cocone_point_unique_up_to_iso
+    (limits.colimit.is_colimit _),
+  let eY : tensor A Y ≅ limits.colimit FY :=
+    (limits.is_colimit_of_preserves
+    (tensor_functor.flip.obj Y) hT).cocone_point_unique_up_to_iso
+    (limits.colimit.is_colimit _),
+  let t := _, change mono t,
+  have ht : t = eX.hom ≫ limits.colim_map η ≫ eY.inv,
+  { sorry },
+  rw ht, clear ht t,
+  suffices : mono (limits.colim_map η),
+  { resetI, apply_instance },
+  suffices : ∀ i, mono (η.app i),
+  { sorry },
+  intros i,
+  obtain ⟨α, _, e, -⟩ := exists_sigma_iso_of_index _ i, resetI,
+  change mono ((tensor_functor.obj (of i.val)).map f),
+  clear eX eY,
+  let eX : ((tensor_functor.obj (of i.val)).obj X) ≅
+    (tensor_functor.obj (∐ λ (i : α), tunit)).obj X := (tensor_functor.map_iso e.symm).app X,
+  let eY : ((tensor_functor.obj (of i.val)).obj Y) ≅
+    (tensor_functor.obj (∐ λ (i : α), tunit)).obj Y := (tensor_functor.map_iso e.symm).app Y,
+  have : (tensor_functor.obj (of ↥(i.val))).map f =
+    eX.hom ≫ (tensor_functor.obj _).map f ≫ eY.inv, sorry,
+  rw this, clear this,
+  suffices : mono ((tensor_functor.obj (∐ λ (i : α), tunit)).map f), { resetI, apply_instance },
+  clear eX eY e i η FX FY D,
+  let eX : (tensor_functor.obj (∐ λ (i : α), tunit)).obj X ≅
+    (∐ (λ i : α, tensor tunit X)) :=
+    preserves_colimit_iso (tensor_functor.flip.obj X) _ ≪≫
+    limits.has_colimit.iso_of_nat_iso (discrete.nat_iso $ λ _, iso.refl _),
+  let eY : (tensor_functor.obj (∐ λ (i : α), tunit)).obj Y ≅
+    (∐ (λ i : α, tensor tunit Y)) :=
+    preserves_colimit_iso (tensor_functor.flip.obj Y) _ ≪≫
+    limits.has_colimit.iso_of_nat_iso (discrete.nat_iso $ λ _, iso.refl _),
+  have : (tensor_functor.obj (∐ λ (i : α), tunit)).map f =
+    eX.hom ≫ _ ≫ eY.inv,
+  rotate 2,
+  { apply limits.sigma.desc,
+    intros i, refine _ ≫ limits.sigma.ι _ i,
+    exact map_tensor (𝟙 _) f },
+  { sorry },
+  rw this, clear this,
+  let t := _, change mono (eX.hom ≫ t ≫ eY.inv),
+  suffices : mono t, { resetI, apply_instance },
+  suffices : mono (map_tensor (𝟙 tunit) f), sorry,
+  sorry,
+end
+
+end preserves_finite_limits
 
 end AddCommGroup
