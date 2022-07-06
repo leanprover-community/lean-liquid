@@ -527,4 +527,9 @@ example (α : Type (u+1)) (M : Condensed.{u} Ab.{u+1}) :
   limits.preserves_colimits_of_shape (discrete α) (tensor_functor.obj M) :=
 infer_instance
 
+/- this is an assumption in `main_lemma'` in `breen_deligne/main.lean` and it is
+used in `condensed/bd_lemma.lean` -/
+instance tensor_functor_additive (A : Condensed.{u} Ab.{u+1}) :
+  (tensor_functor.obj A).additive := sorry
+
 end Condensed

@@ -192,14 +192,11 @@ instance forget_preserves_is_quasi_iso {P Q : bounded_homotopy_category 𝓐} (f
   [hf : homotopy_category.is_quasi_iso f] :
   homotopy_category.is_quasi_iso ((bounded_homotopy_category.forget 𝓐).map f) := hf
 
-instance forget_preserves_K_projective {P : bounded_homotopy_category (endomorphisms 𝓐)}
-  [P.val.is_K_projective] [∀ k, projective (P.val.as.X k)] :
-((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P).val.is_K_projective :=
--- Adam says that he knows a messy proof of this but it might need AB4 (i.e. this
--- might not even be true in this generality)
--- jmc: there is absolutely no harm in assuming that `P.val.as.X i` is projective for all `i`
--- because that's true for the `P` that we'll apply this to.
-sorry
+instance forget_of_termwise_projective_is_termwise_projective
+  {P : bounded_homotopy_category (endomorphisms 𝓐)} (k : ℤ)
+   [hP : projective (P.val.as.X k)] :
+  projective (((endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj P).val.as.X k) :=
+by { dsimp [of], apply_instance, }
 
 def forget_mk_end (X : chain_complex 𝓐 ℕ) (f : X ⟶ X) :
   (endomorphisms.forget 𝓐).map_bounded_homotopy_category.obj

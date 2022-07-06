@@ -574,4 +574,16 @@ begin
   refine ⟨P, H1, ⟨⟨a, H2⟩⟩, f, H3, H4⟩,
 end
 
+instance is_K_projective_of_bounded_termwise_projective
+  (P : bounded_homotopy_category A)
+  [hP : ∀ k, projective (P.val.as.X k)] :
+  P.val.is_K_projective :=
+⟨λ Y hY f, begin
+  suffices H : homotopy f.out 0,
+  { have h := homotopy_category.eq_of_homotopy f.out 0 H,
+    simpa only [homotopy_category.quotient_map_out] using h, },
+  exact projective.null_homotopic_of_projective_to_acyclic _ P.bdd.1.some hP P.bdd.1.some_spec
+    hY.1,
+end⟩
+
 end homotopy_category
