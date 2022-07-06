@@ -417,9 +417,20 @@ lemma homology_is_zero_iff_is_iso (h : ∀ n, projective (P.val.as.X n)) :
   (∀ i, is_zero ((homology_functor _ _ i).obj (C₁ ⟨Y, g⟩ P))) ↔
   (∀ j, is_iso ((homology_functor _ _ j).map (map₂ Y g P))) :=
 begin
-  -- a similar result is proved as `is_zero_iff_epi_and_is_iso` in `derived/les_facts`
-  -- This shouldn't be too bad.
-  sorry
+  have LES := homological_complex.six_term_exact_seq (map₁ Y g P) (map₂ Y g P)
+    (λ n, map₁₂_short_exact _ _ _ (h n)),
+  split,
+  { intros H i,
+    obtain ⟨i, rfl⟩ : ∃ j, j + 1 = i := ⟨i-1, sub_add_cancel _ _⟩,
+    apply ((LES (i+1) i rfl)).is_iso_of_zero_of_zero,
+    { refine (H (i+1)).eq_of_src _ _, },
+    { refine (H i).eq_of_tgt _ _, }, },
+  { intros H i,
+    refine is_zero_of_exact_zero_zero' _ _ ((LES (i+1) i rfl).drop 2).pair _ _,
+    { refine ((LES (i+1) i rfl).drop 1).pair.epi_iff_eq_zero.mp _,
+      exact @is_iso.epi_of_iso _ _ _ _ _ (H _), },
+    { refine ((LES (i+1) i rfl).drop 3).pair.mono_iff_eq_zero.mp _,
+      exact @is_iso.mono_of_iso _ _ _ _ _ (H _), } }
 end
 
 @[reassoc]
@@ -460,7 +471,7 @@ rfl
 
 lemma compatibility {Y : 𝓐} {P₁ P₂ P₃ : bounded_homotopy_category 𝓐} (g : P₁ ⟶ P₃) (f : P₂ ⟶ P₃)
   (h : P₁.val.as ⟶ P₂.val.as)
-  (H : (quotient.functor _).map h ≫ f = g)
+  (H : (homotopy_category.quotient _ _).map h ≫ f = g)
   (i : ℤ) :
   (preadditive_yoneda.obj ((single 𝓐 i).obj Y)).map f.op ≫ (P₂.hom_single_iso Y i).hom ≫
     (homology_functor AddCommGroup _ i).map
@@ -488,6 +499,8 @@ begin
   exact H,
 end
 
+attribute [reassoc] nat_trans.comp_app
+
 lemma Ext_is_zero_iff (X : chain_complex 𝓐 ℕ) (Y : 𝓐)
   (f : X ⟶ X) (g : Y ⟶ Y) :
   (∀ i, is_zero (((Ext i).obj (op $ chain_complex.to_bounded_homotopy_category.obj
@@ -497,6 +510,25 @@ lemma Ext_is_zero_iff (X : chain_complex 𝓐 ℕ) (Y : 𝓐)
 begin
   obtain ⟨P, _inst, fP, h1, h2⟩ := exists_K_projective_replacement
     (chain_complex.to_bounded_homotopy_category.obj (X.mk_end f)),
+  let fP' := (bounded_homotopy_category.forget _).map
+    (((endomorphisms.forget _).map_bounded_homotopy_category).map fP ≫ (forget_mk_end X f).hom),
+  /- use that fP commutes with the given endomorphisms... -/
+  have fP'_eq : fP' ≫ chain_complex.to_bounded_homotopy_category.map f =
+    (homotopy_category.quotient _ _).map P.val.as.e ≫ fP',
+  { dsimp only [chain_complex.to_bounded_homotopy_category_map, functor.comp_map],
+    erw [← (homotopy_category.quotient _ _).map_comp],
+    erw [← (homotopy_category.quotient _ _).map_comp],
+    congr' 1,
+    ext ((_|i)|i),
+    { dsimp only [forget_mk_end, homological_complex.comp_f, endomorphisms.forget,
+        functor.map_homological_complex_map_f, homological_complex.hom.iso_of_components_hom_f],
+      erw [iso.refl_hom, category.comp_id],
+      erw ((quot.out fP).f 0).comm, refl },
+    { apply limits.is_zero.eq_of_tgt, exact is_zero_zero _ },
+    { dsimp only [forget_mk_end, homological_complex.comp_f, endomorphisms.forget,
+        functor.map_homological_complex_map_f, homological_complex.hom.iso_of_components_hom_f],
+      erw [iso.refl_hom, category.comp_id],
+      erw ((quot.out fP).f _).comm, refl }, },
   resetI,
   have foo : ∀ (h : ℤ → Prop), (∀ i, h i) ↔ (∀ i, h (-i)),
   { intro h, split,
@@ -525,8 +557,6 @@ begin
     rw foo,
     apply forall_congr,
     intro i,
-    let fP' := (bounded_homotopy_category.forget _).map
-      (((endomorphisms.forget _).map_bounded_homotopy_category).map fP ≫ (forget_mk_end X f).hom),
     let j : (((Ext (-i)).obj (op (chain_complex.to_bounded_homotopy_category.obj X))).obj ((single 𝓐 0).obj Y))
     ≅ ((homology_functor AddCommGroup (complex_shape.up ℤ).symm i).obj (C₂ Y P)),
     { -- need that post-composing with an iso sends quasi-isos to quasi-isos! More precisely:
@@ -567,14 +597,30 @@ begin
       rw map₂_left_eq,
       apply compatibility,
       simp only [eq_to_hom_refl, category.comp_id],
-      /- use that fP commutes with the given endomorphisms... -/
-      have eq : fP' ≫ chain_complex.to_bounded_homotopy_category.map f =
-        (quotient.functor (homotopic 𝓐 (complex_shape.up ℤ))).map P.val.as.e ≫ fP' := sorry,
-      erw eq,
+      erw fP'_eq,
       apply lift_unique,
       erw category.assoc,
       erw bounded_homotopy_category.lift_lifts, },
-    sorry },
+    { dsimp only [j, iso.trans_hom, Ext_iso, Ext, Ext0, functor.map_iso_hom, functor.comp_map,
+        whiskering_left_obj_map, whisker_left_app, functor.flip_obj_map, functor.flip_map_app,
+        iso.op_hom, functor.comp_obj, whiskering_left_obj_obj, unop_op, op_unop], clear j,
+      simp only [nat_trans.naturality, nat_trans.naturality_assoc],
+      erw [← nat_trans.comp_app_assoc],
+      simp only [← op_comp, category.assoc],
+      /-
+      -- jmc: the rest is just copied from the branch above, but it doesn't work
+      congr' 1,
+      dsimp only [bounded_homotopy_category.replacement_iso],
+      rw lift_unop_op,
+      rw map₂_left_eq,
+      apply compatibility,
+      simp only [eq_to_hom_refl, category.comp_id],
+      erw fP'_eq,
+      apply lift_unique,
+      erw category.assoc,
+      erw bounded_homotopy_category.lift_lifts,
+      -/
+      sorry } }
 end
 
 open_locale zero_object
@@ -698,8 +744,6 @@ begin
   { rintro _ i (rfl : _ = _), apply is_zero.eq_of_src, rw is_zero_iff_id_eq_zero, ext, }
 end
 .
-
-attribute [reassoc] nat_trans.comp_app
 
 lemma Ext'_is_zero_iff (X Y : 𝓐) (f : X ⟶ X) (g : Y ⟶ Y) :
   (∀ i, is_zero (((Ext' i).obj (op $ endomorphisms.mk X f)).obj $ endomorphisms.mk Y g)) ↔
