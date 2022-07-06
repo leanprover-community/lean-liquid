@@ -3,6 +3,7 @@ import linear_algebra.tensor_product
 
 import for_mathlib.AddCommGroup_instances
 import for_mathlib.AddCommGroup.explicit_products
+import for_mathlib.AddCommGroup.ab4
 import for_mathlib.AddCommGroup
 import for_mathlib.exact_filtered_colimits
 import for_mathlib.split_exact
@@ -400,7 +401,38 @@ section preserves_finite_limits
 variables {X Y : AddCommGroup.{u}} (f : X ⟶ Y) [mono f]
   (A : AddCommGroup.{u})
 
-instance AB4 : AB4 AddCommGroup := sorry -- we have this somewhere... TODO: Move it!
+def tensor_unit_iso_aux (t A : AddCommGroup.{u}) (ht : is_tensor_unit t) :
+  t.tensor A ⟶ A :=
+tensor_uncurry $ ht.as_hom (𝟙 _)
+
+instance is_iso_tensor_unit_iso_aux (t A : AddCommGroup.{u}) (ht : is_tensor_unit t) :
+  is_iso (tensor_unit_iso_aux t A ht) :=
+begin
+  let q : A ⟶ t.tensor A := ⟨λ a, ht.gen ⊗ₜ a, _ ,_⟩,
+  use q, split,
+  { apply_fun (tensor_curry_equiv _ _ _).to_equiv,
+    dsimp [tensor_unit_iso_aux], rw tensor_curry_uncurry_comp, apply ht.ext,
+    simp, dsimp [tensor_curry], simp },
+  { ext, dsimp [q, tensor_unit_iso_aux, tensor_uncurry], simp, },
+  { simp, },
+  { intros x y, rw tensor_product.tmul_add },
+end
+
+def tensor_unit_iso (t A : AddCommGroup.{u}) (ht : is_tensor_unit t) :
+  t.tensor A ≅ A :=
+as_iso (tensor_unit_iso_aux t A ht)
+
+lemma tensor_unit_iso_naturality (t A B : AddCommGroup.{u}) (ht : is_tensor_unit t) (f : A ⟶ B) :
+  (tensor_unit_iso t A ht).hom ≫ f = map_tensor (𝟙 _) f ≫ (tensor_unit_iso t B ht).hom :=
+begin
+  apply_fun (tensor_curry_equiv _ _ _).to_equiv,
+  dsimp [tensor_unit_iso, tensor_unit_iso_aux],
+  rw tensor_curry_uncurry_comp,
+  apply ht.ext,
+  simp, dsimp, simp,
+  ext, dsimp [tensor_curry, map_tensor, tensor_uncurry],
+  simp,
+end
 
 instance tensor_obj_map_preserves_mono [no_zero_smul_divisors ℤ A] :
   mono ((tensor_functor.obj A).map f) :=
@@ -486,7 +518,12 @@ begin
   suffices : mono t, { resetI, apply_instance },
   suffices : mono (map_tensor (𝟙 tunit) f),
   { apply AB4.cond, intros i, assumption },
-  sorry,
+  clear eX eY,
+  let eX : tunit.tensor X ≅ X := tensor_unit_iso _ _ is_tensor_unit_tunit,
+  let eY : tunit.tensor Y ≅ Y := tensor_unit_iso _ _ is_tensor_unit_tunit,
+  have : map_tensor (𝟙 tunit) f = eX.hom ≫ f ≫ eY.inv,
+  { simp [reassoc_of (tensor_unit_iso_naturality tunit X Y is_tensor_unit_tunit f)] },
+  rw this, apply_instance,
 end
 
 end preserves_finite_limits
