@@ -11,7 +11,14 @@ namespace category_theory.limits
 
 variables (c : ℝ≥0) [fact (0 < c)]
 
-lemma exists_int_mul (r : ℝ≥0) : ∃ n : ℕ, r ≤ ↑n * c := sorry
+lemma exists_int_mul (r : ℝ≥0) : ∃ n : ℕ, r ≤ ↑n * c :=
+begin
+  refine ⟨nat.ceil (r / c), _⟩,
+  transitivity r / c * c,
+  { rw div_mul_cancel,
+    exact ne_of_gt (fact.out _) },
+  { exact (mul_le_mul_right (fact.out _)).mpr (nat.le_ceil _) },
+end
 
 def find_int_mul (r : ℝ≥0) : ℕ := (exists_int_mul c r).some
 
