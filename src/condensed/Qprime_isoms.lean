@@ -947,13 +947,86 @@ def homology_bd_eval (M : Condensed.{u} Ab.{u+1})
 section
 variables (M N : Condensed.{u} Ab.{u+1}) (f : M ⟶ N)
 
+set_option pp.universes false
+
+@[simp] lemma embed_f_0 {𝓐 : Type*} [category 𝓐] [abelian 𝓐]
+  {X Y : chain_complex 𝓐 ℕ} (f : X ⟶ Y) :
+  ((homological_complex.embed complex_shape.embedding.nat_down_int_up).map f).f 0 = f.f 0 := rfl
+
+@[simp] lemma embed_f_neg {𝓐 : Type*} [category 𝓐] [abelian 𝓐]
+  {X Y : chain_complex 𝓐 ℕ} (f : X ⟶ Y) (n : ℕ) :
+  ((homological_complex.embed complex_shape.embedding.nat_down_int_up).map f).f -[1+ n] = f.f (n+1) := rfl
+
+lemma eval_freeCond'_iso_component_zero_natural :
+  (eval_freeCond'_iso.component_zero BD M).inv ≫ ((BD.eval' freeCond').map f).f 0 =
+  ((presheaf_to_Condensed_Ab.map_homological_complex (complex_shape.up ℤ)).map
+    ((BD.eval' freeFunc).map (Condensed_Ab_to_presheaf.map f))).f 0 ≫
+      (eval_freeCond'_iso.component_zero BD N).inv :=
+begin
+  dsimp only [eval_freeCond'_iso.component_zero, package.eval',
+    functor.map_iso_trans, iso.trans_inv, functor.map_iso_inv,
+    iso_whisker_right_inv,
+    functor.map_homological_complex_map_f, functor.comp_map,
+    functor.comp_obj, functor.flip_obj_map, homological_complex.functor_eval,
+    embed_f_0, data.eval_functor, data.eval_functor'_obj_X_map],
+  simp only [functor.map_biproduct, category.assoc],
+  simp only [biproduct.unique_up_to_iso_inv, functor.map_comp,
+    Condensed_Ab_to_CondensedSet_map, CondensedSet_to_Condensed_Ab_map,
+    whisker_right_twice, category.assoc, whiskering_right_obj_map],
+  dsimp only [presheaf_to_Condensed_Ab],
+  simp only [← functor.map_comp], congr' 1,
+  ext t : 2, dsimp only [nat_trans.comp_app, whisker_right_app, functor.associator],
+  simp only [category.id_comp, category.comp_id],
+  simp only [← functor.map_comp], congr' 1,
+  simp only [← nat_trans.comp_app], congr' 1,
+  apply biproduct.hom_ext', intros j,
+  simp only [category.assoc, biproduct.ι_desc_assoc, biproduct.ι_desc,
+    biproduct.ι_map_assoc],
+  dsimp only [functor.map_bicone, Condensed_Ab_to_presheaf, ← Sheaf_to_presheaf_map],
+  simp only [← functor.map_comp], congr' 1,
+  erw biproduct.ι_map,
+end
+
+lemma eval_freeCond'_iso_component_neg_natural (n : ℕ) :
+  (eval_freeCond'_iso.component_neg BD M n).inv ≫ ((BD.eval' freeCond').map f).f (-[1+ n]) =
+  ((presheaf_to_Condensed_Ab.map_homological_complex (complex_shape.up ℤ)).map
+    ((BD.eval' freeFunc).map (Condensed_Ab_to_presheaf.map f))).f -[1+ n] ≫
+      (eval_freeCond'_iso.component_neg BD N n).inv :=
+begin
+  dsimp only [eval_freeCond'_iso.component_neg, package.eval',
+    functor.map_iso_trans, iso.trans_inv, functor.map_iso_inv,
+    iso_whisker_right_inv,
+    functor.map_homological_complex_map_f, functor.comp_map,
+    functor.comp_obj, functor.flip_obj_map, homological_complex.functor_eval,
+    embed_f_neg, data.eval_functor, data.eval_functor'_obj_X_map],
+  simp only [functor.map_biproduct, category.assoc],
+  simp only [biproduct.unique_up_to_iso_inv, functor.map_comp,
+    Condensed_Ab_to_CondensedSet_map, CondensedSet_to_Condensed_Ab_map,
+    whisker_right_twice, category.assoc, whiskering_right_obj_map],
+  dsimp only [presheaf_to_Condensed_Ab],
+  simp only [← functor.map_comp], congr' 1,
+  ext t : 2, dsimp only [nat_trans.comp_app, whisker_right_app, functor.associator],
+  simp only [category.id_comp, category.comp_id],
+  simp only [← functor.map_comp], congr' 1,
+  simp only [← nat_trans.comp_app], congr' 1,
+  apply biproduct.hom_ext', intros j,
+  simp only [category.assoc, biproduct.ι_desc_assoc, biproduct.ι_desc,
+    biproduct.ι_map_assoc],
+  dsimp only [functor.map_bicone, Condensed_Ab_to_presheaf, ← Sheaf_to_presheaf_map],
+  simp only [← functor.map_comp], congr' 1,
+  erw biproduct.ι_map,
+end
+
 lemma eval_freeCond'_iso_component_natural :
   (eval_freeCond'_iso_component.{u} BD M).inv ≫ (BD.eval' freeCond'.{u}).map f =
   (presheaf_to_Condensed_Ab.{u}.map_homological_complex (complex_shape.up.{0} ℤ)).map
     ((BD.eval' freeFunc.{u u+1}).map (Condensed_Ab_to_presheaf.{u}.map f)) ≫
       (eval_freeCond'_iso_component.{u} BD N).inv :=
 begin
-  sorry
+  ext ((_|n)|n) : 2,
+  { apply eval_freeCond'_iso_component_zero_natural },
+  { apply is_zero.eq_of_tgt, exact is_zero_zero _, },
+  { apply eval_freeCond'_iso_component_neg_natural },
 end
 
 lemma tensor_to_homology_natural
