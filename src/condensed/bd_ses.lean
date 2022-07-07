@@ -152,6 +152,10 @@ begin
   refl,
 end
 
+/--
+This is the short exact sequence of condensed abelian groups of the form
+`0 → ∐ i, F((A_{c * i})^n) → ∐ i, F((A_{c * i})^n) → F(A^n) → 0`.
+-/
 def short_exact_sequence_with_pow :
   short_exact (coproduct_to_coproduct (as_nat_diagram_pow A c n ⋙ F) - 𝟙 _)
     (coproduct_presentation_with_pow F A c n) :=
