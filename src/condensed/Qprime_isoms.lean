@@ -1029,6 +1029,32 @@ begin
   { apply eval_freeCond'_iso_component_neg_natural },
 end
 
+lemma tensor_to_unsheafified_homology_natural'
+  [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (M.val.obj (op S.val))]
+  [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (N.val.obj (op S.val))] (i : ℤ) :
+  tensor_to_unsheafified_homology BD M i ≫
+    whisker_left ExtrDisc_to_Profinite.op
+      ((homology_functor (Profiniteᵒᵖ ⥤ Ab) (complex_shape.up ℤ) i).map
+         ((BD.eval' freeFunc).map (Condensed_Ab_to_presheaf.map f))) =
+  (ExtrSheafProd.map_tensor
+    ((ExtrSheaf_ExtrSheafProd_equiv Ab).functor.map ((Condensed_ExtrSheaf_equiv Ab).inverse.map f))
+      (𝟙 (((BD.eval (forget AddCommGroup ⋙ AddCommGroup.free)).obj (AddCommGroup.free.obj punit)).val.as.homology i))).val ≫
+    tensor_to_unsheafified_homology BD N i :=
+begin
+  ext S : 2,
+  dsimp only [tensor_to_unsheafified_homology, nat_trans.comp_app, whisker_left_app,
+    ExtrSheafProd.map_tensor_val_app],
+  apply AddCommGroup.tensor_ext, intros x y,
+  simp only [comp_apply, id_apply, AddCommGroup.map_tensor, tensor_product.map_tmul,
+    AddCommGroup.tensor_uncurry, linear_map.to_add_monoid_hom_coe,
+    tensor_product.lift.tmul, add_monoid_hom.coe_mk,
+    linear_map.comp_apply, add_monoid_hom.coe_to_int_linear_map],
+  dsimp only [tensor_to_unsheafified_homology_component, add_monoid_hom.mk'_apply,
+    tensor_to_unsheafified_homology_component_applied],
+  simp only [← comp_apply, category.assoc], congr' 1,
+  sorry
+end
+
 lemma tensor_to_homology_natural
   [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (M.val.obj (op S.val))]
   [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (N.val.obj (op S.val))] (i : ℤ) :
@@ -1057,14 +1083,13 @@ begin
       ((BD.eval' freeFunc).map (Condensed_Ab_to_presheaf.map f))),
   erw [← this], clear this,
   simp only [← category.assoc], refine congr_arg2 _ _ rfl,
-  -- jmc is not sure that the following steps are good moves
-  ext S : 3,
-  dsimp only [functor.comp_map, whiskering_left_obj_map, tensor_to_homology_aux,
-    Sheaf.hom.comp_val, nat_trans.comp_app],
-  simp only [category.assoc],
-  -- erw [← nat_trans.naturality],
-  --  nat_trans.naturality_assoc],
-  sorry
+  ext1,
+  dsimp only [tensor_to_homology_aux],
+  simp only [functor.comp_map, whiskering_left_obj_map, Sheaf.category_theory.category_comp_val,
+    presheaf_to_Sheaf_map_val, ExtrSheaf.map_tensor_val,
+    grothendieck_topology.to_sheafify_naturality, category.assoc,
+    grothendieck_topology.to_sheafify_naturality_assoc, ← grothendieck_topology.sheafify_map_comp],
+  rw [tensor_to_unsheafified_homology_natural'],
 end
 
 lemma homology_bd_eval_natural
