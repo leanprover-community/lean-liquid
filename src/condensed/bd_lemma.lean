@@ -165,25 +165,54 @@ end
 
 open_locale zero_object
 
+-- #check @homology_iso_datum.of_g_is_zero
+
+section
+
+variables {𝓐 : Type*} [category 𝓐] [abelian 𝓐]
+variables {A B C X : 𝓐} (f : A ⟶ B) (g : B ⟶ C) (γ : B ⟶ X)
+
+def of_epi_g (hfg : exact f g) (hg : epi g) (hγ : γ = 0) :
+  homology_iso_datum f γ C :=
+{ w := by rw [hγ, comp_zero],
+  K := B,
+  ι := 𝟙 B,
+  f' := f,
+  fac' := category.comp_id _,
+  zero₁' := by rw [hγ, comp_zero],
+  π := g,
+  zero₂' := hfg.w,
+  fork_is_limit := is_limit_aux _ (λ s, s.ι) (λ s, by apply category.comp_id)
+      (λ s m hm, begin rw [← hm], symmetry, apply category.comp_id, end),
+  cofork_is_colimit := @abelian.is_colimit_of_exact_of_epi _ _ _ _ _ _ _ _ hg hfg }
+
+@[simp] lemma of_epi_g.to_homology_iso_predatum_π
+  (hfg : exact f g) (hg : epi g) (hγ : γ = 0) :
+  (of_epi_g f g γ hfg hg hγ).to_homology_iso_predatum.π = g := rfl
+
+end
+
 def eval_free_homology_zero :
   ((data.eval_functor (forget _ ⋙ AddCommGroup.free)).obj breen_deligne.eg.data) ⋙ homology_functor _ _ 0 ≅ 𝟭 _ :=
 begin
   refine nat_iso.of_components _ _,
   { intro A,
-    let e₁ := homology_iso_datum.of_homological_complex_of_next_eq_none
-      (((data.eval_functor (forget AddCommGroup ⋙ AddCommGroup.free)).obj eg.data).obj A) 1 0 rfl
-      chain_complex.next_nat_zero,
-    refine e₁.iso ≪≫ _,
-    let e₂ := (homology_iso_datum.of_g_is_zero
-      ((((data.eval_functor (forget AddCommGroup ⋙ AddCommGroup.free)).obj eg.data).obj A).d 1 0)
-      (0 : _ ⟶ 0) rfl).iso,
-    refine e₂.symm ≪≫ _,
-    let c := @abelian.is_colimit_of_exact_of_epi _ _ _ _ _ _ _ _
-      (eval_free_homology_zero_epi A) (eval_free_homology_zero_exact A),
-    refine (colimit.is_colimit _).cocone_point_unique_up_to_iso c ≪≫ _,
-    exact eq_to_iso (by cases A; refl), },
-  { intros A B f, dsimp only [iso.trans_hom, functor.comp_map],
-  -- suggestion (J. Riou): use homology_map_datum.of_g_are_zeros that I have just added
+    let e := (of_epi_g _ _ _ _ (eval_free_homology_zero_epi A) _).iso.symm,
+    refine e ≪≫ eq_to_iso _,
+    { cases A, refl },
+    { rw homological_complex.d_to_eq, swap 3, exact 1, swap, dsimp, refl,
+      rw exact_iso_comp, exact eval_free_homology_zero_exact A, },
+    { rw homological_complex.d_from_eq_zero, apply chain_complex.next_nat_zero }, },
+  { rintro A B f,
+    dsimp only [iso.trans_hom, functor.comp_map, iso.symm_hom, functor.id_map],
+    simp only [category.assoc, homology_iso_datum.iso_inv,
+      of_epi_g.to_homology_iso_predatum_π],
+    -- refine has_homology.ext_π (homology.has _ _ _) _ _ _,
+    -- dsimp only [homology.has_π],
+    -- erw homology.map_eq_desc'_lift_right,
+    -- -- apply homology.ext,
+    -- erw homology.π'_desc'_assoc,
+    -- erw homology.π'_desc'_assoc,
     sorry }
 end
 
