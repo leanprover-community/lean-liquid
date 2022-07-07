@@ -1,8 +1,10 @@
 import for_mathlib.short_complex_projections
+import for_mathlib.homology_map_datum
 
 noncomputable theory
 
 open category_theory category_theory.category category_theory.limits
+open_locale zero_object
 
 variables {J C : Type*} [category J] [category C] [has_zero_morphisms C]
 
@@ -99,9 +101,24 @@ def functor_category_equivalence : short_complex (J ⥤ C) ≌ J ⥤ short_compl
   counit_iso := functor_category_equivalence.counit_iso,
   functor_unit_iso_comp' := functor_category_equivalence.functor_unit_iso_comp, }
 
+@[simps]
 def functor_lift {X Y Z : J ⥤ C} (f : X ⟶ Y) (g : Y ⟶ Z) (h : f ≫ g = 0) :
   J ⥤ short_complex C :=
 functor_category_equivalence.functor.obj (mk f g h)
+
+@[simps]
+def ι_middle [has_zero_object C] : C ⥤ short_complex C :=
+functor_lift (0 : 0 ⟶ 𝟭 C) (0 : 𝟭 C ⟶ 0) zero_comp
+
+def ι_middle_homology_nat_iso {A : Type*} [category A] [abelian A] :
+  𝟭 A ≅ ι_middle ⋙ homology_functor :=
+nat_iso.of_components
+(λ X, (homology_iso_datum.of_both_zeros _ _ rfl rfl).iso)
+(λ X Y f, begin
+  erw (homology_map_datum.of_both_are_zeros (ι_middle.map f) rfl rfl rfl rfl).homology_map_eq,
+  erw iso.hom_inv_id_assoc,
+  refl,
+end)
 
 @[simps]
 def nat_trans_hom_mk {S₁ S₂ : J ⥤ short_complex C} (τ₁ : S₁ ⋙ π₁ ⟶ S₂ ⋙ π₁)

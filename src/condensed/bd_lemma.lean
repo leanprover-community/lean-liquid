@@ -192,6 +192,11 @@ def of_epi_g (hfg : exact f g) (hg : epi g) (hγ : γ = 0) :
 
 end
 
+/- stategy for the naturality:
+rewrite this by first constructing a natural transformation using
+a natural transformation of functors `AddCommGroup ⥤ short_complex AddCommGroup`,
+using short_complex.ι_middle as a target, and computing homolgy with `ι_middle_homology_nat_iso`,
+and then show it is an iso using the objectwise exact sequence -/
 def eval_free_homology_zero :
   ((data.eval_functor (forget _ ⋙ AddCommGroup.free)).obj breen_deligne.eg.data) ⋙ homology_functor _ _ 0 ≅ 𝟭 _ :=
 begin

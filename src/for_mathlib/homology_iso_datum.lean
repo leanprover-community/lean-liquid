@@ -572,8 +572,22 @@ def of_g_is_zero (hg : g = 0) : homology_iso_datum f g (cokernel f) :=
   π := cokernel.π f,
   zero₂' := cokernel.condition f,
   fork_is_limit := is_limit_aux _ (λ s, s.ι) (λ s, by apply category.comp_id)
-      (λ s m hm, begin rw [← hm], symmetry, apply category.comp_id, end),
+    (λ s m hm, begin rw [← hm], symmetry, apply category.comp_id, end),
   cofork_is_colimit := by apply cokernel_is_cokernel, }
 
+@[simps]
+def of_both_zeros (hf : f = 0) (hg : g = 0) : homology_iso_datum f g Y :=
+{ w := by rw [hg, comp_zero],
+  K := Y,
+  ι := 𝟙 Y,
+  f' := 0,
+  fac' := by rw [hf, zero_comp] ,
+  zero₁' := by rw [hg, comp_zero],
+  π := 𝟙 Y,
+  zero₂' := zero_comp,
+  fork_is_limit := is_limit_aux _ (λ s, s.ι) (λ s, by apply category.comp_id)
+    (λ s m hm, begin rw [← hm], symmetry, apply category.comp_id, end),
+  cofork_is_colimit := is_colimit_aux _ (λ s, s.π) (λ s, by apply category.id_comp)
+    (λ s m hm, begin rw [← hm], symmetry, dsimp, apply category.id_comp, end), }
 
 end homology_iso_datum

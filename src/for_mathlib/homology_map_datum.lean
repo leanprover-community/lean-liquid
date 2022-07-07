@@ -106,4 +106,13 @@ def of_g_are_zeros (φ : S₁ ⟶ S₂) (hg₁ : S₁.1.g = 0) (hg₂ : S₂.1.g
   fac₁' := φ.comm₁₂,
   fac₂' := by { dsimp, simp only [comp_id, id_comp], },
   fac₃' := by { dsimp, simp only [cokernel.π_desc], }, }
+
+def of_both_are_zeros (φ : S₁ ⟶ S₂) (hf₁ : S₁.1.f = 0) (hg₁ : S₁.1.g = 0) (hf₂ : S₂.1.f = 0) (hg₂ : S₂.1.g = 0) :
+  homology_map_datum φ (homology_iso_datum.of_both_zeros S₁.1.f S₁.1.g hf₁ hg₁)
+    (homology_iso_datum.of_both_zeros S₂.1.f S₂.1.g hf₂ hg₂) (φ.τ₂) :=
+{ κ := φ.τ₂,
+  fac₁' := by tidy,
+  fac₂' := by tidy,
+  fac₃' := by tidy, }
+
 end homology_map_datum
