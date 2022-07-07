@@ -201,6 +201,9 @@ def eval_freeCond_homology_zero :
 sorry
 .
 
+-- move this
+attribute [reassoc] homology_bd_eval_natural
+
 lemma exists_tensor_iso (A : endomorphisms (Condensed.{u} Ab.{u+1}))
   [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (A.X.val.obj (op S.val))]
   (t : ℤ) (ht : t ≤ -1) :
@@ -209,17 +212,22 @@ lemma exists_tensor_iso (A : endomorphisms (Condensed.{u} Ab.{u+1}))
       ((eg.eval freeCond'.map_endomorphisms).obj A).val.as.homology t)) :=
 begin
   obtain ⟨n, rfl⟩ : ∃ n : ℕ, t = -n,
-  { lift -t to ℕ with n hn, swap, { rw [neg_nonneg], refine ht.trans _, dec_trivial },
+  sorry { lift -t to ℕ with n hn, swap, { rw [neg_nonneg], refine ht.trans _, dec_trivial },
     refine ⟨n, _⟩, rw [hn, neg_neg], },
-  let HtQ'Z := ((eg.eval $
+  let HnQ'Z := ((eg.eval $
     category_theory.forget AddCommGroup ⋙ AddCommGroup.free).obj
       (AddCommGroup.free.obj punit)).val.as.homology (-n),
-  refine ⟨HtQ'Z, ⟨_⟩⟩,
+  refine ⟨HnQ'Z, ⟨_⟩⟩,
   refine endomorphisms.mk_iso _ _,
   { refine _ ≪≫ ((package.hH_endo₁ eg freeCond' n).app A).symm,
     refine (homology_bd_eval eg A.X (-n)).symm ≪≫ _,
     exact (package.eval'_homology eg freeCond' n).app A.X, },
-  sorry
+  { dsimp only [iso.trans_hom, iso.symm_hom, package.endo_T_obj_obj_e, tensor_functor],
+    simp only [category.assoc, ← homology_bd_eval_natural_assoc],
+    refine congr_arg2 _ rfl _,
+    -- jmc: this looks very similar to the naturality proof of `package.hH0_endo`
+    sorry
+     }
 end
 
 lemma bd_lemma (A : Condensed.{u} Ab.{u+1}) (B : Condensed.{u} Ab.{u+1})
