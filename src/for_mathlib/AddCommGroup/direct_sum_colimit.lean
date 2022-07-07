@@ -17,6 +17,19 @@ add_subgroup.closure
 { x | ∃ (i j : J) (f : i ⟶ j) (t : F.obj i),
   x = direct_sum.of _ j (F.map f t) - direct_sum.of _ i t  }
 
+def as_small_succ (i : as_small.{u} ℕ) : as_small ℕ :=
+  as_small.up.obj (as_small.down.obj i + 1)
+
+def to_as_small_succ (i : as_small.{u} ℕ) : i ⟶ as_small_succ i :=
+as_small.up.map (hom_of_le $ nat.le_succ _)
+
+lemma explicit_cocone_point_kernel_eq_of_as_small_nat
+  (F : as_small.{u} ℕ ⥤ AddCommGroup.{u}) :
+  explicit_cocone_point_kernel F =
+  add_subgroup.closure { x | ∃ i (t : F.obj i), x =
+    direct_sum.of (λ i, F.obj i) (as_small_succ i) (F.map (to_as_small_succ i) t) -
+    direct_sum.of _ i t } := sorry
+
 def explicit_cocone_point : AddCommGroup.{u} :=
 AddCommGroup.of
 ((direct_sum J (λ i, F.obj i)) ⧸ explicit_cocone_point_kernel F)

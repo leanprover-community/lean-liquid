@@ -79,6 +79,16 @@ def direct_sum_to_explicit_colimit (S : ExtrDisc.{u}) :
   λ i, (AddCommGroup.explicit_cocone.{u+1}
   (F ⋙ Condensed.evaluation _ S.val)).ι.app i)
 
+lemma key_lemma_aux (S : ExtrDisc.{u}) :
+  direct_sum_to_explicit_colimit F S = quotient_add_group.mk' _ :=
+begin
+  apply (AddCommGroup.is_colimit_direct_sum_cofan.{u+1 u+1}
+      (λ i, (F.obj i).val.obj (op S.val))).hom_ext, intros j,
+  erw (AddCommGroup.is_colimit_direct_sum_cofan.{u+1 u+1}
+      (λ i, (F.obj i).val.obj (op S.val))).fac, ext t,
+  refl,
+end
+
 lemma key_lemma (S : ExtrDisc.{u}) :
   exact (direct_sum_to_direct_sum F S - 𝟙 _) (direct_sum_to_explicit_colimit F S) :=
 begin
@@ -98,7 +108,30 @@ begin
       (λ i, (F.obj i).val.obj (op S.val))).fac,
     dsimp,
     apply (AddCommGroup.explicit_cocone (F ⋙ evaluation Ab S.val)).w },
-  { sorry }
+  { rintros x hx, rw add_monoid_hom.mem_ker at hx, rw key_lemma_aux at hx,
+    dsimp at hx,
+    rw quotient_add_group.eq_zero_iff at hx,
+    rw AddCommGroup.explicit_cocone_point_kernel_eq_of_as_small_nat at hx,
+    apply add_subgroup.closure_induction hx,
+    { rintros x ⟨i,t,rfl⟩, let tt := (AddCommGroup.direct_sum_cofan.{u+1 u+1}
+        (λ j, (F.obj j).val.obj (op S.val))).ι.app i t,
+      use tt,
+      change _ - _ = _ - _, congr' 1,
+      swap,
+      { dsimp only [tt], rw id_apply,
+        dsimp [AddCommGroup.direct_sum_cofan, AddCommGroup.direct_sum_ι],
+        congr },
+      { dsimp [tt], rw ← comp_apply,
+        erw (AddCommGroup.is_colimit_direct_sum_cofan.{u+1 u+1}
+          (λ j, (F.obj j).val.obj (op S.val))).fac,
+        dsimp [shift_cofan, AddCommGroup.direct_sum_cofan, AddCommGroup.direct_sum_ι,
+          AddCommGroup.to_as_small_succ],
+        rw comp_apply,
+        dsimp [AddCommGroup.as_small_succ],
+        congr } },
+    { use 0, simp only [map_zero], },
+    { rintros x y ⟨x,rfl⟩ ⟨y,rfl⟩, use x + y, simp only [map_add], },
+    { rintros x ⟨x,rfl⟩, use -x, simp only [map_neg], } },
 end
 
 lemma sigma_eval_iso_direct_sum_direct_sum_to_direct_sum (S : ExtrDisc.{u}) :
@@ -283,6 +316,13 @@ begin
   { rw ← category.assoc, apply exact_comp_inv_hom_comp,
     rw exact_iso_comp, rw exact_comp_iso, exact this },
   apply key_lemma,
+end
+
+theorem short_exact :
+  short_exact (coproduct_to_coproduct F - 𝟙 _) (coproduct_to_colimit F) :=
+begin
+  constructor,
+  apply exactness_in_the_middle,
 end
 
 end Condensed
