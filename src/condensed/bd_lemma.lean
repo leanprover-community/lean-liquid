@@ -212,7 +212,7 @@ lemma exists_tensor_iso (A : endomorphisms (Condensed.{u} Ab.{u+1}))
       ((eg.eval freeCond'.map_endomorphisms).obj A).val.as.homology t)) :=
 begin
   obtain ⟨n, rfl⟩ : ∃ n : ℕ, t = -n,
-  sorry { lift -t to ℕ with n hn, swap, { rw [neg_nonneg], refine ht.trans _, dec_trivial },
+  { lift -t to ℕ with n hn, swap, { rw [neg_nonneg], refine ht.trans _, dec_trivial },
     refine ⟨n, _⟩, rw [hn, neg_neg], },
   let HnQ'Z := ((eg.eval $
     category_theory.forget AddCommGroup ⋙ AddCommGroup.free).obj
@@ -225,9 +225,12 @@ begin
   { dsimp only [iso.trans_hom, iso.symm_hom, package.endo_T_obj_obj_e, tensor_functor],
     simp only [category.assoc, ← homology_bd_eval_natural_assoc],
     refine congr_arg2 _ rfl _,
-    -- jmc: this looks very similar to the naturality proof of `package.hH0_endo`
-    sorry
-     }
+    dsimp only [iso.app_hom, iso.app_inv],
+    rw [← functor.comp_map, nat_trans.naturality_assoc],
+    refine congr_arg2 _ rfl _,
+    dsimp only [← iso.app_inv],
+    rw [iso.comp_inv_eq, category.assoc, iso.eq_inv_comp],
+    exact (eg.hH_endo₁_natural freeCond' A n).symm, }
 end
 
 lemma bd_lemma (A : Condensed.{u} Ab.{u+1}) (B : Condensed.{u} Ab.{u+1})

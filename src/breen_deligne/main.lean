@@ -647,23 +647,15 @@ def hH_endo₁ (i : ℕ) :
   endomorphisms.forget _ ⋙ (data.eval_functor F).obj BD.data ⋙ homology_functor 𝓐 _ i :=
 hH_endo₁_a _ _ i ≪≫ hH_endo₁_b _ _ i ≪≫ hH_endo₁_c _ _ i
 
-def hH0_endo₂ :
-  ((BD.eval' F.map_endomorphisms ⋙ homology_functor (endomorphisms 𝓐) (complex_shape.up ℤ) 0).obj X).X ≅ X.X :=
-(hH_endo₁ _ _ 0).app _ ≪≫ hH0.app _
-
-def hH0_endo :
-  (BD.eval' F.map_endomorphisms ⋙ homology_functor (endomorphisms 𝓐) (complex_shape.up ℤ) 0).obj X ≅ X :=
-endomorphisms.mk_iso (hH0_endo₂ _ _ hH0 X)
+lemma hH_endo₁_natural (X : endomorphisms 𝓐) (i : ℕ) :
+  ((BD.eval' F.map_endomorphisms ⋙ homology_functor _ _ (-i)).obj X).e ≫ (BD.hH_endo₁ F i).hom.app X =
+    (BD.hH_endo₁ F i).hom.app X ≫ ((data.eval_functor F).obj BD.data ⋙ homology_functor 𝓐 _ i).map X.e :=
 begin
-  dsimp only [hH0_endo₂, iso.trans_hom, iso_whisker_left_hom, iso.app_hom, whisker_left_app],
-  have := hH0.hom.naturality X.e, simp only [functor.id_map] at this,
-  simp only [category.assoc], erw [← this], clear this, simp only [← category.assoc],
-  refine congr_arg2 _ _ rfl,
   let φ : X ⟶ X := ⟨X.e, rfl⟩,
-  have := (hH_endo₁ BD F 0).hom.naturality φ, erw [← this], clear this,
+  have := (hH_endo₁ BD F i).hom.naturality φ, erw [← this], clear this,
   refine congr_arg2 _ _ rfl,
   dsimp only [functor.comp_map, endomorphisms.forget_map],
-  erw endomorphisms.homology_functor_obj_e ((BD.eval' F.map_endomorphisms).obj X) 0,
+  erw endomorphisms.homology_functor_obj_e ((BD.eval' F.map_endomorphisms).obj X) (-i),
   congr' 2,
   dsimp only [package.eval'],
   ext i,
@@ -700,6 +692,20 @@ begin
     apply biproduct.hom_ext,
     intro a,
     simpa only [biproduct.map_π, endomorphisms.end_of_e_comm], },
+end
+
+def hH0_endo₂ :
+  ((BD.eval' F.map_endomorphisms ⋙ homology_functor (endomorphisms 𝓐) (complex_shape.up ℤ) 0).obj X).X ≅ X.X :=
+(hH_endo₁ _ _ 0).app _ ≪≫ hH0.app _
+
+def hH0_endo :
+  (BD.eval' F.map_endomorphisms ⋙ homology_functor (endomorphisms 𝓐) (complex_shape.up ℤ) 0).obj X ≅ X :=
+endomorphisms.mk_iso (hH0_endo₂ _ _ hH0 X)
+begin
+  dsimp only [hH0_endo₂, iso.trans_hom, iso_whisker_left_hom, iso.app_hom, whisker_left_app],
+  have := hH0.hom.naturality X.e, simp only [functor.id_map] at this,
+  simp only [category.assoc], erw [← this], clear this, simp only [← category.assoc],
+  rw ← hH_endo₁_natural BD F X 0, refl,
 end
 
 end
