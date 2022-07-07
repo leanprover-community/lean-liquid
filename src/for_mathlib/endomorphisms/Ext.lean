@@ -261,35 +261,12 @@ open category_theory.preadditive
 
 @[simps]
 def map₂_left : C₂ Y P ⟶ C₂ Y P :=
-{ f := λ i, add_monoid_hom.mk' (λ ψ, (P.val.as.X i).e ≫ ψ) (by { intros, rw [comp_add] }),
-  comm' := λ i j, begin
-    rintro (rfl : _ = _),
-    dsimp only [C₂],
-    ext1 x,
-    dsimp,
-    simp only [comp_apply, add_monoid_hom.mk'_apply, linear_map.to_add_monoid_hom_coe,
-      preadditive_yoneda_obj_map_apply, ← category.assoc],
-    congr' 1,
-    have := (endomorphisms.hom.comm (P.val.as.d j (j+1))).symm,
-    exact this,
-  end }
-
-/- this may have been a better definition for map₂_left ! -/
-lemma map₂_left_eq : map₂_left Y P =
-  ((preadditive_yoneda.obj Y).map_homological_complex _).map
-  (homological_complex.op_functor.map (quiver.hom.op P.val.as.e)) := by refl
+((preadditive_yoneda.obj Y).map_homological_complex _).map
+  (homological_complex.op_functor.map (quiver.hom.op P.val.as.e))
 
 @[simps]
 def map₂_right : C₂ Y P ⟶ C₂ Y P :=
-{ f := λ i, add_monoid_hom.mk' (λ ψ, ψ ≫ g) (by { intros, rw [add_comp] }),
-  comm' := λ i j, begin
-    rintro (rfl : _ = _),
-    dsimp only [C₂],
-    ext1 x,
-    dsimp,
-    simp only [comp_apply, add_monoid_hom.mk'_apply, linear_map.to_add_monoid_hom_coe,
-      preadditive_yoneda_obj_map_apply, category.assoc],
-  end }
+(nat_trans.map_homological_complex (preadditive_yoneda.map g) _).app P.unEnd.val.as.op
 
 def map₂ : C₂ Y P ⟶ C₂ Y P :=
 map₂_left Y P - map₂_right Y g P
@@ -363,14 +340,13 @@ begin
   rw AddCommGroup.exact_iff', split,
   { rw [map₂, homological_complex.sub_f_apply, comp_sub],
     ext φ,
-    simp only [map₁, map₂_left_f, map₂_right_f, add_monoid_hom.sub_apply, comp_apply,
-      add_monoid_hom.mk'_apply, AddCommGroup.zero_apply, add_monoid_hom.coe_mk],
-    rw [endomorphisms.hom.comm], apply sub_self },
+    simp only [map₁, map₂_left_f_apply, map₂_right_f_apply, add_monoid_hom.sub_apply, comp_apply,
+      AddCommGroup.zero_apply],
+    erw [endomorphisms.hom.comm], apply sub_self },
   intros φ hφ,
   refine ⟨⟨φ, _⟩, _⟩,
-  { simpa only [add_monoid_hom.mem_ker, map₂, map₂_left_f, map₂_right_f,
-      homological_complex.sub_f_apply,
-      add_monoid_hom.mk'_apply, add_monoid_hom.sub_apply, sub_eq_zero] using hφ, },
+  { simpa only [add_monoid_hom.mem_ker, map₂, map₂_left_f_apply, map₂_right_f_apply,
+      homological_complex.sub_f_apply, add_monoid_hom.sub_apply, sub_eq_zero] using hφ, },
   { refl },
 end
 
@@ -482,6 +458,7 @@ begin
   /- use that fP commutes with the given endomorphisms... -/
   have fP'_eq : fP' ≫ chain_complex.to_bounded_homotopy_category.map f =
     (homotopy_category.quotient _ _).map P.val.as.e ≫ fP',
+  sorry -- !!! this is just to speed up the proof while working on it
   { dsimp only [chain_complex.to_bounded_homotopy_category_map, functor.comp_map],
     erw [← (homotopy_category.quotient _ _).map_comp],
     erw [← (homotopy_category.quotient _ _).map_comp],
@@ -502,6 +479,7 @@ begin
     { intros h1 i, apply h1 (-i) },
     { intros h1 i, specialize h1 (-i), rwa neg_neg at h1, } },
   convert homology_is_zero_iff_is_iso Y g P h2,
+  sorry -- !!! this is just to speed up the proof while working on it
   { apply propext,
     rw foo,
     apply forall_congr,
@@ -552,6 +530,7 @@ begin
     delta map₂,
     rw [functor.map_sub, comp_sub, sub_comp],
     refine congr_arg2 _ _ _,
+    sorry -- !!! this is just to speed up the proof while working on it
     { dsimp only [j, iso.trans_hom, Ext_iso, Ext, Ext0, functor.map_iso_hom, functor.comp_map,
         whiskering_left_obj_map, whisker_left_app, functor.flip_obj_map, functor.flip_map_app,
         iso.op_hom], clear j,
@@ -561,7 +540,6 @@ begin
       congr' 1,
       dsimp only [bounded_homotopy_category.replacement_iso],
       rw lift_unop_op,
-      rw map₂_left_eq,
       apply compatibility,
       simp only [eq_to_hom_refl, category.comp_id],
       erw fP'_eq,
@@ -573,7 +551,7 @@ begin
         iso.op_hom, functor.comp_obj, whiskering_left_obj_obj, unop_op, op_unop], clear j,
       simp only [nat_trans.naturality, nat_trans.naturality_assoc],
       erw [← nat_trans.comp_app_assoc],
-      simp only [← op_comp, category.assoc],
+      simp only [← op_comp, category.assoc, map₂_right],
       /-
       -- jmc: the rest is just copied from the branch above, but it doesn't work
       congr' 1,
