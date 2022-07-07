@@ -36,7 +36,7 @@ def explicit_cocone : cocone F :=
       dsimp, refine ⟨i, j, f, t, rfl⟩,
     end } }
 
-def is_colimit_explicit_cone : is_colimit (explicit_cocone F) :=
+def is_colimit_explicit_cocone : is_colimit (explicit_cocone F) :=
 { desc := λ S, quotient_add_group.lift _
     (direct_sum.to_add_monoid $ λ i, S.ι.app _)
     begin

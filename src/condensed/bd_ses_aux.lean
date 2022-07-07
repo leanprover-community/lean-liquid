@@ -1,5 +1,6 @@
 import condensed.ab
 import condensed.short_exact
+import for_mathlib.AddCommGroup.direct_sum_colimit
 
 import for_mathlib.AddCommGroup.explicit_products
 
@@ -24,18 +25,6 @@ def coproduct_to_coproduct :
 sigma.desc $ λ i,
   F.map (as_small.up.map $ hom_of_le $ nat.le_succ _) ≫
   sigma.ι _ (as_small.up.obj (as_small.down.obj i + 1))
-
-instance epi_coproduct_to_colimit :
-  epi (coproduct_to_colimit F) :=
-begin
-  constructor,
-  intros Z a b h,
-  apply colimit.hom_ext,
-  intros j,
-  apply_fun (λ e, sigma.ι F.obj j ≫ e) at h,
-  dsimp [coproduct_to_colimit] at h,
-  simpa using h,
-end
 
 def sigma_eval_iso {α : Type (u+1)} (X : α → Condensed.{u} Ab.{u+1})
   (S : ExtrDisc.{u}) :
@@ -64,6 +53,71 @@ sigma_eval_iso _ _ ≪≫
 (colimit.is_colimit (discrete.functor φ)).cocone_point_unique_up_to_iso
   (AddCommGroup.is_colimit_direct_sum_cofan.{u+1 u+1} φ)
 
+def shift_cofan (S : ExtrDisc.{u}) (T : cofan (λ i, (F.obj i).val.obj (op S.val))) :
+  cofan (λ i, (F.obj i).val.obj (op S.val)) :=
+cofan.mk T.X $ λ (i : as_small.{u+1} ℕ),
+begin
+  refine _ ≫ T.ι.app (as_small.up.obj $ as_small.down.obj i + 1),
+  refine (F.map _).val.app _,
+  refine as_small.up.map _,
+  refine hom_of_le _,
+  exact nat.le_succ _,
+end
+
+def direct_sum_to_direct_sum (S : ExtrDisc.{u}) :
+  AddCommGroup.of (direct_sum (as_small.{u+1} ℕ) (λ i, (F.obj i).val.obj (op S.val))) ⟶
+  AddCommGroup.of (direct_sum (as_small.{u+1} ℕ) (λ i, (F.obj i).val.obj (op S.val))) :=
+let φ : as_small.{u+1} ℕ → AddCommGroup := λ i, (F.obj i).val.obj (op S.val) in
+(AddCommGroup.is_colimit_direct_sum_cofan.{u+1 u+1} φ).desc
+  (shift_cofan F S $ AddCommGroup.direct_sum_cofan.{u+1 u+1} φ)
+
+def direct_sum_to_explicit_colimit (S : ExtrDisc.{u}) :
+  AddCommGroup.of (direct_sum (as_small.{u+1} ℕ) (λ i, (F.obj i).val.obj (op S.val))) ⟶
+  (AddCommGroup.explicit_cocone (F ⋙ Condensed.evaluation _ S.val)).X :=
+(AddCommGroup.is_colimit_direct_sum_cofan.{u+1 u+1} (λ i, (F.obj i).val.obj (op S.val))).desc
+(cofan.mk (AddCommGroup.explicit_cocone (F ⋙ Condensed.evaluation _ S.val)).X $
+  λ i, (AddCommGroup.explicit_cocone.{u+1}
+  (F ⋙ Condensed.evaluation _ S.val)).ι.app i)
+
+lemma key_lemma (S : ExtrDisc.{u}) :
+  exact (direct_sum_to_direct_sum F S - 𝟙 _) (direct_sum_to_explicit_colimit F S) := sorry
+
+lemma sigma_eval_iso_direct_sum_direct_sum_to_direct_sum (S : ExtrDisc.{u}) :
+  (sigma_eval_iso_direct_sum F.obj S).hom ≫ direct_sum_to_direct_sum F S =
+  (coproduct_to_coproduct _).val.app _ ≫ (sigma_eval_iso_direct_sum F.obj S).hom :=
+begin
+  apply (is_colimit_of_preserves (Condensed.evaluation Ab.{u+1} S.val)
+    (colimit.is_colimit (discrete.functor F.obj))).hom_ext, intros j,
+  dsimp [coproduct_to_coproduct],
+  slice_rhs 1 2
+  { rw [← nat_trans.comp_app, ← Sheaf.hom.comp_val, colimit.ι_desc], },
+  dsimp [sigma_eval_iso_direct_sum, sigma_eval_iso], simp only [category.assoc],
+  slice_lhs 1 2
+  { erw (is_colimit_of_preserves (Condensed.evaluation Ab.{u+1} S.val)
+    (colimit.is_colimit (discrete.functor F.obj))).fac },
+  slice_rhs 2 3
+  { erw (is_colimit_of_preserves (Condensed.evaluation Ab.{u+1} S.val)
+    (colimit.is_colimit (discrete.functor F.obj))).fac },
+  dsimp,
+  simp only [has_colimit.iso_of_nat_iso_ι_hom, discrete.nat_iso_hom_app, category.assoc,
+    colimit.comp_cocone_point_unique_up_to_iso_hom], dsimp,
+  simp only [category.id_comp],
+  erw (AddCommGroup.is_colimit_direct_sum_cofan.{u+1 u+1} (λ i, (F.obj i).val.obj (op S.val))).fac,
+  refl,
+end
+
+def colimit_val_app_iso_explicit_colimit (S : ExtrDisc.{u}) :
+  (colimit F).val.obj (op S.val) ≅
+  (AddCommGroup.explicit_cocone (F ⋙ Condensed.evaluation _ S.val)).X :=
+(is_colimit_of_preserves (Condensed.evaluation _ S.val)
+  (colimit.is_colimit F)).cocone_point_unique_up_to_iso
+  (AddCommGroup.is_colimit_explicit_cocone _)
+
+lemma sigma_eval_iso_direct_sum_to_explicit_colimit (S : ExtrDisc.{u}) :
+  (sigma_eval_iso_direct_sum F.obj S).hom ≫ direct_sum_to_explicit_colimit F S =
+  (coproduct_to_colimit _).val.app _ ≫ (colimit_val_app_iso_explicit_colimit _ _).hom :=
+sorry
+
 lemma ι_sigma_eval_iso_direct_sum {α : Type (u+1)} (X : α → Condensed.{u} Ab.{u+1})
   (S : ExtrDisc.{u}) (i : α) :
   (sigma.ι X i : X i ⟶ _).val.app (op S.val) ≫ (sigma_eval_iso_direct_sum X S).hom =
@@ -71,6 +125,18 @@ lemma ι_sigma_eval_iso_direct_sum {α : Type (u+1)} (X : α → Condensed.{u} A
 begin
   dsimp only [sigma_eval_iso_direct_sum],
   erw ι_sigma_eval_iso_assoc, erw colimit.ι_desc, refl,
+end
+
+instance epi_coproduct_to_colimit :
+  epi (coproduct_to_colimit F) :=
+begin
+  constructor,
+  intros Z a b h,
+  apply colimit.hom_ext,
+  intros j,
+  apply_fun (λ e, sigma.ι F.obj j ≫ e) at h,
+  dsimp [coproduct_to_colimit] at h,
+  simpa using h,
 end
 
 instance mono_coproduct_to_coproduct :
@@ -153,14 +219,27 @@ theorem exactness_in_the_middle :
   exact (coproduct_to_coproduct F - 𝟙 _) (coproduct_to_colimit F) :=
 begin
   rw exact_iff_ExtrDisc, intros S,
-  rw AddCommGroup.exact_iff', split,
-  { simp only [← nat_trans.comp_app, ← Sheaf.hom.comp_val,
-      exactness_in_the_middle_part_one], refl, },
-  rintros x hx, rw add_monoid_hom.mem_ker at hx,
-  let φ : as_small.{u+1} ℕ → AddCommGroup := λ i, (F.obj i).val.obj (op S.val),
-  let e : (∐ F.obj).val.obj (ExtrDisc_to_Profinite.op.obj (op S)) ≅
-    AddCommGroup.of (direct_sum (as_small.{u+1} ℕ) (λ i, φ i)) := sigma_eval_iso_direct_sum _ _,
-  sorry
+  let e₁ : (∐ F.obj).val.obj (ExtrDisc_to_Profinite.op.obj (op S)) ≅
+    _ := sigma_eval_iso_direct_sum F.obj S,
+  let e₂ : (colimit F).val.obj (op S.val) ≅ _ :=
+    colimit_val_app_iso_explicit_colimit F S,
+  let a := _, let b := _, change exact a b,
+  have ha : a = e₁.hom ≫ (direct_sum_to_direct_sum _ _ - 𝟙 _) ≫ e₁.inv,
+  { simp only [preadditive.sub_comp, category.id_comp, preadditive.comp_sub, iso.hom_inv_id],
+    rw ← category.assoc,
+    erw [sigma_eval_iso_direct_sum_direct_sum_to_direct_sum],
+    simp only [category.assoc, iso.hom_inv_id, category.comp_id],
+    refl },
+  have hb : b = e₁.hom ≫ direct_sum_to_explicit_colimit _ _ ≫ e₂.inv,
+  { dsimp [e₁, e₂],
+    rw [← category.assoc, sigma_eval_iso_direct_sum_to_explicit_colimit],
+    simp only [category.assoc, iso.hom_inv_id, category.comp_id],
+    refl },
+  rw [ha, hb], clear ha hb a b,
+  suffices : exact (direct_sum_to_direct_sum F S - 𝟙 _) (direct_sum_to_explicit_colimit _ _),
+  { rw ← category.assoc, apply exact_comp_inv_hom_comp,
+    rw exact_iso_comp, rw exact_comp_iso, exact this },
+  apply key_lemma,
 end
 
 end Condensed
