@@ -399,7 +399,7 @@ begin
   apply category.comp_id,
 end
 
-lemma compatibility_aux {Y : 𝓐} {P₁ P₂ : bounded_homotopy_category 𝓐} (f : P₁ ⟶ P₂) :
+lemma compatibility₁_aux {Y : 𝓐} {P₁ P₂ : bounded_homotopy_category 𝓐} (f : P₁ ⟶ P₂) :
   (homotopy_category.quotient AddCommGroup (complex_shape.up ℤ).symm).map
     (homological_complex.unop_functor.map
       (((preadditive_yoneda.obj Y).right_op.map_homological_complex (complex_shape.up ℤ)).map (quot.out f)).op) =
@@ -412,7 +412,7 @@ lemma compatibility_aux {Y : 𝓐} {P₁ P₂ : bounded_homotopy_category 𝓐} 
            homological_complex.op_functor.map (f.out.op)) :=
 rfl
 
-lemma compatibility {Y : 𝓐} {P₁ P₂ P₃ : bounded_homotopy_category 𝓐} (g : P₁ ⟶ P₃) (f : P₂ ⟶ P₃)
+lemma compatibility₁ {Y : 𝓐} {P₁ P₂ P₃ : bounded_homotopy_category 𝓐} (g : P₁ ⟶ P₃) (f : P₂ ⟶ P₃)
   (h : P₁.val.as ⟶ P₂.val.as)
   (H : (homotopy_category.quotient _ _).map h ≫ f = g)
   (i : ℤ) :
@@ -431,7 +431,7 @@ begin
   simp only [quiver.hom.unop_op, ← functor.map_comp,
     homotopy_category.homology_functor_map_factors],
   congr' 1,
-  simp only [functor.right_op_map, quiver.hom.unop_op, functor.map_comp, compatibility_aux],
+  simp only [functor.right_op_map, quiver.hom.unop_op, functor.map_comp, compatibility₁_aux],
   simp only [← functor.map_comp],
   apply homotopy_category.eq_of_homotopy,
   apply functor.map_homotopy,
@@ -440,6 +440,39 @@ begin
   apply homotopy_category.homotopy_of_eq,
   simp only [functor.map_comp, homotopy_category.quotient_map_out],
   exact H,
+end
+
+instance preadditive_yoneda_flip_additive :
+  (preadditive_yoneda : 𝓐 ⥤ _).flip.additive := { }
+
+/--  -/
+lemma hom_single_iso_naturality_snd_var
+  (P : bounded_homotopy_category 𝓐) {B₁ B₂ : 𝓐} (i : ℤ)
+  (f : B₁ ⟶ B₂) (x : P ⟶ (single 𝓐 i).obj B₁) :
+  ((homology_functor _ _ i).map
+    ((nat_trans.map_homological_complex (preadditive_yoneda.map f) _).app P.val.as.op))
+      ((hom_single_iso P B₁ i).hom x) = ((hom_single_iso P B₂ i).hom (x ≫ (single 𝓐 i).map f)) :=
+begin
+  sorry,
+end
+
+lemma compatibility₂ {Y₁ Y₂ : 𝓐} (g : Y₁ ⟶ Y₂) {P₁ P₂ : bounded_homotopy_category 𝓐} (π : P₁ ⟶ P₂)
+  (i : ℤ) :
+  (preadditive_yoneda.map (((shift_single_iso 0 (-i)).app Y₁).hom ≫
+    eq_to_hom (show (single 𝓐 (0 - -i)).obj Y₁ = (single 𝓐 i).obj Y₁,
+    by { congr, linarith, }))).app (op P₂) ≫
+    (preadditive_yoneda.obj ((single 𝓐 i).obj Y₁)).map π.op ≫
+    (hom_single_iso _ Y₁ i).hom ≫
+    (homology_functor _ _ i).map ((nat_trans.map_homological_complex
+      (preadditive_yoneda.map g) _).app P₁.val.as.op) =
+  (preadditive_yoneda.map ((shift_functor (bounded_homotopy_category 𝓐) (-i)).map ((single 𝓐 0).map g))).app (op P₂) ≫
+    (preadditive_yoneda.map (((shift_single_iso 0 (-i)).app Y₂).hom ≫
+    eq_to_hom (show (single 𝓐 (0 - -i)).obj Y₂ = (single 𝓐 i).obj Y₂,
+    by { congr, linarith, }))).app (op P₂) ≫
+    (preadditive_yoneda.obj ((single 𝓐 i).obj Y₂)).map π.op ≫
+    (hom_single_iso P₁ Y₂ i).hom :=
+begin
+  sorry,
 end
 
 attribute [reassoc] nat_trans.comp_app
@@ -458,7 +491,6 @@ begin
   /- use that fP commutes with the given endomorphisms... -/
   have fP'_eq : fP' ≫ chain_complex.to_bounded_homotopy_category.map f =
     (homotopy_category.quotient _ _).map P.val.as.e ≫ fP',
-  sorry -- !!! this is just to speed up the proof while working on it
   { dsimp only [chain_complex.to_bounded_homotopy_category_map, functor.comp_map],
     erw [← (homotopy_category.quotient _ _).map_comp],
     erw [← (homotopy_category.quotient _ _).map_comp],
@@ -479,7 +511,6 @@ begin
     { intros h1 i, apply h1 (-i) },
     { intros h1 i, specialize h1 (-i), rwa neg_neg at h1, } },
   convert homology_is_zero_iff_is_iso Y g P h2,
-  sorry -- !!! this is just to speed up the proof while working on it
   { apply propext,
     rw foo,
     apply forall_congr,
@@ -530,7 +561,6 @@ begin
     delta map₂,
     rw [functor.map_sub, comp_sub, sub_comp],
     refine congr_arg2 _ _ _,
-    sorry -- !!! this is just to speed up the proof while working on it
     { dsimp only [j, iso.trans_hom, Ext_iso, Ext, Ext0, functor.map_iso_hom, functor.comp_map,
         whiskering_left_obj_map, whisker_left_app, functor.flip_obj_map, functor.flip_map_app,
         iso.op_hom], clear j,
@@ -540,7 +570,7 @@ begin
       congr' 1,
       dsimp only [bounded_homotopy_category.replacement_iso],
       rw lift_unop_op,
-      apply compatibility,
+      apply compatibility₁,
       simp only [eq_to_hom_refl, category.comp_id],
       erw fP'_eq,
       apply lift_unique,
@@ -549,23 +579,9 @@ begin
     { dsimp only [j, iso.trans_hom, Ext_iso, Ext, Ext0, functor.map_iso_hom, functor.comp_map,
         whiskering_left_obj_map, whisker_left_app, functor.flip_obj_map, functor.flip_map_app,
         iso.op_hom, functor.comp_obj, whiskering_left_obj_obj, unop_op, op_unop], clear j,
-      simp only [nat_trans.naturality, nat_trans.naturality_assoc],
-      erw [← nat_trans.comp_app_assoc],
-      simp only [← op_comp, category.assoc, map₂_right],
-      /-
-      -- jmc: the rest is just copied from the branch above, but it doesn't work
-      congr' 1,
-      dsimp only [bounded_homotopy_category.replacement_iso],
-      rw lift_unop_op,
-      rw map₂_left_eq,
-      apply compatibility,
-      simp only [eq_to_hom_refl, category.comp_id],
-      erw fP'_eq,
-      apply lift_unique,
-      erw category.assoc,
-      erw bounded_homotopy_category.lift_lifts,
-      -/
-      sorry } }
+      simp only [nat_trans.naturality, nat_trans.naturality_assoc,
+        category.assoc, map₂_right],
+      apply compatibility₂, } }
 end
 
 open_locale zero_object
