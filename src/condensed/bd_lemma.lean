@@ -197,7 +197,42 @@ def nat_trans_eval_free :
     homological_complex.eval _ _ 0 ⟶ 𝟭 AddCommGroup :=
 { app := λ A, (forget _ ⋙ AddCommGroup.free).map (Pow_1_iso A).hom ≫
     AddCommGroup.of_hom (free_abelian_group.lift id),
-  naturality' := sorry, }
+  naturality' := λ A₁ A₂ f, begin
+    simp only [functor.comp_map, homological_complex.eval_map, data.eval_functor_obj_map_f,
+      forget_map_eq_coe, AddCommGroup.free_map, functor.id_map, category.assoc],
+    ext x,
+    dsimp [eg, eg.BD, eg.rank] at x,
+    have h : ∃ y, x = (Pow_1_iso A₁).inv y,
+    { use (Pow_1_iso A₁).hom x,
+      rw [← comp_apply, iso.hom_inv_id, id_apply], },
+    cases h with y hy,
+    subst hy,
+    simp only [comp_apply, free_abelian_group.map_of_apply, AddCommGroup.of_hom_apply,
+      free_abelian_group.lift.of, id.def, coe_inv_hom_id, biproduct.map_eq],
+    let z : fin (eg.data.X 0) := ⟨0, begin
+      dsimp [eg, eg.BD, eg.rank],
+      linarith,
+    end⟩,
+    rw finset.sum_eq_single (ulift.up z), rotate,
+    { intros b hb₁ hb₂,
+      exfalso,
+      apply hb₂,
+      cases b,
+      simp only [ulift.up_inj],
+      rw fin.eq_mk_iff_coe_eq,
+      have hb₃ := b.is_lt,
+      dsimp [eg, eg.BD, eg.rank] at hb₃,
+      linarith, },
+    { intro h,
+      exfalso,
+      apply h,
+      simp only [finset.mem_univ], },
+    simp only [← comp_apply, category.assoc],
+    congr' 1,
+    dsimp,
+    change _ ≫ (Pow_1_iso A₁).hom ≫ _ ≫ (Pow_1_iso A₂).inv ≫ _ = _,
+    rw [iso.inv_hom_id, iso.inv_hom_id_assoc, category.comp_id],
+  end, }
 
 def short_complex_nat_trans_eval_free :
   ((data.eval_functor (forget _ ⋙ AddCommGroup.free)).obj breen_deligne.eg.data)
