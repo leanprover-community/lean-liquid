@@ -6,13 +6,20 @@ noncomputable theory
 universes u
 open_locale tensor_product
 
-open category_theory opposite
+open category_theory category_theory.limits opposite
 
 namespace Condensed
 
 def tensor_punit :
   tensor_functor.flip.obj (AddCommGroup.of (punit →₀ ℤ)) ≅ 𝟭 _ :=
 sorry
+
+
+/-
+We need one of the following two sorries.
+If we prove the first, we can deduce the second using `exact_functor.lean`
+But maybe it is easier to just prove `preserves_finite_limits_tensor_functor` second directly.
+-/
 
 lemma tensor_eval_iso_natural_right
   (A : (Condensed.{u} Ab.{u+1})) {X Y : Ab} (f : X ⟶ Y) (S : ExtrDisc) :
@@ -43,5 +50,11 @@ begin
   { apply commsq.of_eq, apply tensor_eval_iso_natural_right },
   { apply commsq.of_eq, apply tensor_eval_iso_natural_right },
 end
+
+-- See comment around L20
+instance preserves_finite_limits_tensor_functor (A : Condensed.{u} Ab.{u+1})
+  [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (A.val.obj (op S.val))] :
+  preserves_finite_limits (tensor_functor.obj A) :=
+sorry
 
 end Condensed

@@ -750,15 +750,33 @@ instance endo_T_additive (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) (A : endomorphisms 𝓐)
   ((endo_T T).obj A).additive :=
 { map_add' := λ X Y f g, by { ext, dsimp, rw functor.map_add } }
 
-instance endo_T_preserves_finite_limits (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) (A : endomorphisms 𝓐) :
+instance endo_T_preserves_finite_limits (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) (A : endomorphisms 𝓐)
+  [preserves_finite_limits (T.obj A.X)] :
   preserves_finite_limits ((endo_T T).obj A) :=
-sorry
+begin
+  constructor, introsI J hJ1 hJ2,
+  haveI : reflects_limits_of_shape J (endomorphisms.forget 𝓐) := {},
+  haveI : preserves_limits_of_shape J ((endo_T T).obj A ⋙ endomorphisms.forget 𝓐),
+  { apply preserves_limits_of_shape_of_nat_iso (endo_T_comp_forget T A).symm,
+    apply_instance, },
+  exact preserves_limits_of_shape_of_reflects_of_preserves
+    ((endo_T T).obj A) (endomorphisms.forget _),
+end
 
-instance endo_T_preserves_finite_colimits (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) (A : endomorphisms 𝓐) :
+instance endo_T_preserves_finite_colimits (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) (A : endomorphisms 𝓐)
+  [preserves_finite_colimits (T.obj A.X)] :
   preserves_finite_colimits ((endo_T T).obj A) :=
-sorry
+begin
+  constructor, introsI J hJ1 hJ2,
+  haveI : reflects_colimits_of_shape J (endomorphisms.forget 𝓐) := {},
+  haveI : preserves_colimits_of_shape J ((endo_T T).obj A ⋙ endomorphisms.forget 𝓐),
+  { apply preserves_colimits_of_shape_of_nat_iso (endo_T_comp_forget T A).symm,
+    apply_instance, },
+  exact preserves_colimits_of_shape_of_reflects_of_preserves
+    ((endo_T T).obj A) (endomorphisms.forget _),
+end
 
-instance endo_T_preserves_colimits_of_shape
+instance endo_T_preserves_colimits_of_shape_discrete
   (α : Type v) (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) (M : endomorphisms 𝓐)
   [preserves_colimits_of_shape (discrete α) (T.obj M.X)] :
   preserves_colimits_of_shape (discrete α) ((endo_T T).obj M) :=
@@ -772,10 +790,8 @@ begin
 end
 
 lemma endo_T_short_exact
-  (A : endomorphisms 𝓐) (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐)
-  [(T.obj A.X).additive]
-  (hT : ∀ {X Y Z : Ab} (f : X ⟶ Y) (g : Y ⟶ Z),
-    short_exact f g → short_exact ((T.obj A.X).map f) ((T.obj A.X).map g))
+  (A : endomorphisms 𝓐) (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) [(T.obj A.X).additive]
+  [preserves_finite_limits (T.obj A.X)] [preserves_finite_colimits (T.obj A.X)]
   {X Y Z : Ab} (f : X ⟶ Y) (g : Y ⟶ Z) (hfg : short_exact f g) :
   short_exact (((endo_T T).obj A).map f) (((endo_T T).obj A).map g) :=
 begin
@@ -786,10 +802,9 @@ lemma main_lemma' [has_finite_limits 𝓐] [has_finite_colimits 𝓐]
   (A : 𝓐) (B : 𝓐) (f : A ⟶ A) (g : B ⟶ B)
   (hH0 : ((data.eval_functor F).obj BD.data) ⋙ homology_functor _ _ 0 ≅ 𝟭 _)
   (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) [(T.obj A).additive]
-  [∀ M, Π (α : Type v), preserves_colimits_of_shape (discrete α) (T.obj M)]
+  [preserves_finite_limits (T.obj A)] [preserves_finite_colimits (T.obj A)]
+  [Π (α : Type v), preserves_colimits_of_shape (discrete α) (T.obj A)]
   (hT0 : T.flip.obj (AddCommGroup.of (punit →₀ ℤ)) ≅ 𝟭 _)
-  (hT : ∀ {X Y Z : Ab} (f : X ⟶ Y) (g : Y ⟶ Z),
-    short_exact f g → short_exact ((T.obj A).map f) ((T.obj A).map g))
   (hTA : ∀ (t : ℤ), t ≤ -1 → (∃ (A' : Ab),
      nonempty (((endo_T T).obj ⟨A,f⟩).obj A' ≅ ((BD.eval F.map_endomorphisms).obj ⟨A,f⟩).val.as.homology t))) :
   (∀ i, is_iso $ ((Ext' i).map f.op).app B - ((Ext' i).obj (op A)).map g) ↔
@@ -798,11 +813,9 @@ lemma main_lemma' [has_finite_limits 𝓐] [has_finite_colimits 𝓐]
     ((Ext i).obj (op $ (BD.eval F).obj A)).map ((single _ 0).map g)) :=
 begin
   let M : endomorphisms 𝓐 := ⟨A,f⟩,
-  haveI : Π (α : Type v), preserves_colimits_of_shape (discrete α) ((endo_T T).obj M),
-  { intro α, apply package.endo_T_preserves_colimits_of_shape.{v u} α, },
   apply BD.main_lemma F A B f g hH0 ((endo_T T).obj M),
   { exact endomorphisms.mk_iso (hT0.app _) (nat_trans.naturality _ _) },
-  { intros X Y Z _ _ hfg, apply endo_T_short_exact _ T _ _ _ hfg, assumption, exact @hT, },
+  { intros X Y Z _ _ hfg, refine endo_T_short_exact _ T _ _ hfg, },
   { exact hTA }
 end
 

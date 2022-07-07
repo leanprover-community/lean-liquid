@@ -182,6 +182,7 @@ def eval_freeCond_homology_zero :
 -- rewrite with isoms to reduce to checking on presheaves,
 -- then use `eval_free_homology_zero`
 sorry
+.
 
 lemma bd_lemma (A : Condensed.{u} Ab.{u+1}) (B : Condensed.{u} Ab.{u+1})
   [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (A.val.obj (op S.val))]
@@ -192,8 +193,7 @@ lemma bd_lemma (A : Condensed.{u} Ab.{u+1}) (B : Condensed.{u} Ab.{u+1})
     ((Ext i).obj (op $ (breen_deligne.eg.eval freeCond').obj A)).map ((single _ 0).map g)) :=
 begin
   refine eg.main_lemma' _ A B f g
-    eval_freeCond_homology_zero tensor_functor tensor_punit _ _,
-  { intros X Y Z _ _ h, refine tensor_short_exact _ _ _ h, },
+    eval_freeCond_homology_zero tensor_functor tensor_punit _,
   { intros t ht,
     let HtQ'Z := ((eg.eval $
       category_theory.forget AddCommGroup ⋙ AddCommGroup.free).obj
