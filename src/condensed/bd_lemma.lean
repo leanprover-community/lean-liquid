@@ -201,6 +201,27 @@ def eval_freeCond_homology_zero :
 sorry
 .
 
+lemma exists_tensor_iso (A : endomorphisms (Condensed.{u} Ab.{u+1}))
+  [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (A.X.val.obj (op S.val))]
+  (t : ℤ) (ht : t ≤ -1) :
+  (∃ (A' : Ab), nonempty
+    (((package.endo_T tensor_functor).obj A).obj A' ≅
+      ((eg.eval freeCond'.map_endomorphisms).obj A).val.as.homology t)) :=
+begin
+  obtain ⟨n, rfl⟩ : ∃ n : ℕ, t = -n,
+  { lift -t to ℕ with n hn, swap, { rw [neg_nonneg], refine ht.trans _, dec_trivial },
+    refine ⟨n, _⟩, rw [hn, neg_neg], },
+  let HtQ'Z := ((eg.eval $
+    category_theory.forget AddCommGroup ⋙ AddCommGroup.free).obj
+      (AddCommGroup.free.obj punit)).val.as.homology (-n),
+  refine ⟨HtQ'Z, ⟨_⟩⟩,
+  refine endomorphisms.mk_iso _ _,
+  { refine _ ≪≫ ((package.hH_endo₁ eg freeCond' n).app A).symm,
+    refine (homology_bd_eval eg A.X (-n)).symm ≪≫ _,
+    exact (package.eval'_homology eg freeCond' n).app A.X, },
+  sorry
+end
+
 lemma bd_lemma (A : Condensed.{u} Ab.{u+1}) (B : Condensed.{u} Ab.{u+1})
   [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (A.val.obj (op S.val))]
   (f : A ⟶ A) (g : B ⟶ B) :
@@ -208,25 +229,7 @@ lemma bd_lemma (A : Condensed.{u} Ab.{u+1}) (B : Condensed.{u} Ab.{u+1})
   (∀ i, is_iso $
     ((Ext i).map ((breen_deligne.eg.eval freeCond').map f).op).app ((single _ 0).obj B) -
     ((Ext i).obj (op $ (breen_deligne.eg.eval freeCond').obj A)).map ((single _ 0).map g)) :=
-begin
-  refine eg.main_lemma' _ A B f g
-    eval_freeCond_homology_zero tensor_functor tensor_punit _,
-  { intros t ht,
-    obtain ⟨n, rfl⟩ : ∃ n : ℕ, t = -n,
-    { lift -t to ℕ with n hn, swap, { rw [neg_nonneg], refine ht.trans _, dec_trivial },
-      refine ⟨n, _⟩, rw [hn, neg_neg], },
-    let HtQ'Z := ((eg.eval $
-      category_theory.forget AddCommGroup ⋙ AddCommGroup.free).obj
-        (AddCommGroup.free.obj punit)).val.as.homology (-n),
-    refine ⟨HtQ'Z, ⟨_⟩⟩,
-    refine endomorphisms.mk_iso _ _,
-    { refine _ ≪≫ ((package.hH_endo₁ eg freeCond' n).app ⟨A,f⟩).symm,
-      let e := homology_bd_eval eg A n,
-      -- refine _ ≪≫ e.symm,
-      sorry
-       },
-    -- somehow, use `homology_bd_eval`
-    sorry }
-end
+eg.main_lemma' _ A B f g
+  eval_freeCond_homology_zero tensor_functor tensor_punit (exists_tensor_iso ⟨A,f⟩)
 
 end Condensed
