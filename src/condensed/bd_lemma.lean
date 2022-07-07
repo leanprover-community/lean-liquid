@@ -155,19 +155,36 @@ begin
       ← functor.map_comp, eval_free_σ_eq_add], refl },
 end
 
-lemma eval_free_homology_zero_surj (A : AddCommGroup) :
-  function.surjective ((forget _ ⋙ AddCommGroup.free).map (Pow_1_iso A).hom ≫ free_abelian_group.lift id) :=
+instance eval_free_homology_zero_epi (A : AddCommGroup) :
+  epi ((forget _ ⋙ AddCommGroup.free).map (Pow_1_iso A).hom ≫ AddCommGroup.of_hom (free_abelian_group.lift id)) :=
 begin
-  erw [← AddCommGroup.epi_iff_surjective, ← functor.map_iso_hom],
   apply_with epi_comp {instances:=ff}, apply_instance,
   rw [AddCommGroup.epi_iff_surjective], intro a,
   exact ⟨free_abelian_group.of a, free_abelian_group.lift.of _ _⟩
 end
 
+open_locale zero_object
+
 def eval_free_homology_zero :
   ((data.eval_functor (forget _ ⋙ AddCommGroup.free)).obj breen_deligne.eg.data) ⋙ homology_functor _ _ 0 ≅ 𝟭 _ :=
--- on objects, use `eval_free_homology_zero_exact` and `eval_free_homology_zero_surj`
-sorry
+begin
+  refine nat_iso.of_components _ _,
+  { intro A,
+    let e₁ := homology_iso_datum.of_homological_complex_of_next_eq_none
+      (((data.eval_functor (forget AddCommGroup ⋙ AddCommGroup.free)).obj eg.data).obj A) 1 0 rfl
+      chain_complex.next_nat_zero,
+    refine e₁.iso ≪≫ _,
+    let e₂ := (homology_iso_datum.of_g_is_zero
+      ((((data.eval_functor (forget AddCommGroup ⋙ AddCommGroup.free)).obj eg.data).obj A).d 1 0)
+      (0 : _ ⟶ 0) rfl).iso,
+    refine e₂.symm ≪≫ _,
+    let c := @abelian.is_colimit_of_exact_of_epi _ _ _ _ _ _ _ _
+      (eval_free_homology_zero_epi A) (eval_free_homology_zero_exact A),
+    refine (colimit.is_colimit _).cocone_point_unique_up_to_iso c ≪≫ _,
+    exact eq_to_iso (by cases A; refl), },
+  { intros A B f, dsimp only [iso.trans_hom, functor.comp_map],
+    sorry }
+end
 
 end
 
