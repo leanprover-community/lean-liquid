@@ -116,7 +116,31 @@ def colimit_val_app_iso_explicit_colimit (S : ExtrDisc.{u}) :
 lemma sigma_eval_iso_direct_sum_to_explicit_colimit (S : ExtrDisc.{u}) :
   (sigma_eval_iso_direct_sum F.obj S).hom ≫ direct_sum_to_explicit_colimit F S =
   (coproduct_to_colimit _).val.app _ ≫ (colimit_val_app_iso_explicit_colimit _ _).hom :=
-sorry
+begin
+  apply (is_colimit_of_preserves (Condensed.evaluation Ab.{u+1} S.val)
+    (colimit.is_colimit (discrete.functor F.obj))).hom_ext, intros j,
+  dsimp [sigma_eval_iso_direct_sum, sigma_eval_iso, coproduct_to_colimit,
+    colimit_val_app_iso_explicit_colimit],
+  simp only [category.assoc],
+
+  erw (is_colimit_of_preserves (Condensed.evaluation Ab.{u+1} S.val)
+    (colimit.is_colimit (discrete.functor F.obj))).fac_assoc,
+  slice_rhs 1 2
+  { rw [← nat_trans.comp_app, ← Sheaf.hom.comp_val, colimit.ι_desc], },
+
+  erw colimit.ι_desc_assoc,
+  dsimp,
+  simp only [category.id_comp, colimit.comp_cocone_point_unique_up_to_iso_hom_assoc],
+
+  dsimp [direct_sum_to_explicit_colimit],
+  erw
+    (AddCommGroup.is_colimit_direct_sum_cofan.{u+1 u+1} (λ (i : as_small ℕ),
+      (F.obj i).val.obj (op S.val))).fac,
+
+  erw (is_colimit_of_preserves (evaluation Ab S.val) (colimit.is_colimit F)).fac,
+
+  refl,
+end
 
 lemma ι_sigma_eval_iso_direct_sum {α : Type (u+1)} (X : α → Condensed.{u} Ab.{u+1})
   (S : ExtrDisc.{u}) (i : α) :
