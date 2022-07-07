@@ -547,6 +547,7 @@ end has_homology
 
 variables (f g)
 
+@[simps]
 def of_f_is_zero (hf : f = 0) : homology_iso_datum f g (kernel g) :=
 { w := by rw [hf, zero_comp],
   K := kernel g,
@@ -560,6 +561,7 @@ def of_f_is_zero (hf : f = 0) : homology_iso_datum f g (kernel g) :=
   cofork_is_colimit := is_colimit_aux _ (λ s, s.π) (λ s, by apply category.id_comp)
     (λ s m hm, begin rw [← hm], symmetry, apply category.id_comp, end), }
 
+@[simps]
 def of_g_is_zero (hg : g = 0) : homology_iso_datum f g (cokernel f) :=
 { w := by rw [hg, comp_zero],
   K := Y,

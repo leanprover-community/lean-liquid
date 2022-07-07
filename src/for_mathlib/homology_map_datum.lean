@@ -95,3 +95,15 @@ def map_nat_trans {S : short_complex C} {H : C} (h : homology_iso_datum S.1.f S.
   fac₃' := nat_trans.naturality _ _, }
 
 end homology_iso_datum
+
+namespace homology_map_datum
+
+def of_g_are_zeros (φ : S₁ ⟶ S₂) (hg₁ : S₁.1.g = 0) (hg₂ : S₂.1.g = 0) :
+  homology_map_datum φ (homology_iso_datum.of_g_is_zero S₁.1.f S₁.1.g hg₁)
+    (homology_iso_datum.of_g_is_zero S₂.1.f S₂.1.g hg₂)
+    (cokernel.map _ _ φ.τ₁ φ.τ₂ φ.comm₁₂) :=
+{ κ := φ.τ₂,
+  fac₁' := φ.comm₁₂,
+  fac₂' := by { dsimp, simp only [comp_id, id_comp], },
+  fac₃' := by { dsimp, simp only [cokernel.π_desc], }, }
+end homology_map_datum
