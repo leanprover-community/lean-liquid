@@ -445,7 +445,6 @@ end
 instance preadditive_yoneda_flip_additive :
   (preadditive_yoneda : 𝓐 ⥤ _).flip.additive := { }
 
-/--  -/
 lemma hom_single_iso_naturality_snd_var
   (P : bounded_homotopy_category 𝓐) {B₁ B₂ : 𝓐} (i : ℤ)
   (f : B₁ ⟶ B₂) (x : P ⟶ (single 𝓐 i).obj B₁) :
@@ -466,6 +465,13 @@ variable {𝓐}
 
 def _root_.category_theory.functor.congr_map {C D : Type*} [category C] [category D]
   (F : C ⥤ D) {X Y : C} {f g : X ⟶ Y} (h : f = g) : F.map f = F.map g := by rw h
+
+@[reassoc]
+lemma preadditive_yoneda_bifunctor_comm {C : Type*} [category C] [preadditive C]
+  {X₁ X₂ : C} {Y₁ Y₂ : Cᵒᵖ} (f : X₁ ⟶ X₂) (g : Y₁ ⟶ Y₂) :
+  (preadditive_yoneda.obj X₁).map g ≫ (preadditive_yoneda.map f).app Y₂ =
+  ((preadditive_yoneda.map f).app Y₁) ≫ (preadditive_yoneda.obj X₂).map g:=
+nat_trans.naturality _ _
 
 lemma compatibility₂ {Y₁ Y₂ : 𝓐} (g : Y₁ ⟶ Y₂) {P₁ P₂ : bounded_homotopy_category 𝓐} (π : P₁ ⟶ P₂)
   (i : ℤ) :
@@ -499,7 +505,11 @@ begin
   slice_rhs 1 2 { erw eq₅, },
   simp only [category.assoc],
   congr' 1,
-  sorry,
+  rw ← preadditive_yoneda_bifunctor_comm_assoc,
+  congr' 1,
+  apply concrete_category.hom_ext,
+  intro x,
+  apply hom_single_iso_naturality_snd_var,
 end
 
 attribute [reassoc] nat_trans.comp_app
