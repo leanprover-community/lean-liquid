@@ -104,6 +104,13 @@ sigma.desc $ λ i, F.map ((as_nat_diagram A c).map $
   sigma.ι (λ i : as_small.{u+1} ℕ, F.obj ((as_nat_diagram A c).obj i))
   (ulift.up $ (ulift.down i) + 1)
 
+open opposite
+
+def coproduct_eval_iso {α : Type (u+1)} (X : α → Condensed.{u} Ab.{u+1}) (S : ExtrDisc.{u}) :
+  (∐ X).val.obj (op S.val) ≅ ∐ (λ a, (X a).val.obj (op S.val)) :=
+preserves_colimit_iso (Condensed.evaluation Ab.{u+1} S.val) _ ≪≫
+has_colimit.iso_of_nat_iso (discrete.nat_iso $ λ _, iso.refl _)
+
 instance mono_coproduct_to_coproduct :
   mono (coproduct_to_coproduct F A c - 𝟙 _) :=
 begin
