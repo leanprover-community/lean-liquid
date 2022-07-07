@@ -318,7 +318,7 @@ begin
   apply key_lemma,
 end
 
-theorem short_exact :
+theorem short_exact_sequence_aux :
   short_exact (coproduct_to_coproduct F - 𝟙 _) (coproduct_to_colimit F) :=
 begin
   constructor,

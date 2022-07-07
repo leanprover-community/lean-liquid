@@ -74,27 +74,39 @@ def coproduct_presentation :
   F.obj (as_nat_cocone A c).X :=
 sigma.desc $ λ i, F.map ((as_nat_cocone A c).ι.app i)
 
-instance epi_coproduct_presentation :
-  epi (coproduct_presentation F A c) :=
+def presentation_point_isomorphism :
+  F.obj ((as_nat_cocone A c).X) ≅ colimit (as_nat_diagram A c ⋙ F) :=
+(is_colimit_of_preserves F (is_colimit_as_nat_cocone A c)).cocone_point_unique_up_to_iso
+  (colimit.is_colimit _)
+
+lemma coproduct_presentation_eq :
+  coproduct_presentation F A c ≫ (presentation_point_isomorphism F A c).hom =
+  coproduct_to_colimit ((as_nat_diagram A c ⋙ F)) :=
 begin
-  let G : cocone (as_nat_diagram A c ⋙ F) :=
-    F.map_cocone (as_nat_cocone A c),
-  let hG : is_colimit G := is_colimit_of_preserves F (is_colimit_as_nat_cocone _ _),
-  let e : F.obj (as_nat_cocone A c).X ≅ G.X :=
-    (is_colimit_of_preserves F (is_colimit_as_nat_cocone A c)).cocone_point_unique_up_to_iso hG,
-  suffices : epi (coproduct_presentation F A c ≫ e.hom),
-  { exact (epi_iso_comp_iff_epi (coproduct_presentation F A c) e).mp this },
-  constructor, intros Z a b w,
-  apply hG.hom_ext, intros j,
-  apply_fun (λ e, sigma.ι
-    (λ i : as_small.{u+1} ℕ, F.obj ((as_nat_diagram A c).obj i)) j ≫ e) at w,
-  convert w using 1,
-  all_goals
-  { dsimp [coproduct_presentation, e],
-    simp only [category.assoc, colimit.ι_desc_assoc], dsimp,
-    erw (is_colimit_of_preserves.{u+1 u+1 u+1 u+1 u+2 u+2} F
-      (is_colimit_as_nat_cocone.{u} A c)).fac_assoc,
-    refl },
+  apply colimit.hom_ext, intros j,
+  erw colimit.ι_desc,
+  erw colimit.ι_desc_assoc,
+  dsimp,
+  erw (is_colimit_of_preserves F (is_colimit_as_nat_cocone A c)).fac,
+  refl,
 end
+
+theorem coproduct_to_colimit_short_exact_sequence :
+  short_exact (coproduct_to_coproduct (as_nat_diagram A c ⋙ F) - 𝟙 _)
+  (coproduct_presentation F A c) :=
+{ mono := infer_instance,
+  epi := begin
+    have := coproduct_presentation_eq F A c,
+    rw ← iso.eq_comp_inv at this, rw this,
+    apply_with epi_comp { instances := ff },
+    apply_instance,
+    apply_instance,
+  end,
+  exact := begin
+    have := coproduct_presentation_eq F A c,
+    rw ← iso.eq_comp_inv at this, rw this,
+    rw exact_comp_iso,
+    exact (short_exact_sequence_aux (as_nat_diagram A c ⋙ F)).exact,
+  end }
 
 end Condensed
