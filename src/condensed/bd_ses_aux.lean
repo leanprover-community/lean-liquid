@@ -80,7 +80,26 @@ def direct_sum_to_explicit_colimit (S : ExtrDisc.{u}) :
   (F ⋙ Condensed.evaluation _ S.val)).ι.app i)
 
 lemma key_lemma (S : ExtrDisc.{u}) :
-  exact (direct_sum_to_direct_sum F S - 𝟙 _) (direct_sum_to_explicit_colimit F S) := sorry
+  exact (direct_sum_to_direct_sum F S - 𝟙 _) (direct_sum_to_explicit_colimit F S) :=
+begin
+  rw AddCommGroup.exact_iff', split,
+  { apply (AddCommGroup.is_colimit_direct_sum_cofan.{u+1 u+1}
+      (λ i, (F.obj i).val.obj (op S.val))).hom_ext,
+    intros j,
+    simp only [preadditive.sub_comp, category.id_comp, preadditive.comp_sub, comp_zero],
+    rw sub_eq_zero,
+    dsimp [direct_sum_to_direct_sum, direct_sum_to_explicit_colimit],
+    rw (AddCommGroup.is_colimit_direct_sum_cofan.{u+1 u+1}
+      (λ i, (F.obj i).val.obj (op S.val))).fac_assoc,
+    rw (AddCommGroup.is_colimit_direct_sum_cofan.{u+1 u+1}
+      (λ i, (F.obj i).val.obj (op S.val))).fac,
+    dsimp [shift_cofan], simp only [category.assoc],
+    rw (AddCommGroup.is_colimit_direct_sum_cofan.{u+1 u+1}
+      (λ i, (F.obj i).val.obj (op S.val))).fac,
+    dsimp,
+    apply (AddCommGroup.explicit_cocone (F ⋙ evaluation Ab S.val)).w },
+  { sorry }
+end
 
 lemma sigma_eval_iso_direct_sum_direct_sum_to_direct_sum (S : ExtrDisc.{u}) :
   (sigma_eval_iso_direct_sum F.obj S).hom ≫ direct_sum_to_direct_sum F S =
