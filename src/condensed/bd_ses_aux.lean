@@ -137,4 +137,30 @@ begin
   recover, all_goals { apply_instance }
 end
 
+.
+
+theorem exactness_in_the_middle_part_one :
+  (coproduct_to_coproduct F - 𝟙 _) ≫ (coproduct_to_colimit F) = 0 :=
+begin
+  apply colimit.hom_ext, intros j,
+  dsimp [coproduct_to_coproduct, coproduct_to_colimit],
+  simp only [preadditive.comp_sub, preadditive.sub_comp, colimit.ι_desc_assoc,
+    category.id_comp, category.comp_id, colimit.ι_desc],
+  dsimp, simp,
+end
+
+theorem exactness_in_the_middle :
+  exact (coproduct_to_coproduct F - 𝟙 _) (coproduct_to_colimit F) :=
+begin
+  rw exact_iff_ExtrDisc, intros S,
+  rw AddCommGroup.exact_iff', split,
+  { simp only [← nat_trans.comp_app, ← Sheaf.hom.comp_val,
+      exactness_in_the_middle_part_one], refl, },
+  rintros x hx, rw add_monoid_hom.mem_ker at hx,
+  let φ : as_small.{u+1} ℕ → AddCommGroup := λ i, (F.obj i).val.obj (op S.val),
+  let e : (∐ F.obj).val.obj (ExtrDisc_to_Profinite.op.obj (op S)) ≅
+    AddCommGroup.of (direct_sum (as_small.{u+1} ℕ) (λ i, φ i)) := sigma_eval_iso_direct_sum _ _,
+  sorry
+end
+
 end Condensed
