@@ -28,7 +28,47 @@ lemma explicit_cocone_point_kernel_eq_of_as_small_nat
   explicit_cocone_point_kernel F =
   add_subgroup.closure { x | ∃ i (t : F.obj i), x =
     direct_sum.of (λ i, F.obj i) (as_small_succ i) (F.map (to_as_small_succ i) t) -
-    direct_sum.of _ i t } := sorry
+    direct_sum.of _ i t } :=
+begin
+  apply le_antisymm,
+  { erw add_subgroup.closure_le,
+    rintros x ⟨⟨i⟩,⟨j⟩,f,t,rfl⟩,
+    obtain ⟨k,rfl⟩ : ∃ k : ℕ, j = i + k,
+    { have : i ≤ j := le_of_hom (as_small.down.map f),
+      exact le_iff_exists_add.mp this },
+    induction k with k hk,
+    { have : f = 𝟙 _, ext, rw this,
+      simp only [category_theory.functor.map_id, id_apply, set_like.mem_coe],
+      erw sub_self,
+      exact add_subgroup.zero_mem _, },
+    { let f₁ : as_small.up.obj i ⟶ as_small.up.obj (i + k) := as_small.up.map
+        (hom_of_le $ le_self_add),
+      let f₂ : as_small.up.obj (i + k) ⟶ as_small.up.obj (i + (k + 1)) :=
+        as_small.up.map (hom_of_le $ by nlinarith),
+      have hf : f = f₁ ≫ f₂, by ext, rw hf, clear hf,
+      specialize hk f₁,
+      let t' := _, change t' ∈ _, let s := _, change s ∈ _ at hk,
+      rw (show t' = (t' - s) + s, by simp),
+      let A := add_subgroup.closure {x :
+        direct_sum (as_small ℕ) (λ (i : as_small ℕ), ↥(F.obj i)) |
+          ∃ (i : as_small ℕ) (t : ↥(F.obj i)), x =
+            (direct_sum.of (λ (i : as_small ℕ), ↥(F.obj i)) (as_small_succ i))
+              ((F.map (to_as_small_succ i)) t) -
+            (direct_sum.of (λ (i : as_small ℕ), ↥(F.obj i)) i) t},
+      change _ ∈ A,
+      suffices : (t' - s) ∈ A, by exact A.add_mem this hk,
+      dsimp [t', s], simp only [functor.map_comp, comp_apply, sub_sub_sub_cancel_right],
+      apply add_subgroup.subset_closure,
+      use as_small.up.obj (i + k),
+      let tt : F.obj (as_small.up.obj (i + k)) := F.map f₁ t,
+      use tt,
+      congr } },
+  { rw add_subgroup.closure_le,
+    rintros x ⟨i,t,rfl⟩,
+    apply add_subgroup.subset_closure,
+    refine ⟨i,as_small_succ i, to_as_small_succ i, t, _⟩,
+    congr }
+end
 
 def explicit_cocone_point : AddCommGroup.{u} :=
 AddCommGroup.of
