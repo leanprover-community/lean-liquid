@@ -3,6 +3,7 @@ import condensed.ab
 import condensed.short_exact
 import condensed.bd_ses_aux
 import for_mathlib.nnreal_to_nat_colimit
+import for_mathlib.pow_functor
 
 open category_theory
 open category_theory.limits
@@ -107,6 +108,62 @@ theorem coproduct_to_colimit_short_exact_sequence :
     rw ← iso.eq_comp_inv at this, rw this,
     rw exact_comp_iso,
     exact (short_exact_sequence_aux (as_nat_diagram A c ⋙ F)).exact,
+  end }
+
+variables (n : ℕ)
+
+/-- The map `(∐ i, F((A_≤ i * c)^n)) ⟶ F(A^n)`. -/
+def coproduct_presentation_with_pow :
+  (∐ (λ i : as_small.{u+1} ℕ, F.obj (∏ λ (j : ulift.{u+1} (fin n)), (as_nat_diagram A c).obj i))) ⟶
+  F.obj (∏ λ j : ulift.{u+1} (fin n), (as_nat_cocone A c).X) :=
+sigma.desc $ λ i, F.map (pi.map $ λ j, (as_nat_cocone A c).ι.app i)
+
+-- Filtered colimits commute with finite products in condensed sets
+instance pow_functor_preserves_filtered_colimits (n : ℕ) :
+  preserves_filtered_colimits
+  (pow_functor CondensedSet.{u} (ulift.{u+1} (fin n))) := sorry
+
+def as_nat_diagram_pow : as_small.{u+1} ℕ ⥤ CondensedSet.{u} :=
+as_nat_diagram A c ⋙ pow_functor _ (ulift.{u+1} (fin n))
+
+def as_nat_cocone_pow : cocone (as_nat_diagram_pow A c n) :=
+(pow_functor _ (ulift.{u+1} (fin n))).map_cocone (as_nat_cocone A c)
+
+def is_colimit_as_nat_cocone_pow : is_colimit (as_nat_cocone_pow A c n) :=
+is_colimit_of_preserves _ (is_colimit_as_nat_cocone _ _)
+
+def presentation_point_isomorphism_with_pow :
+  F.obj (∏ λ (j : ulift.{u+1} (fin n)), (as_nat_cocone A c).X) ≅
+  colimit (as_nat_diagram_pow A c n ⋙ F) :=
+(is_colimit_of_preserves F
+(is_colimit_as_nat_cocone_pow A c n)).cocone_point_unique_up_to_iso
+(colimit.is_colimit _)
+
+lemma coproduct_presentation_with_pow_eq :
+  coproduct_presentation_with_pow F A c n =
+  coproduct_to_colimit (as_nat_diagram_pow A c n ⋙ F) ≫
+  (presentation_point_isomorphism_with_pow F A c n).inv :=
+begin
+  apply colimit.hom_ext, intros j,
+  erw colimit.ι_desc,
+  erw colimit.ι_desc_assoc,
+  dsimp,
+  erw colimit.ι_desc,
+  refl,
+end
+
+def short_exact_sequence_with_pow :
+  short_exact (coproduct_to_coproduct (as_nat_diagram_pow A c n ⋙ F) - 𝟙 _)
+    (coproduct_presentation_with_pow F A c n) :=
+{ mono := infer_instance,
+  epi := begin
+    rw coproduct_presentation_with_pow_eq,
+    apply epi_comp,
+  end,
+  exact := begin
+    rw coproduct_presentation_with_pow_eq,
+    rw exact_comp_iso,
+    exact (short_exact_sequence_aux _).exact,
   end }
 
 end Condensed
