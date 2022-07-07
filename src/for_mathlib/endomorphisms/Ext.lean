@@ -456,13 +456,24 @@ begin
   sorry,
 end
 
+variable (𝓐)
+
+@[simps]
+def congr_single_functor {p q : ℤ} (h : p = q) :
+  single 𝓐 p ≅ single 𝓐 q := eq_to_iso (by subst h)
+
+variable {𝓐}
+
+def _root_.category_theory.functor.congr_map {C D : Type*} [category C] [category D]
+  (F : C ⥤ D) {X Y : C} {f g : X ⟶ Y} (h : f = g) : F.map f = F.map g := by rw h
+
 lemma compatibility₂ {Y₁ Y₂ : 𝓐} (g : Y₁ ⟶ Y₂) {P₁ P₂ : bounded_homotopy_category 𝓐} (π : P₁ ⟶ P₂)
   (i : ℤ) :
   (preadditive_yoneda.map (((shift_single_iso 0 (-i)).app Y₁).hom ≫
     eq_to_hom (show (single 𝓐 (0 - -i)).obj Y₁ = (single 𝓐 i).obj Y₁,
     by { congr, linarith, }))).app (op P₂) ≫
     (preadditive_yoneda.obj ((single 𝓐 i).obj Y₁)).map π.op ≫
-    (hom_single_iso _ Y₁ i).hom ≫
+    (hom_single_iso P₁ Y₁ i).hom ≫
     (homology_functor _ _ i).map ((nat_trans.map_homological_complex
       (preadditive_yoneda.map g) _).app P₁.val.as.op) =
   (preadditive_yoneda.map ((shift_functor (bounded_homotopy_category 𝓐) (-i)).map ((single 𝓐 0).map g))).app (op P₂) ≫
@@ -472,6 +483,22 @@ lemma compatibility₂ {Y₁ Y₂ : 𝓐} (g : Y₁ ⟶ Y₂) {P₁ P₂ : bound
     (preadditive_yoneda.obj ((single 𝓐 i).obj Y₂)).map π.op ≫
     (hom_single_iso P₁ Y₂ i).hom :=
 begin
+  let τiso := shift_single_iso 0 (-i) ≪≫ congr_single_functor 𝓐 (show 0 - -i = i, by linarith),
+  let τ := (shift_single_iso 0 (-i) ≪≫ congr_single_functor 𝓐 (show 0 - -i = i, by linarith)).hom,
+  have eq₁ : Π Y, eq_to_hom (show (single 𝓐 (0 - -i)).obj Y = (single 𝓐 i).obj Y,
+    by { congr, linarith, }) = ((congr_single_functor _ (by linarith)).app Y).hom :=
+    λ Y, by simp only [iso.app_hom, congr_single_functor_hom, eq_to_hom_app],
+  have eq₂ : shift_single_iso 0 (-i) ≪≫
+    congr_single_functor 𝓐 (show 0 - -i = i, by linarith) = τiso := rfl,
+  have eq₃ : Π Y, (τiso.app Y).hom = τ.app Y := λ Y, rfl,
+  simp only [eq₁, ← iso.trans_hom, ← nat_iso.trans_app, eq₂, eq₃],
+  have eq₄ := preadditive_yoneda.congr_map (τ.naturality g),
+  simp only [functor.map_comp] at eq₄,
+  have eq₅ := nat_trans.congr_app eq₄ (op P₂),
+  simp only [nat_trans.comp_app] at eq₅,
+  slice_rhs 1 2 { erw eq₅, },
+  simp only [category.assoc],
+  congr' 1,
   sorry,
 end
 
