@@ -10,9 +10,24 @@ open category_theory category_theory.limits opposite
 
 namespace Condensed
 
+def tensor_tunit (A : AddCommGroup) (h : AddCommGroup.is_tensor_unit A) :
+  tensor_functor.flip.obj A ≅ 𝟭 _ :=
+begin
+  sorry
+end
+
 def tensor_punit :
   tensor_functor.flip.obj (AddCommGroup.of (punit →₀ ℤ)) ≅ 𝟭 _ :=
-sorry
+tensor_tunit _ $
+begin
+  dsimp [AddCommGroup.is_tensor_unit],
+  refine ⟨finsupp.single punit.star 1, _⟩,
+  intro B, split,
+  { intros f g h, ext ⟨⟩, exact h },
+  { intros b, refine ⟨(finsupp.total _ _ _ _).to_add_monoid_hom, _⟩,
+    { intro, exact b },
+    { dsimp, simp only [finsupp.total_single, one_zsmul], } }
+end
 
 -- See comment around L20
 instance preserves_mono_tensor_functor (A : Condensed.{u} Ab.{u+1})
