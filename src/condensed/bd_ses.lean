@@ -1,6 +1,7 @@
 import condensed.filtered_colimits_commute_with_finite_limits
 import condensed.ab
 import condensed.short_exact
+import condensed.bd_ses_aux
 import for_mathlib.nnreal_to_nat_colimit
 
 open category_theory
@@ -94,29 +95,6 @@ begin
     erw (is_colimit_of_preserves.{u+1 u+1 u+1 u+1 u+2 u+2} F
       (is_colimit_as_nat_cocone.{u} A c)).fac_assoc,
     refl },
-end
-
-def coproduct_to_coproduct :
-  (∐ (λ i : as_small.{u+1} ℕ, F.obj ((as_nat_diagram A c).obj i))) ⟶
-  (∐ (λ i : as_small.{u+1} ℕ, F.obj ((as_nat_diagram A c).obj i))) :=
-sigma.desc $ λ i, F.map ((as_nat_diagram A c).map $
-  as_small.up.map $ hom_of_le $ nat.le_succ _) ≫
-  sigma.ι (λ i : as_small.{u+1} ℕ, F.obj ((as_nat_diagram A c).obj i))
-  (ulift.up $ (ulift.down i) + 1)
-
-open opposite
-
-def coproduct_eval_iso {α : Type (u+1)} (X : α → Condensed.{u} Ab.{u+1}) (S : ExtrDisc.{u}) :
-  (∐ X).val.obj (op S.val) ≅ ∐ (λ a, (X a).val.obj (op S.val)) :=
-preserves_colimit_iso (Condensed.evaluation Ab.{u+1} S.val) _ ≪≫
-has_colimit.iso_of_nat_iso (discrete.nat_iso $ λ _, iso.refl _)
-
-instance mono_coproduct_to_coproduct :
-  mono (coproduct_to_coproduct F A c - 𝟙 _) :=
-begin
-  rw mono_iff_ExtrDisc,
-  intros S, dsimp,
-  sorry -- TODO: same proof that we did in the other file...
 end
 
 end Condensed
