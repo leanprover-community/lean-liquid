@@ -212,10 +212,19 @@ begin
   refine eg.main_lemma' _ A B f g
     eval_freeCond_homology_zero tensor_functor tensor_punit _,
   { intros t ht,
+    obtain ⟨n, rfl⟩ : ∃ n : ℕ, t = -n,
+    { lift -t to ℕ with n hn, swap, { rw [neg_nonneg], refine ht.trans _, dec_trivial },
+      refine ⟨n, _⟩, rw [hn, neg_neg], },
     let HtQ'Z := ((eg.eval $
       category_theory.forget AddCommGroup ⋙ AddCommGroup.free).obj
-        (AddCommGroup.free.obj punit)).val.as.homology t,
+        (AddCommGroup.free.obj punit)).val.as.homology (-n),
     refine ⟨HtQ'Z, ⟨_⟩⟩,
+    refine endomorphisms.mk_iso _ _,
+    { refine _ ≪≫ ((package.hH_endo₁ eg freeCond' n).app ⟨A,f⟩).symm,
+      let e := homology_bd_eval eg A n,
+      -- refine _ ≪≫ e.symm,
+      sorry
+       },
     -- somehow, use `homology_bd_eval`
     sorry }
 end

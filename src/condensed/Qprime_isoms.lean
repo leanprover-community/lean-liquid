@@ -944,4 +944,11 @@ def homology_bd_eval (M : Condensed.{u} Ab.{u+1})
       (AddCommGroup.free.obj punit)).val.as.homology i) :=
 (as_iso (tensor_to_homology BD M i)).symm
 
+lemma homology_bd_eval_natural (M N : Condensed.{u} Ab.{u+1}) (f : M ⟶ N)
+  [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (M.val.obj (op S.val))]
+  [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (N.val.obj (op S.val))] (i : ℤ) :
+  (homology_bd_eval BD M i).inv ≫ (homology_functor _ _ i).map ((BD.eval' freeCond').map f) =
+  map_tensor f (𝟙 _) ≫ (homology_bd_eval BD N i).inv :=
+sorry
+
 end Condensed

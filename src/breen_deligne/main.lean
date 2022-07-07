@@ -609,46 +609,47 @@ begin
 end
 
 
-def eval'_homology :
-  BD.eval' F ⋙ homology_functor 𝓐 (complex_shape.up ℤ) 0 ≅
-  (data.eval_functor F).obj BD.data ⋙ homology_functor 𝓐 (complex_shape.down ℕ) 0 :=
+def eval'_homology (i : ℕ) :
+  BD.eval' F ⋙ homology_functor 𝓐 (complex_shape.up ℤ) (-i) ≅
+  (data.eval_functor F).obj BD.data ⋙ homology_functor 𝓐 (complex_shape.down ℕ) i :=
 begin
   calc ((data.eval_functor F).obj BD.data ⋙
     homological_complex.embed complex_shape.embedding.nat_down_int_up) ⋙
-    homology_functor 𝓐 (complex_shape.up ℤ) 0 ≅
+    homology_functor 𝓐 (complex_shape.up ℤ) (-i) ≅
     (data.eval_functor F).obj BD.data ⋙
     homological_complex.embed complex_shape.embedding.nat_down_int_up ⋙
-    homology_functor 𝓐 (complex_shape.up ℤ) 0 : functor.associator _ _ _
-  ... ≅ (data.eval_functor F).obj BD.data ⋙ homology_functor 𝓐 (complex_shape.down ℕ) 0 :
+    homology_functor 𝓐 (complex_shape.up ℤ) (-i) : functor.associator _ _ _
+  ... ≅ (data.eval_functor F).obj BD.data ⋙ homology_functor 𝓐 (complex_shape.down ℕ) i :
     iso_whisker_left _ _,
-  exact homological_complex.homology_embed_nat_iso 𝓐 complex_shape.embedding.nat_down_int_up
-    complex_shape.embedding.nat_down_int_up_c_iff 0 0 rfl,
+  refine homological_complex.homology_embed_nat_iso 𝓐 complex_shape.embedding.nat_down_int_up
+    complex_shape.embedding.nat_down_int_up_c_iff _ _ _,
+  { cases i; refl }
 end
 
-def hH0_endo₁_a :
-  BD.eval' F.map_endomorphisms ⋙ homology_functor _ _ 0 ⋙ endomorphisms.forget 𝓐 ≅
-  (data.eval_functor F.map_endomorphisms).obj BD.data ⋙ homology_functor _ _ 0 ⋙ endomorphisms.forget 𝓐 :=
-((whiskering_right _ _ _).obj (endomorphisms.forget 𝓐)).map_iso (eval'_homology _ _)
+def hH_endo₁_a (i : ℕ) :
+  BD.eval' F.map_endomorphisms ⋙ homology_functor _ _ (-i) ⋙ endomorphisms.forget 𝓐 ≅
+  (data.eval_functor F.map_endomorphisms).obj BD.data ⋙ homology_functor _ _ i ⋙ endomorphisms.forget 𝓐 :=
+((whiskering_right _ _ _).obj (endomorphisms.forget 𝓐)).map_iso (eval'_homology _ _ _)
 
-def hH0_endo₁_b :
-  (data.eval_functor F.map_endomorphisms).obj BD.data ⋙ homology_functor _ _ 0 ⋙ endomorphisms.forget 𝓐 ≅
-  (data.eval_functor F.map_endomorphisms).obj BD.data ⋙ (endomorphisms.forget 𝓐).map_homological_complex _ ⋙ homology_functor _ _ 0 :=
+def hH_endo₁_b (i : ℕ) :
+  (data.eval_functor F.map_endomorphisms).obj BD.data ⋙ homology_functor _ _ i ⋙ endomorphisms.forget 𝓐 ≅
+  (data.eval_functor F.map_endomorphisms).obj BD.data ⋙ (endomorphisms.forget 𝓐).map_homological_complex _ ⋙ homology_functor _ _ i :=
 ((whiskering_left _ _ _).obj ((data.eval_functor _).obj BD.data)).map_iso
-  ((endomorphisms.forget 𝓐).homology_functor_iso _ 0)
+  ((endomorphisms.forget 𝓐).homology_functor_iso _ i)
 
-def hH0_endo₁_c :
-  (data.eval_functor F.map_endomorphisms).obj BD.data ⋙ (endomorphisms.forget 𝓐).map_homological_complex _ ⋙ homology_functor _ _ 0 ≅
-  endomorphisms.forget _ ⋙ (data.eval_functor F).obj BD.data ⋙ homology_functor _ _ 0 :=
-(((whiskering_right _ _ _).obj (homology_functor 𝓐 (complex_shape.down ℕ) 0)).map_iso (forget_eval BD F).symm : _)
+def hH_endo₁_c (i : ℕ) :
+  (data.eval_functor F.map_endomorphisms).obj BD.data ⋙ (endomorphisms.forget 𝓐).map_homological_complex _ ⋙ homology_functor _ _ i ≅
+  endomorphisms.forget _ ⋙ (data.eval_functor F).obj BD.data ⋙ homology_functor _ _ i :=
+(((whiskering_right _ _ _).obj (homology_functor 𝓐 (complex_shape.down ℕ) i)).map_iso (forget_eval BD F).symm : _)
 
-def hH0_endo₁ :
-  BD.eval' F.map_endomorphisms ⋙ homology_functor (endomorphisms 𝓐) _ 0 ⋙ endomorphisms.forget 𝓐 ≅
-  endomorphisms.forget _ ⋙ (data.eval_functor F).obj BD.data ⋙ homology_functor 𝓐 _ 0 :=
-hH0_endo₁_a _ _ ≪≫ hH0_endo₁_b _ _ ≪≫ hH0_endo₁_c _ _
+def hH_endo₁ (i : ℕ) :
+  BD.eval' F.map_endomorphisms ⋙ homology_functor (endomorphisms 𝓐) _ (-i) ⋙ endomorphisms.forget 𝓐 ≅
+  endomorphisms.forget _ ⋙ (data.eval_functor F).obj BD.data ⋙ homology_functor 𝓐 _ i :=
+hH_endo₁_a _ _ i ≪≫ hH_endo₁_b _ _ i ≪≫ hH_endo₁_c _ _ i
 
 def hH0_endo₂ :
   ((BD.eval' F.map_endomorphisms ⋙ homology_functor (endomorphisms 𝓐) (complex_shape.up ℤ) 0).obj X).X ≅ X.X :=
-(hH0_endo₁ _ _).app _ ≪≫ hH0.app _
+(hH_endo₁ _ _ 0).app _ ≪≫ hH0.app _
 
 def hH0_endo :
   (BD.eval' F.map_endomorphisms ⋙ homology_functor (endomorphisms 𝓐) (complex_shape.up ℤ) 0).obj X ≅ X :=
@@ -659,7 +660,7 @@ begin
   simp only [category.assoc], erw [← this], clear this, simp only [← category.assoc],
   refine congr_arg2 _ _ rfl,
   let φ : X ⟶ X := ⟨X.e, rfl⟩,
-  have := (hH0_endo₁ BD F).hom.naturality φ, erw [← this], clear this,
+  have := (hH_endo₁ BD F 0).hom.naturality φ, erw [← this], clear this,
   refine congr_arg2 _ _ rfl,
   dsimp only [functor.comp_map, endomorphisms.forget_map],
   erw endomorphisms.homology_functor_obj_e ((BD.eval' F.map_endomorphisms).obj X) 0,
