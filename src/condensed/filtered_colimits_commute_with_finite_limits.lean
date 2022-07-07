@@ -1,5 +1,6 @@
 import condensed.top_comparison
 import condensed.filtered_colimits
+import for_mathlib.pow_functor
 
 open category_theory
 open category_theory.limits
@@ -71,6 +72,52 @@ begin
   apply_with nat_iso.is_iso_of_is_iso_app { instances := ff },
   intros S,
   apply is_iso_colim_to_lim_component,
+end
+
+noncomputable
+def colimit_limit_iso_limit_colimit :
+  colimit (limit F) ≅ limit (colimit F.flip) :=
+@as_iso _ _ _ _ (colim_to_lim F) (is_iso_colim_to_lim _)
+
+open_locale classical
+
+-- How is this now showing up?
+--instance fin_category_discrete (α : Type (u+1)) [fintype α] : fin_category (discrete α) :=
+--sorry
+
+noncomputable
+def colimit_pow_iso (α : Type (u+1)) [fintype α] (F : J ⥤ CondensedSet.{u}) :
+  colimit (∏ λ i : α, F) ≅ ∏ (λ i : α, colimit F) :=
+colimit_limit_iso_limit_colimit (discrete.functor $ λ i : α, F) ≪≫
+has_limit.iso_of_nat_iso (discrete.nat_iso $ λ i,
+begin
+  dsimp,
+  refine (preserves_colimit_iso ((category_theory.evaluation _ _).obj i) _) ≪≫ _,
+  refine has_colimit.iso_of_nat_iso _,
+  refine nat_iso.of_components (λ j, iso.refl _) _,
+  intros j k f, dsimp, simp,
+end)
+
+.
+
+def is_colimit_pow_functor_map_cocone (α: Type (u+1))
+  [fintype α]
+  [J: Type (u+1)]
+  [small_category J]
+  [is_filtered J]
+  (F: J ⥤ CondensedSet) :
+  is_colimit ((pow_functor CondensedSet α).map_cocone (colimit.cocone F)) :=
+sorry
+
+-- Filtered colimits commute with finite products in condensed sets
+noncomputable
+instance pow_functor_preserves_filtered_colimits (α : Type (u+1)) [fintype α] :
+  preserves_filtered_colimits
+  (pow_functor CondensedSet.{u} α) :=
+begin
+  constructor, introsI J _ _, constructor, intros F,
+  apply preserves_colimit_of_preserves_colimit_cocone (colimit.is_colimit F),
+  apply is_colimit_pow_functor_map_cocone,
 end
 
 end CondensedSet

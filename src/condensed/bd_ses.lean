@@ -118,11 +118,6 @@ def coproduct_presentation_with_pow :
   F.obj (∏ λ j : ulift.{u+1} (fin n), (as_nat_cocone A c).X) :=
 sigma.desc $ λ i, F.map (pi.map $ λ j, (as_nat_cocone A c).ι.app i)
 
--- Filtered colimits commute with finite products in condensed sets
-instance pow_functor_preserves_filtered_colimits (n : ℕ) :
-  preserves_filtered_colimits
-  (pow_functor CondensedSet.{u} (ulift.{u+1} (fin n))) := sorry
-
 def as_nat_diagram_pow : as_small.{u+1} ℕ ⥤ CondensedSet.{u} :=
 as_nat_diagram A c ⋙ pow_functor _ (ulift.{u+1} (fin n))
 
