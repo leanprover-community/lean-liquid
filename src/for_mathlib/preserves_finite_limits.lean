@@ -57,7 +57,8 @@ def preserves_equalizers_of_preserves_kernels [F.additive]
     apply preserves_limit_of_iso_diagram F (diagram_iso_parallel_pair K).symm
   end }
 
-lemma exact_comp_mono_iff {X Y Z A : 𝓐} (f : X ⟶ Y) (g : Y ⟶ Z) (h : Z ⟶ A) [mono h]:
+-- todo: unify with `exact_comp_mono_iff`
+lemma exact_comp_mono_iff' {X Y Z A : 𝓐} (f : X ⟶ Y) (g : Y ⟶ Z) (h : Z ⟶ A) [mono h]:
   exact f (g ≫ h) ↔ exact f g :=
 begin
   refine ⟨λ hfg, ⟨zero_of_comp_mono h (by rw [category.assoc, hfg.1]), _⟩, λ h, exact_comp_mono h⟩,
@@ -99,13 +100,13 @@ begin
     let hc' := hc.of_iso_limit (iso_of_ι _ _ _),
     have := abelian.exact_of_is_kernel _ _ (kernel_fork.condition c) hc',
     simp_rw ← image.fac f at this,
-    rw exact_comp_mono_iff at this,
+    rw exact_comp_mono_iff' at this,
     let := abelian.is_colimit_of_exact_of_epi _ _ this,
     let q := is_colimit_cofork_map_of_is_colimit' F _ this,
     haveI : mono (F.map (image.ι f)),
     { apply h1, apply_instance },
     simp_rw ← image.fac f,
-    rw [functor.map_comp, exact_comp_mono_iff],
+    rw [functor.map_comp, exact_comp_mono_iff'],
     exact abelian.exact_of_is_cokernel _ _ _ q },
   haveI : preserves_limits_of_shape walking_parallel_pair.{v} F,
   { apply preserves_equalizers_of_preserves_kernels },
@@ -117,4 +118,3 @@ begin
   exact @preserves_finite_limits_of_preserves_equalizers_and_finite_products
     _ _ _ _ _ _ _ _ p,
 end
-
