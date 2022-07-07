@@ -1,5 +1,4 @@
 import condensed.tensor
-import for_mathlib.AddCommGroup.tensor_short_exact
 import for_mathlib.preserves_finite_limits
 
 noncomputable theory
