@@ -8,12 +8,46 @@ open_locale tensor_product
 
 open category_theory category_theory.limits opposite
 
+namespace AddCommGroup
+
+@[reassoc]
+lemma map_tensor_flip {A B C D : AddCommGroup} (f : A ⟶ B) (g : C ⟶ D) :
+  map_tensor f g ≫ (tensor_flip _ _).hom = (tensor_flip _ _).hom ≫ map_tensor g f :=
+by { apply AddCommGroup.tensor_ext, intros a c, refl }
+
+end AddCommGroup
+
 namespace Condensed
 
 def tensor_tunit (A : AddCommGroup) (h : AddCommGroup.is_tensor_unit A) :
   tensor_functor.flip.obj A ≅ 𝟭 _ :=
 begin
-  sorry
+  refine _ ≪≫ (Condensed_ExtrSheaf_equiv Ab).counit_iso,
+  refine nat_iso.of_components _ _,
+  { intro M,
+    refine (Condensed_ExtrSheaf_equiv Ab).functor.map_iso _,
+    refine Sheaf.iso.mk _ _ _,
+    refine nat_iso.of_components _ _,
+    { intro S,
+      refine (AddCommGroup.tensor_functor_iso_flip.app _).app _ ≪≫ _,
+      refine AddCommGroup.tensor_unit_iso _ _ h, },
+    { intros S T f,
+      dsimp [ExtrSheaf.tensor, AddCommGroup.tensor_functor_iso_flip],
+      simp only [category.assoc],
+      erw AddCommGroup.tensor_unit_iso_naturality,
+      rw ← AddCommGroup.map_tensor_flip_assoc, refl, } },
+  { intros M N f,
+    dsimp only [tensor_functor, map_tensor, functor.flip_obj_map,
+      functor.comp_map, functor.map_iso_hom],
+    simp only [← functor.map_comp], congr' 1,
+    ext S : 3,
+    dsimp only [Sheaf.category_theory.category_comp_val, ExtrSheaf.map_tensor_val, Sheaf.iso.mk_hom_val,
+      nat_iso.of_components.hom_app, nat_trans.comp_app,
+      ExtrSheafProd.map_tensor_val_app, iso.trans_hom],
+    simp only [category.assoc],
+    dsimp [AddCommGroup.tensor_functor_iso_flip],
+    rw [AddCommGroup.map_tensor_flip_assoc], congr' 1,
+    symmetry, apply AddCommGroup.tensor_unit_iso_naturality, }
 end
 
 def tensor_punit :
