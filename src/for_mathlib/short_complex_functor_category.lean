@@ -120,6 +120,24 @@ nat_iso.of_components
   refl,
 end)
 
+lemma ι_middle_π₁_is_zero [has_zero_object C] :
+  is_zero ((ι_middle : C ⥤ _ ) ⋙ short_complex.π₁) :=
+begin
+  rw functor.is_zero_iff,
+  intro X,
+  dsimp,
+  simp only [functor.zero_obj],
+end
+
+lemma ι_middle_π₃_is_zero [has_zero_object C] :
+  is_zero ((ι_middle : C ⥤ _ ) ⋙ short_complex.π₃) :=
+begin
+  rw functor.is_zero_iff,
+  intro X,
+  dsimp,
+  simp only [functor.zero_obj],
+end
+
 @[simps]
 def nat_trans_hom_mk {S₁ S₂ : J ⥤ short_complex C} (τ₁ : S₁ ⋙ π₁ ⟶ S₂ ⋙ π₁)
   (τ₂ : S₁ ⋙ π₂ ⟶ S₂ ⋙ π₂) (τ₃ : S₁ ⋙ π₃ ⟶ S₂ ⋙ π₃)

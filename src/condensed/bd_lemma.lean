@@ -155,7 +155,7 @@ begin
       ← functor.map_comp, eval_free_σ_eq_add], refl },
 end
 
-instance eval_free_homology_zero_epi (A : AddCommGroup) :
+instance eval_free_homology_zero_epi (A : AddCommGroup.{u}) :
   epi ((forget _ ⋙ AddCommGroup.free).map (Pow_1_iso A).hom ≫ AddCommGroup.of_hom (free_abelian_group.lift id)) :=
 begin
   apply_with epi_comp {instances:=ff}, apply_instance,
@@ -192,34 +192,95 @@ def of_epi_g (hfg : exact f g) (hg : epi g) (hγ : γ = 0) :
 
 end
 
-/- stategy for the naturality:
-rewrite this by first constructing a natural transformation using
-a natural transformation of functors `AddCommGroup ⥤ short_complex AddCommGroup`,
-using short_complex.ι_middle as a target, and computing homolgy with `ι_middle_homology_nat_iso`,
-and then show it is an iso using the objectwise exact sequence -/
-def eval_free_homology_zero :
-  ((data.eval_functor (forget _ ⋙ AddCommGroup.free)).obj breen_deligne.eg.data) ⋙ homology_functor _ _ 0 ≅ 𝟭 _ :=
+def nat_trans_eval_free :
+  ((data.eval_functor (forget _ ⋙ AddCommGroup.free.{u})).obj breen_deligne.eg.data) ⋙
+    homological_complex.eval _ _ 0 ⟶ 𝟭 AddCommGroup :=
+{ app := λ A, (forget _ ⋙ AddCommGroup.free).map (Pow_1_iso A).hom ≫
+    AddCommGroup.of_hom (free_abelian_group.lift id),
+  naturality' := sorry, }
+
+def short_complex_nat_trans_eval_free :
+  ((data.eval_functor (forget _ ⋙ AddCommGroup.free)).obj breen_deligne.eg.data)
+    ⋙ short_complex.functor_homological_complex _ _ 0 ⟶ short_complex.ι_middle :=
 begin
-  refine nat_iso.of_components _ _,
-  { intro A,
-    let e := (of_epi_g _ _ _ _ (eval_free_homology_zero_epi A) _).iso.symm,
-    refine e ≪≫ eq_to_iso _,
-    { cases A, refl },
-    { rw homological_complex.d_to_eq, swap 3, exact 1, swap, dsimp, refl,
-      rw exact_iso_comp, exact eval_free_homology_zero_exact A, },
-    { rw homological_complex.d_from_eq_zero, apply chain_complex.next_nat_zero }, },
-  { rintro A B f,
-    dsimp only [iso.trans_hom, functor.comp_map, iso.symm_hom, functor.id_map],
-    simp only [category.assoc, homology_iso_datum.iso_inv,
-      of_epi_g.to_homology_iso_predatum_π],
-    -- refine has_homology.ext_π (homology.has _ _ _) _ _ _,
-    -- dsimp only [homology.has_π],
-    -- erw homology.map_eq_desc'_lift_right,
-    -- -- apply homology.ext,
-    -- erw homology.π'_desc'_assoc,
-    -- erw homology.π'_desc'_assoc,
-    sorry }
+  refine short_complex.nat_trans_hom_mk 0 nat_trans_eval_free 0 _
+    (begin apply is_zero.eq_of_tgt, apply short_complex.ι_middle_π₃_is_zero, end),
+  ext1, ext1 A,
+  simp only [zero_comp, nat_trans.app_zero, nat_trans.hcomp_app, nat_trans.comp_app,
+    nat_trans.id_app, short_complex.π₂.map_id, category.comp_id],
+  dsimp only [short_complex.φ₁₂, short_complex.functor_homological_complex, functor.comp_obj,
+    short_complex.mk],
+  simp only [@homological_complex.d_to_eq _ _ _ _ (complex_shape.down ℕ) _ _ 1 0 (zero_add 1),
+    category.assoc],
+  erw [(eval_free_homology_zero_exact A).w, comp_zero],
 end
+
+lemma short_complex_nat_trans_eval_free_app_τ₂ (A : AddCommGroup) :
+  (short_complex_nat_trans_eval_free.app A).τ₂ = nat_trans_eval_free.app A := rfl
+
+def eval_free_homology_zero_nat_trans :=
+short_complex_nat_trans_eval_free ◫ (𝟙 short_complex.homology_functor)
+
+lemma _root_.short_complex.homology_map_is_iso_of_exact_and_epi
+  {A : Type*} [category A] [abelian A]
+  {S₁ S₂ : short_complex A} (φ : S₁ ⟶ S₂) (hg₁ : S₁.1.g = 0) (hf₂ : S₂.1.f = 0) (hg₂ : S₂.1.g = 0)
+  (ex : exact S₁.1.f φ.τ₂) (epi_τ₂ : epi φ.τ₂) :
+  is_iso (short_complex.homology_functor.map φ) :=
+begin
+  let h₁ := homology_iso_datum.of_g_is_zero S₁.1.f S₁.1.g hg₁,
+  let h₂ := homology_iso_datum.of_both_zeros S₂.1.f S₂.1.g hf₂ hg₂,
+  let ψ := cokernel.desc _ φ.τ₂ ex.w,
+  let μ : homology_map_datum φ h₁ h₂ ψ :=
+  { κ := φ.τ₂,
+    fac₁' := by { erw [φ.comm₁₂], simp only [hf₂], refl, },
+    fac₂' := by { erw [category.id_comp, category.comp_id], },
+    fac₃' := by { erw [category.comp_id], apply cokernel.π_desc, }, },
+  rw μ.homology_map_eq,
+  suffices : is_iso ψ,
+  { haveI := this, apply_instance, },
+  exact abelian.category_theory.limits.cokernel.desc.category_theory.is_iso _ _ ex,
+end
+
+instance : is_iso eval_free_homology_zero_nat_trans.{u} :=
+begin
+  suffices : ∀ A, is_iso ((short_complex_nat_trans_eval_free ◫
+    (𝟙 short_complex.homology_functor)).app A),
+  { apply_with nat_iso.is_iso_of_is_iso_app { instances := ff }, exact this, },
+  intro A,
+  simp only [nat_trans.hcomp_id_app],
+  refine short_complex.homology_map_is_iso_of_exact_and_epi _ _ rfl rfl _ _,
+  { apply is_zero.eq_of_tgt,
+    refine is_zero.of_iso (is_zero_zero _) _,
+    apply homological_complex.X_next_iso_zero,
+    rcases h : (complex_shape.down ℕ).next 0 with _ | ⟨i, hi⟩,
+    { refl, },
+    { exfalso,
+      change i+1=0 at hi,
+      simpa only using hi, }, },
+  { refine exact_of_iso_of_exact' _ _ _ _ _ _ _ _ _ (eval_free_homology_zero_exact A),
+    { symmetry,
+      exact (homological_complex.X_prev_iso _ (zero_add 1)), },
+    { refl, },
+    { apply eq_to_iso, cases A, refl, },
+    { dsimp only [short_complex.functor_homological_complex, functor.comp_obj,
+        short_complex.mk],
+      rw homological_complex.d_to_eq, swap 3, exact 1, swap, dsimp, refl,
+      simp only [iso.symm_hom, iso.refl_hom, category.comp_id],
+      apply iso.inv_hom_id_assoc, },
+    { apply category.id_comp, }, },
+  { rw short_complex_nat_trans_eval_free_app_τ₂,
+    dsimp [nat_trans_eval_free],
+    convert eval_free_homology_zero_epi.{u} A,
+    cases A,
+    refl, },
+end
+
+def eval_free_homology_zero :
+  ((data.eval_functor (forget _ ⋙ AddCommGroup.free)).obj breen_deligne.eg.data) ⋙
+    homology_functor _ _ 0 ≅ 𝟭 _ :=
+  iso_whisker_left _ (short_complex.homology_functor_iso _ _ _) ≪≫
+    (functor.associator _ _ _).symm ≪≫ as_iso eval_free_homology_zero_nat_trans ≪≫
+    short_complex.ι_middle_homology_nat_iso.symm
 
 end
 
