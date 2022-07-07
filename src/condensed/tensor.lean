@@ -546,9 +546,10 @@ instance tensor_functor_additive (A : Condensed.{u} Ab.{u+1}) :
     dsimp [tensor_functor, map_tensor],
     rw [← functor.map_add], congr' 1, ext S : 3,
     dsimp only [ExtrSheaf.map_tensor, ExtrSheafProd.map_tensor],
-    simp only [category_theory.functor.map_id, nat_trans.id_app],
-    -- rw [← AddCommGroup.tensor_functor_obj_map],
-    sorry
+    simp only [category_theory.functor.map_id],
+    erw [nat_trans.id_app],
+    rw [← AddCommGroup.tensor_functor_obj_map, functor.map_add],
+    refl,
   end }
 
 end Condensed
