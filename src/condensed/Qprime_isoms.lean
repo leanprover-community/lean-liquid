@@ -944,11 +944,63 @@ def homology_bd_eval (M : Condensed.{u} Ab.{u+1})
       (AddCommGroup.free.obj punit)).val.as.homology i) :=
 (as_iso (tensor_to_homology BD M i)).symm
 
-lemma homology_bd_eval_natural (M N : Condensed.{u} Ab.{u+1}) (f : M ⟶ N)
+section
+variables (M N : Condensed.{u} Ab.{u+1}) (f : M ⟶ N)
+
+lemma eval_freeCond'_iso_component_natural :
+  (eval_freeCond'_iso_component.{u} BD M).inv ≫ (BD.eval' freeCond'.{u}).map f =
+  (presheaf_to_Condensed_Ab.{u}.map_homological_complex (complex_shape.up.{0} ℤ)).map
+    ((BD.eval' freeFunc.{u u+1}).map (Condensed_Ab_to_presheaf.{u}.map f)) ≫
+      (eval_freeCond'_iso_component.{u} BD N).inv :=
+begin
+  sorry
+end
+
+lemma tensor_to_homology_natural
+  [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (M.val.obj (op S.val))]
+  [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (N.val.obj (op S.val))] (i : ℤ) :
+  tensor_to_homology.{u} BD M i ≫ (homology_functor (Condensed.{u} Ab.{u+1}) _ i).map
+      ((BD.eval' freeCond').map f) =
+  map_tensor f (𝟙 _) ≫ tensor_to_homology.{u} BD N i :=
+begin
+  simp only [tensor_to_homology, category.assoc, ← functor.map_comp,
+    eval_freeCond'_iso_component_natural],
+  simp only [functor.map_comp],
+  simp only [← category.assoc], refine congr_arg2 _ _ rfl, simp only [category.assoc],
+  have := (homology_functor_sheafification_iso (complex_shape.up ℤ) i).hom.naturality
+    ((Condensed_Ab_to_presheaf ⋙ BD.eval' freeFunc).map f),
+  erw [← this], clear this,
+  simp only [← category.assoc], refine congr_arg2 _ _ rfl, simp only [category.assoc],
+  dsimp only [iso.app_hom],
+  have := (Condensed_ExtrSheaf_equiv Ab.{u+1}).counit_iso.hom.naturality
+    ((homology_functor (Profinite.{u}ᵒᵖ ⥤ Ab.{u+1}) _ i ⋙
+      presheaf_to_Condensed_Ab).map ((Condensed_Ab_to_presheaf ⋙ BD.eval' freeFunc.{u u+1}).map f)),
+  erw [← this], clear this,
+  simp only [← category.assoc], refine congr_arg2 _ _ rfl, simp only [category.assoc],
+  dsimp only [map_tensor, functor.comp_map],
+  simp only [← functor.map_comp], congr' 1,
+  have := ExtrDisc_sheafification_iso.hom.naturality
+    ((homology_functor (Profinite.{u}ᵒᵖ ⥤ Ab.{u+1}) _ i).map
+      ((BD.eval' freeFunc).map (Condensed_Ab_to_presheaf.map f))),
+  erw [← this], clear this,
+  simp only [← category.assoc], refine congr_arg2 _ _ rfl,
+  -- jmc is not sure that the following steps are good moves
+  ext S : 3,
+  dsimp only [functor.comp_map, whiskering_left_obj_map, tensor_to_homology_aux,
+    Sheaf.hom.comp_val, nat_trans.comp_app],
+  simp only [category.assoc],
+  -- erw [← nat_trans.naturality],
+  --  nat_trans.naturality_assoc],
+  sorry
+end
+
+lemma homology_bd_eval_natural
   [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (M.val.obj (op S.val))]
   [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (N.val.obj (op S.val))] (i : ℤ) :
   (homology_bd_eval BD M i).inv ≫ (homology_functor _ _ i).map ((BD.eval' freeCond').map f) =
   map_tensor f (𝟙 _) ≫ (homology_bd_eval BD N i).inv :=
-sorry
+tensor_to_homology_natural BD M N f i
+
+end
 
 end Condensed
