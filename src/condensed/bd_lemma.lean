@@ -183,6 +183,7 @@ begin
     refine (colimit.is_colimit _).cocone_point_unique_up_to_iso c ≪≫ _,
     exact eq_to_iso (by cases A; refl), },
   { intros A B f, dsimp only [iso.trans_hom, functor.comp_map],
+  -- suggestion (J. Riou): use homology_map_datum.of_g_are_zeros that I have just added
     sorry }
 end
 
