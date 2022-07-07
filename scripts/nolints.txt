@@ -31,11 +31,14 @@ apply_nolint breen_deligne.FreeMat.kronecker_map_reindex_right unused_arguments
 apply_nolint breen_deligne.data.homological_complex.functor_eval_flip_preserves_colimits_of_shape unused_arguments
 
 -- breen_deligne/main.lean
+apply_nolint breen_deligne.package.endo_T unused_arguments
+apply_nolint breen_deligne.package.endo_T_short_exact unused_arguments
 apply_nolint breen_deligne.package.eval'_bounded_above unused_arguments
 apply_nolint breen_deligne.package.eval'_homology unused_arguments
 apply_nolint breen_deligne.package.forget_eval unused_arguments
 apply_nolint breen_deligne.package.hH0_endo₁_a unused_arguments
 apply_nolint breen_deligne.package.hH0_endo₁_b unused_arguments
+apply_nolint breen_deligne.package.main_lemma' unused_arguments
 apply_nolint breen_deligne.package.main_lemma.IH_neg unused_arguments
 apply_nolint breen_deligne.package.main_lemma.bdd_step unused_arguments
 apply_nolint breen_deligne.package.main_lemma.bdd_step₂ unused_arguments
@@ -65,6 +68,10 @@ apply_nolint Condensed.homology_functor.map_id_bo_ho_ca unused_arguments
 
 -- condensed/acyclic.lean
 apply_nolint condensed.acyclic_of_exact.induction_step_ex unused_arguments
+
+-- condensed/bd_ses.lean
+apply_nolint Condensed.coproduct_presentation unused_arguments
+apply_nolint Condensed.coproduct_to_coproduct unused_arguments
 
 -- condensed/condensify.lean
 apply_nolint Tinv_nat_trans unused_arguments
@@ -108,6 +115,9 @@ apply_nolint is_sheaf_colimit_presheaf_aux.prod.second_iso unused_arguments
 apply_nolint is_sheaf_colimit_presheaf_aux.prod.third_iso_aux_left unused_arguments
 apply_nolint is_sheaf_colimit_presheaf_aux.prod.third_iso_aux_right unused_arguments
 
+-- condensed/filtered_colimits_commute_with_finite_limits.lean
+apply_nolint CondensedSet.colim_to_lim unused_arguments
+
 -- condensed/is_proetale_sheaf.lean
 apply_nolint category_theory.functor.finite_product_condition_of_sum unused_arguments
 
@@ -143,6 +153,9 @@ apply_nolint category_theory.sigma_cokernel_cofork unused_arguments
 -- for_mathlib/ab5.lean
 apply_nolint category_theory.colimit_homology_functor_iso unused_arguments
 apply_nolint category_theory.eval_functor_colimit_iso unused_arguments
+
+-- for_mathlib/ab52.lean
+apply_nolint category_theory.mono_colim_map_of_mono def_lemma
 
 -- for_mathlib/abelian_category.lean
 apply_nolint category_theory.limits.image_iso_of_eq unused_arguments
@@ -226,9 +239,11 @@ apply_nolint category_theory.functor.left_derived.β unused_arguments
 -- for_mathlib/endomorphisms/Ext.lean
 apply_nolint category_theory.endomorphisms.C₁ unused_arguments
 apply_nolint category_theory.endomorphisms.C₂ unused_arguments
+apply_nolint category_theory.endomorphisms.compatibility_aux unused_arguments
 apply_nolint category_theory.endomorphisms.embed_single unused_arguments
 apply_nolint category_theory.endomorphisms.forget_mk_end unused_arguments
 apply_nolint category_theory.endomorphisms.forget_preserves_is_quasi_iso unused_arguments
+apply_nolint category_theory.endomorphisms.lift_unop_op unused_arguments
 apply_nolint category_theory.endomorphisms.map.homotopy_category.is_quasi_iso unused_arguments
 apply_nolint category_theory.endomorphisms.map₁₂_exact unused_arguments
 apply_nolint category_theory.endomorphisms.mk_bo_ho_ca' unused_arguments
@@ -284,6 +299,9 @@ apply_nolint category_theory.is_initial_colimit def_lemma unused_arguments
 apply_nolint category_theory.is_iso_coproduct unused_arguments
 apply_nolint homotopy_category.homotopic_of_quotient_map_eq unused_arguments
 
+-- for_mathlib/homotopy_category_op.lean
+apply_nolint homological_complex.op_functor_map_homotopy def_lemma
+
 -- for_mathlib/horseshoe.lean
 apply_nolint short_exact_sequence.biprod_factors unused_arguments
 apply_nolint short_exact_sequence.horseshoe_ker unused_arguments
@@ -308,6 +326,9 @@ apply_nolint homological_complex.termwise_split_mono_section unused_arguments
 
 -- for_mathlib/nnreal_int_binary.lean
 apply_nolint nnreal.zpow_le_zpow' def_lemma
+
+-- for_mathlib/nnreal_to_nat_colimit.lean
+apply_nolint category_theory.limits.nat_to_nnreal unused_arguments
 
 -- for_mathlib/order.lean
 apply_nolint Inter_eq inhabited_nonempty
