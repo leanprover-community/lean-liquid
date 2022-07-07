@@ -442,4 +442,14 @@ begin
       simpa only [hi, hi'], }, },
 end
 
+lemma hom_single_iso_naturality_snd_var
+  (P : bounded_homotopy_category C) {B₁ B₂ : C} (i : ℤ)
+  (f : B₁ ⟶ B₂) (x : P ⟶ (single C i).obj B₁) :
+  ((homology_functor _ _ i).map
+    ((nat_trans.map_homological_complex (preadditive_yoneda.map f) _).app P.val.as.op))
+      ((hom_single_iso P B₁ i).hom x) = ((hom_single_iso P B₂ i).hom (x ≫ (single C i).map f)) :=
+begin
+  sorry,
+end
+
 end bounded_homotopy_category

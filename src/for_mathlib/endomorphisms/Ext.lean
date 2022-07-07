@@ -445,16 +445,6 @@ end
 instance preadditive_yoneda_flip_additive :
   (preadditive_yoneda : 𝓐 ⥤ _).flip.additive := { }
 
-lemma hom_single_iso_naturality_snd_var
-  (P : bounded_homotopy_category 𝓐) {B₁ B₂ : 𝓐} (i : ℤ)
-  (f : B₁ ⟶ B₂) (x : P ⟶ (single 𝓐 i).obj B₁) :
-  ((homology_functor _ _ i).map
-    ((nat_trans.map_homological_complex (preadditive_yoneda.map f) _).app P.val.as.op))
-      ((hom_single_iso P B₁ i).hom x) = ((hom_single_iso P B₂ i).hom (x ≫ (single 𝓐 i).map f)) :=
-begin
-  sorry,
-end
-
 variable (𝓐)
 
 @[simps]
