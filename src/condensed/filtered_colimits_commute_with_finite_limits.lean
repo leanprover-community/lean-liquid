@@ -54,6 +54,7 @@ instance faithful_CondesensedSet_to_presheaf :
   faithful CondensedSet_to_presheaf :=
 show faithful (Sheaf_to_presheaf _ _), by apply_instance
 
+noncomputable
 instance preserves_limits_CondesensedSet_to_presheaf :
   preserves_limits CondensedSet_to_presheaf :=
 adjunction.right_adjoint_preserves_limits CondensedSet_presheaf_adjunction
@@ -74,10 +75,6 @@ begin
   let F' := uncurry.{u+1 u+1}.obj F ⋙ VS,
   let f := colimit_limit_to_limit_colimit F',
   let f' := colimit_limit_iso (curry.{u+1 u+1}.obj F'), -- another version of `f`?
-  letI : preserves_limit (colimit F.flip) VS,
-  { apply_with limits.comp_preserves_limit {instances:=ff},
-    { sorry /- jmc: huh?! `apply_instance` fails! -/ },
-    { apply_instance } },
   let e₁ : (colimit (limit F)).val.obj S ≅ colimit (curry.obj (category_theory.prod.swap J K ⋙ F') ⋙ lim),
   { sorry },
   let e₂ : (limit (colimit F.flip)).val.obj S ≅ limit (curry.obj F' ⋙ colim),
