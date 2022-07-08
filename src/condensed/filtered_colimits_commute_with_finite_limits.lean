@@ -246,9 +246,10 @@ begin
       category_theory.functor.map_limit_hom_π_assoc,
       iso.refl_hom, iso.refl_inv, category.id_comp, category.id_comp], },
   simp only [← nat_trans.comp_app, ← Sheaf.hom.comp_val,
+    CondensedSet_to_presheaf_map, evaluation_obj_map, functor.comp_map,
     ← category_theory.nat_trans.comp_app_assoc, ← category_theory.Sheaf.hom.comp_val_assoc],
-  simp only [colim_to_lim, colimit.ι_desc_assoc, limit.lift_π_assoc,
-    category.assoc],
+  simp only [colim_to_lim, colimit.ι_desc_assoc, limit.lift_π_assoc, category.assoc],
+  congr' 2,
   -- dsimp only [category_theory.functor.map_limit, category_theory.functor.map_colimit],
   sorry
 end
