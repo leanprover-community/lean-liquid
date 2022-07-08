@@ -1,5 +1,6 @@
 import condensed.top_comparison
 import condensed.filtered_colimits
+import condensed.adjunctions
 import for_mathlib.pow_functor
 
 open category_theory
@@ -53,15 +54,43 @@ instance faithful_CondesensedSet_to_presheaf :
   faithful CondensedSet_to_presheaf :=
 show faithful (Sheaf_to_presheaf _ _), by apply_instance
 
+instance preserves_limits_CondesensedSet_to_presheaf :
+  preserves_limits CondensedSet_to_presheaf :=
+adjunction.right_adjoint_preserves_limits CondensedSet_presheaf_adjunction
+
+section
+
+-- set_option pp.universes true
+
 lemma is_iso_colim_to_lim_component (S : Profinite.{u}ᵒᵖ) :
   is_iso ((colim_to_lim F).val.app S) :=
 begin
   /-
   The forgetful functor to presheaves preserves filtered colimits and all limits,
-  while the same holds for evaluation, hence this morphism should be isomoprhic to
+  while the same holds for evaluation, hence this morphism should be isomorphic to
   `colimit_limit_to_limit_colimit` which is an isomorphism.
   -/
+  let VS := CondensedSet_to_presheaf.{u} ⋙ (category_theory.evaluation.{u u+1 u+1 u+2} Profinite.{u}ᵒᵖ (Type (u+1))).obj S,
+  let F' := uncurry.{u+1 u+1}.obj F ⋙ VS,
+  let f := colimit_limit_to_limit_colimit F',
+  let f' := colimit_limit_iso (curry.{u+1 u+1}.obj F'), -- another version of `f`?
+  letI : preserves_limit (colimit F.flip) VS,
+  { apply_with limits.comp_preserves_limit {instances:=ff},
+    { sorry /- jmc: huh?! `apply_instance` fails! -/ },
+    { apply_instance } },
+  let e₁ : (colimit (limit F)).val.obj S ≅ colimit (curry.obj (category_theory.prod.swap J K ⋙ F') ⋙ lim),
+  { sorry },
+  let e₂ : (limit (colimit F.flip)).val.obj S ≅ limit (curry.obj F' ⋙ colim),
+  { refine is_limit.cone_point_unique_up_to_iso
+      (is_limit_of_preserves VS (limit.is_limit $ colimit F.flip))
+      (limit.is_limit _) ≪≫ _,
+    refine limits.lim.map_iso _,
+    sorry },
+  suffices : (colim_to_lim F).val.app S = e₁.hom ≫ f ≫ e₂.inv,
+  { rw [this, is_iso_iff_is_iso_comp_left, is_iso_iff_is_iso_comp_right], apply_instance },
   sorry
+end
+
 end
 
 lemma is_iso_colim_to_lim :
