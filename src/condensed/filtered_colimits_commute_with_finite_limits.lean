@@ -250,8 +250,13 @@ begin
     ← category_theory.nat_trans.comp_app_assoc, ← category_theory.Sheaf.hom.comp_val_assoc],
   simp only [colim_to_lim, colimit.ι_desc_assoc, limit.lift_π_assoc, category.assoc],
   congr' 2,
-  -- dsimp only [category_theory.functor.map_limit, category_theory.functor.map_colimit],
-  sorry
+  simp only [← lim_map_eq_lim_map, ← functor.map_iso_hom, ← functor.map_iso_inv, iso.inv_comp_eq],
+  simp only [← category.assoc, ← iso.eq_comp_inv],
+  simp only [functor.map_iso_hom, functor.map_iso_inv, category.assoc,
+    lim_map_eq_lim_map, lim_map_π_assoc, colimit.ι_map_assoc,
+    category_theory.functor.ι_map_colimit_inv, category_theory.functor.map_limit_hom_π_assoc,
+    iso.refl_hom, iso.refl_inv, category.id_comp, nat_trans.id_app],
+  refl,
 end
 
 end
@@ -272,10 +277,6 @@ def colimit_limit_iso_limit_colimit :
 @as_iso _ _ _ _ (colim_to_lim F) (is_iso_colim_to_lim _)
 
 open_locale classical
-
--- How is this now showing up?
---instance fin_category_discrete (α : Type (u+1)) [fintype α] : fin_category (discrete α) :=
---sorry
 
 noncomputable
 def colimit_pow_iso (α : Type (u+1)) [fintype α] (F : J ⥤ CondensedSet.{u}) :
