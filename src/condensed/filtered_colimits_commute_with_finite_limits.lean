@@ -226,8 +226,8 @@ begin
   { rw [this, is_iso_iff_is_iso_comp_left, is_iso_iff_is_iso_comp_right], apply_instance },
   rw [← iso.inv_comp_eq, iso.eq_comp_inv, category.assoc],
   ext j k : 2,
-  dsimp [is_iso_colim_to_lim_component_e₁, is_iso_colim_to_lim_component_e₂],
-  simp only [category.assoc, colimit.ι_map_assoc,
+  dsimp [colimit_limit_to_limit_colimit, is_iso_colim_to_lim_component_e₁, is_iso_colim_to_lim_component_e₂],
+  simp only [category.assoc, limit.lift_π, colimit.ι_desc, colimit.ι_map_assoc,
     category_theory.functor.ι_map_colimit_inv_assoc,
     category_theory.functor.map_limit_hom_π_assoc,
     lim_map_π, nat_trans.comp_app, whisker_right_app, category.id_comp,
@@ -236,11 +236,20 @@ begin
     nat_iso.of_components.hom_app, nat_iso.of_components.inv_app,
     functor.map_iso_hom, functor.map_iso_inv,
     functor.comp_map, CondensedSet_to_presheaf_map, evaluation_obj_map],
+  simp only [← functor.map_iso_hom, ← functor.map_iso_inv, iso.inv_comp_eq],
+  simp only [← category.assoc, ← iso.eq_comp_inv],
+  simp only [category.assoc, functor.map_iso_hom, functor.map_iso_inv,
+    colimit.ι_map_assoc, lim_map_eq_lim_map, lim_map_π_assoc,
+    nat_iso.of_components.hom_app, nat_iso.of_components.inv_app],
+  conv_rhs
+  { erw [category_theory.functor.ι_map_colimit_inv,
+      category_theory.functor.map_limit_hom_π_assoc,
+      iso.refl_hom, iso.refl_inv, category.id_comp, category.id_comp], },
   simp only [← nat_trans.comp_app, ← Sheaf.hom.comp_val,
     ← category_theory.nat_trans.comp_app_assoc, ← category_theory.Sheaf.hom.comp_val_assoc],
   simp only [colim_to_lim, colimit.ι_desc_assoc, limit.lift_π_assoc,
     category.assoc],
-  dsimp only [category_theory.functor.map_limit, category_theory.functor.map_colimit],
+  -- dsimp only [category_theory.functor.map_limit, category_theory.functor.map_colimit],
   sorry
 end
 
