@@ -32,12 +32,11 @@ apply_nolint breen_deligne.data.homological_complex.functor_eval_flip_preserves_
 
 -- breen_deligne/main.lean
 apply_nolint breen_deligne.package.endo_T unused_arguments
-apply_nolint breen_deligne.package.endo_T_short_exact unused_arguments
 apply_nolint breen_deligne.package.eval'_bounded_above unused_arguments
 apply_nolint breen_deligne.package.eval'_homology unused_arguments
 apply_nolint breen_deligne.package.forget_eval unused_arguments
-apply_nolint breen_deligne.package.hH0_endo₁_a unused_arguments
-apply_nolint breen_deligne.package.hH0_endo₁_b unused_arguments
+apply_nolint breen_deligne.package.hH_endo₁_a unused_arguments
+apply_nolint breen_deligne.package.hH_endo₁_b unused_arguments
 apply_nolint breen_deligne.package.main_lemma' unused_arguments
 apply_nolint breen_deligne.package.main_lemma.IH_neg unused_arguments
 apply_nolint breen_deligne.package.main_lemma.bdd_step unused_arguments
@@ -71,7 +70,8 @@ apply_nolint condensed.acyclic_of_exact.induction_step_ex unused_arguments
 
 -- condensed/bd_ses.lean
 apply_nolint Condensed.coproduct_presentation unused_arguments
-apply_nolint Condensed.coproduct_to_coproduct unused_arguments
+apply_nolint Condensed.coproduct_presentation_with_pow unused_arguments
+apply_nolint Condensed.short_exact_sequence_with_pow def_lemma
 
 -- condensed/condensify.lean
 apply_nolint Tinv_nat_trans unused_arguments
@@ -117,6 +117,10 @@ apply_nolint is_sheaf_colimit_presheaf_aux.prod.third_iso_aux_right unused_argum
 
 -- condensed/filtered_colimits_commute_with_finite_limits.lean
 apply_nolint CondensedSet.colim_to_lim unused_arguments
+apply_nolint CondensedSet.is_colimit_pow_functor_map_cocone incorrect_type_class_argument
+apply_nolint CondensedSet.is_colimit_pow_functor_map_cocone._proof_2 incorrect_type_class_argument
+apply_nolint CondensedSet.is_colimit_pow_functor_map_cocone._proof_4 incorrect_type_class_argument
+apply_nolint CondensedSet.is_colimit_pow_functor_map_cocone.equations._eqn_1 incorrect_type_class_argument
 
 -- condensed/is_proetale_sheaf.lean
 apply_nolint category_theory.functor.finite_product_condition_of_sum unused_arguments
@@ -239,7 +243,8 @@ apply_nolint category_theory.functor.left_derived.β unused_arguments
 -- for_mathlib/endomorphisms/Ext.lean
 apply_nolint category_theory.endomorphisms.C₁ unused_arguments
 apply_nolint category_theory.endomorphisms.C₂ unused_arguments
-apply_nolint category_theory.endomorphisms.compatibility_aux unused_arguments
+apply_nolint category_theory.endomorphisms.compatibility₁_aux unused_arguments
+apply_nolint category_theory.endomorphisms.congr_single_functor unused_arguments
 apply_nolint category_theory.endomorphisms.embed_single unused_arguments
 apply_nolint category_theory.endomorphisms.forget_mk_end unused_arguments
 apply_nolint category_theory.endomorphisms.forget_preserves_is_quasi_iso unused_arguments
@@ -247,8 +252,10 @@ apply_nolint category_theory.endomorphisms.lift_unop_op unused_arguments
 apply_nolint category_theory.endomorphisms.map.homotopy_category.is_quasi_iso unused_arguments
 apply_nolint category_theory.endomorphisms.map₁₂_exact unused_arguments
 apply_nolint category_theory.endomorphisms.mk_bo_ho_ca' unused_arguments
+apply_nolint category_theory.endomorphisms.preadditive_yoneda_flip_additive unused_arguments
 apply_nolint category_theory.endomorphisms.quot_out_single_map unused_arguments
 apply_nolint category_theory.endomorphisms.single_unEnd unused_arguments
+apply_nolint category_theory.functor.congr_map def_lemma
 
 -- for_mathlib/endomorphisms/ab4.lean
 apply_nolint category_theory.endomorphisms.category_theory.AB4 unused_arguments
@@ -334,6 +341,11 @@ apply_nolint category_theory.limits.nat_to_nnreal unused_arguments
 apply_nolint Inter_eq inhabited_nonempty
 apply_nolint eventually_constant inhabited_nonempty
 apply_nolint exists_le_finset inhabited_nonempty
+
+-- for_mathlib/preserves_finite_limits.lean
+apply_nolint iso_of_ι unused_arguments
+apply_nolint preserves_finite_limits_of_preserves_mono_preserves_finite_colimits def_lemma
+apply_nolint preserves_limits_of_shape_pempty_of_preserves_terminal unused_arguments
 
 -- for_mathlib/projective_replacement.lean
 apply_nolint category_theory.projective.category_theory.category_struct.comp.category_theory.epi unused_arguments
