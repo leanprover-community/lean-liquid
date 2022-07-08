@@ -328,16 +328,17 @@ variables (BD : package)
 def eval_freeFunc_homology_zero :
   (data.eval_functor Condensed.freeFunc.{u (u+1)}).obj breen_deligne.eg.data
     ⋙ homology_functor _ _ 0 ≅ 𝟭 (Profinite.{u}ᵒᵖ ⥤ Ab.{u+1}) :=
-nat_iso.of_components (λ M, begin
-/- need to make `functor_eval_homology_iso` natural in `M` -/
-  let iso := @homological_complex.functor_eval_homology_iso.{(u+1) (u) (u+2)} ℕ Profinite.{u}ᵒᵖ
-    Ab.{u+1} _ _ _ (complex_shape.down ℕ)
-      (((data.eval_functor Condensed.freeFunc.{u (u+1)}).obj breen_deligne.eg.data).obj M) 0,
-  sorry,
-end)
 begin
-  sorry,
+  refine nat_iso.of_components (λ M, _) sorry,
+  { refine _ ≪≫ iso_whisker_left M eval_free_homology_zero ≪≫ functor.right_unitor M,
+    refine nat_iso.of_components (λ x, _) _,
+    all_goals { sorry, }, },
 end
+
+-- for the commutation of "homology" and "presheaf", this might be useful:
+--  iso_whisker_left ((data.eval_functor freeFunc.{u (u+1)}).obj eg.data)
+--    (@homological_complex.functor_eval_homology_nat_iso.{(u+1) u (u+2)} ℕ Profinite.{u}ᵒᵖ
+--    Ab.{u+1} _ _ _ (complex_shape.down ℕ) 0) ≪≫ _,
 
 
 def eval_freeCond_homology_zero :

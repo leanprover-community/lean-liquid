@@ -90,22 +90,10 @@ def eval_functor_homology_iso (F : X ⥤ homological_complex 𝒜 c) (i) :
 iso_whisker_right (eval_functor_equiv.unit_iso.app F) (homology_functor 𝒜 c i)
   ≪≫ (functor_eval_homology_iso ((@eval_functor _ X 𝒜 _ _ _ c).obj F) i).symm
 
-/- do we have this elsewhere? -/
-@[simps]
-def _root_.category_theory.functor.right_comp {C D : Type*} (X : Type*) [category C] [category D]
-  [category X] (F : C ⥤ D) : (X ⥤ C) ⥤ (X ⥤ D) :=
-{ obj := λ G, G ⋙ F,
-  map := λ G₁ G₂ φ, φ ◫ 𝟙 F,
-  map_id' := λ G, by { ext, simpa only [nat_trans.hcomp_id_app, nat_trans.id_app,
-    category_theory.functor.map_id], },
-  map_comp' := λ G₁ G₂ G₃ φ ψ, begin
-    ext,
-    simp only [nat_trans.hcomp_id_app, nat_trans.comp_app, functor.map_comp],
-  end }
-
 @[simps]
 def functor_eval_homology_nat_iso (i : ι) :
-  homology_functor (X ⥤ 𝒜) c i ≅ functor_eval.flip ⋙ (homology_functor 𝒜 c i).right_comp _ :=
+  homology_functor (X ⥤ 𝒜) c i ≅ functor_eval.flip ⋙
+    (whiskering_right _ _ _).obj (homology_functor 𝒜 c i) :=
 nat_iso.of_components
 (λ G, functor_eval_homology_iso G i)
 (λ G₁ G₂ φ, begin
@@ -113,10 +101,7 @@ nat_iso.of_components
   ext1 x,
   dsimp only [functor_eval_homology_iso, nat_iso.of_components],
   simp only [iso.app_hom, nat_trans.comp_app, functor.comp_map],
-  erw (((evaluation X 𝒜).obj x).homology_functor_iso c i).hom.naturality φ,
-  congr' 1,
-  symmetry,
-  apply category.id_comp,
+  exact (((evaluation X 𝒜).obj x).homology_functor_iso c i).hom.naturality φ,
 end)
 
 end homological_complex
