@@ -84,6 +84,14 @@ lemma _root_.category_theory.functor.map_limit_hom_π {J C D : Type*}
 by simp only [category_theory.functor.map_limit, functor.map_cone_π_app,
     limit.cone_point_unique_up_to_iso_hom_comp, limit.cone_π]
 
+-- @[simp, reassoc]
+-- lemma _root_.category_theory.functor.map_limit_inv_π {J C D : Type*}
+--   [small_category J] [category C] [category D]
+--   (G : C ⥤ D) (F : J ⥤ C)
+--   [has_limit F] [has_limit (F ⋙ G)] [preserves_limit F G]
+--   (j : J) :
+--   (G.map_limit F).inv ≫ limit.π _ j = _ :=
+
 def _root_.category_theory.functor.map_colimit {J C D : Type*}
   [small_category J] [category C] [category D]
   (G : C ⥤ D) (F : J ⥤ C)
@@ -203,6 +211,8 @@ begin
 end
 .
 
+attribute [reassoc] nat_trans.comp_app Sheaf.hom.comp_val
+
 lemma is_iso_colim_to_lim_component (S : Profinite.{u}ᵒᵖ) :
   is_iso ((colim_to_lim F).val.app S) :=
 begin
@@ -217,8 +227,20 @@ begin
   rw [← iso.inv_comp_eq, iso.eq_comp_inv, category.assoc],
   ext j k : 2,
   dsimp [is_iso_colim_to_lim_component_e₁, is_iso_colim_to_lim_component_e₂],
-  simp only [category.assoc, colimit.ι_map_assoc, category_theory.functor.ι_map_colimit_inv_assoc,
-    lim_map_π],
+  simp only [category.assoc, colimit.ι_map_assoc,
+    category_theory.functor.ι_map_colimit_inv_assoc,
+    category_theory.functor.map_limit_hom_π_assoc,
+    lim_map_π, nat_trans.comp_app, whisker_right_app, category.id_comp,
+    functor.associator_hom_app, functor.associator_inv_app,
+    limit_comp_iso, colimit_comp_iso, iso.trans_hom, iso.trans_inv,
+    nat_iso.of_components.hom_app, nat_iso.of_components.inv_app,
+    functor.map_iso_hom, functor.map_iso_inv,
+    functor.comp_map, CondensedSet_to_presheaf_map, evaluation_obj_map],
+  simp only [← nat_trans.comp_app, ← Sheaf.hom.comp_val,
+    ← category_theory.nat_trans.comp_app_assoc, ← category_theory.Sheaf.hom.comp_val_assoc],
+  simp only [colim_to_lim, colimit.ι_desc_assoc, limit.lift_π_assoc,
+    category.assoc],
+  dsimp only [category_theory.functor.map_limit, category_theory.functor.map_colimit],
   sorry
 end
 
