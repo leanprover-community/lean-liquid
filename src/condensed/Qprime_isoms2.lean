@@ -4,7 +4,7 @@ import condensed.Qprime_isoms
 
 noncomputable theory
 
-universes u
+universes v u
 
 open category_theory category_theory.limits breen_deligne opposite
 open bounded_homotopy_category
@@ -13,6 +13,19 @@ namespace Condensed
 
 variables (BD : package)
 variables (M N : Condensed.{u} Ab.{u+1}) (f : M ⟶ N)
+
+section
+variables {X A B : Type*} [category X] [category.{v} A] [category.{v} B] [abelian A] [abelian B]
+variables {ι : Type*} {c : complex_shape ι} (i : ι)
+variables (𝓕₁ 𝓕₂ : X ⥤ A) (φ : 𝓕₁ ⟶ 𝓕₂) (G : (X ⥤ A) ⥤ homological_complex (X ⥤ A) c) (S : X)
+-- variables (F : A ⥤ B) [functor.additive F] [preserves_finite_limits F] [preserves_finite_colimits F]
+
+-- lemma homology_functor_iso_natural :
+--   (((category_theory.evaluation X A).obj S).homology_functor_iso c i).inv.app (G.obj M) ≫
+--     ((homology_functor (X ⥤ Ab) c i).map (G.map f)).app S =
+--     _ := sorry
+
+end
 
 lemma tensor_to_unsheafified_homology_natural'
   [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (M.val.obj (op S.val))]
