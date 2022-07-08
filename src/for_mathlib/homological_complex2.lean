@@ -68,9 +68,9 @@ functor_eval.flip
 
 end
 
-universes v u
-variables {ι : Type} {X : Type v} {𝒜 : Type u}
-  [small_category X] [category.{v} 𝒜] [abelian 𝒜] {c : complex_shape ι}
+universes v u w
+variables {ι : Type} {X : Type (max u v)} {𝒜 : Type w}
+  [category.{u} X] [category.{max u v} 𝒜] [abelian 𝒜] {c : complex_shape ι}
 
 noncomputable theory
 
