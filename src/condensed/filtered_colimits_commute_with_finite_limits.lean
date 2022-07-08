@@ -74,6 +74,16 @@ is_limit.cone_point_unique_up_to_iso
   (is_limit_of_preserves G (limit.is_limit _))
   (limit.is_limit _)
 
+@[simp, reassoc]
+lemma _root_.category_theory.functor.map_limit_hom_π {J C D : Type*}
+  [small_category J] [category C] [category D]
+  (G : C ⥤ D) (F : J ⥤ C)
+  [has_limit F] [has_limit (F ⋙ G)] [preserves_limit F G]
+  (j : J) :
+  (G.map_limit F).hom ≫ limit.π (F ⋙ G) j = G.map (limit.π F j) :=
+by simp only [category_theory.functor.map_limit, functor.map_cone_π_app,
+    limit.cone_point_unique_up_to_iso_hom_comp, limit.cone_π]
+
 def _root_.category_theory.functor.map_colimit {J C D : Type*}
   [small_category J] [category C] [category D]
   (G : C ⥤ D) (F : J ⥤ C)
@@ -93,26 +103,103 @@ lemma _root_.category_theory.functor.ι_map_colimit_inv {J C D : Type*}
 by simp only [category_theory.functor.map_colimit, functor.map_cocone_ι_app,
     colimit.comp_cocone_point_unique_up_to_iso_inv, colimit.cocone_ι]
 
+def limit_comp_iso {J K C D : Type*} [small_category J] [small_category K]
+  [category C] [category D] [has_limits_of_shape J C] [has_limits_of_shape J D]
+  (F : J ⥤ K ⥤ C) (G : C ⥤ D) [has_limit F]
+  [H : ∀ k, has_limit (F.flip.obj k)] [∀ k, preserves_limit (F.flip.obj k) G]
+  [∀ k, preserves_limit F ((category_theory.evaluation K C).obj k)]
+   :
+  limit F ⋙ G ≅ F.flip ⋙ ((whiskering_right _ _ _).obj G) ⋙ lim :=
+begin
+  refine nat_iso.of_components _ _,
+  { intro k,
+    refine G.map_iso _ ≪≫ G.map_limit _,
+    letI : has_limit (F ⋙ (category_theory.evaluation K C).obj k) := H k,
+    refine ((category_theory.evaluation _ _).obj k).map_limit _ ≪≫ _,
+    refine limits.lim.map_iso _,
+    exact iso.refl _ },
+  { intros k₁ k₂ f,
+    ext j,
+    dsimp,
+    simp only [functor.map_comp, category_theory.functor.map_limit_hom_π, category.assoc,
+      lim_map_π, whisker_right_app, functor.flip_map_app,
+      category_theory.functor.map_limit_hom_π_assoc],
+    simp only [← functor.map_comp, category.assoc], congr' 1,
+    simp only [lim_map_π, lim_map_π_assoc, category_theory.functor.map_limit_hom_π_assoc,
+      category_theory.functor.map_limit_hom_π],
+    erw [← evaluation_map_app K C, ← category.assoc, ← nat_trans.naturality],
+    erw [nat_trans.id_app, nat_trans.id_app, category.comp_id, category.id_comp],
+    refl }
+end
+.
+
 def colimit_comp_iso {J K C D : Type*} [small_category J] [small_category K]
-  [category C] [category D] [has_colimits_of_shape J D]
+  [category C] [category D] [has_colimits_of_shape J C] [has_colimits_of_shape J D]
   (F : J ⥤ K ⥤ C) (G : C ⥤ D) [has_colimit F]
-  [∀ k, has_colimit (F.flip.obj k)] [∀ k, preserves_colimit (F.flip.obj k) G]
+  [H : ∀ k, has_colimit (F.flip.obj k)] [∀ k, preserves_colimit (F.flip.obj k) G]
   [∀ k, preserves_colimit F ((category_theory.evaluation K C).obj k)]
-  [∀ k, has_colimit (F ⋙ (category_theory.evaluation K C).obj k)] :
+   :
   colimit F ⋙ G ≅ F.flip ⋙ ((whiskering_right _ _ _).obj G) ⋙ colim :=
 begin
   refine nat_iso.of_components _ _,
   { intro k,
     refine G.map_iso _ ≪≫ G.map_colimit _,
-    refine ((category_theory.evaluation _ _).obj k).map_colimit _, },
+    letI : has_colimit (F ⋙ (category_theory.evaluation K C).obj k) := H k,
+    refine ((category_theory.evaluation _ _).obj k).map_colimit _ ≪≫ _,
+    refine colim.map_iso _,
+    exact iso.refl _ },
   { intros k₁ k₂ f,
     rw [← iso.inv_comp_eq, ← category.assoc, ← iso.eq_comp_inv],
     ext j,
     dsimp,
     simp only [category.assoc, category_theory.functor.ι_map_colimit_inv_assoc, colimit.ι_map_assoc,
       whisker_right_app, functor.flip_map_app],
-    simp only [← functor.map_comp], congr' 1,
-    sorry }
+    simp only [← functor.map_comp, category.assoc], congr' 1,
+    simp only [colimit.ι_map_assoc, category_theory.functor.ι_map_colimit_inv_assoc,
+      category_theory.functor.ι_map_colimit_inv],
+    rw [← evaluation_map_app K C, nat_trans.naturality],
+    erw [nat_trans.id_app, nat_trans.id_app, category.id_comp, category.id_comp],
+    refl }
+end
+.
+
+def is_iso_colim_to_lim_component_e₁ (S : Profinite.{u}ᵒᵖ) :
+  (colimit (limit F)).val.obj S ≅ colimit (curry.obj (category_theory.prod.swap J K ⋙
+    (uncurry.{u+1 u+1}.obj F ⋙
+    (CondensedSet_to_presheaf.{u} ⋙ (category_theory.evaluation.{u u+1 u+1 u+2} Profinite.{u}ᵒᵖ (Type (u+1))).obj S))) ⋙ lim) :=
+begin
+  let VS := CondensedSet_to_presheaf.{u} ⋙ (category_theory.evaluation.{u u+1 u+1 u+2} Profinite.{u}ᵒᵖ (Type (u+1))).obj S,
+  refine VS.map_colimit (limit F) ≪≫ _,
+  refine colim.map_iso _,
+  refine limit_comp_iso _ _ ≪≫ _,
+  refine (functor.associator _ _ _).symm ≪≫ _,
+  refine ((whiskering_right _ _ _).obj lim).map_iso _,
+  refine nat_iso.of_components _ _,
+  { intro k, refine nat_iso.of_components (λ j, iso.refl _) _,
+    intros i j f, dsimp,
+    simp only [category.id_comp, category.comp_id, (F.obj j).map_id, nat_trans.id_app, Sheaf.hom.id_val], },
+  { intros k l f, ext j : 2, dsimp,
+    simp only [category.id_comp, category.comp_id, F.map_id, nat_trans.id_app, Sheaf.hom.id_val], }
+end
+.
+
+def is_iso_colim_to_lim_component_e₂ (S : Profinite.{u}ᵒᵖ) :
+  (limit (colimit F.flip)).val.obj S ≅
+  limit (curry.obj (uncurry.{u+1 u+1}.obj F ⋙
+    (CondensedSet_to_presheaf.{u} ⋙ (category_theory.evaluation.{u u+1 u+1 u+2} Profinite.{u}ᵒᵖ (Type (u+1))).obj S)) ⋙ colim) :=
+begin
+  let VS := CondensedSet_to_presheaf.{u} ⋙ (category_theory.evaluation.{u u+1 u+1 u+2} Profinite.{u}ᵒᵖ (Type (u+1))).obj S,
+  refine VS.map_limit (colimit F.flip) ≪≫ _,
+  refine limits.lim.map_iso _,
+  refine colimit_comp_iso _ _ ≪≫ _,
+  refine (functor.associator _ _ _).symm ≪≫ _,
+  refine ((whiskering_right _ _ _).obj colim).map_iso _,
+  refine nat_iso.of_components _ _,
+  { intro k, refine nat_iso.of_components (λ j, iso.refl _) _,
+    intros i j f, dsimp,
+    simp only [category.id_comp, category.comp_id, F.map_id, nat_trans.id_app, Sheaf.hom.id_val], },
+  { intros k l f, ext j : 2, dsimp,
+    simp only [category.id_comp, category.comp_id, (F.obj l).map_id, nat_trans.id_app, Sheaf.hom.id_val], }
 end
 .
 
@@ -124,18 +211,14 @@ begin
   while the same holds for evaluation, hence this morphism should be isomorphic to
   `colimit_limit_to_limit_colimit` which is an isomorphism.
   -/
-  let VS := CondensedSet_to_presheaf.{u} ⋙ (category_theory.evaluation.{u u+1 u+1 u+2} Profinite.{u}ᵒᵖ (Type (u+1))).obj S,
-  let F' := uncurry.{u+1 u+1}.obj F ⋙ VS,
-  let f := colimit_limit_to_limit_colimit F',
-  let e₁ : (colimit (limit F)).val.obj S ≅ colimit (curry.obj (category_theory.prod.swap J K ⋙ F') ⋙ lim),
-  { sorry },
-  let e₂ : (limit (colimit F.flip)).val.obj S ≅ limit (curry.obj F' ⋙ colim),
-  { refine VS.map_limit (colimit F.flip) ≪≫ _,
-    refine limits.lim.map_iso _,
-    refine (colimit_comp_iso _ _) ≪≫ _,
-    sorry },
-  suffices : (colim_to_lim F).val.app S = e₁.hom ≫ f ≫ e₂.inv,
+  suffices : (colim_to_lim F).val.app S =
+    (is_iso_colim_to_lim_component_e₁ F S).hom ≫ colimit_limit_to_limit_colimit _ ≫ (is_iso_colim_to_lim_component_e₂ F S).inv,
   { rw [this, is_iso_iff_is_iso_comp_left, is_iso_iff_is_iso_comp_right], apply_instance },
+  rw [← iso.inv_comp_eq, iso.eq_comp_inv, category.assoc],
+  ext j k : 2,
+  dsimp [is_iso_colim_to_lim_component_e₁, is_iso_colim_to_lim_component_e₂],
+  simp only [category.assoc, colimit.ι_map_assoc, category_theory.functor.ι_map_colimit_inv_assoc,
+    lim_map_π],
   sorry
 end
 
