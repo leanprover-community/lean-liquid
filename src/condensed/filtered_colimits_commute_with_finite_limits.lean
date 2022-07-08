@@ -293,14 +293,78 @@ end)
 
 .
 
-def is_colimit_pow_functor_map_cocone (α: Type (u+1))
+def prod_eval_iso
+  (α : Type (u+1))
+  (X : α → J ⥤ CondensedSet.{u}) (j) :
+  (∏ X).obj j ≅ ∏ (λ i, (X i).obj j) :=
+preserves_limit_iso ((category_theory.evaluation _ _).obj j) _ ≪≫
+has_limit.iso_of_nat_iso (discrete.nat_iso $ λ i, iso.refl _)
+
+def is_colimit_pow_functor_map_cocone_aux
+  (α: Type (u+1))
   [fintype α]
-  [J: Type (u+1)]
-  [small_category J]
-  [is_filtered J]
+  (F: J ⥤ CondensedSet)
+  (S : cocone (F ⋙ pow_functor CondensedSet α)) :
+  cocone (∏ λ (i : α), F) :=
+{ X := S.X,
+  ι :=
+  { app := λ j, begin
+      refine (prod_eval_iso _ _ _).hom ≫ _,
+      refine S.ι.app j,
+    end,
+    naturality' := begin
+      intros i j f, dsimp [prod_eval_iso], simp only [category.comp_id, category.assoc],
+      rw ← S.w f,
+      simp only [← category.assoc], congr' 1, simp only [category.assoc], dsimp,
+      apply limit.hom_ext, intros k,
+      dsimp [pow_functor], simp only [category.assoc, has_limit.iso_of_nat_iso_hom_π,
+        discrete.nat_iso_hom_app, preserves_limits_iso_hom_π_assoc,
+        evaluation_obj_map, nat_trans.naturality_assoc, lim_map_π, discrete.nat_trans_app,
+        has_limit.iso_of_nat_iso_hom_π_assoc],
+      dsimp [discrete.functor], simp,
+    end } }
+
+def is_colimit_pow_functor_map_cocone
+  (α: Type (u+1))
+  [fintype α]
   (F: J ⥤ CondensedSet) :
   is_colimit ((pow_functor CondensedSet α).map_cocone (colimit.cocone F)) :=
-sorry
+{ desc := λ S, (colimit_pow_iso α F).inv ≫
+    colimit.desc (∏ λ (i : α), F) (is_colimit_pow_functor_map_cocone_aux α F S),
+  fac' := begin
+    intros S j, dsimp,  simp only [← category.assoc], let t := _, change t ≫ _ = _,
+    have ht : t = (prod_eval_iso _ _ _).inv ≫ colimit.ι _ j,
+    { rw iso.eq_inv_comp,
+      dsimp [t], rw [← category.assoc, iso.comp_inv_eq], dsimp [prod_eval_iso, colimit_pow_iso,
+        pow_functor, colimit_limit_iso_limit_colimit, colim_to_lim],
+      simp only [category.assoc, colimit.ι_desc_assoc, has_limit.lift_iso_of_nat_iso_hom],
+      apply limit.hom_ext, intros k,
+      simp only [category.assoc, lim_map_π, discrete.nat_trans_app,
+        has_limit.iso_of_nat_iso_hom_π_assoc, discrete.nat_iso_hom_app,
+        preserves_limits_iso_hom_π_assoc, evaluation_obj_map, limit.lift_π,
+        cones.postcompose_obj_π, nat_trans.comp_app, iso.trans_hom],
+      dsimp, simp only [category.id_comp],
+      erw (is_colimit_of_preserves ((category_theory.evaluation
+        (discrete α) CondensedSet).obj k) _).fac_assoc,
+      erw colimit.ι_desc, refl },
+    rw [ht, category.assoc, colimit.ι_desc],
+    dsimp [is_colimit_pow_functor_map_cocone_aux], simp,
+  end,
+  uniq' := begin
+    intros S m hm, rw iso.eq_inv_comp, apply colimit.hom_ext, intros j,
+    dsimp [colimit_pow_iso], simp only [category.assoc, colimit.ι_desc],
+    erw colimit.ι_desc_assoc, dsimp [is_colimit_pow_functor_map_cocone_aux],
+    simp_rw [← hm, ← category.assoc], congr' 1, apply limit.hom_ext, intros k,
+    dsimp [pow_functor, prod_eval_iso],
+    simp only [has_limit.lift_iso_of_nat_iso_hom, limit.lift_π, cones.postcompose_obj_π,
+      nat_trans.comp_app, discrete.nat_iso_hom_app, iso.trans_hom, category.assoc, lim_map_π,
+      discrete.nat_trans_app, has_limit.iso_of_nat_iso_hom_π_assoc,
+      preserves_limits_iso_hom_π_assoc, evaluation_obj_map],
+    erw (is_colimit_of_preserves ((category_theory.evaluation
+      (discrete α) CondensedSet).obj k) _).fac_assoc,
+    erw colimit.ι_desc,
+    dsimp, simp,
+  end }
 
 -- Filtered colimits commute with finite products in condensed sets
 noncomputable
