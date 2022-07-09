@@ -115,12 +115,6 @@ def preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab
   M.val.obj (op X) :=
 sorry
 
-instance ulift_complete : complete_space (SemiNormedGroup.ulift.{u+1}.obj V) :=
-sorry
-
-instance ulift_separated : separated_space (SemiNormedGroup.ulift.{u+1}.obj V) :=
-sorry
-
 set_option pp.universes true
 
 def ExtQprime_iso_aux_system_obj_aux :
