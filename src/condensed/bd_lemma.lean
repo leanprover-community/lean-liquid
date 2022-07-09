@@ -332,14 +332,11 @@ def eval_freeFunc_homology_iso (i : ℕ) :
   (category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1} ⋙
     (whiskering_right _ _ _).obj ((data.eval_functor (category_theory.forget _ ⋙
       AddCommGroup.free)).obj breen_deligne.eg.data ⋙ homology_functor _ _ i)).flip :=
+iso_whisker_left ((data.eval_functor freeFunc.{u (u+1)}).obj eg.data)
+  (@homological_complex.functor_eval_homology_nat_iso.{(u+1) u (u+2)} ℕ Profinite.{u}ᵒᵖ
+    Ab.{u+1} _ _ _ (complex_shape.down ℕ) i) ≪≫
 begin
-  /- this should basically be the isomorphisms between the homology of a presheaf and
-  the presheaf of objectwise homology, use something like
-    iso_whisker_left ((data.eval_functor freeFunc.{u (u+1)}).obj eg.data)
-      (@homological_complex.functor_eval_homology_nat_iso.{(u+1) u (u+2)} ℕ Profinite.{u}ᵒᵖ
-      Ab.{u+1} _ _ _ (complex_shape.down ℕ) 0),
-      and maybe nat_iso.unflip ? -/
-  sorry,
+  sorry
 end
 
 def eval_freeFunc_homology_zero :
