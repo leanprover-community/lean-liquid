@@ -59,7 +59,8 @@ end)
   repeat { erw category.comp_id, },
   /- strategy : starting with slice_rhs 2 3, use a naturality property of `eval_Pow` with
   respect to the additive functor `G`, then the statement would only involve
-  the functors `G` and `F₂`. -/
+  the functors `G` and `F₂`.
+  More precisely, do it first for a basic `f`, and extend by linearity -/
   sorry,
 end)
 
