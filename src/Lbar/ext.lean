@@ -67,12 +67,14 @@ begin
       { exact iso.refl _ }, },
     { rintro i (j|(_|j)) (rfl : _ = _),
       { apply is_zero.eq_of_src, exact (is_zero_zero _).unop },
-      { dsimp, erw [category.id_comp, category.comp_id], refl },
-      { dsimp, erw [category.id_comp, category.comp_id], refl }, } },
+      { dsimp only [iso.refl_hom], erw [category.id_comp, category.comp_id], refl },
+      { dsimp only [iso.refl_hom], erw [category.id_comp, category.comp_id], refl }, } },
   { intros X Y f, ext ((_|n)|n),
-    sorry { dsimp, erw [category.id_comp, category.comp_id], refl },
+    { dsimp only [homological_complex.comp_f, homological_complex.hom.iso_of_components_hom_f, iso.refl_hom],
+      erw [category.id_comp, category.comp_id], refl },
     { apply is_zero.eq_of_tgt, exact is_zero_zero _ },
-    sorry { dsimp, erw [category.id_comp, category.comp_id], refl }, }
+    { dsimp only [homological_complex.comp_f, homological_complex.hom.iso_of_components_hom_f, iso.refl_hom],
+      erw [category.id_comp, category.comp_id], refl } }
 end
 .
 
