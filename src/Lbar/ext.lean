@@ -89,8 +89,11 @@ begin
   refine nat_iso.of_components _ _,
   { intro X, refine homological_complex.hom.iso_of_components _ _,
     { intro n, exact iso.refl _ },
-    { sorry } },
-  { sorry }
+    { rintro i j (rfl : _ = _), dsimp only [iso.refl_hom],
+      rw [category.id_comp, category.comp_id], refl } },
+  { intros X Y f, ext n,
+    dsimp only [homological_complex.comp_f, homological_complex.hom.iso_of_components_hom_f, iso.refl_hom],
+    rw [category.id_comp, category.comp_id], refl }
 end
 .
 
