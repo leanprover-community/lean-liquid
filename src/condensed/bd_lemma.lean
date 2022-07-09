@@ -343,6 +343,7 @@ begin
 -- we need a general compatibility of `data.eval_functor` with respect to the
 -- application of additive functors: it would be applied here to each of the
 -- evaluation functors from abelian presheaves to abelian groups.
+-- see breen_deligne/apply_Pow.lean for an attempt at stating the expected compatibilities
   sorry
 end
 
