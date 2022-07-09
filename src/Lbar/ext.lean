@@ -142,8 +142,6 @@ begin
   { sorry }
 end
 
-#exit
-
 -- this needs to be functorial in `c`
 def ExtQprime_iso_aux_system_obj (c : ℝ≥0) (n : ℕ) :
   ((Ext n).obj (op $ (QprimeFP r' BD κ M).obj c)).obj ((single _ 0).obj V.to_Cond) ≅
