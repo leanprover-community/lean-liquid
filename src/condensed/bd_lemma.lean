@@ -339,12 +339,12 @@ begin
   refine (functor.associator _ _ _).symm ≪≫ iso_whisker_right _ _ ≪≫
     (functor.whiskering_right_obj_comp _ _ _).symm ≪≫
     (functor.flip_evaluation_comp_whiskering_right _ _).symm,
---  refine nat_iso.unflip _,
--- we need a general compatibility of `data.eval_functor` with respect to the
--- application of additive functors: it would be applied here to each of the
--- evaluation functors from abelian presheaves to abelian groups.
--- see breen_deligne/apply_Pow.lean for an attempt at stating the expected compatibilities
-  sorry
+  refine nat_iso.unflip _,
+  exact nat_iso.of_components
+    (λ X, ((data.eval_functor_comp freeFunc.{u (u+1)}
+      (forget AddCommGroup ⋙ AddCommGroup.free) ((category_theory.evaluation _ Ab.{u+1}).obj X)
+      (iso.refl _)).app breen_deligne.eg.data).symm)
+    sorry,
 end
 
 def eval_freeFunc_homology_zero :

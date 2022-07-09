@@ -84,12 +84,18 @@ instance additive_whiskering_left :
 instance additive_whiskering_right :
   functor.additive ((whiskering_right A₁ _ _).obj G) := { }
 
-include F₁ e
+include e
 def eval_functor'_comp :
   (eval_functor' F₂ ⋙ ((whiskering_left _ _ A₂).obj G).map_homological_complex _ ≅
   eval_functor' F₁ ⋙ ((whiskering_right A₁ _ _).obj G).map_homological_complex _) :=
 begin
--- use eval_Pow_functor_comp
+  sorry,
+end
+
+def eval_functor_comp :
+  eval_functor F₂ ⋙ (whiskering_left _ _ _).obj G ≅
+  eval_functor F₁ ⋙ (whiskering_right A₁ _ _).obj (G.map_homological_complex _) :=
+begin
   sorry,
 end
 
