@@ -336,6 +336,13 @@ iso_whisker_left ((data.eval_functor freeFunc.{u (u+1)}).obj eg.data)
   (@homological_complex.functor_eval_homology_nat_iso.{(u+1) u (u+2)} ℕ Profinite.{u}ᵒᵖ
     Ab.{u+1} _ _ _ (complex_shape.down ℕ) i) ≪≫
 begin
+  refine (functor.associator _ _ _).symm ≪≫ iso_whisker_right _ _ ≪≫
+    (functor.whiskering_right_obj_comp _ _ _).symm ≪≫
+    (functor.flip_evaluation_comp_whiskering_right _ _).symm,
+--  refine nat_iso.unflip _,
+-- we need a general compatibility of `data.eval_functor` with respect to the
+-- application of additive functors: it would be applied here to each of the
+-- evaluation functors from abelian presheaves to abelian groups.
   sorry
 end
 

@@ -1,4 +1,5 @@
 import category_theory.functor.category
+import category_theory.products.basic
 
 open category_theory
 
@@ -36,5 +37,21 @@ def unflip {C D E : Type*} [category C] [category D] [category E]
   inv_hom_id' := by rw [← nat_trans.unflip_comp, e.inv_hom_id, nat_trans.unflip_id], }
 
 end nat_iso
+
+namespace functor
+
+def flip_evaluation_comp_whiskering_right (C : Type*) {D E : Type*}
+  [category C] [category D] [category E] (H : D ⥤ E) :
+  (evaluation C D ⋙ (whiskering_right (C ⥤ D) D E).obj H).flip ≅
+    (whiskering_right C D E).obj H := iso.refl _
+
+def whiskering_right_obj_comp (C : Type*) {D₁ D₂ D₃ : Type*}
+  [category C] [category D₁] [category D₂] [category D₃]
+  (F₁₂ : D₁ ⥤ D₂) (F₂₃ : D₂ ⥤ D₃) :
+  (whiskering_right C _ _).obj (F₁₂ ⋙ F₂₃) ≅
+    (whiskering_right C _ _).obj F₁₂ ⋙
+    (whiskering_right C _ _).obj F₂₃ := iso.refl _
+
+end functor
 
 end category_theory
