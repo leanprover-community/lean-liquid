@@ -53,6 +53,90 @@ end
 
 open_locale zero_object
 
+-- def unop_functor_homology_iso
+--   {𝓐 ι : Type*} [category 𝓐] [abelian 𝓐] {c : complex_shape ι}
+--   (C : homological_complex 𝓐 c) (i : ι) :
+--   C.unop.homology i ≅ C.homology i :=
+-- sorry
+
+def embed_unop {𝓐 : Type*} [category 𝓐] [abelian 𝓐] :
+  (homological_complex.embed complex_shape.embedding.nat_down_int_up).op ⋙
+    @homological_complex.unop_functor 𝓐 _ _ _ _ ≅
+  homological_complex.unop_functor ⋙
+    homological_complex.embed complex_shape.embedding.nat_up_int_down :=
+begin
+  refine nat_iso.of_components _ _,
+  { intro X, refine homological_complex.hom.iso_of_components _ _,
+    { rintro ((_|n)|n),
+      { exact iso.refl _ },
+      { refine is_zero.iso (is_zero_zero _).unop (is_zero_zero _), },
+      { exact iso.refl _ }, },
+    { sorry } },
+  { sorry }
+end
+
+-- move me
+lemma nat_up_int_down_c_iff : complex_shape.embedding.nat_up_int_down.c_iff :=
+λ i j, complex_shape.embedding.nat_down_int_up_c_iff j i
+
+def forget₂_unop :
+  ((forget₂ SemiNormedGroup Ab).op.map_homological_complex (complex_shape.down ℕ)).op ⋙
+  homological_complex.unop_functor ≅
+  homological_complex.unop_functor ⋙
+  (forget₂ SemiNormedGroup Ab).map_homological_complex (complex_shape.down ℕ).symm :=
+begin
+  refine nat_iso.of_components _ _,
+  { intro X, refine homological_complex.hom.iso_of_components _ _,
+    { intro n, exact iso.refl _ },
+    { sorry } },
+  { sorry }
+end
+.
+
+def _root_.category_theory.nat_iso.map_homological_complex
+  {ι V W : Type*} [category V] [preadditive V] [category W] [preadditive W]
+  {F G : V ⥤ W} [F.additive] [G.additive] (e : F ≅ G) (c : complex_shape ι) :
+  F.map_homological_complex c ≅ G.map_homological_complex c :=
+{ hom := nat_trans.map_homological_complex e.hom _,
+  inv := nat_trans.map_homological_complex e.inv _,
+  hom_inv_id' := by { ext C i, exact (e.app (C.X i)).hom_inv_id },
+  inv_hom_id' := by { ext C i, exact (e.app (C.X i)).inv_hom_id }, }
+.
+
+def preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab
+  (M : Condensed.{u} Ab.{u+1}) (X : Profinite) :
+  (preadditive_yoneda.obj M).obj (op $ CondensedSet_to_Condensed_Ab.obj (Profinite_to_Condensed.obj X)) ≅
+  M.val.obj (op X) :=
+sorry
+
+instance ulift_complete : complete_space (SemiNormedGroup.ulift.{u+1}.obj V) :=
+sorry
+
+instance ulift_separated : separated_space (SemiNormedGroup.ulift.{u+1}.obj V) :=
+sorry
+
+def ExtQprime_iso_aux_system_obj_aux :
+  ((CLC (SemiNormedGroup.ulift.{u+1}.obj V)).right_op.map_FreeAb ⋙
+         FreeAb.eval SemiNormedGroupᵒᵖ) ⋙
+    (forget₂ SemiNormedGroup Ab).op ≅
+  (freeCond.map_FreeAb ⋙ FreeAb.eval (Condensed.{u} Ab.{u+1})) ⋙
+    (preadditive_yoneda.obj V.to_Cond).right_op :=
+begin
+  refine nat_iso.of_components _ _,
+  { intro X,
+    dsimp only [functor.comp_obj, functor.right_op, functor.op_obj, FreeAb.eval,
+      functor.map_FreeAb],
+    refine iso.op _,
+    refine (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab _ _) ≪≫ _,
+    -- let e := add_equiv.to_AddCommGroup_iso (LCC_iso_Cond_of_top_ab_add_equiv (X.as) (SemiNormedGroup.ulift.{u+1}.obj V)),
+
+    -- ((LCC_iso_Cond_of_top_ab (SemiNormedGroup.ulift.{u+1}.obj V)).app (op X.as)).symm,
+    sorry },
+  { sorry }
+end
+
+#exit
+
 -- this needs to be functorial in `c`
 def ExtQprime_iso_aux_system_obj (c : ℝ≥0) (n : ℕ) :
   ((Ext n).obj (op $ (QprimeFP r' BD κ M).obj c)).obj ((single _ 0).obj V.to_Cond) ≅
@@ -62,11 +146,26 @@ begin
   refine (homology_functor _ _ (-n:ℤ)).map_iso _ ≪≫ _,
   { let C := ((preadditive_yoneda.obj V.to_Cond).right_op.map_homological_complex _).obj
       (((QprimeFP_nat r' BD κ M).obj c)),
-    exact ((homological_complex.embed complex_shape.embedding.nat_down_int_up).obj C).unop, },
-  { refine (homological_complex.unop_functor.right_op.map_iso _).unop,
+    exact ((homological_complex.embed complex_shape.embedding.nat_up_int_down).obj C.unop), },
+  { refine _ ≪≫ embed_unop.app (op (((preadditive_yoneda_obj V.to_Cond ⋙ forget₂ _ _).right_op.map_homological_complex
+      (complex_shape.down ℕ)).obj ((QprimeFP_nat r' BD κ M).obj c))),
+    dsimp,
+    refine (homological_complex.unop_functor.right_op.map_iso _).unop,
     symmetry, refine (map_homological_complex_embed _).app _, },
-  sorry
+  refine (homological_complex.homology_embed_nat_iso _
+    complex_shape.embedding.nat_up_int_down nat_up_int_down_c_iff
+    n (-n) _).app _ ≪≫ _,
+  { cases n; refl },
+  refine (homology_functor _ _ n).map_iso _,
+  refine _ ≪≫ forget₂_unop.app _,
+  let φ : op (((preadditive_yoneda.obj V.to_Cond).right_op.map_homological_complex (complex_shape.down ℕ)).obj
+  ((QprimeFP_nat r' BD κ M).obj c)) ≅ _ := _,
+  refine homological_complex.unop_functor.map_iso φ,
+  refine ((category_theory.nat_iso.map_homological_complex
+    (ExtQprime_iso_aux_system_obj_aux V) _).app ((breen_deligne.FPsystem r' BD _ κ).obj c)).op,
 end
+
+#exit
 
 attribute [reassoc] Ext_compute_with_acyclic_naturality
 
