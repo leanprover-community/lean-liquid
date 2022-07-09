@@ -107,6 +107,15 @@ sorry
 
 set_option pp.universes true
 
+def ExtQprime_iso_aux_system_obj_aux' (X : Profinite.{u}) :
+  Ab.ulift.{u+1}.obj
+    ((forget₂ SemiNormedGroup Ab).obj
+      (SemiNormedGroup.Completion.obj ((SemiNormedGroup.LocallyConstant.obj V).obj (op X)))) ≅
+  (forget₂ SemiNormedGroup.{u+1} Ab.{u+1}).obj
+    (SemiNormedGroup.Completion.obj
+      ((SemiNormedGroup.LocallyConstant.obj (SemiNormedGroup.ulift.{u+1}.obj V)).obj (op X))) :=
+sorry
+
 def ExtQprime_iso_aux_system_obj_aux :
   ((CLC (SemiNormedGroup.ulift.{u+1}.obj V)).right_op.map_FreeAb ⋙
          FreeAb.eval SemiNormedGroupᵒᵖ) ⋙
@@ -121,8 +130,7 @@ begin
     refine iso.op _,
     refine (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab _ _) ≪≫ _,
     let e := (Condensed_Ab_to_presheaf.map_iso (Condensed_LCC_iso_of_top_ab V)).app (op X.as),
-    refine e.symm ≪≫ _,
-    sorry },
+    refine e.symm ≪≫ (ExtQprime_iso_aux_system_obj_aux' V X.as), },
   { sorry }
 end
 
