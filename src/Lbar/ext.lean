@@ -128,14 +128,13 @@ begin
       functor.map_FreeAb],
     refine iso.op _,
     refine (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab _ _) ≪≫ _,
-    -- let e := add_equiv.to_AddCommGroup_iso (LCC_iso_Cond_of_top_ab_add_equiv (X.as) (SemiNormedGroup.ulift.{u+1}.obj V)),
+    -- let e := add_equiv.to_AddCommGroup_iso (LCC_iso_Cond_of_top_ab_add_equiv (X.as) V),
 
-    -- ((LCC_iso_Cond_of_top_ab (SemiNormedGroup.ulift.{u+1}.obj V)).app (op X.as)).symm,
+    -- let e := ((LCC_iso_Cond_of_top_ab V).app (op X.as)).symm,
+    -- refine _ ≪≫ e ≪≫ _,
     sorry },
   { sorry }
 end
-
-#exit
 
 -- this needs to be functorial in `c`
 def ExtQprime_iso_aux_system_obj (c : ℝ≥0) (n : ℕ) :
@@ -164,8 +163,6 @@ begin
   refine ((category_theory.nat_iso.map_homological_complex
     (ExtQprime_iso_aux_system_obj_aux V) _).app ((breen_deligne.FPsystem r' BD _ κ).obj c)).op,
 end
-
-#exit
 
 attribute [reassoc] Ext_compute_with_acyclic_naturality
 
