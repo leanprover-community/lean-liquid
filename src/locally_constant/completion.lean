@@ -146,3 +146,16 @@ nat_iso.of_components
     erw [category.id_comp],
     refl,
   end
+
+def Condensed_LCC : Condensed.{u} Ab.{u+1} :=
+{ val := LCC.{u} V ⋙ Ab.ulift.{u+1},
+  cond := begin
+    let e := LCC_iso_Cond_of_top_ab V,
+    let e' := iso_whisker_right e Ab.ulift.{u+1},
+    apply presheaf.is_sheaf_of_iso proetale_topology.{u} e',
+    exact (Condensed.of_top_ab _).2,
+  end }
+
+def Condensed_LCC_iso_of_top_ab :
+  Condensed_LCC V ≅ Condensed.of_top_ab V :=
+Sheaf.iso.mk _ _ $ iso_whisker_right (LCC_iso_Cond_of_top_ab _) _
