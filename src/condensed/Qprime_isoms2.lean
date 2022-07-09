@@ -21,7 +21,7 @@ lemma homology_functor_iso_natural'
   ((homology_functor (Profinite.{u}ᵒᵖ ⥤ Ab.{u+1}) (complex_shape.up ℤ) i).map g).app S =
   category_theory.functor.map _ g ≫
       (((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj S).homology_functor_iso (complex_shape.up ℤ) i).inv.app C₂ :=
-sorry
+((((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj S).homology_functor_iso _ i).inv.naturality g).symm
 
 lemma homology_functor_iso_natural (S : ExtrDiscᵒᵖ) (i : ℤ) :
   (((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj
