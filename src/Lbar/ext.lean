@@ -121,6 +121,8 @@ sorry
 instance ulift_separated : separated_space (SemiNormedGroup.ulift.{u+1}.obj V) :=
 sorry
 
+set_option pp.universes true
+
 def ExtQprime_iso_aux_system_obj_aux :
   ((CLC (SemiNormedGroup.ulift.{u+1}.obj V)).right_op.map_FreeAb ⋙
          FreeAb.eval SemiNormedGroupᵒᵖ) ⋙
@@ -134,10 +136,8 @@ begin
       functor.map_FreeAb],
     refine iso.op _,
     refine (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab _ _) ≪≫ _,
-    -- let e := add_equiv.to_AddCommGroup_iso (LCC_iso_Cond_of_top_ab_add_equiv (X.as) V),
-
-    -- let e := ((LCC_iso_Cond_of_top_ab V).app (op X.as)).symm,
-    -- refine _ ≪≫ e ≪≫ _,
+    let e := (Condensed_Ab_to_presheaf.map_iso (Condensed_LCC_iso_of_top_ab V)).app (op X.as),
+    refine e.symm ≪≫ _,
     sorry },
   { sorry }
 end
