@@ -53,12 +53,6 @@ end
 
 open_locale zero_object
 
--- def unop_functor_homology_iso
---   {𝓐 ι : Type*} [category 𝓐] [abelian 𝓐] {c : complex_shape ι}
---   (C : homological_complex 𝓐 c) (i : ι) :
---   C.unop.homology i ≅ C.homology i :=
--- sorry
-
 def embed_unop {𝓐 : Type*} [category 𝓐] [abelian 𝓐] :
   (homological_complex.embed complex_shape.embedding.nat_down_int_up).op ⋙
     @homological_complex.unop_functor 𝓐 _ _ _ _ ≅
@@ -71,9 +65,16 @@ begin
       { exact iso.refl _ },
       { refine is_zero.iso (is_zero_zero _).unop (is_zero_zero _), },
       { exact iso.refl _ }, },
-    { sorry } },
-  { sorry }
+    { rintro i (j|(_|j)) (rfl : _ = _),
+      { apply is_zero.eq_of_src, exact (is_zero_zero _).unop },
+      { dsimp, erw [category.id_comp, category.comp_id], refl },
+      { dsimp, erw [category.id_comp, category.comp_id], refl }, } },
+  { intros X Y f, ext ((_|n)|n),
+    sorry { dsimp, erw [category.id_comp, category.comp_id], refl },
+    { apply is_zero.eq_of_tgt, exact is_zero_zero _ },
+    sorry { dsimp, erw [category.id_comp, category.comp_id], refl }, }
 end
+.
 
 -- move me
 lemma nat_up_int_down_c_iff : complex_shape.embedding.nat_up_int_down.c_iff :=
@@ -135,6 +136,8 @@ begin
     sorry },
   { sorry }
 end
+
+#exit
 
 -- this needs to be functorial in `c`
 def ExtQprime_iso_aux_system_obj (c : ℝ≥0) (n : ℕ) :
