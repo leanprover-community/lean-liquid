@@ -99,16 +99,6 @@ begin
 end
 .
 
-def _root_.category_theory.nat_iso.map_homological_complex
-  {ι V W : Type*} [category V] [preadditive V] [category W] [preadditive W]
-  {F G : V ⥤ W} [F.additive] [G.additive] (e : F ≅ G) (c : complex_shape ι) :
-  F.map_homological_complex c ≅ G.map_homological_complex c :=
-{ hom := nat_trans.map_homological_complex e.hom _,
-  inv := nat_trans.map_homological_complex e.inv _,
-  hom_inv_id' := by { ext C i, exact (e.app (C.X i)).hom_inv_id },
-  inv_hom_id' := by { ext C i, exact (e.app (C.X i)).inv_hom_id }, }
-.
-
 def preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab
   (M : Condensed.{u} Ab.{u+1}) (X : Profinite) :
   (preadditive_yoneda.obj M).obj (op $ CondensedSet_to_Condensed_Ab.obj (Profinite_to_Condensed.obj X)) ≅

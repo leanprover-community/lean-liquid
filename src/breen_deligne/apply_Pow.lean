@@ -1,12 +1,13 @@
 import breen_deligne.eval
+import for_mathlib.nat_iso_map_homological_complex
 
 noncomputable theory
+
+universes v
 
 namespace category_theory
 namespace preadditive
 open category_theory category_theory.limits
-
-universes v
 
 variables {C D : Type*} [category.{v} C] [category.{v} D] [preadditive C] [preadditive D]
   [has_finite_biproducts C] [has_finite_biproducts D] (F : C ⥤ D) [functor.additive F] (n : ℕ)
@@ -73,7 +74,7 @@ namespace data
 open category_theory category_theory.limits category_theory.preadditive
 open universal_map
 
-variables  {A₁ A₂ : Type*} [category A₁] [category A₂]
+variables  {A₁ A₂ : Type*} [category.{v} A₁] [category.{v} A₂]
   [preadditive A₁] [preadditive A₂] [has_finite_biproducts A₁] [has_finite_biproducts A₂]
   (BD : data)
   (F₁ : A₁ ⥤ A₁) (F₂ : A₂ ⥤ A₂) (G : A₁ ⥤ A₂) [functor.additive G]
@@ -88,16 +89,12 @@ include e
 def eval_functor'_comp :
   (eval_functor' F₂ ⋙ ((whiskering_left _ _ A₂).obj G).map_homological_complex _ ≅
   eval_functor' F₁ ⋙ ((whiskering_right A₁ _ _).obj G).map_homological_complex _) :=
-begin
-  sorry,
-end
+category_theory.nat_iso.map_homological_complex (eval_Pow_functor_comp F₁ F₂ G e) _
 
 def eval_functor_comp :
   eval_functor F₂ ⋙ (whiskering_left _ _ _).obj G ≅
   eval_functor F₁ ⋙ (whiskering_right A₁ _ _).obj (G.map_homological_complex _) :=
-begin
-  sorry,
-end
+iso_whisker_right (eval_functor'_comp F₁ F₂ G e) homological_complex.functor_eval.flip
 
 end data
 
