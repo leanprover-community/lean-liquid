@@ -4,6 +4,7 @@ import for_mathlib.additive_functor
 import for_mathlib.exact_functor
 import for_mathlib.homotopy_category_op
 import for_mathlib.has_homology_aux
+import for_mathlib.hom_single_iso2
 
 noncomputable theory
 
