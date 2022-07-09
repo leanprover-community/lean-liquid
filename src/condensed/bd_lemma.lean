@@ -14,6 +14,7 @@ import for_mathlib.endomorphisms.ab4
 import for_mathlib.homology_exact
 import condensed.Qprime_isoms2
 import for_mathlib.free_abelian_exact
+import for_mathlib.unflip
 
 .
 
@@ -325,21 +326,31 @@ namespace Condensed
 
 variables (BD : package)
 
+def eval_freeFunc_homology_iso (i : ℕ) :
+  (data.eval_functor Condensed.freeFunc.{u (u+1)}).obj breen_deligne.eg.data
+    ⋙ homology_functor _ _ i ≅
+  (category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1} ⋙
+    (whiskering_right _ _ _).obj ((data.eval_functor (category_theory.forget _ ⋙
+      AddCommGroup.free)).obj breen_deligne.eg.data ⋙ homology_functor _ _ i)).flip :=
+begin
+  /- this should basically be the isomorphisms between the homology of a presheaf and
+  the presheaf of objectwise homology, use something like
+    iso_whisker_left ((data.eval_functor freeFunc.{u (u+1)}).obj eg.data)
+      (@homological_complex.functor_eval_homology_nat_iso.{(u+1) u (u+2)} ℕ Profinite.{u}ᵒᵖ
+      Ab.{u+1} _ _ _ (complex_shape.down ℕ) 0),
+      and maybe nat_iso.unflip ? -/
+  sorry,
+end
+
 def eval_freeFunc_homology_zero :
   (data.eval_functor Condensed.freeFunc.{u (u+1)}).obj breen_deligne.eg.data
     ⋙ homology_functor _ _ 0 ≅ 𝟭 (Profinite.{u}ᵒᵖ ⥤ Ab.{u+1}) :=
 begin
-  refine nat_iso.of_components (λ M, _) sorry,
-  { refine _ ≪≫ iso_whisker_left M eval_free_homology_zero ≪≫ functor.right_unitor M,
-    refine nat_iso.of_components (λ x, _) _,
-    all_goals { sorry, }, },
+  refine eval_freeFunc_homology_iso 0 ≪≫ nat_iso.unflip _,
+  exact nat_iso.hcomp (iso.refl (category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}))
+    ((whiskering_right (Profiniteᵒᵖ ⥤ Ab) Ab AddCommGroup).map_iso
+    eval_free_homology_zero),
 end
-
--- for the commutation of "homology" and "presheaf", this might be useful:
---  iso_whisker_left ((data.eval_functor freeFunc.{u (u+1)}).obj eg.data)
---    (@homological_complex.functor_eval_homology_nat_iso.{(u+1) u (u+2)} ℕ Profinite.{u}ᵒᵖ
---    Ab.{u+1} _ _ _ (complex_shape.down ℕ) 0) ≪≫ _,
-
 
 def eval_freeCond_homology_zero :
   ((data.eval_functor freeCond').obj breen_deligne.eg.data) ⋙ homology_functor _ _ 0 ≅ 𝟭 _ :=
