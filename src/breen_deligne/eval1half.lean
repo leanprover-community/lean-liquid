@@ -8,8 +8,8 @@ open category_theory category_theory.limits category_theory.category
   category_theory.preadditive
 
 variables {A₁ A₂ A₃ : Type*} [category A₁] [preadditive A₁] [has_finite_biproducts A₁]
-  [category A₂] [preadditive A₂] [has_finite_biproducts A₂]
-  [category A₃] [preadditive A₃] [has_finite_biproducts A₃]
+  [category A₂] [preadditive A₂] --[has_finite_biproducts A₂]
+  [category A₃] [preadditive A₃] --[has_finite_biproducts A₃]
 
 namespace universal_map
 
