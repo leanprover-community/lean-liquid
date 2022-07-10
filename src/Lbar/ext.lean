@@ -103,7 +103,24 @@ def preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab
   (M : Condensed.{u} Ab.{u+1}) (X : Profinite) :
   (preadditive_yoneda.obj M).obj (op $ CondensedSet_to_Condensed_Ab.obj (Profinite_to_Condensed.obj X)) ≅
   M.val.obj (op X) :=
-sorry
+let e := Condensed_Ab_CondensedSet_adjunction.hom_equiv X.to_Condensed M in
+add_equiv.to_AddCommGroup_iso $
+{ to_fun := λ t, yoneda'_equiv _ _ (e t).val,
+  inv_fun := λ t, e.symm $ ⟨(yoneda'_equiv _ _).symm $ by apply t⟩,
+  left_inv := λ t, begin
+    dsimp only,
+    apply_fun e, rw equiv.apply_symm_apply, ext1,
+    dsimp only, erw equiv.apply_symm_apply,
+  end,
+  right_inv := λ t, begin
+    dsimp only,
+    rw equiv.apply_symm_apply,
+    rw equiv.apply_symm_apply,
+  end,
+  map_add' := begin
+    intros x y,
+    refl,
+  end }
 
 set_option pp.universes true
 
