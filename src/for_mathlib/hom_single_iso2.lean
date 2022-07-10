@@ -11,85 +11,6 @@ open category_theory category_theory.limits category_theory.preadditive
 
 variables {C : Type u} {ι : Type*} [category.{v} C] [abelian C] {c : complex_shape ι}
 
-namespace AddCommGroup
-
--- def has_homology'' {A B C : AddCommGroup} (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0) :
---   _root_.has_homology f g (AddCommGroup.homology f g) :=
--- { w := w,
---   π := (AddCommGroup.kernel_iso_ker _).hom ≫ of_hom (quotient_add_group.mk' _),
---   ι := _,
---   π_ι := _,
---   ex_π := _,
---   ι_ex := _,
---   epi_π := _,
---   mono_ι := _ }
-
-/-
-{ w := w,
-  π := (AddCommGroup.kernel_iso_ker _).hom ≫ of_hom (quotient_add_group.mk' _),
-  ι := _,
-  -- quotient_add_group.lift _ ((cokernel.π f).comp $ add_subgroup.subtype _) begin
-  --   rintro ⟨y, hx : g y = 0⟩ ⟨x, rfl : f x = y⟩,
-  --   dsimp only [add_monoid_hom.comp_apply, quotient_add_group.mk'_apply, subtype.coe_mk,
-  --     add_subgroup.coe_subtype],
-  --   rw [← comp_apply, cokernel.condition, zero_apply],
-  -- end,
-  π_ι := by sorry { rw [← kernel_iso_ker_hom_comp_subtype], refl },
-  ex_π := by sorry; begin
-    rw [← exact_comp_hom_inv_comp_iff (kernel_iso_ker g), iso.inv_hom_id_assoc],
-    rw AddCommGroup.exact_iff',
-    split,
-    { ext, simp, },
-    { rintros ⟨x, hx : _ = _⟩ (hh : _ = _),
-      dsimp at hh,
-      rw quotient_add_group.eq_zero_iff at hh,
-      obtain ⟨t,ht⟩ := hh,
-      use t,
-      ext,
-      simp_rw comp_apply,
-      dsimp [kernel_iso_ker],
-      rw [← comp_apply, kernel.lift_ι, ht],
-      refl }
-  end,
-  ι_ex := by sorry; begin
-    rw AddCommGroup.exact_iff',
-    split,
-    { ext ⟨t⟩,
-      simpa only [comp_apply, add_monoid_hom.coe_comp, quotient_add_group.coe_mk',
-        function.comp_app, quotient_add_group.lift_mk, add_subgroup.coe_subtype,
-        add_subgroup.coe_mk, cokernel.π_desc_apply, add_monoid_hom.zero_comp,
-        add_monoid_hom.zero_apply] },
-    { rintros x (hx : _ = _),
-      change ∃ e, _,
-      have : function.surjective (cokernel.π f) := surjective_of_epi (cokernel.π f),
-      obtain ⟨y,rfl⟩ := this x,
-      rw [← comp_apply, cokernel.π_desc] at hx,
-      let yy : g.ker := ⟨y,hx⟩,
-      use quotient_add_group.mk yy,
-      simp only [quotient_add_group.lift_mk', add_monoid_hom.coe_comp, add_subgroup.coe_subtype,
-        function.comp_app, subtype.coe_mk] }
-  end,
-  epi_π := by sorry; begin
-    apply_with epi_comp {instances:=ff}, { apply_instance },
-    rw AddCommGroup.epi_iff_surjective, exact quotient_add_group.mk'_surjective _
-  end,
-  mono_ι := by sorry; begin
-    rw [AddCommGroup.mono_iff_injective, injective_iff_map_eq_zero],
-    intros y hy,
-    obtain ⟨⟨y, hy'⟩, rfl⟩ := quotient_add_group.mk'_surjective _ y,
-    rw [quotient_add_group.mk'_apply, quotient_add_group.eq_zero_iff],
-    rw [quotient_add_group.mk'_apply, quotient_add_group.lift_mk] at hy,
-    rw add_subgroup.mem_comap,
-    dsimp at hy ⊢,
-    have : exact f (cokernel.π f) := abelian.exact_cokernel f,
-    rw AddCommGroup.exact_iff' at this,
-    exact this.2 hy,
-  end }
--/
-
-end AddCommGroup
-
-
 namespace bounded_homotopy_category
 
 open hom_single_iso_setup opposite
@@ -136,7 +57,15 @@ lemma aux₂_naturality_snd_var
     (homological_complex.d_comp_d _ _ _ _)
     (homological_complex.d_comp_d _ _ _ _)
     (commsq.of_eq $ ((map_hom_complex' _ f).comm _ _).symm)
-    (commsq.of_eq $ ((map_hom_complex' _ f).comm _ _).symm) ≫ (aux₂ P B₂ i).inv := sorry
+    (commsq.of_eq $ ((map_hom_complex' _ f).comm _ _).symm) ≫ (aux₂ P B₂ i).inv :=
+begin
+  dsimp only [aux₂, map_hom_complex_homology],
+  rw ← AddCommGroup.homology_iso_inv_homology_map,
+  congr' 1,
+  dsimp only [homology.map'],
+  erw ← has_homology.homology_map_eq',
+  congr',
+end
 .
 
 lemma quotient_add_group.lift_mk''
@@ -198,6 +127,9 @@ begin
   rw [← comp_apply, (map_hom_complex' P f).comm, comp_apply],
   erw [hφ, map_zero],
 end
+.
+
+attribute [simps] eq_to_iso
 
 lemma homological_complex_hom_single_iso_natural
   (P : bounded_homotopy_category C) {B₁ B₂ : C} (i : ℤ)
@@ -209,7 +141,22 @@ lemma homological_complex_hom_single_iso_natural
   homotopy_category.quotient_map_hom P.val.as ((homological_complex.single C _ i).obj B₂)
     (((homological_complex.hom_single_iso P.val.as B₂ i).symm)
       ⟨(map_hom_complex' P f).f i φ, homological_complex_hom_single_iso_natural_aux P i f φ⟩) :=
-sorry
+begin
+  dsimp only [homotopy_category.quotient_map_hom, add_monoid_hom.mk'_apply,
+    single, homotopy_category.single, functor.comp_map],
+  rw [← functor.map_comp], congr' 1,
+  ext n,
+  dsimp only [homological_complex.comp_f, homological_complex.hom_single_iso_symm_apply_f],
+  split_ifs with hin, swap, { rw zero_comp },
+  subst n,
+  simp only [category.assoc], refine congr_arg2 _ rfl _,
+  dsimp only [map_hom_complex', nat_trans.map_homological_complex_app_f,
+    preadditive_yoneda_map_app_apply],
+  simp only [category.assoc], refine congr_arg2 _ rfl _,
+  dsimp only [homological_complex.single],
+  rw [← category_theory.eq_to_iso_hom, ← iso.eq_inv_comp],
+  exact dif_pos rfl,
+end
 
 lemma hom_single_iso_naturality_snd_var_good
   (P : bounded_homotopy_category C) {B₁ B₂ : C} (i : ℤ)
