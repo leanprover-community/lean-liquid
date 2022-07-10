@@ -12,7 +12,7 @@ namespace CondensedSet
 universes u
 
 variables {J K : Type (u+1)} [small_category J] [small_category K]
-  [is_filtered J] [fin_category K] (F : K ⥤ J ⥤ CondensedSet.{u})
+  [fin_category K] (F : K ⥤ J ⥤ CondensedSet.{u})
 
 noncomputable
 def colim_to_lim :
@@ -85,14 +85,6 @@ lemma _root_.category_theory.functor.map_limit_hom_π {J C D : Type*}
 by simp only [category_theory.functor.map_limit, functor.map_cone_π_app,
     limit.cone_point_unique_up_to_iso_hom_comp, limit.cone_π]
 
--- @[simp, reassoc]
--- lemma _root_.category_theory.functor.map_limit_inv_π {J C D : Type*}
---   [small_category J] [category C] [category D]
---   (G : C ⥤ D) (F : J ⥤ C)
---   [has_limit F] [has_limit (F ⋙ G)] [preserves_limit F G]
---   (j : J) :
---   (G.map_limit F).inv ≫ limit.π _ j = _ :=
-
 def _root_.category_theory.functor.map_colimit {J C D : Type*}
   [small_category J] [category C] [category D]
   (G : C ⥤ D) (F : J ⥤ C)
@@ -116,8 +108,7 @@ def limit_comp_iso {J K C D : Type*} [small_category J] [small_category K]
   [category C] [category D] [has_limits_of_shape J C] [has_limits_of_shape J D]
   (F : J ⥤ K ⥤ C) (G : C ⥤ D) [has_limit F]
   [H : ∀ k, has_limit (F.flip.obj k)] [∀ k, preserves_limit (F.flip.obj k) G]
-  [∀ k, preserves_limit F ((category_theory.evaluation K C).obj k)]
-   :
+  [∀ k, preserves_limit F ((category_theory.evaluation K C).obj k)] :
   limit F ⋙ G ≅ F.flip ⋙ ((whiskering_right _ _ _).obj G) ⋙ lim :=
 begin
   refine nat_iso.of_components _ _,
@@ -146,8 +137,7 @@ def colimit_comp_iso {J K C D : Type*} [small_category J] [small_category K]
   [category C] [category D] [has_colimits_of_shape J C] [has_colimits_of_shape J D]
   (F : J ⥤ K ⥤ C) (G : C ⥤ D) [has_colimit F]
   [H : ∀ k, has_colimit (F.flip.obj k)] [∀ k, preserves_colimit (F.flip.obj k) G]
-  [∀ k, preserves_colimit F ((category_theory.evaluation K C).obj k)]
-   :
+  [∀ k, preserves_colimit F ((category_theory.evaluation K C).obj k)] :
   colimit F ⋙ G ≅ F.flip ⋙ ((whiskering_right _ _ _).obj G) ⋙ colim :=
 begin
   refine nat_iso.of_components _ _,
@@ -171,6 +161,8 @@ begin
     refl }
 end
 .
+
+variables [is_filtered J]
 
 def is_iso_colim_to_lim_component_e₁ (S : Profinite.{u}ᵒᵖ) :
   (colimit (limit F)).val.obj S ≅ colimit (curry.obj (category_theory.prod.swap J K ⋙
@@ -262,8 +254,36 @@ end
 
 end
 
-lemma is_iso_colim_to_lim :
-  is_iso (colim_to_lim F) :=
+def prod_eval_iso (α : Type (u+1))
+  (X : α → J ⥤ CondensedSet.{u}) (j) :
+  (∏ X).obj j ≅ ∏ (λ i, (X i).obj j) :=
+preserves_limit_iso ((category_theory.evaluation _ _).obj j) _ ≪≫
+has_limit.iso_of_nat_iso (discrete.nat_iso $ λ i, iso.refl _)
+
+def is_colimit_pow_functor_map_cocone_aux (α : Type (u+1)) [fintype α] (F : J ⥤ CondensedSet)
+  (S : cocone (F ⋙ pow_functor CondensedSet α)) :
+  cocone (∏ λ (i : α), F) :=
+{ X := S.X,
+  ι :=
+  { app := λ j, begin
+      refine (prod_eval_iso _ _ _).hom ≫ _,
+      refine S.ι.app j,
+    end,
+    naturality' := begin
+      intros i j f, dsimp [prod_eval_iso], simp only [category.comp_id, category.assoc],
+      rw ← S.w f,
+      simp only [← category.assoc], congr' 1, simp only [category.assoc], dsimp,
+      apply limit.hom_ext, intros k,
+      dsimp [pow_functor], simp only [category.assoc, has_limit.iso_of_nat_iso_hom_π,
+        discrete.nat_iso_hom_app, preserves_limits_iso_hom_π_assoc,
+        evaluation_obj_map, nat_trans.naturality_assoc, lim_map_π, discrete.nat_trans_app,
+        has_limit.iso_of_nat_iso_hom_π_assoc],
+      dsimp [discrete.functor], simp,
+    end } }
+
+variables [is_filtered J]
+
+lemma is_iso_colim_to_lim : is_iso (colim_to_lim F) :=
 begin
   suffices : is_iso (CondensedSet_to_presheaf.map (colim_to_lim F)),
   { resetI, apply is_iso_of_fully_faithful CondensedSet_to_presheaf },
@@ -291,44 +311,9 @@ begin
   refine nat_iso.of_components (λ j, iso.refl _) _,
   intros j k f, dsimp, simp,
 end)
-
 .
 
-def prod_eval_iso
-  (α : Type (u+1))
-  (X : α → J ⥤ CondensedSet.{u}) (j) :
-  (∏ X).obj j ≅ ∏ (λ i, (X i).obj j) :=
-preserves_limit_iso ((category_theory.evaluation _ _).obj j) _ ≪≫
-has_limit.iso_of_nat_iso (discrete.nat_iso $ λ i, iso.refl _)
-
-def is_colimit_pow_functor_map_cocone_aux
-  (α: Type (u+1))
-  [fintype α]
-  (F: J ⥤ CondensedSet)
-  (S : cocone (F ⋙ pow_functor CondensedSet α)) :
-  cocone (∏ λ (i : α), F) :=
-{ X := S.X,
-  ι :=
-  { app := λ j, begin
-      refine (prod_eval_iso _ _ _).hom ≫ _,
-      refine S.ι.app j,
-    end,
-    naturality' := begin
-      intros i j f, dsimp [prod_eval_iso], simp only [category.comp_id, category.assoc],
-      rw ← S.w f,
-      simp only [← category.assoc], congr' 1, simp only [category.assoc], dsimp,
-      apply limit.hom_ext, intros k,
-      dsimp [pow_functor], simp only [category.assoc, has_limit.iso_of_nat_iso_hom_π,
-        discrete.nat_iso_hom_app, preserves_limits_iso_hom_π_assoc,
-        evaluation_obj_map, nat_trans.naturality_assoc, lim_map_π, discrete.nat_trans_app,
-        has_limit.iso_of_nat_iso_hom_π_assoc],
-      dsimp [discrete.functor], simp,
-    end } }
-
-def is_colimit_pow_functor_map_cocone
-  (α: Type (u+1))
-  [fintype α]
-  (F: J ⥤ CondensedSet) :
+def is_colimit_pow_functor_map_cocone (α : Type (u+1)) [fintype α] (F : J ⥤ CondensedSet) :
   is_colimit ((pow_functor CondensedSet α).map_cocone (colimit.cocone F)) :=
 { desc := λ S, (colimit_pow_iso α F).inv ≫
     colimit.desc (∏ λ (i : α), F) (is_colimit_pow_functor_map_cocone_aux α F S),

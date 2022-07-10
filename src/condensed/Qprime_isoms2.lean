@@ -140,9 +140,7 @@ lemma aaaahrg (i : ℤ) {A B : Ab} (f : A ⟶ B) :
   ((BD.eval' (forget AddCommGroup ⋙ AddCommGroup.free)).map f) :=
 rfl
 
-lemma tensor_to_unsheafified_homology_natural'
-  [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (M.val.obj (op S.val))]
-  [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (N.val.obj (op S.val))] (i : ℤ) :
+lemma tensor_to_unsheafified_homology_natural' (i : ℤ) :
   tensor_to_unsheafified_homology BD M i ≫
     whisker_left ExtrDisc_to_Profinite.op
       ((homology_functor (Profiniteᵒᵖ ⥤ Ab) (complex_shape.up ℤ) i).map
@@ -171,9 +169,7 @@ begin
   rw [aaaahrg, aaaahrg, ← category_theory.functor.map_comp, ← category_theory.functor.map_comp],
 end
 
-lemma tensor_to_homology_natural
-  [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (M.val.obj (op S.val))]
-  [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (N.val.obj (op S.val))] (i : ℤ) :
+lemma tensor_to_homology_natural (i : ℤ) :
   tensor_to_homology.{u} BD M i ≫ (homology_functor (Condensed.{u} Ab.{u+1}) _ i).map
       ((BD.eval' freeCond').map f) =
   map_tensor f (𝟙 _) ≫ tensor_to_homology.{u} BD N i :=
