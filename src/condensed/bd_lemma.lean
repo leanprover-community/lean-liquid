@@ -15,6 +15,7 @@ import for_mathlib.homology_exact
 import condensed.Qprime_isoms2
 import for_mathlib.free_abelian_exact
 import for_mathlib.unflip
+import breen_deligne.eval_Pow_functor_nat_trans_compatibility
 
 .
 
@@ -356,10 +357,12 @@ begin
         whisker_left],
       repeat { erw category.id_comp, },
       repeat { erw category.comp_id, },
-      /- sounds like the lemma stated in `eval_Pow_functor_nat_trans_compatibility.lean`
-        applied to the natural transformation between the evaluation at X and the
-        evaluation at Y -/
-      sorry,
+      have comm := eval_Pow_functor_nat_trans_compatibility
+        freeFunc.{u (u+1)} (forget AddCommGroup ⋙ AddCommGroup.free)
+        ((category_theory.evaluation _ Ab.{u+1}).map f) (iso.refl _) (iso.refl _)
+        (by { dsimp, erw [category.comp_id, category.id_comp], refl, }) M (eg.data.X j),
+      dsimp only [iso.refl, nat_trans.id_app] at comm,
+      simpa only [category.id_comp] using comm,
     end)
 end
 
