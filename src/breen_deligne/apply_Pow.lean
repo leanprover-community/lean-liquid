@@ -10,7 +10,8 @@ namespace preadditive
 open category_theory category_theory.limits
 
 variables {C D : Type*} [category.{v} C] [category.{v} D] [preadditive C] [preadditive D]
-  [has_finite_biproducts C] [has_finite_biproducts D] (F : C ⥤ D) [functor.additive F] (n : ℕ)
+  [has_finite_biproducts C] [has_finite_biproducts D] (F : C ⥤ D) [functor.additive F]
+  (F' : C ⥤ D) [functor.additive F'] (τ : F ⟶ F') (n : ℕ)
 
 @[simps]
 def apply_Pow : Pow n ⋙ F ≅ F ⋙ Pow n := nat_iso.of_components (λ A,
@@ -32,6 +33,26 @@ def apply_Pow : Pow n ⋙ F ≅ F ⋙ Pow n := nat_iso.of_components (λ A,
     end, })
 (λ X Y f, by { ext, simp only [category.assoc, biproduct.lift_π,
   functor.comp_map, Pow_map, biproduct.lift_map, ← F.map_comp, biproduct.map_π], })
+
+lemma apply_Pow_naturality (M : C) :
+  τ.app ((Pow n).obj M) ≫ (apply_Pow F' n).hom.app M =
+  (apply_Pow F n).hom.app M ≫ (Pow n).map (τ.app M) :=
+begin
+  rw [← cancel_epi ((apply_Pow F n).inv.app M)],
+  slice_rhs 1 2 { rw [← nat_trans.comp_app, iso.inv_hom_id], },
+  erw category.id_comp,
+  apply limits.biproduct.hom_ext,
+  intro j,
+  apply limits.biproduct.hom_ext',
+  intro i,
+  simp only [apply_Pow_inv_app, apply_Pow_hom_app, category.assoc,
+    biproduct.lift_π, biproduct.ι_desc_assoc, Pow_map, biproduct.map_π],
+  erw [τ.naturality_assoc, ← F'.map_comp],
+  by_cases i = j,
+  { subst h,
+    erw [biproduct.ι_π_self_assoc, biproduct.ι_π_self, F'.map_id, category.comp_id], },
+  { erw [biproduct.ι_π_ne_assoc _ h, biproduct.ι_π_ne _ h, F'.map_zero, comp_zero, zero_comp], },
+end
 
 open breen_deligne breen_deligne.universal_map
 

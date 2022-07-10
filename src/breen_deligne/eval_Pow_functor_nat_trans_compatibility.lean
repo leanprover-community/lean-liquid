@@ -23,7 +23,14 @@ lemma eval_Pow_functor_nat_trans_compatibility
   e.hom.app _ ≫ F₂.map ((apply_Pow G n).hom.app M) ≫
     ((eval_Pow_functor F₂).obj n).map (τ.app M) :=
 begin
-  sorry
+  dsimp only [eval_Pow_functor],
+  have h₁ := nat_trans.congr_app h ((Pow n).obj M),
+  simp only [nat_trans.comp_app, whisker_right_app, whisker_left] at h₁,
+  slice_lhs 1 2 { erw ← h₁, },
+  simp only [category.assoc],
+  erw [← F₂.map_comp, ← F₂.map_comp],
+  congr' 2,
+  apply apply_Pow_naturality,
 end
 
 end breen_deligne
