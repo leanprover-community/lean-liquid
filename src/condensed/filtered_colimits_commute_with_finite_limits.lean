@@ -2,6 +2,7 @@ import condensed.top_comparison
 import condensed.filtered_colimits
 import condensed.adjunctions
 import for_mathlib.pow_functor
+import for_mathlib.nat_trans
 
 open category_theory
 open category_theory.limits
@@ -211,7 +212,7 @@ begin
 end
 .
 
-attribute [reassoc] nat_trans.comp_app Sheaf.hom.comp_val
+local attribute [reassoc] Sheaf.hom.comp_val
 
 lemma is_iso_colim_to_lim_component (S : Profinite.{u}ᵒᵖ) :
   is_iso ((colim_to_lim F).val.app S) :=

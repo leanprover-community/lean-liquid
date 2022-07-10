@@ -5,6 +5,7 @@ import for_mathlib.exact_functor
 import for_mathlib.homotopy_category_op
 import for_mathlib.has_homology_aux
 import for_mathlib.hom_single_iso2
+import for_mathlib.nat_trans
 
 noncomputable theory
 
@@ -503,7 +504,7 @@ begin
   apply hom_single_iso_naturality_snd_var,
 end
 
-attribute [reassoc] nat_trans.comp_app
+--attribute [reassoc] nat_trans.comp_app
 
 lemma Ext_is_zero_iff (X : chain_complex 𝓐 ℕ) (Y : 𝓐)
   (f : X ⟶ X) (g : Y ⟶ Y) :
