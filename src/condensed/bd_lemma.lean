@@ -323,88 +323,63 @@ open bounded_homotopy_category
 
 namespace Condensed
 
+def HQ'Z (n : ℤ) : Ab :=
+((eg.eval $ category_theory.forget AddCommGroup ⋙ AddCommGroup.free).obj
+  (AddCommGroup.free.obj punit)).val.as.homology n
+
 variables (BD : package)
 
-def eval_freeFunc_homology_iso (i : ℕ) :
-  (data.eval_functor Condensed.freeFunc.{u (u+1)}).obj breen_deligne.eg.data
-    ⋙ homology_functor _ _ i ≅
-  (category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1} ⋙
-    (whiskering_right _ _ _).obj ((data.eval_functor (category_theory.forget _ ⋙
-      AddCommGroup.free)).obj breen_deligne.eg.data ⋙ homology_functor _ _ i)).flip :=
-iso_whisker_left ((data.eval_functor freeFunc.{u (u+1)}).obj eg.data)
-  (@homological_complex.functor_eval_homology_nat_iso.{(u+1) u (u+2)} ℕ Profinite.{u}ᵒᵖ
-    Ab.{u+1} _ _ _ (complex_shape.down ℕ) i) ≪≫
-begin
-  refine (functor.associator _ _ _).symm ≪≫ iso_whisker_right _ _ ≪≫
-    (functor.whiskering_right_obj_comp _ _ _).symm ≪≫
-    (functor.flip_evaluation_comp_whiskering_right _ _).symm,
-  refine nat_iso.unflip _,
-  exact nat_iso.of_components
-    (λ X, ((data.eval_functor_comp freeFunc.{u (u+1)}
-      (forget AddCommGroup ⋙ AddCommGroup.free) ((category_theory.evaluation _ Ab.{u+1}).obj X)
-      (iso.refl _)).app breen_deligne.eg.data).symm)
-    (λ X Y f, begin
-      ext1 i, ext1 M, ext1, ext1 j,
-      dsimp only [data.eval_functor_comp, data.eval_functor, homological_complex.functor_eval,
-        functor.flip, functor.comp_obj, iso.symm, iso_whisker_right, whiskering_right,
-        functor.map_iso, whisker_right, iso.app, nat_trans.comp_app, functor.comp_map,
-        homological_complex.comp_f, homological_complex.functor_eval.obj,
-        category_theory.evaluation,
-        functor.map_homological_complex, iso.refl,
-        data.eval_functor'_comp, data.eval_functor', nat_iso.map_homological_complex,
-        nat_trans.map_homological_complex, preadditive.eval_Pow_functor_comp,
-        nat_iso.of_components, iso.trans, iso_whisker_left, whiskering_left, functor.associator,
-        whisker_left],
-      repeat { erw category.id_comp, },
-      repeat { erw category.comp_id, },
-      have comm := eval_Pow_functor_nat_trans_compatibility
-        freeFunc.{u (u+1)} (forget AddCommGroup ⋙ AddCommGroup.free)
-        ((category_theory.evaluation _ Ab.{u+1}).map f) (iso.refl _) (iso.refl _)
-        (by { dsimp, erw [category.comp_id, category.id_comp], refl, }) M (eg.data.X j),
-      dsimp only [iso.refl, nat_trans.id_app] at comm,
-      simpa only [category.id_comp] using comm,
-    end)
-end
+-- `by apply_instance` takes for ever, so we provide this shortcut
+instance : abelian (endomorphisms $ Condensed.{u} Ab.{u+1}) :=
+endomorphisms.category_theory.abelian
 
-def eval_freeFunc_homology_zero :
-  (data.eval_functor Condensed.freeFunc.{u (u+1)}).obj breen_deligne.eg.data
-    ⋙ homology_functor _ _ 0 ≅ 𝟭 (Profinite.{u}ᵒᵖ ⥤ Ab.{u+1}) :=
-begin
-  refine eval_freeFunc_homology_iso 0 ≪≫ nat_iso.unflip _,
-  exact nat_iso.hcomp (iso.refl (category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}))
-    ((whiskering_right (Profiniteᵒᵖ ⥤ Ab) Ab AddCommGroup).map_iso
-    eval_free_homology_zero),
-end
+-- `by apply_instance` takes for ever, so we provide this shortcut
+instance : has_finite_biproducts (endomorphisms $ Condensed.{u} Ab.{u+1}) :=
+abelian.has_finite_biproducts
 
-def eval_freeCond_homology_zero :
-  ((data.eval_functor freeCond').obj breen_deligne.eg.data) ⋙ homology_functor _ _ 0 ≅ 𝟭 _ :=
--- relate `freeCond'` and `freeFunc`, use `eval_freeFunc_homology_zero`,
--- and use the exactness of the associated sheaf functor (cf. `homology_functor_iso`)
-sorry
+-- `by apply_instance` takes for ever, so we provide this shortcut
+instance : enough_projectives (endomorphisms $ Condensed.{u} Ab.{u+1}) :=
+endomorphisms.category_theory.enough_projectives
+
+-- `by apply_instance` takes for ever, so we provide this shortcut
+instance : has_coproducts_of_shape (ulift.{u+1} ℕ) (endomorphisms $ Condensed.{u} Ab.{u+1}) :=
+endomorphisms.has_colimits_of_shape
+
+-- `by apply_instance` takes for ever, so we provide this shortcut
+instance : has_products_of_shape (ulift ℕ) (endomorphisms $ Condensed.{u} Ab.{u+1}) :=
+endomorphisms.has_limits_of_shape
+
+-- `by apply_instance` takes for ever, so we provide this shortcut
+instance : has_coproducts (endomorphisms $ Condensed.{u} Ab.{u+1}) :=
+λ (J : Type (u+1)), endomorphisms.has_colimits_of_shape
+
+-- `by apply_instance` takes for ever, so we provide this shortcut
+instance : AB4 (endomorphisms $ Condensed.{u} Ab.{u+1}) :=
+endomorphisms.category_theory.AB4 _
+
+-- `by apply_instance` takes for ever, so we provide this shortcut
+instance : has_finite_limits (endomorphisms $ Condensed.{u} Ab.{u+1}) :=
+abelian.has_finite_limits
+
+-- `by apply_instance` takes for ever, so we provide this shortcut
+instance : has_finite_colimits (endomorphisms $ Condensed.{u} Ab.{u+1}) :=
+abelian.has_finite_colimits
 .
 
 -- move this
 attribute [reassoc] homology_bd_eval_natural
 
-lemma exists_tensor_iso (A : endomorphisms (Condensed.{u} Ab.{u+1}))
+def exists_tensor_iso (A : endomorphisms (Condensed.{u} Ab.{u+1}))
   [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (A.X.val.obj (op S.val))]
-  (t : ℤ) (ht : t ≤ -1) :
-  (∃ (A' : Ab), nonempty
-    (((package.endo_T tensor_functor).obj A).obj A' ≅
-      ((eg.eval freeCond'.map_endomorphisms).obj A).val.as.homology t)) :=
+  (n : ℕ) :
+  ((package.endo_T tensor_functor).obj A).obj (HQ'Z (-n)) ≅
+      ((eg.eval freeCond'.map_endomorphisms).obj A).val.as.homology (-n) :=
 begin
-  obtain ⟨n, rfl⟩ : ∃ n : ℕ, t = -n,
-  { lift -t to ℕ with n hn, swap, { rw [neg_nonneg], refine ht.trans _, dec_trivial },
-    refine ⟨n, _⟩, rw [hn, neg_neg], },
-  let HnQ'Z := ((eg.eval $
-    category_theory.forget AddCommGroup ⋙ AddCommGroup.free).obj
-      (AddCommGroup.free.obj punit)).val.as.homology (-n),
-  refine ⟨HnQ'Z, ⟨_⟩⟩,
   refine endomorphisms.mk_iso _ _,
   { refine _ ≪≫ ((package.hH_endo₁ eg freeCond' n).app A).symm,
     refine (homology_bd_eval eg A.X (-n)).symm ≪≫ _,
     exact (package.eval'_homology eg freeCond' n).app A.X, },
-  { dsimp only [iso.trans_hom, iso.symm_hom, package.endo_T_obj_obj_e, tensor_functor],
+  { dsimp only [iso.trans_hom, iso.symm_hom, package.endo_T_obj_obj_e, tensor_functor, HQ'Z],
     simp only [category.assoc, ← homology_bd_eval_natural_assoc],
     refine congr_arg2 _ rfl _,
     dsimp only [iso.app_hom, iso.app_inv],
@@ -414,6 +389,18 @@ begin
     rw [iso.comp_inv_eq, category.assoc, iso.eq_inv_comp],
     exact (eg.hH_endo₁_natural freeCond' A n).symm, }
 end
+.
+
+-- move this
+lemma is_tensor_unit_of_iso (A B : Ab) (e : A ≅ B) (ha : AddCommGroup.is_tensor_unit A) :
+  AddCommGroup.is_tensor_unit B :=
+begin
+  obtain ⟨a, ha⟩ := ha,
+  refine ⟨e.hom a, _⟩,
+  intro C, specialize ha C,
+  let φ := iso.AddCommGroup_iso_to_add_equiv ((preadditive_yoneda.obj C).map_iso e.op),
+  exact ha.comp φ.bijective,
+end
 
 lemma bd_lemma (A : Condensed.{u} Ab.{u+1}) (B : Condensed.{u} Ab.{u+1})
   [∀ S : ExtrDisc.{u}, no_zero_smul_divisors ℤ (A.val.obj (op S.val))]
@@ -422,7 +409,21 @@ lemma bd_lemma (A : Condensed.{u} Ab.{u+1}) (B : Condensed.{u} Ab.{u+1})
   (∀ i, is_iso $
     ((Ext i).map ((breen_deligne.eg.eval freeCond').map f).op).app ((single _ 0).obj B) -
     ((Ext i).obj (op $ (breen_deligne.eg.eval freeCond').obj A)).map ((single _ 0).map g)) :=
-eg.main_lemma' _ A B f g
-  eval_freeCond_homology_zero tensor_functor tensor_punit (exists_tensor_iso ⟨A,f⟩)
+begin
+  apply eg.main_lemma_weak' _ A B f g tensor_functor tensor_punit (λ n, HQ'Z (-n)),
+  { apply tensor_tunit,
+    apply is_tensor_unit_of_iso
+      (AddCommGroup.free.obj punit) (HQ'Z 0),
+    { let e := (eval_free_homology_zero.app (AddCommGroup.free.obj punit)).symm,
+      refine e ≪≫ _, clear e,
+      let e := (package.eval'_homology eg (forget AddCommGroup ⋙ AddCommGroup.free) 0).symm,
+      exact e.app (AddCommGroup.free.obj punit), },
+    { refine ⟨free_abelian_group.of punit.star, _⟩,
+      intro B, split,
+      { intros f g h, ext ⟨⟩, exact h },
+      { intros b, refine ⟨free_abelian_group.lift (λ _, b), _⟩,
+        apply free_abelian_group.lift.of } } },
+  { apply exists_tensor_iso }
+end
 
 end Condensed

@@ -14,6 +14,7 @@ import for_mathlib.endomorphisms.homology
 import for_mathlib.yoneda_left_exact
 import for_mathlib.homotopy_category_functor_compatibilities
 import for_mathlib.preserves_exact
+import for_mathlib.AddCommGroup.tensor
 
 .
 
@@ -451,6 +452,7 @@ def Pow_X (X : endomorphisms 𝓐) (n : ℕ) :
 instance eval'_bounded_above (X : 𝓐) : ((homotopy_category.quotient 𝓐 (complex_shape.up ℤ)).obj ((BD.eval' F).obj X)).is_bounded_above :=
 ((BD.eval F).obj X).bdd
 
+/-
 def mk_bo_ha_ca'_Q (X : 𝓐) (f : X ⟶ X) :
   endomorphisms.mk_bo_ho_ca' ((BD.eval' F).obj X) ((BD.eval' F).map f) ≅
   (BD.eval F.map_endomorphisms).obj ⟨X, f⟩ :=
@@ -518,6 +520,7 @@ begin
       { rw [biproduct.ι_π, dif_pos rfl, eq_to_hom_refl, category.comp_id], },
       { rintro k - hk, rw [biproduct.ι_π_ne _ hk, comp_zero], } }, }
 end
+-/
 
 section
 
@@ -740,6 +743,31 @@ begin
     apply eval_mk_end },
 end
 
+lemma main_lemma_weak
+  (A : 𝓐) (B : 𝓐) (f : A ⟶ A) (g : B ⟶ B)
+  (hH0 : ((BD.eval F.map_endomorphisms).obj ⟨A,f⟩).val.as.homology 0 ≅ ⟨A,f⟩)
+  (T : Ab.{v} ⥤ endomorphisms 𝓐) [Π (α : Type v), preserves_colimits_of_shape (discrete α) T]
+  (hT0 : T.obj (AddCommGroup.of (punit →₀ ℤ)) ≅ ⟨A, f⟩)
+  (hT : ∀ {X Y Z : Ab} (f : X ⟶ Y) (g : Y ⟶ Z),
+    short_exact f g → short_exact (T.map f) (T.map g))
+  (hTA : ∀ t ≤ (-1:ℤ), (∃ (A' : Ab),
+    nonempty (T.obj A' ≅ ((BD.eval F.map_endomorphisms).obj ⟨A, f⟩).val.as.homology t))) :
+  (∀ i, is_iso $ ((Ext' i).map f.op).app B - ((Ext' i).obj (op A)).map g) ↔
+  (∀ i, is_iso $
+    ((Ext i).map ((BD.eval F).map f).op).app ((single _ 0).obj B) -
+    ((Ext i).obj (op $ (BD.eval F).obj A)).map ((single _ 0).map g)) :=
+begin
+  rw [← endomorphisms.Ext'_is_zero_iff A B f g],
+  erw [← endomorphisms.Ext_is_zero_iff],
+  refine (main_lemma.is_zero BD F.map_endomorphisms _ _ hH0 T hT0 @hT hTA).trans _,
+  apply forall_congr, intro i,
+  apply iso.is_zero_iff,
+  refine functor.map_iso _ _ ≪≫ iso.app (functor.map_iso _ _) _,
+  { exact iso.refl _, },
+  { refine iso.op _, apply functor.map_iso,
+    apply eval_mk_end },
+end
+
 @[simps]
 def endo_T (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) : endomorphisms 𝓐 ⥤ Ab.{v} ⥤ endomorphisms 𝓐 :=
 functor.flip
@@ -824,6 +852,34 @@ begin
   { exact endomorphisms.mk_iso (hT0.app _) (nat_trans.naturality _ _) },
   { intros X Y Z _ _ hfg, refine endo_T_short_exact _ T _ _ hfg, },
   { exact hTA }
+end
+
+lemma main_lemma_weak' [has_finite_limits 𝓐] [has_finite_colimits 𝓐]
+  (A : 𝓐) (B : 𝓐) (f : A ⟶ A) (g : B ⟶ B)
+  (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) [(T.obj A).additive]
+  [preserves_finite_limits (T.obj A)] [preserves_finite_colimits (T.obj A)]
+  [Π (α : Type v), preserves_colimits_of_shape (discrete α) (T.obj A)]
+  (hT0 : T.flip.obj (AddCommGroup.of (punit →₀ ℤ)) ≅ 𝟭 _)
+  (A' : ℕ → Ab)
+  (hA'0 : T.flip.obj (A' 0) ≅ 𝟭 _)
+  (hTA : ∀ n, (((endo_T T).obj ⟨A,f⟩).obj (A' n) ≅ ((BD.eval F.map_endomorphisms).obj ⟨A,f⟩).val.as.homology (-n))) :
+  (∀ i, is_iso $ ((Ext' i).map f.op).app B - ((Ext' i).obj (op A)).map g) ↔
+  (∀ i, is_iso $
+    ((Ext i).map ((BD.eval F).map f).op).app ((single _ 0).obj B) -
+    ((Ext i).obj (op $ (BD.eval F).obj A)).map ((single _ 0).map g)) :=
+begin
+  let M : endomorphisms 𝓐 := ⟨A,f⟩,
+  -- let h
+  apply BD.main_lemma_weak F A B f g _ ((endo_T T).obj M),
+  { exact endomorphisms.mk_iso (hT0.app _) (nat_trans.naturality _ _) },
+  { intros X Y Z _ _ hfg, refine endo_T_short_exact _ T _ _ hfg, },
+  { intros t ht,
+    obtain ⟨n, rfl⟩ : ∃ n : ℕ, t = -n,
+    { lift -t to ℕ with n hn, swap, { rw [neg_nonneg], refine ht.trans _, dec_trivial },
+      refine ⟨n, _⟩, rw [hn, neg_neg], },
+    refine ⟨A' n, ⟨hTA n⟩⟩, },
+  { refine (hTA 0).symm ≪≫ _,
+    refine endomorphisms.mk_iso (hA'0.app _) (hA'0.hom.naturality f), }
 end
 
 end
