@@ -378,8 +378,8 @@ end
 
 def eval_freeCond_homology_zero :
   ((data.eval_functor freeCond').obj breen_deligne.eg.data) ⋙ homology_functor _ _ 0 ≅ 𝟭 _ :=
--- rewrite with isoms to reduce to checking on presheaves,
--- then use `eval_free_homology_zero`
+-- relate `freeCond'` and `freeFunc`, use `eval_freeFunc_homology_zero`,
+-- and use the exactness of the associated sheaf functor (cf. `homology_functor_iso`)
 sorry
 .
 
