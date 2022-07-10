@@ -1,4 +1,4 @@
-import breen_deligne.eval
+import breen_deligne.eval1half
 import for_mathlib.nat_iso_map_homological_complex
 
 noncomputable theory
@@ -33,16 +33,16 @@ def apply_Pow : Pow n ⋙ F ≅ F ⋙ Pow n := nat_iso.of_components (λ A,
 (λ X Y f, by { ext, simp only [category.assoc, biproduct.lift_π,
   functor.comp_map, Pow_map, biproduct.lift_map, ← F.map_comp, biproduct.map_π], })
 
-open breen_deligne.universal_map
+open breen_deligne breen_deligne.universal_map
 
-def eval_Pow_functor_comp {A₁ A₂ : Type*} [category A₁] [category A₂]
-  [preadditive A₁] [preadditive A₂] [has_finite_biproducts A₁] [has_finite_biproducts A₂]
+variables {A₁ A₂ : Type*} [category.{v} A₁] [category.{v} A₂] [preadditive A₁] [preadditive A₂]
+  [has_finite_biproducts A₁] [has_finite_biproducts A₂]
   (F₁ : A₁ ⥤ A₁) (F₂ : A₂ ⥤ A₂) (G : A₁ ⥤ A₂)
   [functor.additive G]
-  (e : F₁ ⋙ G ≅ G ⋙ F₂) :
+
+def eval_Pow_functor_comp (e : F₁ ⋙ G ≅ G ⋙ F₂) :
   eval_Pow_functor F₂ ⋙ ((whiskering_left _ _ A₂).obj G) ≅
-  eval_Pow_functor F₁ ⋙ (whiskering_right A₁ _ _).obj G
-:=
+  eval_Pow_functor F₁ ⋙ (whiskering_right A₁ _ _).obj G :=
 nat_iso.of_components
 (λ n, begin
   apply iso.symm,
@@ -57,11 +57,37 @@ end)
     functor.map_iso, eval_Pow_functor, functor.comp_map, whisker_right, whisker_left],
   repeat { erw category.id_comp, },
   repeat { erw category.comp_id, },
-  /- strategy : starting with slice_rhs 2 3, use a naturality property of `eval_Pow` with
-  respect to the additive functor `G`, then the statement would only involve
-  the functors `G` and `F₂`.
-  More precisely, do it first for a basic `f`, and extend by linearity -/
-  sorry,
+  rw [map_eval_Pow f F₁ G M, category.assoc, ← congr_eval_Pow' f e.inv],
+  simp only [← category.assoc],
+  congr' 1,
+  revert f,
+  let φ₁ : universal_map n m →+ ((G ⋙ Pow n ⋙ F₂).obj M ⟶ F₂.obj ((Pow m ⋙ G).obj M)) :=
+  { to_fun := λ f, ((eval_Pow F₂) f).app (G.obj M) ≫ F₂.map ((apply_Pow G m).inv.app M),
+    map_zero' := by simp only [eval_Pow_zero, nat_trans.app_zero, zero_comp],
+    map_add' := λ f₁ f₂, by simp only [map_add, nat_trans.app_add, add_comp], },
+  let φ₂ : universal_map n m →+ ((G ⋙ Pow n ⋙ F₂).obj M ⟶ F₂.obj ((Pow m ⋙ G).obj M)) :=
+  { to_fun := λ f, F₂.map ((apply_Pow G n).inv.app M) ≫ ((eval_Pow' (G ⋙ F₂)) f).app M,
+    map_zero' := by simp only [map_zero, nat_trans.app_zero, comp_zero],
+    map_add' := λ f₁ f₂, by simp only [map_add, nat_trans.app_add, comp_add], },
+  suffices : φ₁ = φ₂,
+  { intro f,
+    change φ₁ f = φ₂ f,
+    rw this, },
+  ext f,
+  dsimp only [φ₁, φ₂], clear φ₁ φ₂,
+  simp only [add_monoid_hom.coe_mk, eval_Pow'_of, eval_Pow_of, whisker_right_app,
+    ← F₂.map_comp, functor.comp_map],
+  congr' 1,
+  erw [← cancel_mono ((apply_Pow G m).hom.app M), category.assoc,
+    ← nat_trans.comp_app, iso.inv_hom_id, nat_trans.id_app, category.comp_id],
+  simp only [basic_universal_map.eval_Pow_app, apply_Pow_inv_app,
+    apply_Pow_hom_app, category.assoc],
+  apply limits.biproduct.hom_ext,
+  intro j,
+  apply limits.biproduct.hom_ext',
+  intro i,
+  simp only [biproduct.matrix_π, biproduct.ι_desc, category.assoc, biproduct.lift_π,
+    biproduct.ι_desc_assoc, ← G.map_comp, G.map_zsmul, G.map_id],
 end)
 
 end preadditive

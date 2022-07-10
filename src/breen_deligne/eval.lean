@@ -121,6 +121,8 @@ namespace universal_map
 
 variables {m n o : ℕ} (f : universal_map m n) (g : universal_map n o)
 
+/- Note: this definition is generalized in `eval1half.lean` for a functor
+`F : A₁ ⥤ A₂`. This generalization is used in `apply_Pow.lean`. -/
 def eval_Pow : universal_map m n →+ (Pow m ⋙ F ⟶ Pow n ⋙ F) :=
 free_abelian_group.lift $ λ g : basic_universal_map m n, whisker_right g.eval_Pow F
 
