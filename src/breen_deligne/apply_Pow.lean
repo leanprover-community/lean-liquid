@@ -123,15 +123,21 @@ open category_theory category_theory.limits category_theory.preadditive
 open universal_map
 
 variables  {A₁ A₂ : Type*} [category.{v} A₁] [category.{v} A₂]
-  [preadditive A₁] [preadditive A₂] [has_finite_biproducts A₁] [has_finite_biproducts A₂]
   (BD : data)
-  (F₁ : A₁ ⥤ A₁) (F₂ : A₂ ⥤ A₂) (G : A₁ ⥤ A₂) [functor.additive G]
+  (F₁ : A₁ ⥤ A₁) (F₂ : A₂ ⥤ A₂) (G : A₁ ⥤ A₂)
   (e : F₁ ⋙ G ≅ G ⋙ F₂)
+
+variables [preadditive A₂]
 
 instance additive_whiskering_left :
   functor.additive ((whiskering_left _ _ A₂).obj G) := { }
+
+variables [preadditive A₁] [functor.additive G]
+
 instance additive_whiskering_right :
   functor.additive ((whiskering_right A₁ _ _).obj G) := { }
+
+variables [has_finite_biproducts A₁] [has_finite_biproducts A₂]
 
 include e
 def eval_functor'_comp :
@@ -147,3 +153,4 @@ iso_whisker_right (eval_functor'_comp F₁ F₂ G e) homological_complex.functor
 end data
 
 end breen_deligne
+#lint
