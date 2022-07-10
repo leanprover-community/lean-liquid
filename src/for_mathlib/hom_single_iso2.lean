@@ -13,13 +13,26 @@ variables {C : Type u} {ι : Type*} [category.{v} C] [abelian C] {c : complex_sh
 
 namespace bounded_homotopy_category
 
+open hom_single_iso_setup opposite
+
 lemma aux₁_naturality_snd_var
   (P : bounded_homotopy_category C) {B₁ B₂ : C} (i : ℤ) (f : B₁ ⟶ B₂) :
   (aux₁ P B₁ i).hom ≫
   (homology_functor AddCommGroup (complex_shape.up ℤ).symm i).map
     ((nat_trans.map_homological_complex (preadditive_yoneda.map f)
     (complex_shape.up ℤ).symm).app P.val.as.op) =
-  map_hom_complex_homology _ _ f _ _ ≫ (aux₁ P B₂ i).hom := sorry
+  map_hom_complex_homology _ _ f _ _ ≫ (aux₁ P B₂ i).hom :=
+begin
+  rw [← iso.comp_inv_eq],
+  ext : 2,
+  dsimp only [aux₁, iso.symm_hom, iso.symm_inv, homology_iso', homology.map_iso],
+  simp only [category.assoc],
+  rw [homology.map_eq_desc'_lift_left, homology.π'_desc'_assoc,
+    homology.map_eq_lift_desc'_left, homology.lift_ι,
+    map_hom_complex_homology,
+    homology.map_eq_lift_desc'_left, homology.lift_ι, homology.π'_desc'],
+  sorry
+end
 
 lemma aux₂_naturality_snd_var
   (P : bounded_homotopy_category C) {B₁ B₂ : C} (i : ℤ) (f : B₁ ⟶ B₂) :
