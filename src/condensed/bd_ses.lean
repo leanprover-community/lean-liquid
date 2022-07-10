@@ -18,12 +18,12 @@ noncomputable theory
 universes u
 variables (F : CondensedSet.{u} ⥤ Condensed.{u} Ab.{u+1})
   [preserves_filtered_colimits F] (A : CompHausFiltPseuNormGrp.{u})
-  (c : ℝ≥0) [fact (0 < c)]
+  (ι : ℕ →o ℝ≥0) (hι : ∀ r : ℝ≥0, ∃ n : ℕ, r ≤ ι n)
 
 set_option pp.universes true
 
 def as_nat_diagram : as_small.{u+1} ℕ ⥤ CondensedSet.{u} :=
-restrict_diagram c A.level_Condensed_diagram'
+restrict_diagram ι A.level_Condensed_diagram'
 
 @[simp, reassoc]
 lemma ι_colimit_iso_Condensed_obj (i) :
@@ -63,81 +63,82 @@ def is_colimit_level_Condensed_diagram_cocone :
     simpa,
   end }
 
-def as_nat_cocone : cocone (as_nat_diagram A c) :=
-restrict_cocone c A.level_Condensed_diagram_cocone
+def as_nat_cocone : cocone (as_nat_diagram A ι) :=
+restrict_cocone ι A.level_Condensed_diagram_cocone
 
-def is_colimit_as_nat_cocone : is_colimit (as_nat_cocone A c) :=
-is_colimit_restrict_cocone c _ (is_colimit_level_Condensed_diagram_cocone _)
+def is_colimit_as_nat_cocone : is_colimit (as_nat_cocone A ι) :=
+is_colimit_restrict_cocone ι hι _ (is_colimit_level_Condensed_diagram_cocone _)
 
 /-- The map `∐ F(A_≤(n * c)) ⟶ F(A)`-/
 def coproduct_presentation :
-  (∐ (λ i : as_small.{u+1} ℕ, F.obj ((as_nat_diagram A c).obj i))) ⟶
-  F.obj (as_nat_cocone A c).X :=
-sigma.desc $ λ i, F.map ((as_nat_cocone A c).ι.app i)
+  (∐ (λ i : as_small.{u+1} ℕ, F.obj ((as_nat_diagram A ι).obj i))) ⟶
+  F.obj (as_nat_cocone A ι).X :=
+sigma.desc $ λ i, F.map ((as_nat_cocone A ι).ι.app i)
 
 def presentation_point_isomorphism :
-  F.obj ((as_nat_cocone A c).X) ≅ colimit (as_nat_diagram A c ⋙ F) :=
-(is_colimit_of_preserves F (is_colimit_as_nat_cocone A c)).cocone_point_unique_up_to_iso
+  F.obj ((as_nat_cocone A ι).X) ≅ colimit (as_nat_diagram A ι ⋙ F) :=
+(is_colimit_of_preserves F (is_colimit_as_nat_cocone A ι hι)).cocone_point_unique_up_to_iso
   (colimit.is_colimit _)
 
 lemma coproduct_presentation_eq :
-  coproduct_presentation F A c ≫ (presentation_point_isomorphism F A c).hom =
-  coproduct_to_colimit ((as_nat_diagram A c ⋙ F)) :=
+  coproduct_presentation F A ι ≫ (presentation_point_isomorphism F A ι hι).hom =
+  coproduct_to_colimit ((as_nat_diagram A ι ⋙ F)) :=
 begin
   apply colimit.hom_ext, intros j,
   erw colimit.ι_desc,
   erw colimit.ι_desc_assoc,
   dsimp,
-  erw (is_colimit_of_preserves F (is_colimit_as_nat_cocone A c)).fac,
+  erw (is_colimit_of_preserves F (is_colimit_as_nat_cocone A ι hι)).fac,
   refl,
 end
 
-theorem coproduct_to_colimit_short_exact_sequence :
-  short_exact (coproduct_to_coproduct (as_nat_diagram A c ⋙ F) - 𝟙 _)
-  (coproduct_presentation F A c) :=
+
+theorem coproduct_to_colimit_short_exact_sequence (hι : ∀ r : ℝ≥0, ∃ n, r ≤ ι n):
+  short_exact (coproduct_to_coproduct (as_nat_diagram A ι ⋙ F) - 𝟙 _)
+  (coproduct_presentation F A ι) :=
 { mono := infer_instance,
   epi := begin
-    have := coproduct_presentation_eq F A c,
+    have := coproduct_presentation_eq F A ι hι,
     rw ← iso.eq_comp_inv at this, rw this,
     apply_with epi_comp { instances := ff },
     apply_instance,
     apply_instance,
   end,
   exact := begin
-    have := coproduct_presentation_eq F A c,
+    have := coproduct_presentation_eq F A ι hι,
     rw ← iso.eq_comp_inv at this, rw this,
     rw exact_comp_iso,
-    exact (short_exact_sequence_aux (as_nat_diagram A c ⋙ F)).exact,
+    exact (short_exact_sequence_aux (as_nat_diagram A ι ⋙ F)).exact,
   end }
 
 variables (n : ℕ)
 
 /-- The map `(∐ i, F((A_≤ i * c)^n)) ⟶ F(A^n)`. -/
 def coproduct_presentation_with_pow :
-  (∐ (λ i : as_small.{u+1} ℕ, F.obj (∏ λ (j : ulift.{u+1} (fin n)), (as_nat_diagram A c).obj i))) ⟶
-  F.obj (∏ λ j : ulift.{u+1} (fin n), (as_nat_cocone A c).X) :=
-sigma.desc $ λ i, F.map (pi.map $ λ j, (as_nat_cocone A c).ι.app i)
+  (∐ (λ i : as_small.{u+1} ℕ, F.obj (∏ λ (j : ulift.{u+1} (fin n)), (as_nat_diagram A ι).obj i))) ⟶
+  F.obj (∏ λ j : ulift.{u+1} (fin n), (as_nat_cocone A ι).X) :=
+sigma.desc $ λ i, F.map (pi.map $ λ j, (as_nat_cocone A ι).ι.app i)
 
 def as_nat_diagram_pow : as_small.{u+1} ℕ ⥤ CondensedSet.{u} :=
-as_nat_diagram A c ⋙ pow_functor _ (ulift.{u+1} (fin n))
+as_nat_diagram A ι ⋙ pow_functor _ (ulift.{u+1} (fin n))
 
-def as_nat_cocone_pow : cocone (as_nat_diagram_pow A c n) :=
-(pow_functor _ (ulift.{u+1} (fin n))).map_cocone (as_nat_cocone A c)
+def as_nat_cocone_pow : cocone (as_nat_diagram_pow A ι n) :=
+(pow_functor _ (ulift.{u+1} (fin n))).map_cocone (as_nat_cocone A ι)
 
-def is_colimit_as_nat_cocone_pow : is_colimit (as_nat_cocone_pow A c n) :=
-is_colimit_of_preserves _ (is_colimit_as_nat_cocone _ _)
+def is_colimit_as_nat_cocone_pow : is_colimit (as_nat_cocone_pow A ι n) :=
+is_colimit_of_preserves _ (is_colimit_as_nat_cocone _ _ hι)
 
 def presentation_point_isomorphism_with_pow :
-  F.obj (∏ λ (j : ulift.{u+1} (fin n)), (as_nat_cocone A c).X) ≅
-  colimit (as_nat_diagram_pow A c n ⋙ F) :=
+  F.obj (∏ λ (j : ulift.{u+1} (fin n)), (as_nat_cocone A ι).X) ≅
+  colimit (as_nat_diagram_pow A ι n ⋙ F) :=
 (is_colimit_of_preserves F
-(is_colimit_as_nat_cocone_pow A c n)).cocone_point_unique_up_to_iso
+(is_colimit_as_nat_cocone_pow A ι hι n)).cocone_point_unique_up_to_iso
 (colimit.is_colimit _)
 
 lemma coproduct_presentation_with_pow_eq :
-  coproduct_presentation_with_pow F A c n =
-  coproduct_to_colimit (as_nat_diagram_pow A c n ⋙ F) ≫
-  (presentation_point_isomorphism_with_pow F A c n).inv :=
+  coproduct_presentation_with_pow F A ι n =
+  coproduct_to_colimit (as_nat_diagram_pow A ι n ⋙ F) ≫
+  (presentation_point_isomorphism_with_pow F A ι hι n).inv :=
 begin
   apply colimit.hom_ext, intros j,
   erw colimit.ι_desc,
@@ -151,18 +152,20 @@ end
 This is the short exact sequence of condensed abelian groups of the form
 `0 → ∐ i, F((A_{c * i})^n) → ∐ i, F((A_{c * i})^n) → F(A^n) → 0`.
 -/
-def short_exact_sequence_with_pow :
-  short_exact (coproduct_to_coproduct (as_nat_diagram_pow A c n ⋙ F) - 𝟙 _)
-    (coproduct_presentation_with_pow F A c n) :=
+lemma short_exact_sequence_with_pow (hι : ∀ r : ℝ≥0, ∃ n, r ≤ ι n) :
+  short_exact (coproduct_to_coproduct (as_nat_diagram_pow A ι n ⋙ F) - 𝟙 _)
+    (coproduct_presentation_with_pow F A ι n) :=
 { mono := infer_instance,
   epi := begin
     rw coproduct_presentation_with_pow_eq,
     apply epi_comp,
+    apply hι,
   end,
   exact := begin
     rw coproduct_presentation_with_pow_eq,
     rw exact_comp_iso,
     exact (short_exact_sequence_aux _).exact,
+    apply hι,
   end }
 
 end Condensed
