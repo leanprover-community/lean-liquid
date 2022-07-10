@@ -104,43 +104,43 @@ namespace bounded_homotopy_category
 namespace hom_single_iso_setup
 
 def hom_complex
-  (P : bounded_homotopy_category C) (B : C) (i : ℤ) :=
-(((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op)
+  (P : bounded_homotopy_category C) (B : C) :=
+((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op
 
 def map_hom_complex
-  {P₁ P₂ : bounded_homotopy_category C} (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
-  hom_complex P₂ B i ⟶ hom_complex P₁ B i :=
+  {P₁ P₂ : bounded_homotopy_category C} (f : P₁ ⟶ P₂) (B : C) :
+  hom_complex P₂ B ⟶ hom_complex P₁ B :=
 (((preadditive_yoneda.obj B).map_homological_complex _).map
   (homological_complex.op_functor.map f.out.op))
 
 def map_hom_complex'
-  (P : bounded_homotopy_category C) {B₁ B₂ : C} (f : B₁ ⟶ B₂) (i : ℤ) :
-  hom_complex P B₁ i ⟶ hom_complex P B₂ i :=
+  (P : bounded_homotopy_category C) {B₁ B₂ : C} (f : B₁ ⟶ B₂) :
+  hom_complex P B₁ ⟶ hom_complex P B₂ :=
 (nat_trans.map_homological_complex (preadditive_yoneda.map f) _).app _
 
 def aux₁
   (P : bounded_homotopy_category C) (B : C) (i : ℤ) :
   homology
-    ((hom_complex P B i).d (i+1) i)
-    ((hom_complex P B i).d i (i-1))
-    ((hom_complex P B i).d_comp_d _ _ _) ≅
-  (hom_complex P B i).homology i :=
-(homology_iso' (hom_complex P B i) (i+1) i (i-1) (by simp) (by simp)).symm
+    ((hom_complex P B).d (i+1) i)
+    ((hom_complex P B).d i (i-1))
+    ((hom_complex P B).d_comp_d _ _ _) ≅
+  (hom_complex P B).homology i :=
+(homology_iso' (hom_complex P B) (i+1) i (i-1) (by simp) (by simp)).symm
 
 def map_homology
   {P₁ P₂ : bounded_homotopy_category C} (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
-  homology ((hom_complex P₂ B i).d (i + 1) i) ((hom_complex P₂ B i).d i (i - 1))
-    ((hom_complex _ B i).d_comp_d _ _ _) ⟶
-  homology ((hom_complex P₁ B i).d (i + 1) i) ((hom_complex P₁ B i).d i (i - 1))
-    ((hom_complex _ B i).d_comp_d _ _ _) :=
+  homology ((hom_complex P₂ B).d (i + 1) i) ((hom_complex P₂ B).d i (i - 1))
+    ((hom_complex _ B).d_comp_d _ _ _) ⟶
+  homology ((hom_complex P₁ B).d (i + 1) i) ((hom_complex P₁ B).d i (i - 1))
+    ((hom_complex _ B).d_comp_d _ _ _) :=
 homology.map _ _
-(arrow.hom_mk $ (map_hom_complex f B i).comm _ _)
-(arrow.hom_mk $ (map_hom_complex f B i).comm _ _)
+(arrow.hom_mk $ (map_hom_complex f B).comm _ _)
+(arrow.hom_mk $ (map_hom_complex f B).comm _ _)
 rfl
 
 lemma aux₁_naturality
   (P₁ P₂ : bounded_homotopy_category C) (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
-  (aux₁ P₂ B i).hom ≫ (homology_functor _ _ _).map (map_hom_complex f B i) =
+  (aux₁ P₂ B i).hom ≫ (homology_functor _ _ _).map (map_hom_complex f B) =
   (map_homology f _ _) ≫ (aux₁ P₁ B i).hom :=
 begin
   dsimp only [map_homology, aux₁, homology_iso', iso.symm_hom, homology.map_iso,
@@ -166,7 +166,7 @@ begin
   let t := _, change _ = _ ≫ t,
   have ht : t = homology.ι _ _ _ ≫ cokernel.desc _ (cokernel.π _) _,
   rotate 2,
-  { have := (hom_complex P₁ B i).d_to_eq (by simp : (complex_shape.up ℤ).symm.rel (i+1) i),
+  { have := (hom_complex P₁ B).d_to_eq (by simp : (complex_shape.up ℤ).symm.rel (i+1) i),
     rw ← iso.inv_comp_eq at this,
     rw [← this, category.assoc, cokernel.condition, comp_zero] },
   { apply homology.hom_from_ext,
@@ -178,17 +178,17 @@ end
 def aux₂
   (P : bounded_homotopy_category C) (B : C) (i : ℤ) :
   homology
-    ((hom_complex P B i).d (i+1) i)
-    ((hom_complex P B i).d i (i-1))
+    ((hom_complex P B).d (i+1) i)
+    ((hom_complex P B).d i (i-1))
     (homological_complex.d_comp_d _ _ _ _) ≅
-  AddCommGroup.homology ((hom_complex P B i).d (i+1) i) ((hom_complex P B i).d i (i-1)) :=
+  AddCommGroup.homology ((hom_complex P B).d (i+1) i) ((hom_complex P B).d i (i-1)) :=
 (AddCommGroup.homology_iso _ _ _)
 
 def ker_hom
   {P₁ P₂ : bounded_homotopy_category C} (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
-  ((hom_complex P₂ B i).d i (i - 1)).ker →+
-  ((hom_complex P₁ B i).d i (i - 1)).ker :=
-{ to_fun := λ x, ⟨(map_hom_complex f B i).f _ ↑x, begin
+  ((hom_complex P₂ B).d i (i - 1)).ker →+
+  ((hom_complex P₁ B).d i (i - 1)).ker :=
+{ to_fun := λ x, ⟨(map_hom_complex f B).f _ ↑x, begin
     change _ = _,
     have : _ = _ := x.2,
     dsimp [hom_complex, map_hom_complex] at *,
@@ -201,8 +201,8 @@ def ker_hom
 
 def map_explicit_homology
   {P₁ P₂ : bounded_homotopy_category C} (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
-  AddCommGroup.homology ((hom_complex P₂ B i).d (i+1) i) ((hom_complex P₂ B i).d i (i-1)) ⟶
-  AddCommGroup.homology ((hom_complex P₁ B i).d (i+1) i) ((hom_complex P₁ B i).d i (i-1)) :=
+  AddCommGroup.homology ((hom_complex P₂ B).d (i+1) i) ((hom_complex P₂ B).d i (i-1)) ⟶
+  AddCommGroup.homology ((hom_complex P₁ B).d (i+1) i) ((hom_complex P₁ B).d i (i-1)) :=
 quotient_add_group.lift _
 (add_monoid_hom.comp (quotient_add_group.mk' _) $ ker_hom f _ _)
 begin
@@ -224,10 +224,10 @@ lemma map_explicit_homology_eq
   {P₁ P₂ : bounded_homotopy_category C} (f : P₁ ⟶ P₂) (B : C) (i : ℤ) :
   map_explicit_homology f B i =
   AddCommGroup.homology_map
-    ((hom_complex P₂ B i).d_comp_d _ _ _)
-    ((hom_complex P₁ B i).d_comp_d _ _ _)
-    (commsq.of_eq $ ((map_hom_complex f B i).comm (i+1) i).symm)
-    (commsq.of_eq $ ((map_hom_complex f B i).comm i (i-1)).symm) :=
+    ((hom_complex P₂ B).d_comp_d _ _ _)
+    ((hom_complex P₁ B).d_comp_d _ _ _)
+    (commsq.of_eq $ ((map_hom_complex f B).comm (i+1) i).symm)
+    (commsq.of_eq $ ((map_hom_complex f B).comm i (i-1)).symm) :=
 begin
   ext ⟨t⟩,
   symmetry, apply AddCommGroup.homology_map_apply_mk,
@@ -274,7 +274,7 @@ by rw [iso.comp_inv_eq, category.assoc, iso.eq_inv_comp, aux₂_naturality]
 def aux₃
   (P : bounded_homotopy_category C) (B : C) (i : ℤ) :
   (P ⟶ (single C i).obj B) ≃+
-  AddCommGroup.homology ((hom_complex P B i).d (i+1) i) ((hom_complex P B i).d i (i-1)) :=
+  AddCommGroup.homology ((hom_complex P B).d (i+1) i) ((hom_complex P B).d i (i-1)) :=
 begin
   refine add_equiv.surjective_congr (homological_complex.hom_single_iso P.val.as B i)
     (homotopy_category.quotient_map_hom _ _)
@@ -449,10 +449,10 @@ end
 
 def map_hom_complex_homology
   (P : bounded_homotopy_category C) {B₁ B₂ : C} (i : ℤ) (f : B₁ ⟶ B₂) (w₁ w₂) :
-  homology ((hom_complex P B₁ i).d (i + 1) i) ((hom_complex P B₁ i).d i (i - 1)) w₁ ⟶
-  homology ((hom_complex P B₂ i).d (i + 1) i) ((hom_complex P B₂ i).d i (i - 1)) w₂ :=
+  homology ((hom_complex P B₁).d (i + 1) i) ((hom_complex P B₁).d i (i - 1)) w₁ ⟶
+  homology ((hom_complex P B₂).d (i + 1) i) ((hom_complex P B₂).d i (i - 1)) w₂ :=
 homology.map _ _
-  (arrow.hom_mk ((map_hom_complex' _ f i).comm _ _))
-  (arrow.hom_mk ((map_hom_complex' _ f i).comm _ _)) rfl
+  (arrow.hom_mk ((map_hom_complex' _ f).comm _ _))
+  (arrow.hom_mk ((map_hom_complex' _ f).comm _ _)) rfl
 
 end bounded_homotopy_category
