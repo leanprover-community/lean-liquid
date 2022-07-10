@@ -18,10 +18,10 @@ def unflip {C D E : Type*} [category C] [category D] [category E]
     exact (φ.app d).naturality f,
   end}
 
-def unflip_id {C D E : Type*} [category C] [category D] [category E]
+lemma unflip_id {C D E : Type*} [category C] [category D] [category E]
   {F : C ⥤ D ⥤ E} : nat_trans.unflip (𝟙 F.flip) = 𝟙 F := rfl
 
-def unflip_comp {C D E : Type*} [category C] [category D] [category E]
+lemma unflip_comp {C D E : Type*} [category C] [category D] [category E]
   {F G H : C ⥤ D ⥤ E} (φ₁ : F.flip ⟶ G.flip) (φ₂ : G.flip ⟶ H.flip) :
   nat_trans.unflip (φ₁ ≫ φ₂) = nat_trans.unflip φ₁ ≫ nat_trans.unflip φ₂ := rfl
 
