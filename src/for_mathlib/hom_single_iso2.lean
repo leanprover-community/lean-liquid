@@ -31,7 +31,23 @@ begin
     homology.map_eq_lift_desc'_left, homology.lift_ι,
     map_hom_complex_homology,
     homology.map_eq_lift_desc'_left, homology.lift_ι, homology.π'_desc'],
-  sorry
+  dsimp only [arrow.hom_mk_left, map_hom_complex',
+    nat_trans.map_homological_complex_app_f, homology_functor_map],
+  let t : _ := _, show _ ≫ _ ≫ t = _,
+  have ht : t = homology.ι _ _ _ ≫
+    cokernel.map _ _ (homological_complex.X_prev_iso _ _).hom (𝟙 _) _,
+  rotate 2, { dsimp, refl }, { rw [category.comp_id], apply homological_complex.d_to_eq },
+  { ext1, erw [homology.π'_ι_assoc, homology.π'_desc', cokernel.π_desc], refl, },
+  rw [ht, homology.map_eq_lift_desc'_right, homology.lift_ι_assoc], clear ht t,
+  let t : _ := _, show t ≫ _ = _,
+  have ht : t = kernel.map _ _ (𝟙 _) (homological_complex.X_next_iso _ _).inv _ ≫
+    homology.π' _ _ _,
+  rotate 2, { dsimp, apply sub_add_cancel },
+  { rw [category.id_comp], symmetry, apply homological_complex.d_from_eq },
+  { ext1, erw [homology.lift_ι, category.assoc, homology.π'_ι, kernel.lift_ι_assoc], refl },
+  rw [ht, category.assoc, homology.π'_desc'_assoc, category.assoc, category.assoc], clear ht t,
+  rw [kernel.lift_ι_assoc, cokernel.π_desc],
+  simp only [category.assoc, category.id_comp], refl,
 end
 
 lemma aux₂_naturality_snd_var
