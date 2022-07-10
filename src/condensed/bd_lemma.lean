@@ -166,8 +166,6 @@ end
 
 open_locale zero_object
 
--- #check @homology_iso_datum.of_g_is_zero
-
 section
 
 variables {𝓐 : Type*} [category 𝓐] [abelian 𝓐]
@@ -344,7 +342,25 @@ begin
     (λ X, ((data.eval_functor_comp freeFunc.{u (u+1)}
       (forget AddCommGroup ⋙ AddCommGroup.free) ((category_theory.evaluation _ Ab.{u+1}).obj X)
       (iso.refl _)).app breen_deligne.eg.data).symm)
-    sorry,
+    (λ X Y f, begin
+      ext1 i, ext1 M, ext1, ext1 j,
+      dsimp only [data.eval_functor_comp, data.eval_functor, homological_complex.functor_eval,
+        functor.flip, functor.comp_obj, iso.symm, iso_whisker_right, whiskering_right,
+        functor.map_iso, whisker_right, iso.app, nat_trans.comp_app, functor.comp_map,
+        homological_complex.comp_f, homological_complex.functor_eval.obj,
+        category_theory.evaluation,
+        functor.map_homological_complex, iso.refl,
+        data.eval_functor'_comp, data.eval_functor', nat_iso.map_homological_complex,
+        nat_trans.map_homological_complex, preadditive.eval_Pow_functor_comp,
+        nat_iso.of_components, iso.trans, iso_whisker_left, whiskering_left, functor.associator,
+        whisker_left],
+      repeat { erw category.id_comp, },
+      repeat { erw category.comp_id, },
+      /- sounds like the lemma stated in `eval_Pow_functor_nat_trans_compatibility.lean`
+        applied to the natural transformation between the evaluation at X and the
+        evaluation at Y -/
+      sorry,
+    end)
 end
 
 def eval_freeFunc_homology_zero :
