@@ -32,18 +32,18 @@ namespace breen_deligne
 namespace package
 
 variables (BD : package)
-variables {𝓐 : Type u} [category.{v} 𝓐] [abelian 𝓐] [enough_projectives 𝓐]
+variables {𝓐 : Type u} [category.{v} 𝓐] [abelian 𝓐]
 variables (F : 𝓐 ⥤ 𝓐) --[preserves_filtered_colimits F]
 
 namespace main_lemma
 
 variables (A : 𝓐) (B : 𝓐) (j : ℤ)
 
-def IH  : Prop :=
+def IH [enough_projectives 𝓐] : Prop :=
   (∀ i ≤ j, is_zero $ ((Ext' i).obj (op A)).obj B) ↔
   (∀ i ≤ j, is_zero $ ((Ext i).obj (op ((BD.eval F).obj A))).obj ((single _ 0).obj B))
 
-lemma IH_neg (j : ℤ) (hj : j ≤ 0) (ih : IH BD F A B j) : IH BD F A B (j - 1) :=
+lemma IH_neg [enough_projectives 𝓐] (j : ℤ) (hj : j ≤ 0) : IH BD F A B (j - 1) :=
 begin
   split; intros _ _ hij,
   { apply Ext_single_right_is_zero _ _ 1 _ _ (chain_complex.bounded_by_one _),
@@ -77,6 +77,8 @@ begin
   apply is_zero.eq_of_src,
   exact hC 1 (by refl),
 end
+
+variables [enough_projectives 𝓐]
 
 def IH_0_aux (C : bounded_homotopy_category 𝓐) (hC : C.val.bounded_by 1) :
   ((Ext' 0).flip.obj B).obj (op (C.val.as.homology 0)) ≅
@@ -164,6 +166,8 @@ begin
   exact ((Ext' _).flip.obj B).map_iso hH0.op,
 end
 
+omit hH0
+
 open bounded_homotopy_category (of' Ext_map_is_iso_of_quasi_iso)
 
 lemma bdd_step₂ (j : ℤ) :
@@ -180,8 +184,6 @@ begin
   let e := (homotopy_category.quotient _ _).map_iso e',
   refine ⟨e.hom, e.inv, e.hom_inv_id, e.inv_hom_id⟩,
 end
-
-omit hH0
 
 lemma bdd_step₃_aux (i j : ℤ) :
   is_zero (((Ext i).obj (op $ (single 𝓐 j).obj (((BD.eval F).obj A).val.as.homology j))).obj ((single 𝓐 0).obj B)) ↔
@@ -238,7 +240,7 @@ end
 open bounded_homotopy_category (Ext0)
 
 -- move me
-def bdd_step₅_aux'' (X Y : bounded_homotopy_category 𝓐)
+def bdd_step₅_aux'' {𝓐 : Type*} [category 𝓐] [abelian 𝓐] (X Y : bounded_homotopy_category 𝓐)
   (e : bounded_homotopy_category 𝓐 ≌ bounded_homotopy_category 𝓐)
   [e.functor.additive] :
   (preadditive_yoneda.obj X).obj (op Y) ≅
@@ -247,11 +249,13 @@ add_equiv.to_AddCommGroup_iso $
 { map_add' := λ f g, e.functor.map_add,
   .. equiv_of_fully_faithful e.functor }
 
-instance shift_equiv_functor_additive (k : ℤ) :
+-- move me
+instance shift_equiv_functor_additive {𝓐 : Type*} [category 𝓐] [abelian 𝓐] (k : ℤ) :
   (shift_equiv (bounded_homotopy_category 𝓐) k).functor.additive :=
 bounded_homotopy_category.shift_functor_additive k
 
-def bdd_step₅_aux' (X Y : bounded_homotopy_category 𝓐) (k : ℤ) :
+def bdd_step₅_aux' {𝓐 : Type*} [category 𝓐] [abelian 𝓐]
+  (X Y : bounded_homotopy_category 𝓐) (k : ℤ) :
   (preadditive_yoneda.obj X).obj (op Y) ≅ (preadditive_yoneda.obj (X⟦k⟧)).obj (op (Y⟦k⟧)) :=
 bdd_step₅_aux'' _ _ $ shift_equiv _ k
 
@@ -388,13 +392,13 @@ variables (hAT : ∀ t ≤ (-1:ℤ), ∃ A', nonempty (T.obj A' ≅ ((BD.eval F)
 
 include hH0 hAT
 
-lemma bdd_step (j : ℤ) (hj : 0 ≤ j) (ih : IH BD F A B j) : IH BD F A B (j + 1) :=
+lemma bdd_step (j : ℤ) (ih : IH BD F A B j) : IH BD F A B (j + 1) :=
 begin
   by_cases ih' : (∀ i ≤ j, is_zero $ ((Ext' i).obj (op A)).obj B), swap,
   { split,
     { intro h, refine (ih' $ λ i hi, _).elim, apply h _ (int.le_add_one hi), },
     { intro h, refine (ih' $ ih.mpr $ λ i hi, _).elim, apply h _ (int.le_add_one hi), } },
-  refine (bdd_step₁ BD F _ _ hH0 _).trans ((bdd_step₂ BD F _ _ hH0 _).trans _).symm,
+  refine (bdd_step₁ BD F _ _ hH0 _).trans ((bdd_step₂ BD F _ _ _).trans _).symm,
   apply bdd_step₃,
   apply bdd_step₄ BD F A B _ _ _ le_rfl,
   intros t ht i hi,
@@ -415,8 +419,8 @@ lemma bdd (j : ℤ) : IH BD F A B j :=
 begin
   apply int.induction_on' j,
   { exact IH_0 BD F A B hH0 },
-  { exact bdd_step BD F A B hH0 T hT1 @hT hAT },
-  { exact IH_neg BD F A B, },
+  { intros k hk, exact bdd_step BD F A B hH0 T hT1 @hT hAT k },
+  { intros k hk _, exact IH_neg BD F A B k hk, },
 end
 
 lemma is_zero :
@@ -449,7 +453,9 @@ def Pow_X (X : endomorphisms 𝓐) (n : ℕ) :
 (apply_Pow (endomorphisms.forget 𝓐) n).app X
 .
 
-instance eval'_bounded_above (X : 𝓐) : ((homotopy_category.quotient 𝓐 (complex_shape.up ℤ)).obj ((BD.eval' F).obj X)).is_bounded_above :=
+instance eval'_bounded_above {𝓐 : Type u} [category 𝓐] [abelian 𝓐]
+  (F : 𝓐 ⥤ 𝓐) (X : 𝓐) :
+  ((homotopy_category.quotient 𝓐 (complex_shape.up ℤ)).obj ((BD.eval' F).obj X)).is_bounded_above :=
 ((BD.eval F).obj X).bdd
 
 /-
@@ -563,7 +569,6 @@ begin
     { rintro k - hk, rw [biproduct.ι_π_ne _ hk, comp_zero], } }
 end
 
-variables [has_finite_limits 𝓐] [has_finite_colimits 𝓐]
 variables (hH0 : ((data.eval_functor F).obj BD.data) ⋙ homology_functor _ _ 0 ≅ 𝟭 _)
 variables (X : endomorphisms 𝓐)
 
@@ -611,8 +616,7 @@ begin
     biproduct.ι_map, biproduct.ι_desc, endomorphisms.comp_f],
 end
 
-
-def eval'_homology (i : ℕ) :
+def eval'_homology {𝓐 : Type*} [category 𝓐] [abelian 𝓐] (F : 𝓐 ⥤ 𝓐) (i : ℕ) :
   BD.eval' F ⋙ homology_functor 𝓐 (complex_shape.up ℤ) (-i) ≅
   (data.eval_functor F).obj BD.data ⋙ homology_functor 𝓐 (complex_shape.down ℕ) i :=
 begin
@@ -713,9 +717,34 @@ end
 
 end
 
+variables [enough_projectives 𝓐]
 variables [has_coproducts (endomorphisms 𝓐)]
 variables [AB4 (endomorphisms 𝓐)]
-variables [has_finite_limits 𝓐] [has_finite_colimits 𝓐]
+
+lemma main_lemma_general
+  (A : 𝓐) (B : 𝓐) (f : A ⟶ A) (g : B ⟶ B)
+  (hH0 : ((BD.eval F.map_endomorphisms).obj ⟨A,f⟩).val.as.homology 0 ≅ ⟨A,f⟩)
+  (T : Ab.{v} ⥤ endomorphisms 𝓐) [Π (α : Type v), preserves_colimits_of_shape (discrete α) T]
+  (hT0 : T.obj (AddCommGroup.of (punit →₀ ℤ)) ≅ ⟨A, f⟩)
+  (hT : ∀ {X Y Z : Ab} (f : X ⟶ Y) (g : Y ⟶ Z),
+    short_exact f g → short_exact (T.map f) (T.map g))
+  (hTA : ∀ t ≤ (-1:ℤ), (∃ (A' : Ab),
+    nonempty (T.obj A' ≅ ((BD.eval F.map_endomorphisms).obj ⟨A, f⟩).val.as.homology t))) :
+  (∀ i, is_iso $ ((Ext' i).map f.op).app B - ((Ext' i).obj (op A)).map g) ↔
+  (∀ i, is_iso $
+    ((Ext i).map ((BD.eval F).map f).op).app ((single _ 0).obj B) -
+    ((Ext i).obj (op $ (BD.eval F).obj A)).map ((single _ 0).map g)) :=
+begin
+  rw [← endomorphisms.Ext'_is_zero_iff A B f g],
+  erw [← endomorphisms.Ext_is_zero_iff],
+  refine (main_lemma.is_zero BD F.map_endomorphisms _ _ hH0 T hT0 @hT hTA).trans _,
+  apply forall_congr, intro i,
+  apply iso.is_zero_iff,
+  refine functor.map_iso _ _ ≪≫ iso.app (functor.map_iso _ _) _,
+  { exact iso.refl _, },
+  { refine iso.op _, apply functor.map_iso,
+    apply eval_mk_end },
+end
 
 lemma main_lemma
   (A : 𝓐) (B : 𝓐) (f : A ⟶ A) (g : B ⟶ B)
@@ -743,49 +772,27 @@ begin
     apply eval_mk_end },
 end
 
-lemma main_lemma_weak
-  (A : 𝓐) (B : 𝓐) (f : A ⟶ A) (g : B ⟶ B)
-  (hH0 : ((BD.eval F.map_endomorphisms).obj ⟨A,f⟩).val.as.homology 0 ≅ ⟨A,f⟩)
-  (T : Ab.{v} ⥤ endomorphisms 𝓐) [Π (α : Type v), preserves_colimits_of_shape (discrete α) T]
-  (hT0 : T.obj (AddCommGroup.of (punit →₀ ℤ)) ≅ ⟨A, f⟩)
-  (hT : ∀ {X Y Z : Ab} (f : X ⟶ Y) (g : Y ⟶ Z),
-    short_exact f g → short_exact (T.map f) (T.map g))
-  (hTA : ∀ t ≤ (-1:ℤ), (∃ (A' : Ab),
-    nonempty (T.obj A' ≅ ((BD.eval F.map_endomorphisms).obj ⟨A, f⟩).val.as.homology t))) :
-  (∀ i, is_iso $ ((Ext' i).map f.op).app B - ((Ext' i).obj (op A)).map g) ↔
-  (∀ i, is_iso $
-    ((Ext i).map ((BD.eval F).map f).op).app ((single _ 0).obj B) -
-    ((Ext i).obj (op $ (BD.eval F).obj A)).map ((single _ 0).map g)) :=
-begin
-  rw [← endomorphisms.Ext'_is_zero_iff A B f g],
-  erw [← endomorphisms.Ext_is_zero_iff],
-  refine (main_lemma.is_zero BD F.map_endomorphisms _ _ hH0 T hT0 @hT hTA).trans _,
-  apply forall_congr, intro i,
-  apply iso.is_zero_iff,
-  refine functor.map_iso _ _ ≪≫ iso.app (functor.map_iso _ _) _,
-  { exact iso.refl _, },
-  { refine iso.op _, apply functor.map_iso,
-    apply eval_mk_end },
-end
-
 @[simps]
-def endo_T (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) : endomorphisms 𝓐 ⥤ Ab.{v} ⥤ endomorphisms 𝓐 :=
+def endo_T {𝓐 : Type*} [category 𝓐] (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) :
+  endomorphisms 𝓐 ⥤ Ab.{v} ⥤ endomorphisms 𝓐 :=
 functor.flip
 { obj := λ A, (T.flip.obj A).map_endomorphisms,
   map := λ A B f, nat_trans.map_endomorphisms $ T.flip.map f,
   map_id' := by { intros X, simp only [category_theory.functor.map_id], refl},
   map_comp' := by { intros X Y Z f g, simp only [functor.map_comp], refl } }
 
-def endo_T_comp_forget (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) (M : endomorphisms 𝓐) :
+def endo_T_comp_forget {𝓐 : Type*} [category 𝓐] (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) (M : endomorphisms 𝓐) :
   (endo_T T).obj M ⋙ endomorphisms.forget _ ≅ T.obj M.X :=
 nat_iso.of_components (λ _, iso.refl _) $
 by { intros, dsimp, simp only [category.comp_id, category.id_comp], }
 
-instance endo_T_additive (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) (A : endomorphisms 𝓐) [(T.obj A.X).additive] :
+instance endo_T_additive {𝓐 : Type*} [category 𝓐] [preadditive 𝓐]
+  (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) (A : endomorphisms 𝓐) [(T.obj A.X).additive] :
   ((endo_T T).obj A).additive :=
 { map_add' := λ X Y f g, by { ext, dsimp, rw functor.map_add } }
 
-instance endo_T_preserves_finite_limits (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) (A : endomorphisms 𝓐)
+instance endo_T_preserves_finite_limits {𝓐 : Type*} [category 𝓐]
+  (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) (A : endomorphisms 𝓐)
   [preserves_finite_limits (T.obj A.X)] :
   preserves_finite_limits ((endo_T T).obj A) :=
 begin
@@ -798,7 +805,8 @@ begin
     ((endo_T T).obj A) (endomorphisms.forget _),
 end
 
-instance endo_T_preserves_finite_colimits (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) (A : endomorphisms 𝓐)
+instance endo_T_preserves_finite_colimits {𝓐 : Type*} [category 𝓐]
+  (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) (A : endomorphisms 𝓐)
   [preserves_finite_colimits (T.obj A.X)] :
   preserves_finite_colimits ((endo_T T).obj A) :=
 begin
@@ -812,12 +820,13 @@ begin
 end
 
 instance endo_T_preserves_colimits_of_shape_discrete
+  {𝓐 : Type u} [category.{v} 𝓐]
   (α : Type v) (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) (M : endomorphisms 𝓐)
   [preserves_colimits_of_shape (discrete α) (T.obj M.X)] :
   preserves_colimits_of_shape (discrete α) ((endo_T T).obj M) :=
 begin
-  haveI : reflects_colimits_of_shape (discrete α) (endomorphisms.forget 𝓐) := {},
-  haveI : preserves_colimits_of_shape (discrete α) ((endo_T T).obj M ⋙ endomorphisms.forget 𝓐),
+  letI : reflects_colimits_of_shape (discrete α) (endomorphisms.forget 𝓐) := {},
+  letI : preserves_colimits_of_shape (discrete α) ((endo_T T).obj M ⋙ endomorphisms.forget 𝓐),
   { apply preserves_colimits_of_shape_of_nat_iso (endo_T_comp_forget T M).symm,
     apply_instance, },
   exact preserves_colimits_of_shape_of_reflects_of_preserves
@@ -825,6 +834,8 @@ begin
 end
 
 lemma endo_T_short_exact
+  {𝓐 : Type u} [category.{v} 𝓐] [abelian 𝓐]
+  [has_products_of_shape (ulift.{v} ℕ) 𝓐] [has_coproducts_of_shape (ulift.{v} ℕ) 𝓐]
   (A : endomorphisms 𝓐) (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) [(T.obj A.X).additive]
   [preserves_finite_limits (T.obj A.X)] [preserves_finite_colimits (T.obj A.X)]
   {X Y Z : Ab} (f : X ⟶ Y) (g : Y ⟶ Z) (hfg : short_exact f g) :
@@ -833,7 +844,7 @@ begin
   apply functor.map_short_exact, exact hfg
 end
 
-lemma main_lemma' [has_finite_limits 𝓐] [has_finite_colimits 𝓐]
+lemma main_lemma'
   (A : 𝓐) (B : 𝓐) (f : A ⟶ A) (g : B ⟶ B)
   (hH0 : ((data.eval_functor F).obj BD.data) ⋙ homology_functor _ _ 0 ≅ 𝟭 _)
   (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) [(T.obj A).additive]
@@ -854,7 +865,7 @@ begin
   { exact hTA }
 end
 
-lemma main_lemma_weak' [has_finite_limits 𝓐] [has_finite_colimits 𝓐]
+lemma main_lemma_general'
   (A : 𝓐) (B : 𝓐) (f : A ⟶ A) (g : B ⟶ B)
   (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) [(T.obj A).additive]
   [preserves_finite_limits (T.obj A)] [preserves_finite_colimits (T.obj A)]
@@ -870,7 +881,7 @@ lemma main_lemma_weak' [has_finite_limits 𝓐] [has_finite_colimits 𝓐]
 begin
   let M : endomorphisms 𝓐 := ⟨A,f⟩,
   -- let h
-  apply BD.main_lemma_weak F A B f g _ ((endo_T T).obj M),
+  apply BD.main_lemma_general F A B f g _ ((endo_T T).obj M),
   { exact endomorphisms.mk_iso (hT0.app _) (nat_trans.naturality _ _) },
   { intros X Y Z _ _ hfg, refine endo_T_short_exact _ T _ _ hfg, },
   { intros t ht,
