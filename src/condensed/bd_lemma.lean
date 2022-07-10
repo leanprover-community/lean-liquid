@@ -410,7 +410,7 @@ lemma bd_lemma (A : Condensed.{u} Ab.{u+1}) (B : Condensed.{u} Ab.{u+1})
     ((Ext i).map ((breen_deligne.eg.eval freeCond').map f).op).app ((single _ 0).obj B) -
     ((Ext i).obj (op $ (breen_deligne.eg.eval freeCond').obj A)).map ((single _ 0).map g)) :=
 begin
-  apply eg.main_lemma_weak' _ A B f g tensor_functor tensor_punit (λ n, HQ'Z (-n)),
+  apply eg.main_lemma_general' _ A B f g tensor_functor tensor_punit (λ n, HQ'Z (-n)),
   { apply tensor_tunit,
     apply is_tensor_unit_of_iso
       (AddCommGroup.free.obj punit) (HQ'Z 0),
