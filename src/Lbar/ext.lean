@@ -131,7 +131,30 @@ def ExtQprime_iso_aux_system_obj_aux' (X : Profinite.{u}) :
   (forget₂ SemiNormedGroup.{u+1} Ab.{u+1}).obj
     (SemiNormedGroup.Completion.obj
       ((SemiNormedGroup.LocallyConstant.obj (SemiNormedGroup.ulift.{u+1}.obj V)).obj (op X))) :=
-sorry
+begin
+  refine add_equiv.to_AddCommGroup_iso _,
+  refine add_equiv.ulift.trans _,
+  refine add_equiv.mk _ _ _ _ _,
+  { refine uniform_space.completion.map _,
+    refine locally_constant.map_hom _,
+    refine { bound' := ⟨1, λ v, _⟩, .. add_equiv.ulift.symm },
+    rw one_mul, exact le_rfl },
+  { refine uniform_space.completion.map _,
+    refine locally_constant.map_hom _,
+    refine { bound' := ⟨1, λ v, _⟩, .. add_equiv.ulift },
+    rw one_mul, exact le_rfl },
+  { rw [function.left_inverse_iff_comp, uniform_space.completion.map_comp],
+    { have : ulift.down.{u+1} ∘ ulift.up.{u+1} = (id : V → V) := rfl,
+      erw [locally_constant.map_comp, this, locally_constant.map_id, uniform_space.completion.map_id] },
+    { apply normed_group_hom.uniform_continuous, },
+    { apply normed_group_hom.uniform_continuous, } },
+  { rw [function.right_inverse_iff_comp, uniform_space.completion.map_comp],
+    { have : ulift.up.{u+1 u} ∘ ulift.down.{u+1} = @id (ulift V) := by { ext v, refl },
+      erw [locally_constant.map_comp, this, locally_constant.map_id, uniform_space.completion.map_id] },
+    { apply normed_group_hom.uniform_continuous, },
+    { apply normed_group_hom.uniform_continuous, } },
+  { sorry }
+end
 
 def ExtQprime_iso_aux_system_obj_aux :
   ((CLC (SemiNormedGroup.ulift.{u+1}.obj V)).right_op.map_FreeAb ⋙
