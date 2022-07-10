@@ -153,4 +153,3 @@ iso_whisker_right (eval_functor'_comp F₁ F₂ G e) homological_complex.functor
 end data
 
 end breen_deligne
-#lint
