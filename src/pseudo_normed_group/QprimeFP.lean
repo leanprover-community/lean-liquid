@@ -477,13 +477,40 @@ def filtration_pow_iso_aux'₀ (j : ℕ) (r : ℝ≥0) :
     (PFPNGT₁_to_PFPNG₁ₑₗ.{u} r').obj M)) :=
 -- This can't be the best way to do this, but at this point I'm quite annoyed.
 { hom :=
-  { to_fun := λ q, ⟨λ i, q.1 i.down, sorry⟩,
-    continuous_to_fun := sorry },
+  { to_fun := λ q, ⟨λ i, q.1 i.down, begin
+      intros i,
+      apply q.2,
+    end⟩,
+    continuous_to_fun := begin
+      rw (comphaus_filtered_pseudo_normed_group.filtration_pi_homeo
+        (λ i : ulift.{u} (fin j), M) r).inducing.continuous_iff,
+      apply continuous_pi,
+      intros i, dsimp,
+      let e := (comphaus_filtered_pseudo_normed_group.filtration_pi_homeo
+        (λ i : (fin j), M) r),
+      let t := _, change continuous t,
+      suffices : continuous (t ∘ e.symm), by simpa using this,
+      convert continuous_apply i.down,
+      ext, refl,
+    end },
   inv :=
-  { to_fun := λ q, ⟨λ i, q.1 ⟨i⟩, sorry⟩,
-    continuous_to_fun := sorry },
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+  { to_fun := λ q, ⟨λ i, q.1 ⟨i⟩, begin
+      intros i,
+      apply q.2,
+    end⟩,
+    continuous_to_fun := begin
+      let e₁ := (comphaus_filtered_pseudo_normed_group.filtration_pi_homeo
+        (λ i : (fin j), M) r),
+      let e₂ := (comphaus_filtered_pseudo_normed_group.filtration_pi_homeo
+        (λ i : ulift.{u} (fin j), M) r),
+      let t := _, change continuous t,
+      suffices : continuous (e₁ ∘ t ∘ e₂.symm), by simpa using this,
+      apply continuous_pi,
+      intros i, convert continuous_apply (ulift.up i),
+      ext, refl,
+    end },
+  hom_inv_id' := by { ext, refl },
+  inv_hom_id' := by { ext _ ⟨⟩, refl } }
 
 def filtration_pow_iso_aux' (j : ℕ) (r : ℝ≥0) :
   pseudo_normed_group.filtration_obj.{u} (↥M ^ j) r ≅
