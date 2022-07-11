@@ -4,7 +4,7 @@ noncomputable theory
 
 universes u
 
-open opposite category_theory category_theory.limits
+open opposite category_theory category_theory.limits category_theory.preadditive
 open_locale nnreal zero_object
 
 variables (r r' : ℝ≥0)
@@ -32,6 +32,17 @@ set_option pp.universes true
 --    (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab M X).hom :=
 -- by admit
 
+lemma FreeAb_naturality_helper {C 𝓐 : Type*} [category C] [category 𝓐] [preadditive 𝓐]
+  (F G : FreeAb C ⥤ 𝓐) [F.additive] [G.additive]
+  (η : ∀ X : FreeAb C, F.obj X ⟶ G.obj X)
+  (hη : ∀ ⦃X Y : C⦄ (f : X ⟶ Y), F.map ((FreeAb.of_functor _).map f) ≫ η _ = η _ ≫ G.map ((FreeAb.of_functor _).map f))
+  {X Y : FreeAb C} (f : X ⟶ Y) :
+  F.map f ≫ η Y = η X ≫ G.map f :=
+begin
+  change right_comp _ (η Y) (F.map_add_hom f) = left_comp _ (η X) (G.map_add_hom f),
+  rw [← add_monoid_hom.comp_apply, ← add_monoid_hom.comp_apply], congr' 1, clear f,
+  ext1 f, cases X, cases Y, exact hη f,
+end
 
 def ExtQprime_iso_aux_system_obj_aux :
   ((CLC (SemiNormedGroup.ulift.{u+1}.obj V)).right_op.map_FreeAb ⋙
@@ -49,9 +60,13 @@ begin
     let e := (Condensed_Ab_to_presheaf.map_iso (Condensed_LCC_iso_of_top_ab V)).app (op X.as),
     refine e.symm ≪≫ (ExtQprime_iso_aux_system_obj_aux' V X.as), },
   { intros X Y f,
+    apply FreeAb_naturality_helper, clear f X Y, intros X Y f,
     dsimp only [id.def, iso.trans_hom, iso.op_hom, op_comp, iso.symm_hom, functor.map_iso_inv,
-      functor.comp_map, functor.right_op_map, functor.op_map, iso.app_inv],
+      functor.comp_map, functor.right_op_map, functor.op_map, iso.app_inv,
+      FreeAb.eval, functor.map_FreeAb, FreeAb.of_functor],
     simp only [category.assoc, ← op_comp], congr' 1,
+    simp only [free_abelian_group.map_of_apply, free_abelian_group.lift.of, id.def,
+      functor.right_op_map],
     -- rw preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab_natural_assoc,
     -- refine congr_arg2 _ rfl _,
     sorry }
