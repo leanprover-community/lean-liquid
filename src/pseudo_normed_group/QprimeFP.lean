@@ -8,6 +8,8 @@ import system_of_complexes.shift_sub_id
 import for_mathlib.AddCommGroup.explicit_products
 import condensed.Qprime_isoms
 import condensed.short_exact
+import condensed.bd_ses
+import condensed.filtered_colimits
 
 noncomputable theory
 
@@ -16,6 +18,10 @@ open_locale nnreal
 universe u
 
 open category_theory category_theory.limits breen_deligne
+
+def ProFiltPseuNormGrpWithTinv₁.to_CHFPNG {r'} (M : ProFiltPseuNormGrpWithTinv₁.{u} r') :
+  CompHausFiltPseuNormGrp :=
+(PFPNGT₁_to_CHFPNG₁ₑₗ r' ⋙ CHFPNG₁_to_CHFPNGₑₗ).obj M
 
 section step1
 
@@ -412,9 +418,171 @@ begin
   dsimp, simpa only [category.id_comp, colimit.comp_cocone_point_unique_up_to_iso_hom],
 end
 
+-- Move this!
+instance CondensedSet_to_Condensed_Ab_preserves_colimits :
+  preserves_colimits CondensedSet_to_Condensed_Ab.{u} :=
+adjunction.left_adjoint_preserves_colimits Condensed_Ab_CondensedSet_adjunction
+
+section ses_setup
+
+local attribute [instance] type_pow
+
+def profinite_pow_filtration_iso (j : ℕ) (r : ℝ≥0) :
+  (pseudo_normed_group.filtration_obj.{u} (↥M ^ j) r).to_Condensed ≅
+  ∏ λ (k : ulift.{u+1 0} (fin j)), ((ProFiltPseuNormGrp₁.level.obj r).obj
+    ((PFPNGT₁_to_PFPNG₁ₑₗ _).obj M)).to_Condensed := sorry
+
+def combine (hι : monotone ι) (n : ℕ) : ℕ →o ℝ≥0 :=
+{ to_fun := λ t, κ (ι $ ulift.up t) n,
+  monotone' := begin
+    intros a b h,
+    apply (fact.out (monotone (function.swap κ n))),
+    apply hι,
+    exact h
+  end }
+
+def iso_on_the_left_zero₀ :
+ (∐ λ (k : ulift.{u+1 0} ℕ), (QprimeFP_int.{u} r' BD.data κ M).obj (ι k)).X 0 ≅
+ (∐ λ (k : ulift.{u+1 0} ℕ), ((QprimeFP_int.{u} r' BD.data κ M).obj (ι k)).X 0) :=
+begin
+  refine preserves_colimit_iso (homological_complex.eval _ _ 0) _ ≪≫ _,
+  refine has_colimit.iso_of_nat_iso (discrete.nat_iso $ λ i, iso.refl _),
+end
+
+def iso_on_the_left_zero  :
+ (∐ λ (k : ulift.{u+1 0} ℕ), (QprimeFP_int.{u} r' BD.data κ M).obj (ι k)).X 0 ≅
+  ∐ λ (i : as_small.{u+1 0 0} ℕ), CondensedSet_to_Condensed_Ab.{u}.obj
+      (∏ λ (j : ulift.{u+1 0} (fin (BD.data.X 0))),
+      (Condensed.as_nat_diagram.{u} M.to_CHFPNG (combine.{u} κ ι hι 0)).obj i) :=
+begin
+  refine iso_on_the_left_zero₀ BD κ M _ ≪≫ _,
+  refine sigma.map_iso _,
+  rintros ⟨j⟩,
+  dsimp [QprimeFP_int, QprimeFP_nat, FreeAb.eval, functor.map_FreeAb,
+    FPsystem, FPsystem.X],
+  refine CondensedSet_to_Condensed_Ab.map_iso _,
+  refine profinite_pow_filtration_iso M (BD.data.X 0) (κ (ι ⟨j⟩) 0), --≪≫ _,
+end
+
+lemma iso_on_the_left_zero_conj :
+  ((QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD.data κ M)).f 0) =
+  (iso_on_the_left_zero _ _ _ _ hι).hom ≫
+  (Condensed.coproduct_to_coproduct (Condensed.as_nat_diagram_pow M.to_CHFPNG
+    (combine κ ι hι 0) _ ⋙ _) - 𝟙 _) ≫ (iso_on_the_left_zero _ _ _ _ hι).inv :=
+begin
+  sorry
+end
+
+def iso_on_the_left_neg₀ (q : ℕ) :
+ (∐ λ (k : ulift.{u+1 0} ℕ), (QprimeFP_int.{u} r' BD.data κ M).obj (ι k)).X (-[1+q]) ≅
+ (∐ λ (k : ulift.{u+1 0} ℕ), ((QprimeFP_int.{u} r' BD.data κ M).obj (ι k)).X (-[1+q])) :=
+begin
+  refine preserves_colimit_iso (homological_complex.eval _ _ _) _ ≪≫ _,
+  refine has_colimit.iso_of_nat_iso (discrete.nat_iso $ λ i, iso.refl _),
+end
+
+def iso_on_the_left_neg (q : ℕ) :
+ (∐ λ (k : ulift.{u+1 0} ℕ), (QprimeFP_int.{u} r' BD.data κ M).obj (ι k)).X (-[1+q]) ≅
+  ∐ λ (i : as_small.{u+1 0 0} ℕ), CondensedSet_to_Condensed_Ab.{u}.obj
+      (∏ λ (j : ulift.{u+1 0} (fin (BD.data.X (q+1)))),
+      (Condensed.as_nat_diagram.{u} M.to_CHFPNG (combine.{u} κ ι hι (q+1))).obj i) :=
+begin
+  refine iso_on_the_left_neg₀ BD κ M _ q ≪≫ _,
+  refine sigma.map_iso _,
+  rintros ⟨j⟩,
+  dsimp [QprimeFP_int, QprimeFP_nat, FreeAb.eval, functor.map_FreeAb,
+    FPsystem, FPsystem.X],
+  refine CondensedSet_to_Condensed_Ab.map_iso _,
+  refine profinite_pow_filtration_iso M (BD.data.X (q+1)) (κ (ι ⟨j⟩) (q+1)),
+end
+
+lemma iso_on_the_left_neg_conj (q : ℕ) :
+  ((QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD.data κ M)).f (-[1+q])) =
+  (iso_on_the_left_neg _ _ _ _ hι _).hom ≫
+  (Condensed.coproduct_to_coproduct (Condensed.as_nat_diagram_pow M.to_CHFPNG
+    (combine κ ι hι (q+1)) _ ⋙ _) - 𝟙 _) ≫ (iso_on_the_left_neg _ _ _ _ hι _).inv :=
+begin
+  sorry
+end
+
+--variables (n : ℕ)
+--#check
+--  Condensed.coproduct_presentation_with_pow CondensedSet_to_Condensed_Ab.{u} M.to_CHFPNG
+--  (combine κ ι hι n) (BD.data.X n)
+
+.
+
+def product_iso_biproduct {A : Type (u+2)} [category.{u+1} A]
+  [abelian A] {α : Type (u+1)} [fintype α] (X : α → A) :
+  ∏ X ≅ biproduct X :=
+(limit.is_limit _).cone_point_unique_up_to_iso (biproduct.is_limit _)
+
+def Condensed_product_iso_biproduct (q : ℕ) :
+  Condensed_Ab_to_CondensedSet.{u}.obj
+  (∏ λ (i : ulift.{u+1 0} (fin (q))), M.to_Condensed) ≅
+  Condensed_Ab_to_CondensedSet.{u}.obj
+  (⨁ λ (i : ulift.{u+1 0} (fin (q))), M.to_Condensed) :=
+Condensed_Ab_to_CondensedSet.map_iso $
+(limit.is_limit _).cone_point_unique_up_to_iso (biproduct.is_limit _)
+
+def Condensed_product_iso_product (q : ℕ) :
+  Condensed_Ab_to_CondensedSet.{u}.obj
+  (∏ λ (i : ulift.{u+1 0} (fin (q))), M.to_Condensed) ≅
+  ∏ λ i : ulift.{u+1} (fin q), Condensed_Ab_to_CondensedSet.obj M.to_Condensed :=
+preserves_limit_iso Condensed_Ab_to_CondensedSet _ ≪≫
+has_limit.iso_of_nat_iso (discrete.nat_iso $ λ i, iso.refl _)
+
+def iso_on_the_right_zero :
+  CondensedSet_to_Condensed_Ab.{u}.obj
+  (∏ λ (j : ulift.{u+1 0} (fin (BD.data.X 0))),
+  (Condensed.as_nat_cocone.{u} M.to_CHFPNG (combine.{u} κ ι hι 0)).X) ≅
+  ((BD.eval' freeCond'.{u}).obj M.to_Condensed).X 0 :=
+begin
+  refine CondensedSet_to_Condensed_Ab.map_iso _,
+  dsimp,
+  refine _ ≪≫ Condensed_product_iso_biproduct _ _,
+  refine (Condensed_product_iso_product _ _).symm,
+end
+
+def iso_on_the_right_neg (q : ℕ) :
+  CondensedSet_to_Condensed_Ab.{u}.obj
+  (∏ λ (j : ulift.{u+1 0} (fin (BD.data.X (q+1)))),
+  (Condensed.as_nat_cocone.{u} M.to_CHFPNG (combine.{u} κ ι hι 0)).X) ≅
+  ((BD.eval' freeCond'.{u}).obj M.to_Condensed).X (-[1+q]) :=
+begin
+  refine CondensedSet_to_Condensed_Ab.map_iso _,
+  dsimp,
+  refine _ ≪≫ Condensed_product_iso_biproduct _ _,
+  refine (Condensed_product_iso_product _ _).symm,
+end
+
+end ses_setup
+
 lemma QprimeFP.mono (n : ℤ) :
   mono ((QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD.data κ M)).f n) :=
 begin
+  rcases n with (_|q)|q,
+  { erw iso_on_the_left_zero_conj,
+    apply_with mono_comp { instances := ff }, apply_instance,
+    apply_with mono_comp { instances := ff }, swap, apply_instance,
+    apply Condensed.mono_coproduct_to_coproduct },
+  { apply mono_of_is_zero_object,
+    let e :
+      (∐ λ (k : ulift.{u+1 0} ℕ), (QprimeFP_int.{u} r' BD.data κ M).obj
+        (ι k)).X (int.of_nat q.succ) ≅
+      ∐ λ k : ulift.{u+1} ℕ, ((QprimeFP_int.{u} r' BD.data κ M).obj
+        (ι k)).X (int.of_nat q.succ) :=
+      preserves_colimit_iso (homological_complex.eval _ _ _) _ ≪≫
+      has_colimit.iso_of_nat_iso (discrete.nat_iso $ λ p, iso.refl _),
+    apply is_zero_of_iso_of_zero _ e.symm,
+    apply is_zero_colimit, intros j,
+    exact is_zero_zero _ },
+  { erw iso_on_the_left_neg_conj,
+    apply_with mono_comp { instances := ff }, apply_instance,
+    apply_with mono_comp { instances := ff }, swap, apply_instance,
+    apply Condensed.mono_coproduct_to_coproduct },
+
+  /-
   rw Condensed.mono_iff_ExtrDisc, intros T,
   let Q := QprimeFP_int r' BD.data κ M,
   let e : ((∐ λ (k : ulift.{u+1 0} ℕ), Q.obj (ι k)).X n).val.obj
@@ -480,6 +648,7 @@ begin
       change j = i, linarith only [H] },
     { intro, rw [IH, add_monoid_hom.map_zero, dfinsupp.zero_apply], }, },
   recover, all_goals { classical; apply_instance }
+  -/
 end
 .
 
