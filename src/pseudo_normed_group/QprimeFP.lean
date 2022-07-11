@@ -536,8 +536,19 @@ ulift_functor.map_iso
       ulift.{u+1 u}
       (T ⟶ (ProFiltPseuNormGrp₁.level.{u}.obj r).obj
       ((PFPNGT₁_to_PFPNG₁ₑₗ.{u} r').obj M))) (ulift.up $ ulift.down i) t in q.down,
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+  hom_inv_id' := begin
+    ext ⟨t⟩ : 2, dsimp,
+    apply limit.hom_ext, rintros ⟨q⟩,
+    simp,
+  end,
+  inv_hom_id' := begin
+    apply limit.hom_ext, rintro ⟨q⟩,
+    simp only [category.assoc, limit.lift_π, fan.mk_π_app, category.id_comp],
+    ext t,
+    dsimp,
+    rw [← comp_apply, limit.lift_π],
+    refl,
+  end }
 
 def profinite_pow_filtration_iso (j : ℕ) (r : ℝ≥0) :
   (pseudo_normed_group.filtration_obj.{u} (↥M ^ j) r).to_Condensed ≅
