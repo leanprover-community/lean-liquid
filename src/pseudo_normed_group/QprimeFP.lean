@@ -465,7 +465,15 @@ def filtration_pow_iso_aux'₀ (j : ℕ) (r : ℝ≥0) :
   (ProFiltPseuNormGrp₁.level.{u}.obj r).obj
   (ProFiltPseuNormGrp₁.product.{u} (λ (i : ulift.{u 0} (fin j)),
     (PFPNGT₁_to_PFPNG₁ₑₗ.{u} r').obj M)) :=
-sorry
+-- This can't be the best way to do this, but at this point I'm quite annoyed.
+{ hom :=
+  { to_fun := λ q, ⟨λ i, q.1 i.down, sorry⟩,
+    continuous_to_fun := sorry },
+  inv :=
+  { to_fun := λ q, ⟨λ i, q.1 ⟨i⟩, sorry⟩,
+    continuous_to_fun := sorry },
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry }
 
 def filtration_pow_iso_aux' (j : ℕ) (r : ℝ≥0) :
   pseudo_normed_group.filtration_obj.{u} (↥M ^ j) r ≅
