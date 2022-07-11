@@ -444,11 +444,35 @@ def filtration_pow_iso_aux (j : ℕ) (r : ℝ≥0) :
 preserves_limit_iso (ProFiltPseuNormGrp₁.level.obj r) _ ≪≫
 has_limit.iso_of_nat_iso (discrete.nat_iso $ λ q, iso.refl _)
 
+def ProFiltPseuNormGrp₁.product_fan {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrp₁.{u}) :
+  fan X :=
+fan.mk (ProFiltPseuNormGrp₁.product X) $ λ i, ProFiltPseuNormGrp₁.product.π _ _
+
+def ProFiltPseuNormGrp₁.is_limit_product_fan {α : Type u} [fintype α]
+  (X : α → ProFiltPseuNormGrp₁.{u}) :
+  is_limit (ProFiltPseuNormGrp₁.product_fan X) :=
+{ lift := λ S, ProFiltPseuNormGrp₁.product.lift _ _ $ λ i, S.π.app _,
+  fac' := sorry,
+  uniq' := sorry }
+
+def ProFiltPseuNormGrp₁.product_pow_iso {α : Type u} [fintype α]
+  (X : α → ProFiltPseuNormGrp₁.{u}) :
+  ∏ X ≅ ProFiltPseuNormGrp₁.product X :=
+(limit.is_limit _).cone_point_unique_up_to_iso (ProFiltPseuNormGrp₁.is_limit_product_fan _)
+
+def filtration_pow_iso_aux'₀ (j : ℕ) (r : ℝ≥0) :
+  pseudo_normed_group.filtration_obj.{u} (↥M ^ j) r ≅
+  (ProFiltPseuNormGrp₁.level.{u}.obj r).obj
+  (ProFiltPseuNormGrp₁.product.{u} (λ (i : ulift.{u 0} (fin j)),
+    (PFPNGT₁_to_PFPNG₁ₑₗ.{u} r').obj M)) :=
+sorry
+
 def filtration_pow_iso_aux' (j : ℕ) (r : ℝ≥0) :
   pseudo_normed_group.filtration_obj.{u} (↥M ^ j) r ≅
   (ProFiltPseuNormGrp₁.level.obj r).obj
     (∏ λ i : ulift.{u} (fin j), (PFPNGT₁_to_PFPNG₁ₑₗ _).obj M) :=
-sorry
+filtration_pow_iso_aux'₀ _ _ _ ≪≫
+(ProFiltPseuNormGrp₁.level.obj r).map_iso (ProFiltPseuNormGrp₁.product_pow_iso _).symm
 
 def filtration_pow_iso (j : ℕ) (r : ℝ≥0) :
   pseudo_normed_group.filtration_obj.{u} (M ^ j) r ≅
@@ -460,7 +484,15 @@ def profinite_pow_filtration_iso_component (j : ℕ) (r : ℝ≥0) (T : Profinit
   ∏ λ (i : ulift.{u+1} (fin j)), ulift.{u+1}
     (T ⟶ (ProFiltPseuNormGrp₁.level.{u}.obj r).obj ((PFPNGT₁_to_PFPNG₁ₑₗ.{u} r').obj M)) :=
 ulift_functor.map_iso
-((yoneda.flip.obj (op T)).map_iso $ filtration_pow_iso _ _ _) ≪≫ sorry
+((yoneda.flip.obj (op T)).map_iso $ filtration_pow_iso _ _ _) ≪≫
+{ hom := pi.lift $ λ i f, ulift.up $ ulift.down f ≫ pi.π _ (ulift.up i.down),
+  inv := λ t, ulift.up $ pi.lift $ λ i,
+    let q := pi.π (λ (i : ulift.{u+1 0} (fin j)),
+      ulift.{u+1 u}
+      (T ⟶ (ProFiltPseuNormGrp₁.level.{u}.obj r).obj
+      ((PFPNGT₁_to_PFPNG₁ₑₗ.{u} r').obj M))) (ulift.up $ ulift.down i) t in q.down,
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry }
 
 def profinite_pow_filtration_iso (j : ℕ) (r : ℝ≥0) :
   (pseudo_normed_group.filtration_obj.{u} (↥M ^ j) r).to_Condensed ≅
