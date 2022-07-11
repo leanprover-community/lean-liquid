@@ -339,8 +339,15 @@ begin
   sorry
 end
 
+def sufficiently_increasing
+  (κ : ℝ≥0 → ℕ → ℝ≥0) (ι : ulift ℕ → ℝ≥0) (hι : monotone ι)
+  [∀ n, fact (monotone (function.swap κ n))] : Prop :=
+∀ (r : ℝ≥0) (m : ℕ), ∃ n : ℕ, r ≤ κ (ι ⟨n⟩) m
+
 lemma Tinv2_iso_of_bicartesian [normed_with_aut r V]
   [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]
+  (hκ : sufficiently_increasing κ ι hι)
+  (hκ₂ : sufficiently_increasing κ₂ ι hι)
   (i : ℤ)
   (H1 : (shift_sub_id.commsq (ExtQprime.Tinv2 r r' BD.data κ κ₂ M V i) ι hι).bicartesian)
   (H2 : (shift_sub_id.commsq (ExtQprime.Tinv2 r r' BD.data κ κ₂ M V (i+1)) ι hι).bicartesian) :
@@ -352,8 +359,8 @@ lemma Tinv2_iso_of_bicartesian [normed_with_aut r V]
           (normed_group_hom.to_add_monoid_hom normed_with_aut.T.inv) (normed_group_hom.continuous _)))) :=
 begin
   let Vc := (single (Condensed Ab) 0).obj V.to_Cond,
-  have SES₁ := QprimeFP.short_exact BD κ₂ M ι hι sorry, -- NB: this sorry is a missing assumption
-  have SES₂ := QprimeFP.short_exact BD κ M ι hι sorry, -- NB: this sorry is a missing assumption
+  have SES₁ := QprimeFP.short_exact BD κ₂ M ι hι hκ₂,
+  have SES₂ := QprimeFP.short_exact BD κ M ι hι hκ,
   have := Ext_iso_of_bicartesian_of_bicartesian SES₁ SES₂
     (sigma_map _ (QprimeFP_int.Tinv BD.data _ _ M))
     (sigma_map _ (QprimeFP_int.Tinv BD.data _ _ M))
@@ -376,6 +383,8 @@ end
 lemma Tinv2_iso_of_bicartesian' [normed_with_aut r V]
   [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]
   (H : ∀ i, ∃ (ι) (hι),
+    sufficiently_increasing κ ι hι ∧
+    sufficiently_increasing κ₂ ι hι ∧
     (shift_sub_id.commsq (ExtQprime.Tinv2 r r' BD.data κ κ₂ M V i) ι hι).bicartesian ∧
     (shift_sub_id.commsq (ExtQprime.Tinv2 r r' BD.data κ κ₂ M V (i+1)) ι hι).bicartesian)
   (i : ℤ) :
@@ -387,8 +396,8 @@ lemma Tinv2_iso_of_bicartesian' [normed_with_aut r V]
           (normed_group_hom.to_add_monoid_hom normed_with_aut.T.inv) (normed_group_hom.continuous _)))) :=
 begin
   obtain ⟨i, rfl⟩ : ∃ k, k+1 = i := ⟨i-1, sub_add_cancel _ _⟩,
-  obtain ⟨ι, hι, H1, H2⟩ := H i,
-  exact Tinv2_iso_of_bicartesian _ _ _ _ _ _ ι hι i H1 H2,
+  obtain ⟨ι, hι, hκ, hκ₂, H1, H2⟩ := H i,
+  apply Tinv2_iso_of_bicartesian _ _ _ _ _ _ ι hι hκ hκ₂ i H1 H2,
 end
 
 end
@@ -657,6 +666,21 @@ def ι : ulift.{1} ℕ → ℝ≥0 := ι' r r' i ∘ ulift.down
 lemma hι : monotone (ι r r' i) :=
 λ j₁ j₂ h, by { delta ι, apply hι', exact h }
 
+lemma sufficiently_increasing_eg (s : ℝ≥0) (m : ℕ) :
+  ∃ n : ℕ, s ≤ ι' r r' i n * eg.κ r r' m := sorry
+
+lemma sufficiently_increasing_eg' (s : ℝ≥0) (m : ℕ) :
+  ∃ n : ℕ, s ≤ r' * (ι' r r' i n * eg.κ r r' m) :=
+begin
+  obtain ⟨n,hn⟩ := sufficiently_increasing_eg r r' i (s / r') m,
+  use n,
+  replace hn := mul_le_mul (le_refl r') hn (zero_le (s / r')) (zero_le _),
+  refine le_trans (le_of_eq _) hn,
+  have : r' ≠ 0, { symmetry, exact ne_of_lt (fact.out (0 < r')) },
+  rw mul_comm,
+  exact (div_eq_iff this).mp rfl
+end
+
 /-- Thm 9.4bis of [Analytic]. More precisely: the first observation in the proof 9.4 => 9.1. -/
 theorem is_iso_Tinv_sub [normed_with_aut r V] : ∀ i, is_iso (Tinv_sub r r' S V i) :=
 begin
@@ -672,21 +696,29 @@ begin
       (λ c n, r' * (c * breen_deligne.eg.κ r r' n))
     ((Lbar.functor.{0 0} r').obj S) V _,
   rintro (i|(_|i)),
-  { refine ⟨ι r r' i, hι r r' i, _, _⟩;
-    apply useful_commsq_bicartesian,
+  { refine ⟨ι r r' i, hι r r' i, _, _, _, _⟩,
+    { intros s m,
+      apply sufficiently_increasing_eg },
+    { intros s m,
+      apply sufficiently_increasing_eg' },
+    all_goals { apply useful_commsq_bicartesian },
     { rintro ⟨j⟩, apply Hι1 },
     { rintro ⟨j⟩, apply Hι2a },
     { rintro ⟨j⟩, apply Hι2b },
     { rintro ⟨j⟩, apply Hι1' },
     { rintro ⟨j⟩, apply Hι2b },
     { rintro ⟨j⟩, apply Hι2c } },
-  { refine ⟨ι r r' 0, hι r r' 0, _, _⟩,
+  { refine ⟨ι r r' 0, hι r r' 0, _, _, _, _⟩,
+    { intros s m, apply sufficiently_increasing_eg, },
+    { intros s m, apply sufficiently_increasing_eg', },
     { apply useful_commsq_bicartesian_neg, dec_trivial },
     { apply useful_commsq_bicartesian,
     { rintro ⟨j⟩, apply Hι1 },
     { rintro ⟨j⟩, apply Hι2a },
     { rintro ⟨j⟩, apply Hι2b }, }, },
-  { refine ⟨λ _, 0, monotone_const, _, _⟩,
+  { refine ⟨λ _, 0, monotone_const, _, _, _, _⟩,
+    { intros s m, dsimp [ι], sorry }, -- this is wrong
+    { intros s m, dsimp [ι], sorry }, -- this is wrong
     { apply useful_commsq_bicartesian_neg, dec_trivial },
     { apply useful_commsq_bicartesian_neg,
       rw [int.neg_succ_of_nat_eq'],
