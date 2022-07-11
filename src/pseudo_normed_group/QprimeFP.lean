@@ -612,22 +612,10 @@ lemma filtration_pow_iso_aux'₀_spec (j : ℕ) (r : ℝ≥0) (i) :
   filtration_pow_proj M j r i.down := by { ext, refl }
 
 @[simp, reassoc]
-lemma filtration_pow_iso_aux'₀_spec' (j : ℕ) (r : ℝ≥0) (i) :
-  (filtration_pow_iso_aux'₀ M j r).hom ≫
-  ((ProFiltPseuNormGrp₁.level.obj r).map $ ProFiltPseuNormGrp₁.product.π _ ⟨i⟩) =
-  filtration_pow_proj M j r i := by { ext, refl }
-
-@[simp, reassoc]
-lemma filtration_pow_iso_aux'₀_spec'' (j : ℕ) (r : ℝ≥0) (i : ulift.{u} (fin j)) :
+lemma filtration_pow_iso_aux'₀_spec' (j : ℕ) (r : ℝ≥0) (i : ulift.{u} (fin j)) :
   (filtration_pow_iso_aux'₀ M j r).inv ≫ filtration_pow_proj M j r i.down =
   ((ProFiltPseuNormGrp₁.level.obj r).map $ ProFiltPseuNormGrp₁.product.π _ i) :=
 by { cases i, ext _ ⟨k⟩, refl }
-
-@[simp, reassoc]
-lemma filtration_pow_iso_aux'₀_spec''' (j : ℕ) (r : ℝ≥0) (i : fin j) :
-  (filtration_pow_iso_aux'₀ M j r).inv ≫ filtration_pow_proj M j r i =
-  ((ProFiltPseuNormGrp₁.level.obj r).map $ ProFiltPseuNormGrp₁.product.π _ (ulift.up i)) :=
-by { ext, refl }
 
 def filtration_pow_iso_aux' (j : ℕ) (r : ℝ≥0) :
   pseudo_normed_group.filtration_obj.{u} (↥M ^ j) r ≅
@@ -636,10 +624,43 @@ def filtration_pow_iso_aux' (j : ℕ) (r : ℝ≥0) :
 filtration_pow_iso_aux'₀ _ _ _ ≪≫
 (ProFiltPseuNormGrp₁.level.obj r).map_iso (ProFiltPseuNormGrp₁.product_pow_iso _).symm
 
+@[simp, reassoc]
+lemma filtration_pow_iso_aux'_spec (j : ℕ) (r : ℝ≥0) (i) :
+  (filtration_pow_iso_aux' M j r).hom ≫
+  (ProFiltPseuNormGrp₁.level.obj r).map (pi.π _ i) =
+  filtration_pow_proj _ _ _ i.down :=
+begin
+  dsimp [filtration_pow_iso_aux'],
+  simp only [category.assoc],
+  simp only [← functor.map_comp, ProFiltPseuNormGrp₁.product_pow_iso_spec'],
+  simp,
+end
+
+@[simp, reassoc]
+lemma filtration_pow_iso_aux'_spec' (j : ℕ) (r : ℝ≥0) (i : ulift.{u} (fin j)) :
+  (filtration_pow_iso_aux' M j r).inv ≫ filtration_pow_proj _ _ _ i.down =
+  (ProFiltPseuNormGrp₁.level.obj r).map (pi.π _ i) :=
+by { rw iso.inv_comp_eq, rw filtration_pow_iso_aux'_spec }
+
 def filtration_pow_iso (j : ℕ) (r : ℝ≥0) :
   pseudo_normed_group.filtration_obj.{u} (M ^ j) r ≅
   ∏ λ i : ulift.{u} (fin j), pseudo_normed_group.filtration_obj M r :=
 filtration_pow_iso_aux' _ _ _ ≪≫ filtration_pow_iso_aux _ _ _
+
+@[simp, reassoc]
+lemma filtration_pow_iso_spec (j : ℕ) (r : ℝ≥0) (i : ulift.{u} (fin j)) :
+  (filtration_pow_iso M j r).hom ≫ pi.π _ i =
+  filtration_pow_proj _ _ _ i.down :=
+begin
+  dsimp [filtration_pow_iso],
+  simp,
+end
+
+@[simp, reassoc]
+lemma filtration_pow_iso_spec' (j : ℕ) (r : ℝ≥0) (i : ulift.{u} (fin j)) :
+  (filtration_pow_iso M j r).inv ≫ filtration_pow_proj _ _ _ i.down =
+  pi.π _ i :=
+by { rw iso.inv_comp_eq, rw filtration_pow_iso_spec }
 
 def profinite_pow_filtration_iso_component (j : ℕ) (r : ℝ≥0) (T : Profinite.{u}) :
   ulift.{u+1} (T ⟶ pseudo_normed_group.filtration_obj.{u} (↥M ^ j) r) ≅
@@ -667,6 +688,29 @@ ulift_functor.map_iso
     refl,
   end }
 
+.
+
+@[simp, reassoc]
+lemma profinite_pow_filtration_iso_component_spec (j : ℕ) (r : ℝ≥0) (T : Profinite.{u})
+  (i : ulift.{u+1} (fin j)) :
+  (profinite_pow_filtration_iso_component M j r T).hom ≫ pi.π _ i =
+  ulift_functor.map ((yoneda.flip.obj (op T)).map $ filtration_pow_proj _ _ _ i.down) :=
+begin
+  dsimp [profinite_pow_filtration_iso_component],
+  simp,
+  ext ⟨t⟩ : 2,
+  dsimp,
+  simp,
+end
+
+@[simp, reassoc]
+lemma profinite_pow_filtration_iso_component_spec' (j : ℕ) (r : ℝ≥0) (T : Profinite.{u})
+  (i : ulift.{u+1} (fin j)) :
+  (profinite_pow_filtration_iso_component M j r T).inv ≫
+  ulift_functor.map ((yoneda.flip.obj (op T)).map $ filtration_pow_proj _ _ _ i.down) =
+  pi.π _ i :=
+by { rw iso.inv_comp_eq, rw profinite_pow_filtration_iso_component_spec }
+
 def profinite_pow_filtration_iso (j : ℕ) (r : ℝ≥0) :
   (pseudo_normed_group.filtration_obj.{u} (↥M ^ j) r).to_Condensed ≅
   ∏ λ (k : ulift.{u+1 0} (fin j)), ((ProFiltPseuNormGrp₁.level.obj r).obj
@@ -678,7 +722,14 @@ begin
   { intros T,
     refine _ ≪≫ (functor_prod_eval_iso _ _).symm,
     refine profinite_pow_filtration_iso_component _ _ _ _ },
-  { sorry }
+  { intros X Y f, dsimp,
+    apply (is_limit_of_preserves ((evaluation _ _).obj Y) (limit.is_limit _)).hom_ext,
+    intros i, swap, apply_instance,
+    dsimp, simp only [category.assoc],
+    erw [functor_prod_eval_iso_spec', nat_trans.naturality,
+      functor_prod_eval_iso_spec'_assoc, profinite_pow_filtration_iso_component_spec,
+      profinite_pow_filtration_iso_component_spec_assoc],
+    ext, refl }
 end
 
 def combine (hι : monotone ι) (n : ℕ) : ℕ →o ℝ≥0 :=
