@@ -750,8 +750,8 @@ begin
     intros r, apply hκι },
 end
 
-lemma QprimeFP.short_exact (n : ℤ)
-  (hκι : ∀ (r : ℝ≥0) q, ∃ (n : ℕ), r ≤ (combine.{u} κ ι hι q) n) :
+lemma QprimeFP.short_exact
+  (hκι : ∀ (r : ℝ≥0) q, ∃ (n : ℕ), r ≤ (combine.{u} κ ι hι q) n) (n : ℤ) :
   short_exact
     ((QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD.data κ M)).f n)
     ((QprimeFP_sigma_proj BD κ M ι).f n) :=

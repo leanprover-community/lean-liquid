@@ -352,8 +352,8 @@ lemma Tinv2_iso_of_bicartesian [normed_with_aut r V]
           (normed_group_hom.to_add_monoid_hom normed_with_aut.T.inv) (normed_group_hom.continuous _)))) :=
 begin
   let Vc := (single (Condensed Ab) 0).obj V.to_Cond,
-  have SES₁ := QprimeFP.short_exact BD κ₂ M ι hι,
-  have SES₂ := QprimeFP.short_exact BD κ M ι hι,
+  have SES₁ := QprimeFP.short_exact BD κ₂ M ι hι sorry, -- NB: this sorry is a missing assumption
+  have SES₂ := QprimeFP.short_exact BD κ M ι hι sorry, -- NB: this sorry is a missing assumption
   have := Ext_iso_of_bicartesian_of_bicartesian SES₁ SES₂
     (sigma_map _ (QprimeFP_int.Tinv BD.data _ _ M))
     (sigma_map _ (QprimeFP_int.Tinv BD.data _ _ M))
