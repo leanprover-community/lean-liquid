@@ -427,10 +427,35 @@ section ses_setup
 
 local attribute [instance] type_pow
 
+def Condensed_prod_val_iso {α : Type (u+1)} (X : α → CondensedSet.{u}) :
+  (∏ X).val ≅ ∏ (λ i, (X i).val) :=
+preserves_limit_iso CondensedSet_to_presheaf _ ≪≫
+has_limit.iso_of_nat_iso (discrete.nat_iso $ λ p, iso.refl _)
+
+def functor_prod_eval_iso {α : Type (u+1)} (X : α → (Profinite.{u}ᵒᵖ ⥤ Type (u+1))) (T) :
+  (∏ X).obj T ≅ ∏ (λ i, (X i).obj T) :=
+preserves_limit_iso ((evaluation _ _).obj T) _ ≪≫
+has_limit.iso_of_nat_iso (discrete.nat_iso $ λ p, iso.refl _)
+
+def profinite_pow_filtration_iso_component (j : ℕ) (r : ℝ≥0) (T : Profinite.{u}) :
+  ulift.{u+1} (T ⟶ pseudo_normed_group.filtration_obj.{u} (↥M ^ j) r) ≅
+  ∏ λ (i : ulift.{u+1} (fin j)), ulift.{u+1}
+    (T ⟶ (ProFiltPseuNormGrp₁.level.{u}.obj r).obj ((PFPNGT₁_to_PFPNG₁ₑₗ.{u} r').obj M)) :=
+sorry
+
 def profinite_pow_filtration_iso (j : ℕ) (r : ℝ≥0) :
   (pseudo_normed_group.filtration_obj.{u} (↥M ^ j) r).to_Condensed ≅
   ∏ λ (k : ulift.{u+1 0} (fin j)), ((ProFiltPseuNormGrp₁.level.obj r).obj
-    ((PFPNGT₁_to_PFPNG₁ₑₗ _).obj M)).to_Condensed := sorry
+    ((PFPNGT₁_to_PFPNG₁ₑₗ _).obj M)).to_Condensed :=
+begin
+  refine Sheaf.iso.mk _ _ _,
+  refine _ ≪≫ (Condensed_prod_val_iso _).symm,
+  refine nat_iso.of_components _ _,
+  { intros T,
+    refine _ ≪≫ (functor_prod_eval_iso _ _).symm,
+    refine profinite_pow_filtration_iso_component _ _ _ _ },
+  { sorry }
+end
 
 def combine (hι : monotone ι) (n : ℕ) : ℕ →o ℝ≥0 :=
 { to_fun := λ t, κ (ι $ ulift.up t) n,
