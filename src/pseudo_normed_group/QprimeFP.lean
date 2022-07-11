@@ -550,6 +550,19 @@ lemma ProFiltPseuNormGrp₁.product_pow_iso_spec' {α : Type u} [fintype α]
   ProFiltPseuNormGrp₁.product.π _ _ :=
 by { rw iso.inv_comp_eq, rw ProFiltPseuNormGrp₁.product_pow_iso_spec }
 
+def filtration_pow_proj (j : ℕ) (r : ℝ≥0) (i : fin j) :
+  pseudo_normed_group.filtration_obj.{u} (↥M ^ j) r ⟶
+  pseudo_normed_group.filtration_obj.{u} M r :=
+{ to_fun := λ t, ⟨t.1 i, t.2 _⟩,
+  continuous_to_fun := begin
+    let e := (comphaus_filtered_pseudo_normed_group.filtration_pi_homeo
+      (λ i : (fin j), M) r),
+    let t := _, change continuous t,
+    suffices : continuous (t ∘ e.symm), by simpa using this,
+    convert continuous_apply i,
+    ext, refl,
+  end }
+
 def filtration_pow_iso_aux'₀ (j : ℕ) (r : ℝ≥0) :
   pseudo_normed_group.filtration_obj.{u} (↥M ^ j) r ≅
   (ProFiltPseuNormGrp₁.level.{u}.obj r).obj
@@ -591,6 +604,30 @@ def filtration_pow_iso_aux'₀ (j : ℕ) (r : ℝ≥0) :
     end },
   hom_inv_id' := by { ext, refl },
   inv_hom_id' := by { ext _ ⟨⟩, refl } }
+
+@[simp, reassoc]
+lemma filtration_pow_iso_aux'₀_spec (j : ℕ) (r : ℝ≥0) (i) :
+  (filtration_pow_iso_aux'₀ M j r).hom ≫
+  ((ProFiltPseuNormGrp₁.level.obj r).map $ ProFiltPseuNormGrp₁.product.π _ i) =
+  filtration_pow_proj M j r i.down := by { ext, refl }
+
+@[simp, reassoc]
+lemma filtration_pow_iso_aux'₀_spec' (j : ℕ) (r : ℝ≥0) (i) :
+  (filtration_pow_iso_aux'₀ M j r).hom ≫
+  ((ProFiltPseuNormGrp₁.level.obj r).map $ ProFiltPseuNormGrp₁.product.π _ ⟨i⟩) =
+  filtration_pow_proj M j r i := by { ext, refl }
+
+@[simp, reassoc]
+lemma filtration_pow_iso_aux'₀_spec'' (j : ℕ) (r : ℝ≥0) (i : ulift.{u} (fin j)) :
+  (filtration_pow_iso_aux'₀ M j r).inv ≫ filtration_pow_proj M j r i.down =
+  ((ProFiltPseuNormGrp₁.level.obj r).map $ ProFiltPseuNormGrp₁.product.π _ i) :=
+by { cases i, ext _ ⟨k⟩, refl }
+
+@[simp, reassoc]
+lemma filtration_pow_iso_aux'₀_spec''' (j : ℕ) (r : ℝ≥0) (i : fin j) :
+  (filtration_pow_iso_aux'₀ M j r).inv ≫ filtration_pow_proj M j r i =
+  ((ProFiltPseuNormGrp₁.level.obj r).map $ ProFiltPseuNormGrp₁.product.π _ (ulift.up i)) :=
+by { ext, refl }
 
 def filtration_pow_iso_aux' (j : ℕ) (r : ℝ≥0) :
   pseudo_normed_group.filtration_obj.{u} (↥M ^ j) r ≅
