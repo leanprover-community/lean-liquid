@@ -437,11 +437,30 @@ def functor_prod_eval_iso {α : Type (u+1)} (X : α → (Profinite.{u}ᵒᵖ ⥤
 preserves_limit_iso ((evaluation _ _).obj T) _ ≪≫
 has_limit.iso_of_nat_iso (discrete.nat_iso $ λ p, iso.refl _)
 
+def filtration_pow_iso_aux (j : ℕ) (r : ℝ≥0) :
+  (ProFiltPseuNormGrp₁.level.obj r).obj
+    (∏ λ i : ulift.{u} (fin j), (PFPNGT₁_to_PFPNG₁ₑₗ _).obj M) ≅
+  (∏ λ i : ulift.{u} (fin j), pseudo_normed_group.filtration_obj M r) :=
+preserves_limit_iso (ProFiltPseuNormGrp₁.level.obj r) _ ≪≫
+has_limit.iso_of_nat_iso (discrete.nat_iso $ λ q, iso.refl _)
+
+def filtration_pow_iso_aux' (j : ℕ) (r : ℝ≥0) :
+  pseudo_normed_group.filtration_obj.{u} (↥M ^ j) r ≅
+  (ProFiltPseuNormGrp₁.level.obj r).obj
+    (∏ λ i : ulift.{u} (fin j), (PFPNGT₁_to_PFPNG₁ₑₗ _).obj M) :=
+sorry
+
+def filtration_pow_iso (j : ℕ) (r : ℝ≥0) :
+  pseudo_normed_group.filtration_obj.{u} (M ^ j) r ≅
+  ∏ λ i : ulift.{u} (fin j), pseudo_normed_group.filtration_obj M r :=
+filtration_pow_iso_aux' _ _ _ ≪≫ filtration_pow_iso_aux _ _ _
+
 def profinite_pow_filtration_iso_component (j : ℕ) (r : ℝ≥0) (T : Profinite.{u}) :
   ulift.{u+1} (T ⟶ pseudo_normed_group.filtration_obj.{u} (↥M ^ j) r) ≅
   ∏ λ (i : ulift.{u+1} (fin j)), ulift.{u+1}
     (T ⟶ (ProFiltPseuNormGrp₁.level.{u}.obj r).obj ((PFPNGT₁_to_PFPNG₁ₑₗ.{u} r').obj M)) :=
-sorry
+ulift_functor.map_iso
+((yoneda.flip.obj (op T)).map_iso $ filtration_pow_iso _ _ _) ≪≫ sorry
 
 def profinite_pow_filtration_iso (j : ℕ) (r : ℝ≥0) :
   (pseudo_normed_group.filtration_obj.{u} (↥M ^ j) r).to_Condensed ≅
