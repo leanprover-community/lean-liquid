@@ -533,6 +533,23 @@ def ProFiltPseuNormGrp₁.product_pow_iso {α : Type u} [fintype α]
   ∏ X ≅ ProFiltPseuNormGrp₁.product X :=
 (limit.is_limit _).cone_point_unique_up_to_iso (ProFiltPseuNormGrp₁.is_limit_product_fan _)
 
+@[simp, reassoc]
+lemma ProFiltPseuNormGrp₁.product_pow_iso_spec {α : Type u} [fintype α]
+  (X : α → ProFiltPseuNormGrp₁.{u}) (i) :
+  (ProFiltPseuNormGrp₁.product_pow_iso X).hom ≫
+  ProFiltPseuNormGrp₁.product.π _ _ = pi.π _ i :=
+begin
+  erw ProFiltPseuNormGrp₁.product.lift_π,
+  refl,
+end
+
+@[simp, reassoc]
+lemma ProFiltPseuNormGrp₁.product_pow_iso_spec' {α : Type u} [fintype α]
+  (X : α → ProFiltPseuNormGrp₁.{u}) (i) :
+  (ProFiltPseuNormGrp₁.product_pow_iso X).inv ≫ pi.π _ i =
+  ProFiltPseuNormGrp₁.product.π _ _ :=
+by { rw iso.inv_comp_eq, rw ProFiltPseuNormGrp₁.product_pow_iso_spec }
+
 def filtration_pow_iso_aux'₀ (j : ℕ) (r : ℝ≥0) :
   pseudo_normed_group.filtration_obj.{u} (↥M ^ j) r ≅
   (ProFiltPseuNormGrp₁.level.{u}.obj r).obj
