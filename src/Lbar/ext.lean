@@ -716,9 +716,9 @@ begin
     { rintro ⟨j⟩, apply Hι1 },
     { rintro ⟨j⟩, apply Hι2a },
     { rintro ⟨j⟩, apply Hι2b }, }, },
-  { refine ⟨λ _, 0, monotone_const, _, _, _, _⟩,
-    { intros s m, dsimp [ι], sorry }, -- this is wrong
-    { intros s m, dsimp [ι], sorry }, -- this is wrong
+  { refine ⟨ι r r' 0, hι r r' 0, _, _, _, _⟩,
+    { intros s m, apply sufficiently_increasing_eg, },
+    { intros s m, apply sufficiently_increasing_eg', },
     { apply useful_commsq_bicartesian_neg, dec_trivial },
     { apply useful_commsq_bicartesian_neg,
       rw [int.neg_succ_of_nat_eq'],
