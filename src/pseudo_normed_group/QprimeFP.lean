@@ -485,6 +485,28 @@ def filtration_pow_iso_aux (j : ℕ) (r : ℝ≥0) :
 preserves_limit_iso (ProFiltPseuNormGrp₁.level.obj r) _ ≪≫
 has_limit.iso_of_nat_iso (discrete.nat_iso $ λ q, iso.refl _)
 
+@[simp, reassoc]
+lemma filtration_pow_iso_aux_spec (j : ℕ) (r : ℝ≥0) (i) :
+  (filtration_pow_iso_aux M j r).hom ≫ pi.π
+    (λ i : ulift.{u} (fin j), pseudo_normed_group.filtration_obj M r) i =
+  (ProFiltPseuNormGrp₁.level.obj r).map (pi.π _ i) :=
+begin
+  dsimp [filtration_pow_iso_aux],
+  simp only [category.assoc],
+  erw limit.lift_π,
+  dsimp,
+  erw limit.lift_π_assoc,
+  erw category.comp_id,
+  refl,
+end
+
+@[simp, reassoc]
+lemma filtration_pow_iso_aux_spec' (j : ℕ) (r : ℝ≥0) (i) :
+  (filtration_pow_iso_aux M j r).inv ≫
+  (ProFiltPseuNormGrp₁.level.obj r).map (pi.π _ i) =
+  pi.π _ i :=
+by { rw iso.inv_comp_eq, rw filtration_pow_iso_aux_spec }
+
 def ProFiltPseuNormGrp₁.product_fan {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrp₁.{u}) :
   fan X :=
 fan.mk (ProFiltPseuNormGrp₁.product X) $ λ i, ProFiltPseuNormGrp₁.product.π _ _
