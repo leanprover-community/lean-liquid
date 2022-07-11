@@ -432,10 +432,51 @@ def Condensed_prod_val_iso {α : Type (u+1)} (X : α → CondensedSet.{u}) :
 preserves_limit_iso CondensedSet_to_presheaf _ ≪≫
 has_limit.iso_of_nat_iso (discrete.nat_iso $ λ p, iso.refl _)
 
+@[simp, reassoc]
+lemma Condensed_prod_val_iso_spec {α : Type (u+1)} (X : α → CondensedSet.{u}) (i : α) :
+  (Condensed_prod_val_iso X).hom ≫ pi.π _ i =
+  (pi.π X i : ∏ X ⟶ X i).val :=
+begin
+  dsimp [Condensed_prod_val_iso],
+  simp only [category.assoc],
+  erw limit.lift_π,
+  dsimp,
+  erw limit.lift_π_assoc,
+  erw category.comp_id,
+  refl,
+end
+
+@[simp, reassoc]
+lemma Condensed_prod_val_iso_spec' {α : Type (u+1)} (X : α → CondensedSet.{u}) (i : α) :
+  (Condensed_prod_val_iso X).inv ≫ (pi.π X i : ∏ X ⟶ X i).val = pi.π _ _ :=
+by { rw iso.inv_comp_eq, rw Condensed_prod_val_iso_spec }
+
 def functor_prod_eval_iso {α : Type (u+1)} (X : α → (Profinite.{u}ᵒᵖ ⥤ Type (u+1))) (T) :
   (∏ X).obj T ≅ ∏ (λ i, (X i).obj T) :=
 preserves_limit_iso ((evaluation _ _).obj T) _ ≪≫
 has_limit.iso_of_nat_iso (discrete.nat_iso $ λ p, iso.refl _)
+
+@[simp, reassoc]
+lemma functor_prod_eval_iso_spec
+  {α : Type (u+1)} (X : α → (Profinite.{u}ᵒᵖ ⥤ Type (u+1))) (T) (i : α) :
+  (functor_prod_eval_iso X T).hom ≫ pi.π _ i =
+  (pi.π X i : ∏ X ⟶ X i).app _ :=
+begin
+  dsimp [functor_prod_eval_iso],
+  simp only [category.assoc],
+  erw limit.lift_π,
+  dsimp,
+  erw limit.lift_π_assoc,
+  erw category.comp_id,
+  refl,
+end
+
+@[simp, reassoc]
+lemma functor_prod_eval_iso_spec'
+  {α : Type (u+1)} (X : α → (Profinite.{u}ᵒᵖ ⥤ Type (u+1))) (T) (i : α) :
+  (functor_prod_eval_iso X T).inv ≫ (pi.π X i : ∏ X ⟶ X i).app _ =
+  pi.π _ i :=
+by { rw iso.inv_comp_eq, rw functor_prod_eval_iso_spec }
 
 def filtration_pow_iso_aux (j : ℕ) (r : ℝ≥0) :
   (ProFiltPseuNormGrp₁.level.obj r).obj
