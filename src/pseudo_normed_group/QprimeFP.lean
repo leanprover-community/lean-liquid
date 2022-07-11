@@ -452,8 +452,18 @@ def ProFiltPseuNormGrp₁.is_limit_product_fan {α : Type u} [fintype α]
   (X : α → ProFiltPseuNormGrp₁.{u}) :
   is_limit (ProFiltPseuNormGrp₁.product_fan X) :=
 { lift := λ S, ProFiltPseuNormGrp₁.product.lift _ _ $ λ i, S.π.app _,
-  fac' := sorry,
-  uniq' := sorry }
+  fac' := begin
+    intros S j,
+    dsimp,
+    erw ProFiltPseuNormGrp₁.product.lift_π,
+  end,
+  uniq' := begin
+    intros S m hm,
+    apply ProFiltPseuNormGrp₁.product.hom_ext,
+    intros j,
+    erw hm,
+    erw ProFiltPseuNormGrp₁.product.lift_π,
+  end }
 
 def ProFiltPseuNormGrp₁.product_pow_iso {α : Type u} [fintype α]
   (X : α → ProFiltPseuNormGrp₁.{u}) :
