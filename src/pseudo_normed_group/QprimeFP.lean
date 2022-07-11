@@ -544,10 +544,17 @@ begin
   refine (Condensed_product_iso_product _ _).symm,
 end
 
+lemma iso_on_the_right_zero_conj :
+  ((QprimeFP_sigma_proj BD κ M ι).f 0) =
+  (iso_on_the_left_zero _ _ _ _ hι).hom ≫
+  Condensed.coproduct_presentation_with_pow CondensedSet_to_Condensed_Ab M.to_CHFPNG
+    (combine _ _ _ _) _ ≫ (iso_on_the_right_zero _ _ _ _ _).hom :=
+sorry
+
 def iso_on_the_right_neg (q : ℕ) :
   CondensedSet_to_Condensed_Ab.{u}.obj
   (∏ λ (j : ulift.{u+1 0} (fin (BD.data.X (q+1)))),
-  (Condensed.as_nat_cocone.{u} M.to_CHFPNG (combine.{u} κ ι hι 0)).X) ≅
+  (Condensed.as_nat_cocone.{u} M.to_CHFPNG (combine.{u} κ ι hι (q+1))).X) ≅
   ((BD.eval' freeCond'.{u}).obj M.to_Condensed).X (-[1+q]) :=
 begin
   refine CondensedSet_to_Condensed_Ab.map_iso _,
@@ -555,6 +562,13 @@ begin
   refine _ ≪≫ Condensed_product_iso_biproduct _ _,
   refine (Condensed_product_iso_product _ _).symm,
 end
+
+lemma iso_on_the_right_neg_conj (q : ℕ) :
+  ((QprimeFP_sigma_proj BD κ M ι).f (-[1+q])) =
+  (iso_on_the_left_neg _ _ _ _ hι q).hom ≫
+  Condensed.coproduct_presentation_with_pow CondensedSet_to_Condensed_Ab M.to_CHFPNG
+    (combine _ _ _ _) _ ≫ (iso_on_the_right_neg _ _ _ _ _ _).hom :=
+sorry
 
 end ses_setup
 
@@ -663,8 +677,32 @@ end
 
 attribute [simps] Condensed_Ab_to_presheaf
 
-lemma QprimeFP.epi (n : ℤ) : epi ((QprimeFP_sigma_proj BD κ M ι).f n) :=
+lemma QprimeFP.epi (hι : monotone ι)
+  (hκι : ∀ (r : ℝ≥0) q, ∃ (n : ℕ), r ≤ (combine.{u} κ ι hι q) n)
+  (n : ℤ) : epi ((QprimeFP_sigma_proj BD κ M ι).f n) :=
 begin
+  rcases n with (_|q)|q,
+  { erw iso_on_the_right_zero_conj,
+    swap, assumption,
+    apply_with epi_comp { instances := ff }, apply_instance,
+    apply_with epi_comp { instances := ff }, swap, apply_instance,
+    rw Condensed.coproduct_presentation_with_pow_eq,
+    apply_with epi_comp { instances := ff }, swap, apply_instance,
+    swap, { intros r, apply hκι },
+    exact Condensed.epi_coproduct_to_colimit (Condensed.as_nat_diagram_pow.{u} M.to_CHFPNG
+      (combine.{u} κ ι hι 0) (BD.data.X 0) ⋙ CondensedSet_to_Condensed_Ab.{u}) },
+  { apply epi_of_is_zero,
+    exact is_zero_zero _ },
+  { erw iso_on_the_right_neg_conj, swap, assumption,
+    apply_with epi_comp { instances := ff }, apply_instance,
+    apply_with epi_comp { instances := ff }, swap, apply_instance,
+    rw Condensed.coproduct_presentation_with_pow_eq,
+    apply_with epi_comp { instances := ff }, swap, apply_instance,
+    swap, { intros r, apply hκι },
+    exact Condensed.epi_coproduct_to_colimit (Condensed.as_nat_diagram_pow.{u} M.to_CHFPNG
+      (combine.{u} κ ι hι (q + 1)) (BD.data.X (q + 1)) ⋙ CondensedSet_to_Condensed_Ab.{u}) }
+
+  /-
   rw is_epi_iff_forall_surjective,
   intros S,
   rcases n with ((_|n)|n),
@@ -673,29 +711,55 @@ begin
     refine ⟨0, _⟩, apply AddCommGroup.eq_of_is_zero,
     rw [← evaluation_obj_obj, ← Condensed_Ab_to_presheaf_obj],
     apply functor.map_is_zero, apply functor.map_is_zero, exact is_zero_zero _, },
-  { sorry },
-  { sorry },
+  { admit },
+  { admit },
+  -/
 end
 
-lemma QprimeFP.exact (n : ℤ) :
+lemma QprimeFP.exact (n : ℤ)
+  (hκι : ∀ (r : ℝ≥0) q, ∃ (n : ℕ), r ≤ (combine.{u} κ ι hι q) n) :
   exact
     ((QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD.data κ M)).f n)
     ((QprimeFP_sigma_proj BD κ M ι).f n) :=
 begin
-  rw Condensed.exact_iff_ExtrDisc,
-  intro S,
-  sorry
+  rcases n with (_|q)|q,
+  { erw iso_on_the_left_zero_conj,
+    erw iso_on_the_right_zero_conj, swap, assumption,
+    rw ← category.assoc,
+    apply category_theory.exact_comp_inv_hom_comp,
+    rw exact_iso_comp, rw exact_comp_iso,
+    apply (Condensed.short_exact_sequence_with_pow _ _ _ _ _).exact,
+    intros r, apply hκι },
+  { apply exact_of_is_zero,
+    let e :
+      (∐ λ (k : ulift.{u+1 0} ℕ), (QprimeFP_int.{u} r' BD.data κ M).obj
+        (ι k)).X (int.of_nat q.succ) ≅
+      ∐ λ k : ulift.{u+1} ℕ, ((QprimeFP_int.{u} r' BD.data κ M).obj
+        (ι k)).X (int.of_nat q.succ) :=
+      preserves_colimit_iso (homological_complex.eval _ _ _) _ ≪≫
+      has_colimit.iso_of_nat_iso (discrete.nat_iso $ λ p, iso.refl _),
+    apply is_zero_of_iso_of_zero _ e.symm,
+    apply is_zero_colimit, intros j,
+    exact is_zero_zero _ },
+  { erw iso_on_the_left_neg_conj,
+    erw iso_on_the_right_neg_conj, swap, assumption,
+    rw ← category.assoc,
+    apply category_theory.exact_comp_inv_hom_comp,
+    rw exact_iso_comp, rw exact_comp_iso,
+    apply (Condensed.short_exact_sequence_with_pow _ _ _ _ _).exact,
+    intros r, apply hκι },
 end
 
-lemma QprimeFP.short_exact (n : ℤ) :
+lemma QprimeFP.short_exact (n : ℤ)
+  (hκι : ∀ (r : ℝ≥0) q, ∃ (n : ℕ), r ≤ (combine.{u} κ ι hι q) n) :
   short_exact
     ((QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD.data κ M)).f n)
     ((QprimeFP_sigma_proj BD κ M ι).f n) :=
 begin
   apply_with short_exact.mk {instances:=ff},
   { apply QprimeFP.mono },
-  { apply QprimeFP.epi },
-  { apply QprimeFP.exact },
+  { apply QprimeFP.epi, assumption, },
+  { apply QprimeFP.exact, assumption },
 end
 
 end step4
