@@ -1,34 +1,14 @@
-import for_mathlib.derived.les_facts
-import liquid
-import Lbar.functor
-import condensed.projective_resolution
-import condensed.condensify
-import condensed.bd_lemma
-import breen_deligne.eg
-
-import for_mathlib.derived.ext_coproducts
-import condensed.ab4
-import Lbar.squares
-import pseudo_normed_group.QprimeFP
-import for_mathlib.acyclic
-import free_pfpng.acyclic
-import for_mathlib.SemiNormedGroup_ulift
-import for_mathlib.bicartesian4
-import for_mathlib.has_homology_aux
-
-import for_mathlib.derived.Ext_lemmas
+import Lbar.ext_aux1
 
 noncomputable theory
 
 universes u
 
 open opposite category_theory category_theory.limits
-open_locale nnreal
+open_locale nnreal zero_object
 
 variables (r r' : ℝ≥0)
 variables [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r < 1)] [fact (r' < 1)]
-
-abbreviation SemiNormedGroup.to_Cond (V : SemiNormedGroup.{u}) := Condensed.of_top_ab V
 
 section
 
@@ -41,120 +21,17 @@ variables [∀ (c : ℝ≥0), BD.suitable (κ₂ c)] [∀ n, fact (monotone (fun
 variables (M : ProFiltPseuNormGrpWithTinv₁.{u} r')
 variables (V : SemiNormedGroup.{u}) [complete_space V] [separated_space V]
 
-lemma ExtQprime_iso_aux_system_aux (c : ℝ≥0) (k i : ℤ) (hi : i > 0) :
-  is_zero (((Ext' i).obj (op (((homological_complex.embed complex_shape.embedding.nat_down_int_up).obj
-      ((QprimeFP_nat.{u} r' BD κ M).obj c)).X k))).obj V.to_Cond) :=
-begin
-  rcases k with (_|_)|_,
-  { apply free_acyclic.{u} _ V i hi },
-  { apply bounded_derived_category.Ext'_zero_left_is_zero, refine (is_zero_zero _).op },
-  { apply free_acyclic.{u} _ V i hi },
-end
-
-open_locale zero_object
-
-def embed_unop {𝓐 : Type*} [category 𝓐] [abelian 𝓐] :
-  (homological_complex.embed complex_shape.embedding.nat_down_int_up).op ⋙
-    @homological_complex.unop_functor 𝓐 _ _ _ _ ≅
-  homological_complex.unop_functor ⋙
-    homological_complex.embed complex_shape.embedding.nat_up_int_down :=
-begin
-  refine nat_iso.of_components _ _,
-  { intro X, refine homological_complex.hom.iso_of_components _ _,
-    { rintro ((_|n)|n),
-      { exact iso.refl _ },
-      { refine is_zero.iso (is_zero_zero _).unop (is_zero_zero _), },
-      { exact iso.refl _ }, },
-    { rintro i (j|(_|j)) (rfl : _ = _),
-      { apply is_zero.eq_of_src, exact (is_zero_zero _).unop },
-      { dsimp only [iso.refl_hom], erw [category.id_comp, category.comp_id], refl },
-      { dsimp only [iso.refl_hom], erw [category.id_comp, category.comp_id], refl }, } },
-  { intros X Y f, ext ((_|n)|n),
-    { dsimp only [homological_complex.comp_f, homological_complex.hom.iso_of_components_hom_f, iso.refl_hom],
-      erw [category.id_comp, category.comp_id], refl },
-    { apply is_zero.eq_of_tgt, exact is_zero_zero _ },
-    { dsimp only [homological_complex.comp_f, homological_complex.hom.iso_of_components_hom_f, iso.refl_hom],
-      erw [category.id_comp, category.comp_id], refl } }
-end
-.
-
--- move me
-lemma nat_up_int_down_c_iff : complex_shape.embedding.nat_up_int_down.c_iff :=
-λ i j, complex_shape.embedding.nat_down_int_up_c_iff j i
-
-def forget₂_unop :
-  ((forget₂ SemiNormedGroup Ab).op.map_homological_complex (complex_shape.down ℕ)).op ⋙
-  homological_complex.unop_functor ≅
-  homological_complex.unop_functor ⋙
-  (forget₂ SemiNormedGroup Ab).map_homological_complex (complex_shape.down ℕ).symm :=
-begin
-  refine nat_iso.of_components _ _,
-  { intro X, refine homological_complex.hom.iso_of_components _ _,
-    { intro n, exact iso.refl _ },
-    { rintro i j (rfl : _ = _), dsimp only [iso.refl_hom],
-      rw [category.id_comp, category.comp_id], refl } },
-  { intros X Y f, ext n,
-    dsimp only [homological_complex.comp_f, homological_complex.hom.iso_of_components_hom_f, iso.refl_hom],
-    rw [category.id_comp, category.comp_id], refl }
-end
-.
-
-def preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab
-  (M : Condensed.{u} Ab.{u+1}) (X : Profinite) :
-  (preadditive_yoneda.obj M).obj (op $ CondensedSet_to_Condensed_Ab.obj (Profinite_to_Condensed.obj X)) ≅
-  M.val.obj (op X) :=
-let e := Condensed_Ab_CondensedSet_adjunction.hom_equiv X.to_Condensed M in
-add_equiv.to_AddCommGroup_iso $
-{ to_fun := λ t, yoneda'_equiv _ _ (e t).val,
-  inv_fun := λ t, e.symm $ ⟨(yoneda'_equiv _ _).symm $ by apply t⟩,
-  left_inv := λ t, begin
-    dsimp only,
-    apply_fun e, rw equiv.apply_symm_apply, ext1,
-    dsimp only, erw equiv.apply_symm_apply,
-  end,
-  right_inv := λ t, begin
-    dsimp only,
-    rw equiv.apply_symm_apply,
-    rw equiv.apply_symm_apply,
-  end,
-  map_add' := begin
-    intros x y,
-    refl,
-  end }
-
 set_option pp.universes true
 
-def ExtQprime_iso_aux_system_obj_aux' (X : Profinite.{u}) :
-  Ab.ulift.{u+1}.obj
-    ((forget₂ SemiNormedGroup Ab).obj
-      (SemiNormedGroup.Completion.obj ((SemiNormedGroup.LocallyConstant.obj V).obj (op X)))) ≅
-  (forget₂ SemiNormedGroup.{u+1} Ab.{u+1}).obj
-    (SemiNormedGroup.Completion.obj
-      ((SemiNormedGroup.LocallyConstant.obj (SemiNormedGroup.ulift.{u+1}.obj V)).obj (op X))) :=
-begin
-  refine add_equiv.to_AddCommGroup_iso _,
-  refine add_equiv.ulift.trans _,
-  refine add_equiv.mk _ _ _ _ _,
-  { refine uniform_space.completion.map _,
-    refine locally_constant.map_hom _,
-    refine { bound' := ⟨1, λ v, _⟩, .. add_equiv.ulift.symm },
-    rw one_mul, exact le_rfl },
-  { refine uniform_space.completion.map _,
-    refine locally_constant.map_hom _,
-    refine { bound' := ⟨1, λ v, _⟩, .. add_equiv.ulift },
-    rw one_mul, exact le_rfl },
-  { rw [function.left_inverse_iff_comp, uniform_space.completion.map_comp],
-    { have : ulift.down.{u+1} ∘ ulift.up.{u+1} = (id : V → V) := rfl,
-      erw [locally_constant.map_comp, this, locally_constant.map_id, uniform_space.completion.map_id] },
-    { apply normed_group_hom.uniform_continuous, },
-    { apply normed_group_hom.uniform_continuous, } },
-  { rw [function.right_inverse_iff_comp, uniform_space.completion.map_comp],
-    { have : ulift.up.{u+1 u} ∘ ulift.down.{u+1} = @id (ulift V) := by { ext v, refl },
-      erw [locally_constant.map_comp, this, locally_constant.map_id, uniform_space.completion.map_id] },
-    { apply normed_group_hom.uniform_continuous, },
-    { apply normed_group_hom.uniform_continuous, } },
-  { sorry }
-end
+-- jmc: is this helpful??
+-- @[reassoc]
+-- def preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab_natural
+--   (M : Condensed.{u} Ab.{u+1}) (X Y : Profinite) (f : X ⟶ Y) :
+--   (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab M Y).hom ≫ M.val.map f.op =
+--   ((preadditive_yoneda.obj M).map (CondensedSet_to_Condensed_Ab.map $ Profinite_to_Condensed.map f).op) ≫
+--    (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab M X).hom :=
+-- by admit
+
 
 def ExtQprime_iso_aux_system_obj_aux :
   ((CLC (SemiNormedGroup.ulift.{u+1}.obj V)).right_op.map_FreeAb ⋙
@@ -171,7 +48,13 @@ begin
     refine (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab _ _) ≪≫ _,
     let e := (Condensed_Ab_to_presheaf.map_iso (Condensed_LCC_iso_of_top_ab V)).app (op X.as),
     refine e.symm ≪≫ (ExtQprime_iso_aux_system_obj_aux' V X.as), },
-  { sorry }
+  { intros X Y f,
+    dsimp only [id.def, iso.trans_hom, iso.op_hom, op_comp, iso.symm_hom, functor.map_iso_inv,
+      functor.comp_map, functor.right_op_map, functor.op_map, iso.app_inv],
+    simp only [category.assoc, ← op_comp], congr' 1,
+    -- rw preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab_natural_assoc,
+    -- refine congr_arg2 _ rfl _,
+    sorry }
 end
 
 -- this needs to be functorial in `c`
