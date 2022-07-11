@@ -30,22 +30,6 @@ apply_nolint breen_deligne.FreeMat.kronecker_map_reindex_right unused_arguments
 -- breen_deligne/eval.lean
 apply_nolint breen_deligne.data.homological_complex.functor_eval_flip_preserves_colimits_of_shape unused_arguments
 
--- breen_deligne/main.lean
-apply_nolint breen_deligne.package.endo_T unused_arguments
-apply_nolint breen_deligne.package.eval'_bounded_above unused_arguments
-apply_nolint breen_deligne.package.eval'_homology unused_arguments
-apply_nolint breen_deligne.package.forget_eval unused_arguments
-apply_nolint breen_deligne.package.hH_endo₁_a unused_arguments
-apply_nolint breen_deligne.package.hH_endo₁_b unused_arguments
-apply_nolint breen_deligne.package.main_lemma' unused_arguments
-apply_nolint breen_deligne.package.main_lemma.IH_neg unused_arguments
-apply_nolint breen_deligne.package.main_lemma.bdd_step unused_arguments
-apply_nolint breen_deligne.package.main_lemma.bdd_step₂ unused_arguments
-apply_nolint breen_deligne.package.main_lemma.bdd_step₅_aux'' unused_arguments
-apply_nolint breen_deligne.package.main_lemma.homology_iso_deg_0_of_bounded_by_1 unused_arguments
-apply_nolint breen_deligne.package.main_lemma.homology_iso_deg_0_of_bounded_by_1_down unused_arguments
-apply_nolint breen_deligne.package.main_lemma.shift_equiv_functor_additive unused_arguments
-
 -- breen_deligne/suitable.lean
 apply_nolint breen_deligne.basic_universal_map.suitable class_structure
 apply_nolint breen_deligne.universal_map.suitable class_structure
@@ -71,7 +55,6 @@ apply_nolint condensed.acyclic_of_exact.induction_step_ex unused_arguments
 -- condensed/bd_ses.lean
 apply_nolint Condensed.coproduct_presentation unused_arguments
 apply_nolint Condensed.coproduct_presentation_with_pow unused_arguments
-apply_nolint Condensed.short_exact_sequence_with_pow def_lemma
 
 -- condensed/condensify.lean
 apply_nolint Tinv_nat_trans unused_arguments
@@ -114,13 +97,6 @@ apply_nolint is_sheaf_colimit_presheaf_aux.prod.comparison_component unused_argu
 apply_nolint is_sheaf_colimit_presheaf_aux.prod.second_iso unused_arguments
 apply_nolint is_sheaf_colimit_presheaf_aux.prod.third_iso_aux_left unused_arguments
 apply_nolint is_sheaf_colimit_presheaf_aux.prod.third_iso_aux_right unused_arguments
-
--- condensed/filtered_colimits_commute_with_finite_limits.lean
-apply_nolint CondensedSet.colim_to_lim unused_arguments
-apply_nolint CondensedSet.is_colimit_pow_functor_map_cocone incorrect_type_class_argument
-apply_nolint CondensedSet.is_colimit_pow_functor_map_cocone._proof_2 incorrect_type_class_argument
-apply_nolint CondensedSet.is_colimit_pow_functor_map_cocone._proof_4 incorrect_type_class_argument
-apply_nolint CondensedSet.is_colimit_pow_functor_map_cocone.equations._eqn_1 incorrect_type_class_argument
 
 -- condensed/is_proetale_sheaf.lean
 apply_nolint category_theory.functor.finite_product_condition_of_sum unused_arguments
@@ -275,9 +251,6 @@ apply_nolint category_theory.functor.naturality_homology_nat_iso_app def_lemma
 -- for_mathlib/exact_seq3.lean
 apply_nolint category_theory.exact_seq.w def_lemma
 
--- for_mathlib/hom_single_iso.lean
-apply_nolint bounded_homotopy_category.hom_single_iso_setup.hom_complex unused_arguments
-
 -- for_mathlib/homological_complex_equiv_functor_category.lean
 apply_nolint homological_complex.complex_to_functor_functor unused_arguments
 
@@ -333,9 +306,6 @@ apply_nolint homological_complex.termwise_split_mono_section unused_arguments
 
 -- for_mathlib/nnreal_int_binary.lean
 apply_nolint nnreal.zpow_le_zpow' def_lemma
-
--- for_mathlib/nnreal_to_nat_colimit.lean
-apply_nolint category_theory.limits.nat_to_nnreal unused_arguments
 
 -- for_mathlib/order.lean
 apply_nolint Inter_eq inhabited_nonempty
