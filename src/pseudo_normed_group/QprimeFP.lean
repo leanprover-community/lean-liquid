@@ -784,7 +784,7 @@ begin
 end
 
 @[simp, reassoc]
-lemma iso_on_the_left_zero₉_spec (i : ulift.{u+1} ℕ) :
+lemma iso_on_the_left_zero₀_spec (i : ulift.{u+1} ℕ) :
   (sigma.ι (λ (k : ulift.{u+1 0} ℕ), (QprimeFP_int.{u} r' BD.data κ M).obj (ι k)) i).f 0 ≫
   (iso_on_the_left_zero₀ BD κ M ι).hom =
   sigma.ι (λ (k : ulift.{u+1 0} ℕ), ((QprimeFP_int.{u} r' BD.data κ M).obj (ι k)).X 0) i :=
@@ -940,6 +940,24 @@ begin
   refine has_colimit.iso_of_nat_iso (discrete.nat_iso $ λ i, iso.refl _),
 end
 
+@[simp, reassoc]
+lemma iso_on_the_left_neg₀_spec' (q : ℕ) (i : ulift.{u+1} ℕ) :
+  sigma.ι (λ (k : ulift.{u+1 0} ℕ), ((QprimeFP_int.{u} r' BD.data κ M).obj (ι k)).X (-[1+q])) i ≫
+  (iso_on_the_left_neg₀ BD κ M ι q).inv =
+  (sigma.ι (λ (k : ulift.{u+1 0} ℕ), (QprimeFP_int.{u} r' BD.data κ M).obj (ι k)) i).f (-[1+q]) :=
+begin
+  dsimp [iso_on_the_left_neg₀],
+  erw colimit.ι_desc_assoc, dsimp, simp only [category.id_comp],
+  erw colimit.ι_desc, refl,
+end
+
+@[simp, reassoc]
+lemma iso_on_the_left_neg₀_spec (q : ℕ) (i : ulift.{u+1} ℕ) :
+  (sigma.ι (λ (k : ulift.{u+1 0} ℕ), (QprimeFP_int.{u} r' BD.data κ M).obj (ι k)) i).f (-[1+q]) ≫
+  (iso_on_the_left_neg₀ BD κ M ι q).hom =
+  sigma.ι (λ (k : ulift.{u+1 0} ℕ), ((QprimeFP_int.{u} r' BD.data κ M).obj (ι k)).X (-[1+q])) i :=
+by { rw ← iso.eq_comp_inv, rw iso_on_the_left_neg₀_spec', }
+
 def iso_on_the_left_neg (q : ℕ) :
  (∐ λ (k : ulift.{u+1 0} ℕ), (QprimeFP_int.{u} r' BD.data κ M).obj (ι k)).X (-[1+q]) ≅
   ∐ λ (i : as_small.{u+1 0 0} ℕ), CondensedSet_to_Condensed_Ab.{u}.obj
@@ -955,19 +973,113 @@ begin
   refine profinite_pow_filtration_iso M (BD.data.X (q+1)) (κ (ι ⟨j⟩) (q+1)),
 end
 
+@[simp, reassoc]
+lemma iso_on_the_left_neg_spec' (q : ℕ) (k : ℕ) :
+  sigma.ι (λ (i : as_small.{u+1 0 0} ℕ), CondensedSet_to_Condensed_Ab.{u}.obj
+    (∏ λ (j : ulift.{u+1 0} (fin (BD.data.X (q+1)))),
+    (Condensed.as_nat_diagram.{u} M.to_CHFPNG (combine.{u} κ ι hι (q+1))).obj i))
+    ⟨k⟩ ≫ (iso_on_the_left_neg _ _ _ _ _ q).inv =
+  CondensedSet_to_Condensed_Ab.map (profinite_pow_filtration_iso M
+    (BD.data.X (q+1)) (κ (ι ⟨k⟩) (q+1))).inv ≫
+  (sigma.ι (λ (k : ulift.{u+1 0} ℕ), (QprimeFP_int.{u} r' BD.data κ M).obj (ι k)) ⟨k⟩).f (-[1+q]) :=
+begin
+  dsimp [iso_on_the_left_neg],
+  erw colimit.ι_desc_assoc, dsimp,
+  rw [category.assoc],
+  slice_lhs 2 3
+  { rw iso_on_the_left_neg₀_spec' },
+end
+
+@[simp, reassoc]
+lemma iso_on_the_left_neg_spec (q : ℕ) (k : ℕ) :
+  CondensedSet_to_Condensed_Ab.map (profinite_pow_filtration_iso M
+    (BD.data.X (q+1)) (κ (ι ⟨k⟩) (q+1))).inv ≫
+  (sigma.ι (λ (k : ulift.{u+1 0} ℕ), (QprimeFP_int.{u} r' BD.data κ M).obj (ι k)) ⟨k⟩).f (-[1+q]) ≫
+  (iso_on_the_left_neg _ _ _ _ _ q).hom =
+  sigma.ι (λ (i : as_small.{u+1 0 0} ℕ), CondensedSet_to_Condensed_Ab.{u}.obj
+    (∏ λ (j : ulift.{u+1 0} (fin (BD.data.X (q+1)))),
+    (Condensed.as_nat_diagram.{u} M.to_CHFPNG (combine.{u} κ ι hι (q+1))).obj i))
+    ⟨k⟩ :=
+begin
+  rw [← category.assoc, ← iso.eq_comp_inv, iso_on_the_left_neg_spec'],
+end
+
+@[simp, reassoc]
+lemma iso_on_the_left_neg_spec_alt (q : ℕ) (k : ℕ) :
+  (sigma.ι (λ (k : ulift.{u+1 0} ℕ), (QprimeFP_int.{u} r' BD.data κ M).obj (ι k)) ⟨k⟩).f (-[1+q]) ≫
+  (iso_on_the_left_neg _ _ _ _ _ q).hom =
+  CondensedSet_to_Condensed_Ab.map (profinite_pow_filtration_iso M
+    (BD.data.X (q+1)) (κ (ι ⟨k⟩) (q+1))).hom ≫
+  sigma.ι (λ (i : as_small.{u+1 0 0} ℕ), CondensedSet_to_Condensed_Ab.{u}.obj
+    (∏ λ (j : ulift.{u+1 0} (fin (BD.data.X (q+1)))),
+    (Condensed.as_nat_diagram.{u} M.to_CHFPNG (combine.{u} κ ι hι (q+1))).obj i))
+    ⟨k⟩ :=
+begin
+  rw [← functor.map_iso_hom, ← iso.inv_comp_eq,
+    functor.map_iso_inv, iso_on_the_left_neg_spec],
+end
+
+lemma iso_on_the_left_neg_conj_aux (q : ℕ) (j : ℕ) :
+  ((profinite_pow_filtration_iso.{u} M (BD.data.X (q+1)) (κ (ι {down := j}) (q+1))).hom ≫
+    (Condensed.as_nat_diagram_pow.{u} M.to_CHFPNG (combine.{u} κ ι hι (q+1)) (BD.data.X (q+1))).map
+    (as_small.up.{0 0 u+1}.map (hom_of_le.{0} (nat.le_succ _)))) ≫
+  (profinite_pow_filtration_iso.{u} M (BD.data.X (q+1)) (κ (ι {down := j + 1}) (q+1))).inv =
+  Profinite_to_Condensed.map (pseudo_normed_group.map_filtration _ _ _
+    (fact.out (monotone (function.swap κ (q+1))) (hι $ by { exact_mod_cast j.le_succ }))) :=
+begin
+  rw iso.comp_inv_eq,
+  apply limit.hom_ext, intros k,
+  dsimp [Condensed.as_nat_diagram_pow, pow_functor], simp only [category.assoc],
+  erw profinite_pow_filtration_iso_spec,
+  simp only [lim_map_π, discrete.nat_trans_app],
+  erw profinite_pow_filtration_iso_spec_assoc,
+  dsimp [Condensed.as_nat_diagram, restrict_diagram,
+    CompHausFiltPseuNormGrp.level_Condensed_diagram,
+    CompHausFiltPseuNormGrp.level_Condensed_diagram'],
+  rw ← Profinite_to_Condensed.map_comp,
+  have h : κ (ι ⟨j⟩) (q+1) ≤ κ (ι ⟨j+1⟩) (q+1),
+  { apply fact.out (monotone (function.swap κ (q+1))),
+    apply hι,
+    exact_mod_cast j.le_succ },
+  change _ ≫ Profinite_to_Condensed.map (pseudo_normed_group.map_filtration M _ _ h) = _,
+  rw ← Profinite_to_Condensed.map_comp,
+  congr' 1,
+end
+
 lemma iso_on_the_left_neg_conj (q : ℕ) :
   ((QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD.data κ M)).f (-[1+q])) =
   (iso_on_the_left_neg _ _ _ _ hι _).hom ≫
   (Condensed.coproduct_to_coproduct (Condensed.as_nat_diagram_pow M.to_CHFPNG
     (combine κ ι hι (q+1)) _ ⋙ _) - 𝟙 _) ≫ (iso_on_the_left_neg _ _ _ _ hι _).inv :=
 begin
-  sorry
+  dsimp [QprimeFP.shift_sub_id],
+  simp only [comp_sub, sub_comp, category.id_comp, iso.hom_inv_id,
+    category.assoc], congr' 1,
+  apply (is_colimit_of_preserves (homological_complex.eval _ _ _)
+    (colimit.is_colimit _)).hom_ext, swap, apply_instance,
+  rintros ⟨j⟩, dsimp,
+  erw [← homological_complex.comp_f, colimit.ι_desc],
+  dsimp [sigma_shift_cone],
+  rw iso_on_the_left_neg_spec_alt_assoc,
+  erw colimit.ι_desc_assoc, dsimp,
+  simp only [category.assoc],
+  slice_rhs 3 4
+  { erw iso_on_the_left_neg_spec' },
+  simp only [← category.assoc],
+  congr' 1,
+  dsimp [CondensedSet_to_Condensed_Ab],
+  simp only [← functor.map_comp],
+  dsimp [QprimeFP_int, QprimeFP_nat, FreeAb.eval, functor.map_FreeAb,
+    FPsystem, FPsystem.X, FreeAb.of_functor],
+  rw free_abelian_group.lift.of, dsimp,
+  congr' 1,
+  ext S : 2,
+  dsimp,
+  simp only [← functor.map_comp], congr' 1,
+  simp only [← nat_trans.comp_app, ← Sheaf.hom.comp_val],
+  rw iso_on_the_left_neg_conj_aux,
+  ext, refl,
 end
-
---variables (n : ℕ)
---#check
---  Condensed.coproduct_presentation_with_pow CondensedSet_to_Condensed_Ab.{u} M.to_CHFPNG
---  (combine κ ι hι n) (BD.data.X n)
 
 .
 
