@@ -1226,6 +1226,8 @@ begin
   ext, refl,
 end
 
+.
+
 def iso_on_the_right_neg (q : ℕ) :
   CondensedSet_to_Condensed_Ab.{u}.obj
   (∏ λ (j : ulift.{u+1 0} (fin (BD.data.X (q+1)))),
@@ -1238,12 +1240,58 @@ begin
   refine (Condensed_product_iso_product _ _).symm,
 end
 
+@[simp, reassoc]
+lemma iso_on_the_right_neg_spec' (q : ℕ) (i : ulift.{u+1} (fin (BD.data.X (q+1)))) :
+  (iso_on_the_right_neg BD κ M ι hι q).inv ≫
+  CondensedSet_to_Condensed_Ab.map (pi.π _ i) =
+  CondensedSet_to_Condensed_Ab.map (Condensed_Ab_to_CondensedSet.map $ biproduct.π _ i) :=
+begin
+  dsimp [iso_on_the_right_neg], simp only [← functor.map_comp], congr' 1, ext S : 2,
+  dsimp, simp_rw [← functor.map_comp, ← nat_trans.comp_app, ← Sheaf.hom.comp_val, category.assoc],
+  erw Condensed_product_iso_product_spec,
+  erw Condensed_product_iso_biproduct_spec',
+  refl,
+end
+
+@[simp, reassoc]
+lemma iso_on_the_right_neg_spec (q : ℕ) (i : ulift.{u+1} (fin (BD.data.X (q+1)))) :
+  (iso_on_the_right_neg BD κ M ι hι q).hom ≫
+  CondensedSet_to_Condensed_Ab.map (Condensed_Ab_to_CondensedSet.map $ biproduct.π _ i) =
+  CondensedSet_to_Condensed_Ab.map (pi.π _ i) :=
+by { rw ← iso.eq_inv_comp, rw iso_on_the_right_neg_spec' }
+
 lemma iso_on_the_right_neg_conj (q : ℕ) :
   ((QprimeFP_sigma_proj BD κ M ι).f (-[1+q])) =
   (iso_on_the_left_neg _ _ _ _ hι q).hom ≫
   Condensed.coproduct_presentation_with_pow CondensedSet_to_Condensed_Ab M.to_CHFPNG
     (combine _ _ _ _) _ ≫ (iso_on_the_right_neg _ _ _ _ _ _).hom :=
-sorry
+begin
+  dsimp [QprimeFP_sigma_proj],
+  apply (is_colimit_of_preserves (homological_complex.eval _ _ (-[1+q]))
+    (colimit.is_colimit (discrete.functor $
+    λ (k : ulift.{u+1 0} ℕ), (QprimeFP_int.{u} r' BD.data κ M).obj (ι k)))).hom_ext,
+  rintros ⟨i⟩, dsimp, rw [← homological_complex.comp_f, colimit.ι_desc], dsimp,
+  slice_rhs 1 2 { erw iso_on_the_left_neg_spec_alt BD κ M ι hι q i },
+  dsimp [Condensed.coproduct_presentation_with_pow,
+    -CondensedSet_to_Condensed_Ab_map], simp only [category.assoc, colimit.ι_desc],
+  dsimp [-CondensedSet_to_Condensed_Ab_map],
+  dsimp [QprimeFP_incl, -CondensedSet_to_Condensed_Ab_map, iso_on_the_right_neg],
+  simp only [← functor.map_comp], congr' 1,
+  simp_rw ← category.assoc, rw [← iso.comp_inv_eq, iso.eq_comp_inv],
+  apply limit.hom_ext, intros j,
+  simp only [category.assoc, lim_map_π],
+  erw Condensed_product_iso_product_spec,
+  erw Condensed_product_iso_biproduct_spec',
+  erw profinite_pow_filtration_iso_spec_assoc,
+  ext S : 3,
+  dsimp [QprimeFP_incl_aux],
+  rw [← whisker_right_app, ← nat_trans.comp_app],
+  erw (is_limit_of_preserves.{u+1 u+1 u+1 u+1 u+2 u+2} (Condensed_Ab_to_CondensedSet.{u} ⋙
+    CondensedSet_to_presheaf.{u})
+    (biproduct.is_limit.{u+1 u+2} (λ (i : ulift.{u+1 0} (fin (BD.data.X (q+1)))),
+    M.to_Condensed))).fac,
+  ext, refl,
+end
 
 end ses_setup
 
