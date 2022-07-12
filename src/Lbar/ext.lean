@@ -3,7 +3,7 @@ import Lbar.iota
 
 noncomputable theory
 
-universes u
+universes v u
 
 open opposite category_theory category_theory.limits category_theory.preadditive
 open_locale nnreal zero_object
@@ -385,6 +385,46 @@ def pi_Ext_iso_Ext_sigma (i : ℤ) :
   (bounded_homotopy_category.is_colimit_cofan _).cocone_point_unique_up_to_iso
   (colimit.is_colimit _))
 
+-- move me
+@[simp] lemma _root_.category_theory.op_nsmul
+  {C : Type*} [category C] [preadditive C] {X Y : C} (n : ℕ) (f : X ⟶ Y) :
+  (n • f).op = n • f.op := rfl
+
+-- move me
+@[simp] lemma _root_.category_theory.op_sub
+  {C : Type*} [category C] [preadditive C] {X Y : C} (f g : X ⟶ Y) :
+  (f - g).op = f.op - g.op := rfl
+
+@[simp] lemma _root_.homological_complex.of_hom_sub
+  {C : Type*} [category C] [abelian C]
+  (X Y : homological_complex C (complex_shape.up ℤ)) (f g : X ⟶ Y)
+  [((homotopy_category.quotient C (complex_shape.up ℤ)).obj X).is_bounded_above]
+  [((homotopy_category.quotient C (complex_shape.up ℤ)).obj Y).is_bounded_above] :
+  of_hom (f - g) = of_hom f - of_hom g := rfl
+
+@[reassoc]
+lemma Ext_coproduct_iso_naturality_inv
+  (A : Type u)
+  [category.{v} A]
+  [abelian A]
+  [enough_projectives A]
+  [has_coproducts A]
+  [AB4 A]
+  {α : Type v}
+  (X₁ X₂ : α → bounded_homotopy_category A)
+  [uniformly_bounded X₁]
+  [uniformly_bounded X₂]
+  (g : X₁ ⟶ X₂)
+  (i : ℤ) (Y) :
+  (Ext_coproduct_iso _ _ _).inv ≫
+  ((Ext i).map (sigma.desc (λ b, g b ≫ sigma.ι X₂ b) : ∐ X₁ ⟶ ∐ X₂).op).app Y =
+  pi.lift (λ b, pi.π _ b ≫ ((Ext i).map (g b).op).app Y) ≫ (Ext_coproduct_iso _ _ _).inv :=
+begin
+  rw [iso.inv_comp_eq, ← category.assoc, iso.eq_comp_inv],
+  apply Ext_coproduct_iso_naturality,
+end
+
+
 lemma Tinv2_iso_of_bicartesian_aux [normed_with_aut r V]
   [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]
   (i : ℤ)
@@ -400,11 +440,26 @@ lemma Tinv2_iso_of_bicartesian_aux [normed_with_aut r V]
   ((single _ 0).map (Condensed.of_top_ab_map (normed_group_hom.to_add_monoid_hom (normed_with_aut.T.inv : V ⟶ V)) (normed_group_hom.continuous _)))
   i).bicartesian :=
 begin
+  have h1 := _, have h2 := _, have h3 := _,
   refine commsq.bicartesian.of_iso
     (pi_Ext_iso_Ext_sigma _ _ _ _ _ _) (pi_Ext_iso_Ext_sigma _ _ _ _ _ _)
     (pi_Ext_iso_Ext_sigma _ _ _ _ _ _) (pi_Ext_iso_Ext_sigma _ _ _ _ _ _)
-    _ _ _ _ H1;
-  sorry
+    h1 h2 h2 h3 H1,
+  { apply commsq.of_eq,
+    dsimp only [shift_sub_id, QprimeFP.shift_sub_id],
+    simp only [sub_comp, comp_sub, homological_complex.of_hom_sub, category_theory.op_sub,
+      functor.map_sub, op_id, category_theory.functor.map_id, of_hom_id,
+      nat_trans.app_sub, nat_trans.id_app, category.comp_id, category.id_comp],
+    apply congr_arg2 _ _ rfl,
+    dsimp only [pi_Ext_iso_Ext_sigma, iso.trans_hom, iso.symm_hom, functor.map_iso_hom,
+      iso.op_hom, op_comp],
+    simp only [functor.map_comp, category.assoc],
+    --erw Ext_coproduct_iso_naturality_inv_assoc,
+    sorry
+
+  },
+  { sorry },
+  { sorry },
 end
 
 def sufficiently_increasing
@@ -481,16 +536,6 @@ def Tinv_sub (S : Profinite.{u}) (V : SemiNormedGroup.{u}) [normed_with_aut r V]
 ((Ext' i).map ((condensify_Tinv _).app S).op).app _ -
 ((Ext' i).obj _).map (Condensed.of_top_ab_map (normed_with_aut.T.inv).to_add_monoid_hom
   (normed_group_hom.continuous _))
-
--- move me
-@[simp] lemma _root_.category_theory.op_nsmul
-  {C : Type*} [category C] [preadditive C] {X Y : C} (n : ℕ) (f : X ⟶ Y) :
-  (n • f).op = n • f.op := rfl
-
--- move me
-@[simp] lemma _root_.category_theory.op_sub
-  {C : Type*} [category C] [preadditive C] {X Y : C} (f g : X ⟶ Y) :
-  (f - g).op = f.op - g.op := rfl
 
 -- move me
 attribute [simps] Condensed.of_top_ab_map
