@@ -248,14 +248,6 @@ begin
     { exact auux sq2' }, },
 end
 
-def cofan_point_iso_colimit {α : Type (u+1)}
-  (X : α → bounded_homotopy_category (Condensed.{u} Ab.{u+1}))
-  [bounded_homotopy_category.uniformly_bounded X] :
-  (bounded_homotopy_category.cofan X).X ≅
-  ∐ X :=
-(bounded_homotopy_category.is_colimit_cofan X).cocone_point_unique_up_to_iso
-  (colimit.is_colimit _)
-
 lemma cofan_point_iso_colimit_conj_eq_desc
   {e : (homotopy_category.colimit_cofan
      (λ (a : ulift ℕ), ((λ (k : ulift ℕ),
@@ -343,29 +335,6 @@ begin
   refine _ ≫ sigma.ι _ (ulift.up $ ulift.down i + 1),
   refine e _,
 end
-
-@[reassoc]
-lemma Ext_coproduct_iso_naturality_shift
-  (A : Type u)
-  [category.{v} A]
-  [abelian A]
-  [enough_projectives A]
-  [has_coproducts A]
-  [AB4 A]
-  (X : ulift.{v} ℕ → bounded_homotopy_category A)
-  [uniformly_bounded X]
-  (e : X ⟶ (λ i, X (ulift.up $ ulift.down i + 1)))
-  (i : ℤ) (Y) :
-  ((Ext i).map (coproduct_shift _ X e).op).app Y ≫
-  (Ext_coproduct_iso X _ _).hom =
-  (Ext_coproduct_iso _ _ _).hom ≫
-  pi.lift (λ j, pi.π _ (ulift.up (ulift.down j + 1)) ≫
-    ((Ext i).map (e _).op).app Y) :=
-begin
-  sorry
-end
-
-
 
 lemma Tinv2_iso_of_bicartesian_aux [normed_with_aut r V]
   [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]

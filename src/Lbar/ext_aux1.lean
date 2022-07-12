@@ -2,7 +2,7 @@ import Lbar.ext_preamble
 
 noncomputable theory
 
-universes u
+universes u v
 
 open opposite category_theory category_theory.limits
 open_locale nnreal zero_object
@@ -225,3 +225,82 @@ begin
 end
 
 attribute [reassoc] Ext_compute_with_acyclic_naturality
+
+def cofan_point_iso_colimit {α : Type (u+1)}
+  (X : α → bounded_homotopy_category (Condensed.{u} Ab.{u+1}))
+  [bounded_homotopy_category.uniformly_bounded X] :
+  (bounded_homotopy_category.cofan X).X ≅
+  ∐ X :=
+(bounded_homotopy_category.is_colimit_cofan X).cocone_point_unique_up_to_iso
+  (colimit.is_colimit _)
+
+variables (ι : ulift.{u+1} ℕ → ℝ≥0) (hι : monotone ι)
+
+instance sigma_Qprime_int_bounded_above :
+  ((homotopy_category.quotient (Condensed Ab) (complex_shape.up ℤ)).obj
+    (∐ λ (k : ulift ℕ), (QprimeFP_int r' BD κ M).obj (ι k))).is_bounded_above :=
+begin
+  refine ⟨⟨1, _⟩⟩,
+  intros a ha,
+  refine is_zero.of_iso _ (homotopy_category.coproduct_iso _ _),
+  apply category_theory.is_zero_colimit,
+  intro,
+  exact chain_complex.bounded_by_one _ _ ha,
+end
+.
+
+def coproduct_shift (A : Type u)
+  [category.{v} A]
+  [abelian A]
+  [enough_projectives A]
+  [has_coproducts A]
+  [AB4 A]
+  (X : ulift.{v} ℕ → bounded_homotopy_category A)
+  [uniformly_bounded X]
+  (e : X ⟶ (λ i, X (ulift.up $ ulift.down i + 1))) :
+  ∐ X ⟶ ∐ X :=
+begin
+  apply sigma.desc,
+  intros i,
+  refine _ ≫ sigma.ι _ (ulift.up $ ulift.down i + 1),
+  refine e _,
+end
+
+
+@[reassoc]
+lemma Ext_coproduct_iso_naturality_shift
+  (A : Type u)
+  [category.{v} A]
+  [abelian A]
+  [enough_projectives A]
+  [has_coproducts A]
+  [AB4 A]
+  (X : ulift.{v} ℕ → bounded_homotopy_category A)
+  [uniformly_bounded X]
+  (e : X ⟶ (λ i, X (ulift.up $ ulift.down i + 1)))
+  (i : ℤ) (Y) :
+  ((Ext i).map (coproduct_shift _ X e).op).app Y ≫
+  (Ext_coproduct_iso X _ _).hom =
+  (Ext_coproduct_iso _ _ _).hom ≫
+  pi.lift (λ j, pi.π _ (ulift.up (ulift.down j + 1)) ≫
+    ((Ext i).map (e _).op).app Y) :=
+begin
+  dsimp only [Ext_coproduct_iso, Ext, Ext0, Ext_iso, functor.comp_map, whiskering_left,
+    whisker_left, iso.trans_hom, functor.map_iso, preadditive_yoneda_coproduct_iso,
+    functor.flip, pi_iso, as_iso, preadditive_yoneda_coproduct_to_product],
+  simp only [category.assoc],
+  simp only [quiver.hom.unop_op, iso.op_hom, replacement_iso_hom, iso.op_inv,
+    replacement_iso_inv, iso.symm_mk],
+  apply limit.hom_ext,
+  intros j,
+  simp only [category.assoc, limit.lift_π, fan.mk_π_app, limit.lift_π_assoc],
+  simp only [← functor.map_comp, ← op_comp],
+  congr' 2,
+  simp only [category.assoc],
+  apply lift_ext (∐ X).π, swap, apply_instance,
+  dsimp [quiver.hom.unop_op],
+  simp only [category.assoc, lift_lifts, lift_lifts_assoc],
+  dsimp [uniform_π, coproduct_shift],
+  simp only [colimit.ι_desc_assoc, cofan.mk_ι_app, category.assoc, colimit.ι_desc,
+    lift_lifts_assoc],
+end
