@@ -836,13 +836,52 @@ begin
   rw [← category.assoc, ← iso.eq_comp_inv, iso_on_the_left_zero_spec'],
 end
 
+@[simp, reassoc]
+lemma iso_on_the_left_zero_spec_alt (k : ℕ) :
+  (sigma.ι (λ (k : ulift.{u+1 0} ℕ), (QprimeFP_int.{u} r' BD.data κ M).obj (ι k)) ⟨k⟩).f 0 ≫
+  (iso_on_the_left_zero _ _ _ _ _).hom =
+  CondensedSet_to_Condensed_Ab.map (profinite_pow_filtration_iso M
+    (BD.data.X 0) (κ (ι ⟨k⟩) 0)).hom ≫
+  sigma.ι (λ (i : as_small.{u+1 0 0} ℕ), CondensedSet_to_Condensed_Ab.{u}.obj
+    (∏ λ (j : ulift.{u+1 0} (fin (BD.data.X 0))),
+    (Condensed.as_nat_diagram.{u} M.to_CHFPNG (combine.{u} κ ι hι 0)).obj i))
+    ⟨k⟩ :=
+begin
+  rw [← functor.map_iso_hom, ← iso.inv_comp_eq,
+    functor.map_iso_inv, iso_on_the_left_zero_spec],
+end
+
 lemma iso_on_the_left_zero_conj :
   ((QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD.data κ M)).f 0) =
   (iso_on_the_left_zero _ _ _ _ hι).hom ≫
   (Condensed.coproduct_to_coproduct (Condensed.as_nat_diagram_pow M.to_CHFPNG
     (combine κ ι hι 0) _ ⋙ _) - 𝟙 _) ≫ (iso_on_the_left_zero _ _ _ _ hι).inv :=
 begin
-  sorry
+  dsimp [QprimeFP.shift_sub_id],
+  simp only [comp_sub, sub_comp, category.id_comp, iso.hom_inv_id,
+    category.assoc], congr' 1,
+  apply (is_colimit_of_preserves (homological_complex.eval _ _ _)
+    (colimit.is_colimit _)).hom_ext, swap, apply_instance,
+  rintros ⟨j⟩, dsimp,
+  erw [← homological_complex.comp_f, colimit.ι_desc],
+  dsimp [sigma_shift_cone],
+  rw iso_on_the_left_zero_spec_alt_assoc,
+  erw colimit.ι_desc_assoc, dsimp,
+  simp only [category.assoc],
+  slice_rhs 3 4
+  { erw iso_on_the_left_zero_spec' },
+  simp only [← category.assoc],
+  congr' 1,
+  dsimp [CondensedSet_to_Condensed_Ab],
+  simp only [← functor.map_comp],
+  dsimp [QprimeFP_int, QprimeFP_nat, FreeAb.eval, functor.map_FreeAb,
+    FPsystem, FPsystem.X, FreeAb.of_functor],
+  rw free_abelian_group.lift.of, dsimp,
+  congr' 1,
+  ext S : 2,
+  dsimp,
+  simp only [← functor.map_comp], congr' 1,
+  sorry, -- this is doable... I'm just running out of laptop battery!
 end
 
 def iso_on_the_left_neg₀ (q : ℕ) :
