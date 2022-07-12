@@ -121,5 +121,31 @@ add_equiv.to_AddCommGroup_iso $
     refl,
   end }
 
+@[reassoc]
+lemma preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab_natural
+  {M₁ M₂ : Condensed.{u} Ab.{u+1}} (f : M₁ ⟶ M₂) (X : Profinite) :
+  (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab M₁ X).hom ≫ f.val.app _ =
+  (preadditive_yoneda.map f).app _ ≫
+  (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab M₂ X).hom :=
+by { ext, refl }
+
+lemma preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab_natural'
+  (M : Condensed.{u} Ab.{u+1}) {X Y : Profinite.{u}} (f : X ⟶ Y) :
+  (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab M Y).hom ≫ M.val.map f.op =
+  (preadditive_yoneda.obj M).map (CondensedSet_to_Condensed_Ab.map $
+    Profinite_to_Condensed.map f).op ≫
+  (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab M X).hom :=
+begin
+  ext t,
+  rw comp_apply,
+  rw comp_apply,
+  dsimp [preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab, adjunction.whisker_right],
+  simp only [← nat_trans.comp_app],
+  rw ← grothendieck_topology.to_sheafify_naturality_assoc,
+  dsimp [functor.right_unitor],
+  simp only [← comp_apply, category.assoc, ← nat_trans.comp_app, ← nat_trans.comp_app_assoc],
+  simp only [← nat_trans.naturality, functor.comp_map, category.assoc],
+  refl,
 end
 
+end
