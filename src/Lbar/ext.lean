@@ -3,7 +3,7 @@ import Lbar.iota
 
 noncomputable theory
 
-universes v u
+universes v u u'
 
 open opposite category_theory category_theory.limits category_theory.preadditive
 open_locale nnreal zero_object
@@ -436,7 +436,7 @@ def condensify_iso_extend' :
 
 section move_me
 
-universes v u'
+--universes u'
 
 open Profinite
 
