@@ -64,7 +64,12 @@ begin
   simp only [continuous_map.comp_apply],
   apply uniform_space.completion.induction_on t; clear t,
   { refine is_closed_eq _ _,
-    { sorry },
+    { have h1 : continuous (λ q : C(X,V), q x) := continuous_map.continuous_eval_const.{u u} x,
+      have h2 : continuous (uniform_space.completion.extension.{u u}
+        locally_constant.to_continuous_map.{u u}) := uniform_space.completion.continuous_extension,
+      have h3 := (locally_constant.comap_hom.{u u u} f f.continuous).completion.continuous,
+      refine (h1.comp h2).comp h3,
+      apply_instance },
     { let t := _, change continuous t,
       have ht : t = _ ∘ uniform_space.completion.extension
         (locally_constant.to_continuous_map.{u u}),
@@ -151,6 +156,9 @@ end
 
 attribute [reassoc] Ext_compute_with_acyclic_naturality
 
+lemma QprimeFP_map (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) :
+  (QprimeFP r' BD κ M).map h = of'_hom ((QprimeFP_int r' BD κ _).map h) := rfl
+
 def ExtQprime_iso_aux_system (n : ℕ) :
   (QprimeFP r' BD κ M).op ⋙ (Ext n).flip.obj ((single _ 0).obj V.to_Cond) ≅
   aux_system r' BD ⟨M⟩ (SemiNormedGroup.ulift.{u+1}.obj V) κ ⋙
@@ -158,9 +166,20 @@ def ExtQprime_iso_aux_system (n : ℕ) :
 nat_iso.of_components (λ c, ExtQprime_iso_aux_system_obj r' BD κ M V (unop c) n)
 begin
   intros c₁ c₂ h,
+  --dsimp only [functor.comp_map, ExtQprime_iso_aux_system_obj, iso.trans_hom, id,
+  --  functor.map_iso_hom],
+  --erw Ext_compute_with_acyclic_naturality_assoc,
+
   dsimp only [ExtQprime_iso_aux_system_obj, iso.trans_hom],
   rw [functor.comp_map],
-  -- rw [Ext_compute_with_acyclic_naturality_assoc],
+  dsimp only [functor.op_map],
+  rw QprimeFP_map,
+  rw Ext_compute_with_acyclic_naturality_assoc,
+  simp only [category.assoc],
+  refine congr_arg2 _ rfl _,
+  dsimp only [id, iso.trans_hom, functor.comp_map, functor.op_map, quiver.hom.unop_op,
+    functor.right_op_map],
+
   sorry
 end
 
