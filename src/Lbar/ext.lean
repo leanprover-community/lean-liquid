@@ -64,12 +64,17 @@ begin
   simp only [continuous_map.comp_apply],
   apply uniform_space.completion.induction_on t; clear t,
   { refine is_closed_eq _ _,
-    { sorry
-    --   dsimp,
-    -- change : continuous (())
-    --   apply uniform_space.completion.continuous_extension
-       },
-    { sorry } },
+    { sorry },
+    { let t := _, change continuous t,
+      have ht : t = _ ∘ uniform_space.completion.extension
+        (locally_constant.to_continuous_map.{u u}),
+      rotate 2,
+      { intros q, exact q (f x) },
+      { refl },
+      rw ht, clear ht t,
+      apply continuous.comp,
+      exact continuous_map.continuous_eval_const.{u u} (f x),
+      exact uniform_space.completion.continuous_extension.{u u} } },
   { intros a,
     simp only [normed_group_hom.completion_coe,
       locally_constant.comap_hom_apply, quiver.hom.unop_op],
