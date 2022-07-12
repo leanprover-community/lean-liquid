@@ -58,11 +58,18 @@ begin
   ext1 t, dsimp [forget₂, has_forget₂.forget₂,
     LCC_iso_Cond_of_top_ab, LCC_iso_Cond_of_top_ab_add_equiv] at t ⊢,
   simp only [comp_apply, normed_group_hom.coe_to_add_monoid_hom,
-    normed_group_hom.completion_coe_to_fun,
     add_equiv.coe_to_add_monoid_hom, add_equiv.coe_mk],
-  dsimp [Condensed.of_top_ab.presheaf],
+  dsimp only [Condensed.of_top_ab.presheaf, add_monoid_hom.mk'_apply],
   ext x,
   simp only [continuous_map.comp_apply],
+  apply uniform_space.completion.induction_on t; clear t,
+  { refine is_closed_eq _ _,
+    { sorry
+    --   dsimp,
+    -- change : continuous (())
+    --   apply uniform_space.completion.continuous_extension
+       },
+    { sorry } },
   sorry
 end
 
