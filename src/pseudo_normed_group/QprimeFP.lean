@@ -851,6 +851,52 @@ begin
     functor.map_iso_inv, iso_on_the_left_zero_spec],
 end
 
+def pseudo_normed_group.map_filtration (M : Type*) [profinitely_filtered_pseudo_normed_group M]
+  (a b : ℝ≥0) (h : a ≤ b) :
+  pseudo_normed_group.filtration_obj M a ⟶ pseudo_normed_group.filtration_obj M b :=
+{ to_fun := pseudo_normed_group.cast_le' h,
+  continuous_to_fun := begin
+    haveI : fact (a ≤ b) := ⟨h⟩,
+    apply comphaus_filtered_pseudo_normed_group.continuous_cast_le,
+  end }
+
+lemma pow_filtration_hom_ext {T : Profinite.{u}} (j : ℕ) (r : ℝ≥0)
+  (f g : T ⟶ pseudo_normed_group.filtration_obj (M^j) r)
+  (h : ∀ k, f ≫ filtration_pow_proj M j r k = g ≫ filtration_pow_proj M j r k) : f = g :=
+begin
+  ext t x,
+  specialize h x,
+  apply_fun (λ e, (e t).1) at h,
+  exact h,
+end
+
+lemma iso_on_the_left_zero_conj_aux (j : ℕ) :
+  ((profinite_pow_filtration_iso.{u} M (BD.data.X 0) (κ (ι {down := j}) 0)).hom ≫
+    (Condensed.as_nat_diagram_pow.{u} M.to_CHFPNG (combine.{u} κ ι hι 0) (BD.data.X 0)).map
+    (as_small.up.{0 0 u+1}.map (hom_of_le.{0} (nat.le_succ _)))) ≫
+  (profinite_pow_filtration_iso.{u} M (BD.data.X 0) (κ (ι {down := j + 1}) 0)).inv =
+  Profinite_to_Condensed.map (pseudo_normed_group.map_filtration _ _ _
+    (fact.out (monotone (function.swap κ 0)) (hι $ by { exact_mod_cast j.le_succ }))) :=
+begin
+  rw iso.comp_inv_eq,
+  apply limit.hom_ext, intros k,
+  dsimp [Condensed.as_nat_diagram_pow, pow_functor], simp only [category.assoc],
+  erw profinite_pow_filtration_iso_spec,
+  simp only [lim_map_π, discrete.nat_trans_app],
+  erw profinite_pow_filtration_iso_spec_assoc,
+  dsimp [Condensed.as_nat_diagram, restrict_diagram,
+    CompHausFiltPseuNormGrp.level_Condensed_diagram,
+    CompHausFiltPseuNormGrp.level_Condensed_diagram'],
+  rw ← Profinite_to_Condensed.map_comp,
+  have h : κ (ι ⟨j⟩) 0 ≤ κ (ι ⟨j+1⟩) 0,
+  { apply fact.out (monotone (function.swap κ 0)),
+    apply hι,
+    exact_mod_cast j.le_succ },
+  change _ ≫ Profinite_to_Condensed.map (pseudo_normed_group.map_filtration M _ _ h) = _,
+  rw ← Profinite_to_Condensed.map_comp,
+  congr' 1,
+end
+
 lemma iso_on_the_left_zero_conj :
   ((QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD.data κ M)).f 0) =
   (iso_on_the_left_zero _ _ _ _ hι).hom ≫
@@ -881,7 +927,9 @@ begin
   ext S : 2,
   dsimp,
   simp only [← functor.map_comp], congr' 1,
-  sorry, -- this is doable... I'm just running out of laptop battery!
+  simp only [← nat_trans.comp_app, ← Sheaf.hom.comp_val],
+  rw iso_on_the_left_zero_conj_aux,
+  ext, refl,
 end
 
 def iso_on_the_left_neg₀ (q : ℕ) :
