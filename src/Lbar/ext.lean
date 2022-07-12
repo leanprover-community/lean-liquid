@@ -55,7 +55,7 @@ begin
   simp only [category.assoc],
   refine congr_arg2 _ rfl _,
   dsimp only [id, iso.trans_hom, functor.comp_map, functor.op_map, quiver.hom.unop_op,
-    functor.right_op_map],
+    functor.right_op_map, functor.map_iso_hom, iso.unop_hom],
 
   sorry
 end
