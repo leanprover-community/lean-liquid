@@ -248,6 +248,32 @@ begin
     { exact auux sq2' }, },
 end
 
+def cofan_point_iso_colimit {α : Type (u+1)}
+  (X : α → bounded_homotopy_category (Condensed.{u} Ab.{u+1}))
+  [bounded_homotopy_category.uniformly_bounded X] :
+  (bounded_homotopy_category.cofan X).X ≅
+  ∐ X :=
+(bounded_homotopy_category.is_colimit_cofan X).cocone_point_unique_up_to_iso
+  (colimit.is_colimit _)
+
+lemma cofan_point_iso_colimit_conj_eq_desc
+  {e : (homotopy_category.colimit_cofan
+     (λ (a : ulift ℕ), ((λ (k : ulift ℕ),
+     (QprimeFP r' BD.data κ₂ M).obj (ι k)) a).val)).X.is_bounded_above} :
+  (cofan_point_iso_colimit
+    (λ (k : ulift ℕ), (QprimeFP r' BD.data κ₂ M).obj (ι k))).inv ≫
+  of_hom (sigma_shift ι hι (QprimeFP_int r' BD.data κ₂ M)) ≫
+    (cofan_point_iso_colimit (λ (k : ulift ℕ),
+    (QprimeFP r' BD.data κ₂ M).obj (ι k))).hom =
+  begin
+    apply sigma.desc,
+    intros k,
+    refine _ ≫ sigma.ι _ (ulift.up $ ulift.down k + 1),
+    refine (QprimeFP r' BD.data κ₂ M).map _,
+    refine hom_of_le (hι _),
+    exact_mod_cast k.down.le_succ,
+  end := sorry
+
 def pi_Ext_iso_Ext_sigma (i : ℤ) :
   (∏ λ (k : ulift ℕ), ((QprimeFP r' BD.data κ₂ M).op ⋙
     (Ext i).flip.obj ((single (Condensed Ab) 0).obj V.to_Cond)).obj (op (ι k))) ≅
@@ -257,10 +283,10 @@ def pi_Ext_iso_Ext_sigma (i : ℤ) :
   (λ k : ulift ℕ, (QprimeFP r' BD.data κ₂ M).obj (ι k)) i
   ((single (Condensed Ab) 0).obj V.to_Cond)).symm ≪≫
   ((Ext i).flip.obj ((single (Condensed Ab) 0).obj V.to_Cond)).map_iso
-(iso.op $
-  (by exact iso.refl _ ) ≪≫
-  (bounded_homotopy_category.is_colimit_cofan _).cocone_point_unique_up_to_iso
-  (colimit.is_colimit _))
+begin
+  refine iso.op (cofan_point_iso_colimit
+    (λ (k : ulift ℕ), (QprimeFP r' BD.data κ₂ M).obj (ι k)))
+end
 
 -- move me
 @[simp] lemma _root_.category_theory.op_nsmul
@@ -301,6 +327,45 @@ begin
   apply Ext_coproduct_iso_naturality,
 end
 
+def coproduct_shift (A : Type u)
+  [category.{v} A]
+  [abelian A]
+  [enough_projectives A]
+  [has_coproducts A]
+  [AB4 A]
+  (X : ulift.{v} ℕ → bounded_homotopy_category A)
+  [uniformly_bounded X]
+  (e : X ⟶ (λ i, X (ulift.up $ ulift.down i + 1))) :
+  ∐ X ⟶ ∐ X :=
+begin
+  apply sigma.desc,
+  intros i,
+  refine _ ≫ sigma.ι _ (ulift.up $ ulift.down i + 1),
+  refine e _,
+end
+
+@[reassoc]
+lemma Ext_coproduct_iso_naturality_shift
+  (A : Type u)
+  [category.{v} A]
+  [abelian A]
+  [enough_projectives A]
+  [has_coproducts A]
+  [AB4 A]
+  (X : ulift.{v} ℕ → bounded_homotopy_category A)
+  [uniformly_bounded X]
+  (e : X ⟶ (λ i, X (ulift.up $ ulift.down i + 1)))
+  (i : ℤ) (Y) :
+  ((Ext i).map (coproduct_shift _ X e).op).app Y ≫
+  (Ext_coproduct_iso X _ _).hom =
+  (Ext_coproduct_iso _ _ _).hom ≫
+  pi.lift (λ j, pi.π _ (ulift.up (ulift.down j + 1)) ≫
+    ((Ext i).map (e _).op).app Y) :=
+begin
+  sorry
+end
+
+
 
 lemma Tinv2_iso_of_bicartesian_aux [normed_with_aut r V]
   [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]
@@ -322,21 +387,52 @@ begin
     (pi_Ext_iso_Ext_sigma _ _ _ _ _ _) (pi_Ext_iso_Ext_sigma _ _ _ _ _ _)
     (pi_Ext_iso_Ext_sigma _ _ _ _ _ _) (pi_Ext_iso_Ext_sigma _ _ _ _ _ _)
     h1 h2 h2 h3 H1,
-  { apply commsq.of_eq,
+  sorry { apply commsq.of_eq,
     dsimp only [shift_sub_id, QprimeFP.shift_sub_id],
     simp only [sub_comp, comp_sub, homological_complex.of_hom_sub, category_theory.op_sub,
       functor.map_sub, op_id, category_theory.functor.map_id, of_hom_id,
       nat_trans.app_sub, nat_trans.id_app, category.comp_id, category.id_comp],
     apply congr_arg2 _ _ rfl,
-    dsimp only [pi_Ext_iso_Ext_sigma, iso.trans_hom, iso.symm_hom, functor.map_iso_hom,
-      iso.op_hom, op_comp],
-    simp only [functor.map_comp, category.assoc],
-    --erw Ext_coproduct_iso_naturality_inv_assoc,
-    sorry
+    rw ← iso.eq_comp_inv,
+    dsimp only [pi_Ext_iso_Ext_sigma, iso.trans_hom, iso.trans_inv,
+      iso.symm_hom, iso.symm_inv, functor.map_iso_hom,
+      iso.op_hom, op_comp, functor.flip_obj_map, functor.map_iso_inv],
+    simp only [category.assoc, ← nat_trans.comp_app_assoc, ← functor.map_comp_assoc,
+      ← functor.map_comp, iso.op_inv, ← op_comp],
+    rw cofan_point_iso_colimit_conj_eq_desc,
+    rw iso.eq_inv_comp,
+    have := Ext_coproduct_iso_naturality_shift _
+      (λ (k : ulift ℕ), (QprimeFP r' BD.data κ₂ M).obj (ι k))
+      (λ k, (QprimeFP r' BD.data κ₂ M).map (hom_of_le $ hι $
+        by exact_mod_cast k.down.le_succ)) i ((single (Condensed Ab) 0).obj V.to_Cond),
+    exact this.symm,
+    sorry,
 
   },
   { sorry },
-  { sorry },
+  sorry { apply commsq.of_eq,
+    dsimp only [shift_sub_id, QprimeFP.shift_sub_id],
+    simp only [sub_comp, comp_sub, homological_complex.of_hom_sub, category_theory.op_sub,
+      functor.map_sub, op_id, category_theory.functor.map_id, of_hom_id,
+      nat_trans.app_sub, nat_trans.id_app, category.comp_id, category.id_comp],
+    apply congr_arg2 _ _ rfl,
+    rw ← iso.eq_comp_inv,
+    dsimp only [pi_Ext_iso_Ext_sigma, iso.trans_hom, iso.trans_inv,
+      iso.symm_hom, iso.symm_inv, functor.map_iso_hom,
+      iso.op_hom, op_comp, functor.flip_obj_map, functor.map_iso_inv],
+    simp only [category.assoc, ← nat_trans.comp_app_assoc, ← functor.map_comp_assoc,
+      ← functor.map_comp, iso.op_inv, ← op_comp],
+    rw cofan_point_iso_colimit_conj_eq_desc,
+    rw iso.eq_inv_comp,
+
+    have := Ext_coproduct_iso_naturality_shift _
+      (λ (k : ulift ℕ), (QprimeFP r' BD.data κ M).obj (ι k))
+      (λ k, (QprimeFP r' BD.data κ M).map (hom_of_le $ hι $
+        by exact_mod_cast k.down.le_succ)) i ((single (Condensed Ab) 0).obj V.to_Cond),
+
+    exact this.symm,
+
+    sorry }
 end
 
 def sufficiently_increasing
