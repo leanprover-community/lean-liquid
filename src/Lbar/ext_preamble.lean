@@ -129,6 +129,7 @@ lemma preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab_natural
   (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab M₂ X).hom :=
 by { ext, refl }
 
+@[reassoc]
 lemma preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab_natural'
   (M : Condensed.{u} Ab.{u+1}) {X Y : Profinite.{u}} (f : X ⟶ Y) :
   (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab M Y).hom ≫ M.val.map f.op =

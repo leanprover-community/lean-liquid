@@ -45,6 +45,27 @@ begin
   ext1 f, cases X, cases Y, exact hη f,
 end
 
+lemma ExtQprime_iso_aux_system_obj_aux_aux (X Y : Profinite.{u}) (f : X ⟶ Y) :
+  (LCC_iso_Cond_of_top_ab.{u} V).inv.app (op.{u+2} Y) ≫
+  (forget₂.{u+1 u+1 u u u} SemiNormedGroup.{u} Ab.{u}).map
+    (SemiNormedGroup.Completion.{u}.map
+    ((SemiNormedGroup.LocallyConstant.{u u}.obj V).map f.op)) =
+  (Condensed.of_top_ab.presheaf _).map f.op ≫
+  (LCC_iso_Cond_of_top_ab V).inv.app (op X) :=
+begin
+  simp only [← nat_iso.app_inv, iso.inv_comp_eq],
+  simp only [← category.assoc, iso.eq_comp_inv],
+  ext1 t, dsimp [forget₂, has_forget₂.forget₂,
+    LCC_iso_Cond_of_top_ab, LCC_iso_Cond_of_top_ab_add_equiv] at t ⊢,
+  simp only [comp_apply, normed_group_hom.coe_to_add_monoid_hom,
+    normed_group_hom.completion_coe_to_fun,
+    add_equiv.coe_to_add_monoid_hom, add_equiv.coe_mk],
+  dsimp [Condensed.of_top_ab.presheaf],
+  ext x,
+  simp only [continuous_map.comp_apply],
+  sorry
+end
+
 def ExtQprime_iso_aux_system_obj_aux :
   ((CLC (SemiNormedGroup.ulift.{u+1}.obj V)).right_op.map_FreeAb ⋙
          FreeAb.eval SemiNormedGroupᵒᵖ) ⋙
@@ -67,10 +88,15 @@ begin
       FreeAb.eval, functor.map_FreeAb, FreeAb.of_functor],
     simp only [category.assoc, ← op_comp], congr' 1,
     simp only [free_abelian_group.map_of_apply, free_abelian_group.lift.of, id.def,
-      functor.right_op_map],
-    -- rw preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab_natural_assoc,
-    -- refine congr_arg2 _ rfl _,
-    sorry }
+      functor.right_op_map, quiver.hom.unop_op],
+    erw ← preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab_natural'_assoc,
+    congr' 1,
+    dsimp [Condensed_LCC_iso_of_top_ab],
+    erw ExtQprime_iso_aux_system_obj_aux'_natural,
+    simp only [← category.assoc], congr' 1,
+    rw ← Ab.ulift.map_comp,
+    rw ExtQprime_iso_aux_system_obj_aux_aux,
+    ext, refl }
 end
 
 -- this needs to be functorial in `c`

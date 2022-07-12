@@ -51,18 +51,18 @@ begin
   { intros x y, apply normed_group_hom.map_add, }
 end
 
--- jmc: is this helpful??
--- @[reassoc]
--- lemma ExtQprime_iso_aux_system_obj_aux'_natural (X Y : Profinite.{u}) (f : X ⟶ Y) :
---   (ExtQprime_iso_aux_system_obj_aux' V Y).hom ≫
---     (forget₂ _ _).map (SemiNormedGroup.Completion.map ((SemiNormedGroup.LocallyConstant.obj _).map f.op)) =
---     Ab.ulift.map ((forget₂ _ _).map (SemiNormedGroup.Completion.map ((SemiNormedGroup.LocallyConstant.obj _).map f.op))) ≫
---  (ExtQprime_iso_aux_system_obj_aux' V X).hom :=
--- begin
---   ext1 φ, simp only [comp_apply],
---   dsimp only [ExtQprime_iso_aux_system_obj_aux', add_equiv.to_AddCommGroup_iso,
---     add_equiv.trans_apply, add_equiv.coe_to_add_monoid_hom, add_equiv.coe_mk,
---     Ab.ulift_map_apply],
---   admit
--- end
+--jmc: is this helpful??
+@[reassoc]
+lemma ExtQprime_iso_aux_system_obj_aux'_natural (X Y : Profinite.{u}) (f : X ⟶ Y) :
+  (ExtQprime_iso_aux_system_obj_aux' V Y).hom ≫
+    (forget₂ _ _).map (SemiNormedGroup.Completion.map ((SemiNormedGroup.LocallyConstant.obj _).map f.op)) =
+    Ab.ulift.map ((forget₂ _ _).map (SemiNormedGroup.Completion.map ((SemiNormedGroup.LocallyConstant.obj _).map f.op))) ≫
+ (ExtQprime_iso_aux_system_obj_aux' V X).hom :=
+begin
+  ext1 φ, simp only [comp_apply],
+  dsimp only [ExtQprime_iso_aux_system_obj_aux', add_equiv.to_AddCommGroup_iso,
+    add_equiv.trans_apply, add_equiv.coe_to_add_monoid_hom, add_equiv.coe_mk,
+    Ab.ulift_map_apply],
+  sorry
+end
 .
