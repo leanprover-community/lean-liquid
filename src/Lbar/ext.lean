@@ -1,4 +1,5 @@
 import Lbar.ext_aux1
+import Lbar.iota
 
 noncomputable theory
 
@@ -618,67 +619,6 @@ begin
   rw [iso.app_hom, functor.map_iso_hom, sub_comp, comp_sub, nat_trans.naturality,
       ← nat_trans.comp_app, ← nat_trans.comp_app, ← functor.map_comp, ← functor.map_comp,
       iso.op_hom, ← op_comp, ← op_comp, h],
-end
-
-noncomputable
-def ι' : ℕ → ℝ≥0
-| 0 := max
-        (c₀ r r' eg (λ (n : ℕ), eg.κ r r' n) (eg.κ' r r') (i + 1) ⟨ℤ⟩)
-        (c₀ r r' eg (λ (n : ℕ), eg.κ r r' n) (eg.κ' r r') (i + 1 + 1) ⟨ℤ⟩)
-| (j+1) := max
-        (ι' j)
-        (max
-          (max
-            (k (eg.κ' r r') i ^ 2 * ι' j)
-            (k (eg.κ' r r') (i+1) ^ 2 * ι' j))
-            ((k (eg.κ' r r') (i+1+1) ^ 2 * ι' j)))
-
-lemma hι' : monotone (ι' r r' i) :=
-begin
-  apply monotone_nat_of_le_succ,
-  rintro (_|j); apply le_max_left
-end
-
-lemma Hι1 : ∀ j,
-  c₀ r r' eg (λ (n : ℕ), eg.κ r r' n) (eg.κ' r r') (i + 1) ⟨ℤ⟩ ≤ ι' r r' i j
-| 0 := le_max_left _ _
-| (j+1) := (Hι1 j).trans $ by { apply hι', apply nat.le_succ }
-
-lemma Hι1' : ∀ j,
-  c₀ r r' eg (λ (n : ℕ), eg.κ r r' n) (eg.κ' r r') (i + 1 + 1) ⟨ℤ⟩ ≤ ι' r r' i j
-| 0 := le_max_right _ _
-| (j+1) := (Hι1' j).trans $ by { apply hι', apply nat.le_succ }
-
-lemma Hι2a : ∀ j,
-  k (eg.κ' r r') i ^ 2 * ι' r r' i j ≤ ι' r r' i (j + 1) :=
-by rintro (_|j); simp only [ι', le_max_iff, le_rfl, true_or, or_true]
-
-lemma Hι2b : ∀ j,
-  k (eg.κ' r r') (i + 1) ^ 2 * ι' r r' i j ≤ ι' r r' i (j + 1) :=
-by rintro (_|j); simp only [ι', le_max_iff, le_rfl, true_or, or_true]
-
-lemma Hι2c : ∀ j,
-  k (eg.κ' r r') (i + 1 + 1) ^ 2 * ι' r r' i j ≤ ι' r r' i (j + 1) :=
-by rintro (_|j); simp only [ι', le_max_iff, le_rfl, true_or, or_true]
-
-def ι : ulift.{1} ℕ → ℝ≥0 := ι' r r' i ∘ ulift.down
-
-lemma hι : monotone (ι r r' i) :=
-λ j₁ j₂ h, by { delta ι, apply hι', exact h }
-
-lemma sufficiently_increasing_eg (s : ℝ≥0) (m : ℕ) :
-  ∃ n : ℕ, s ≤ ι' r r' i n * eg.κ r r' m := sorry
-
-lemma sufficiently_increasing_eg' (s : ℝ≥0) (m : ℕ) :
-  ∃ n : ℕ, s ≤ r' * (ι' r r' i n * eg.κ r r' m) :=
-begin
-  obtain ⟨n,hn⟩ := sufficiently_increasing_eg r r' i (s / r') m,
-  use n,
-  replace hn := mul_le_mul (le_refl r') hn (zero_le (s / r')) (zero_le _),
-  refine le_trans (le_of_eq _) hn,
-  have : r' ≠ 0, { symmetry, exact ne_of_lt (fact.out (0 < r')) },
-  rw mul_comm,
-  exact (div_eq_iff this).mp rfl
 end
 
 /-- Thm 9.4bis of [Analytic]. More precisely: the first observation in the proof 9.4 => 9.1. -/
