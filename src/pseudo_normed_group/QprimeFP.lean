@@ -732,6 +732,29 @@ begin
     ext, refl }
 end
 
+@[simp, reassoc]
+lemma profinite_pow_filtration_iso_spec (j : ℕ) (r : ℝ≥0) (i : ulift.{u+1} (fin j)) :
+  (profinite_pow_filtration_iso M j r).hom ≫ pi.π _ i =
+  Profinite_to_Condensed.map (filtration_pow_proj _ _ _ i.down) :=
+begin
+  dsimp [profinite_pow_filtration_iso, Sheaf.iso.mk],
+  ext1, dsimp,
+  simp only [category.assoc],
+  rw Condensed_prod_val_iso_spec',
+  ext T : 2,
+  dsimp,
+  simp only [category.assoc],
+  rw functor_prod_eval_iso_spec',
+  erw profinite_pow_filtration_iso_component_spec,
+  refl,
+end
+
+@[simp, reassoc]
+lemma profinite_pow_filtration_iso_spec' (j : ℕ) (r : ℝ≥0) (i : ulift.{u+1} (fin j)) :
+  (profinite_pow_filtration_iso M j r).inv ≫
+  Profinite_to_Condensed.map (filtration_pow_proj _ _ _ i.down) = pi.π _ i :=
+by { rw iso.inv_comp_eq, rw profinite_pow_filtration_iso_spec }
+
 def combine (hι : monotone ι) (n : ℕ) : ℕ →o ℝ≥0 :=
 { to_fun := λ t, κ (ι $ ulift.up t) n,
   monotone' := begin
@@ -748,6 +771,24 @@ begin
   refine preserves_colimit_iso (homological_complex.eval _ _ 0) _ ≪≫ _,
   refine has_colimit.iso_of_nat_iso (discrete.nat_iso $ λ i, iso.refl _),
 end
+
+@[simp, reassoc]
+lemma iso_on_the_left_zero₀_spec' (i : ulift.{u+1} ℕ) :
+  sigma.ι (λ (k : ulift.{u+1 0} ℕ), ((QprimeFP_int.{u} r' BD.data κ M).obj (ι k)).X 0) i ≫
+  (iso_on_the_left_zero₀ BD κ M ι).inv =
+  (sigma.ι (λ (k : ulift.{u+1 0} ℕ), (QprimeFP_int.{u} r' BD.data κ M).obj (ι k)) i).f 0 :=
+begin
+  dsimp [iso_on_the_left_zero₀],
+  erw colimit.ι_desc_assoc, dsimp, simp only [category.id_comp],
+  erw colimit.ι_desc, refl,
+end
+
+@[simp, reassoc]
+lemma iso_on_the_left_zero₉_spec (i : ulift.{u+1} ℕ) :
+  (sigma.ι (λ (k : ulift.{u+1 0} ℕ), (QprimeFP_int.{u} r' BD.data κ M).obj (ι k)) i).f 0 ≫
+  (iso_on_the_left_zero₀ BD κ M ι).hom =
+  sigma.ι (λ (k : ulift.{u+1 0} ℕ), ((QprimeFP_int.{u} r' BD.data κ M).obj (ι k)).X 0) i :=
+by { rw ← iso.eq_comp_inv, rw iso_on_the_left_zero₀_spec', }
 
 def iso_on_the_left_zero  :
  (∐ λ (k : ulift.{u+1 0} ℕ), (QprimeFP_int.{u} r' BD.data κ M).obj (ι k)).X 0 ≅
