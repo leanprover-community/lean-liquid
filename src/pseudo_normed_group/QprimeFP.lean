@@ -805,6 +805,37 @@ begin
   refine profinite_pow_filtration_iso M (BD.data.X 0) (κ (ι ⟨j⟩) 0), --≪≫ _,
 end
 
+@[simp, reassoc]
+lemma iso_on_the_left_zero_spec' (k : ℕ) :
+  sigma.ι (λ (i : as_small.{u+1 0 0} ℕ), CondensedSet_to_Condensed_Ab.{u}.obj
+    (∏ λ (j : ulift.{u+1 0} (fin (BD.data.X 0))),
+    (Condensed.as_nat_diagram.{u} M.to_CHFPNG (combine.{u} κ ι hι 0)).obj i))
+    ⟨k⟩ ≫ (iso_on_the_left_zero _ _ _ _ _).inv =
+  CondensedSet_to_Condensed_Ab.map (profinite_pow_filtration_iso M
+    (BD.data.X 0) (κ (ι ⟨k⟩) 0)).inv ≫
+  (sigma.ι (λ (k : ulift.{u+1 0} ℕ), (QprimeFP_int.{u} r' BD.data κ M).obj (ι k)) ⟨k⟩).f 0 :=
+begin
+  dsimp [iso_on_the_left_zero],
+  erw colimit.ι_desc_assoc, dsimp,
+  rw [category.assoc],
+  slice_lhs 2 3
+  { rw iso_on_the_left_zero₀_spec' },
+end
+
+@[simp, reassoc]
+lemma iso_on_the_left_zero_spec (k : ℕ) :
+  CondensedSet_to_Condensed_Ab.map (profinite_pow_filtration_iso M
+    (BD.data.X 0) (κ (ι ⟨k⟩) 0)).inv ≫
+  (sigma.ι (λ (k : ulift.{u+1 0} ℕ), (QprimeFP_int.{u} r' BD.data κ M).obj (ι k)) ⟨k⟩).f 0 ≫
+  (iso_on_the_left_zero _ _ _ _ _).hom =
+  sigma.ι (λ (i : as_small.{u+1 0 0} ℕ), CondensedSet_to_Condensed_Ab.{u}.obj
+    (∏ λ (j : ulift.{u+1 0} (fin (BD.data.X 0))),
+    (Condensed.as_nat_diagram.{u} M.to_CHFPNG (combine.{u} κ ι hι 0)).obj i))
+    ⟨k⟩ :=
+begin
+  rw [← category.assoc, ← iso.eq_comp_inv, iso_on_the_left_zero_spec'],
+end
+
 lemma iso_on_the_left_zero_conj :
   ((QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD.data κ M)).f 0) =
   (iso_on_the_left_zero _ _ _ _ hι).hom ≫
