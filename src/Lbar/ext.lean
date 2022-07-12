@@ -70,7 +70,17 @@ begin
     --   apply uniform_space.completion.continuous_extension
        },
     { sorry } },
-  sorry
+  { intros a,
+    simp only [normed_group_hom.completion_coe,
+      locally_constant.comap_hom_apply, quiver.hom.unop_op],
+    erw [uniform_space.completion.extension_coe],
+    erw [uniform_space.completion.extension_coe],
+    unfold locally_constant.comap,
+    classical,
+    erw dif_pos, refl,
+    exact f.continuous,
+    exact locally_constant.to_continuous_map_uniform_continuous.{u} Y ↥V,
+    exact locally_constant.to_continuous_map_uniform_continuous.{u} X ↥V },
 end
 
 def ExtQprime_iso_aux_system_obj_aux :
