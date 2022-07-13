@@ -37,6 +37,13 @@ lemma QprimeFP_map (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) :
 
 variables [fact (0 < r')] [fact (r' < 1)]
 
+lemma ExtQprime_iso_aux_system_obj_natrality (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) (n : ℕ) :
+  (ExtQprime_iso_aux_system_obj r' BD κ M V c₂ n).hom ≫
+  (homology_functor _ _ _).map
+  ((system_of_complexes.to_Ab _).map h.op)  =
+  ((Ext n).map ((QprimeFP r' BD κ _).map h).op).app _ ≫
+  (ExtQprime_iso_aux_system_obj r' BD κ M V c₁ n).hom := sorry
+
 def ExtQprime_iso_aux_system (n : ℕ) :
   (QprimeFP r' BD κ M).op ⋙ (Ext n).flip.obj ((single _ 0).obj V.to_Cond) ≅
   aux_system r' BD ⟨M⟩ (SemiNormedGroup.ulift.{u+1}.obj V) κ ⋙
@@ -44,21 +51,9 @@ def ExtQprime_iso_aux_system (n : ℕ) :
 nat_iso.of_components (λ c, ExtQprime_iso_aux_system_obj r' BD κ M V (unop c) n)
 begin
   intros c₁ c₂ h,
-  --dsimp only [functor.comp_map, ExtQprime_iso_aux_system_obj, iso.trans_hom, id,
-  --  functor.map_iso_hom],
-  --erw Ext_compute_with_acyclic_naturality_assoc,
-
-  dsimp only [ExtQprime_iso_aux_system_obj, iso.trans_hom],
-  rw [functor.comp_map],
-  dsimp only [functor.op_map],
-  rw QprimeFP_map,
-  rw Ext_compute_with_acyclic_naturality_assoc,
-  simp only [category.assoc],
-  refine congr_arg2 _ rfl _,
-  dsimp only [id, iso.trans_hom, functor.comp_map, functor.op_map, quiver.hom.unop_op,
-    functor.right_op_map, functor.map_iso_hom, iso.unop_hom],
-
-  sorry
+  dsimp [-homology_functor_map],
+  rw ← ExtQprime_iso_aux_system_obj_natrality,
+  refl,
 end
 
 /-- The `Tinv` map induced by `M` -/
@@ -122,7 +117,8 @@ begin
   { rw [← nat_trans.comp_app, ← ExtQprime_iso_aux_system_comm_Tinv], refl },
   rw [nat_trans.comp_app, functor.map_comp, ExtQprime.T_inv,
     nat_trans.comp_app, whisker_right_app, whisker_left_app, category.assoc],
-  dsimp only [ExtQprime_iso_aux_system, nat_iso.of_components.hom_app],
+  dsimp only [ExtQprime_iso_aux_system, nat_iso.of_components.hom_app, aux_system,
+    aux_system.res, functor.comp_map],
   sorry
 end
 
