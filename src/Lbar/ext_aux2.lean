@@ -42,7 +42,28 @@ lemma ExtQprime_iso_aux_system_obj_natrality (c₁ c₂ : ℝ≥0) (h : c₁ ⟶
   (homology_functor _ _ _).map
   ((system_of_complexes.to_Ab _).map h.op)  =
   ((Ext n).map ((QprimeFP r' BD κ _).map h).op).app _ ≫
-  (ExtQprime_iso_aux_system_obj r' BD κ M V c₁ n).hom := sorry
+  (ExtQprime_iso_aux_system_obj r' BD κ M V c₁ n).hom :=
+begin
+  dsimp only [ExtQprime_iso_aux_system_obj,
+    iso.trans_hom, id, functor.map_iso_hom],
+  haveI : ((homotopy_category.quotient.{u+1 u+2 0}
+    (Condensed.{u u+1 u+2} Ab.{u+1}) (complex_shape.up.{0} ℤ)).obj
+     ((QprimeFP_int.{u} r' BD κ M).obj c₁)).is_bounded_above := sorry,
+  haveI : ((homotopy_category.quotient.{u+1 u+2 0}
+    (Condensed.{u u+1 u+2} Ab.{u+1}) (complex_shape.up.{0} ℤ)).obj
+     ((QprimeFP_int.{u} r' BD κ M).obj c₂)).is_bounded_above := sorry,
+  have := Ext_compute_with_acyclic_naturality
+    ((QprimeFP_int.{u} r' BD κ M).obj c₁)
+    ((QprimeFP_int.{u} r' BD κ M).obj c₂)
+    V.to_Cond sorry sorry
+    ((QprimeFP_int.{u} r' BD κ M).map h) n,
+  dsimp only [functor.comp_map] at this,
+  erw reassoc_of this, clear this,
+  dsimp only [QprimeFP_int],
+  simp only [category.assoc],
+  congr' 1,
+  sorry
+end
 
 def ExtQprime_iso_aux_system (n : ℕ) :
   (QprimeFP r' BD κ M).op ⋙ (Ext n).flip.obj ((single _ 0).obj V.to_Cond) ≅
