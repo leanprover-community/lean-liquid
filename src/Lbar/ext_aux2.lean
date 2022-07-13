@@ -104,6 +104,15 @@ lemma aux₁ :
 
 end ExtQprime_iso_aux_system_obj_naturality_setup
 
+lemma QprimeFP_acyclic (c) (k i : ℤ) (hi : 0 < i) :
+  is_zero (((Ext' i).obj (op (((QprimeFP_int.{u} r' BD κ M).obj c).X k))).obj V.to_Cond) :=
+begin
+  rcases k with ((_|k)|k),
+  { apply free_acyclic, exact hi },
+  { rw [← functor.flip_obj_obj], refine functor.map_is_zero _ _, refine (is_zero_zero _).op, },
+  { apply free_acyclic, exact hi },
+end
+
 lemma ExtQprime_iso_aux_system_obj_natrality (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) (n : ℕ) :
   (ExtQprime_iso_aux_system_obj r' BD κ M V c₂ n).hom ≫
   (homology_functor _ _ _).map
@@ -124,8 +133,11 @@ begin
   have := Ext_compute_with_acyclic_naturality
     ((QprimeFP_int.{u} r' BD κ M).obj c₁)
     ((QprimeFP_int.{u} r' BD κ M).obj c₂)
-    V.to_Cond sorry sorry
+    V.to_Cond _ _
     ((QprimeFP_int.{u} r' BD κ M).map h) n,
+  rotate,
+  { intros k i hi, apply QprimeFP_acyclic, exact hi },
+  { intros k i hi, apply QprimeFP_acyclic, exact hi },
   dsimp only [functor.comp_map] at this,
   erw reassoc_of this, clear this,
   dsimp only [QprimeFP_int],
@@ -139,8 +151,9 @@ begin
   dsimp [-homology_functor_map],
   --refine congr_arg2 _ _ (congr_arg2 _ rfl _),
   --rw ExtQprime_iso_aux_system_obj_naturality_setup.aux₁,
+  --congr' 1,
   --refl,
-  --sorry
+  sorry
 
 end
 
