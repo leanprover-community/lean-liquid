@@ -223,6 +223,16 @@ end)
 sorry
 
 /-
+lemma embed_hom_complex_nat_iso_homology_iso (X : homological_complex (Condensed.{u} Ab.{u+1})
+  (complex_shape.down ℕ)) (A : Condensed.{u} Ab.{u+1}) (n : ℕ) :
+  (homology_functor _ _ (-(n : ℤ))).map (embed_hom_complex_nat_iso X A).hom ≫
+  (homological_complex.homology_embed_nat_iso _
+    complex_shape.embedding.nat_up_int_down nat_up_int_down_c_iff
+    n (-(n : ℤ)) (by { cases n; refl })).app _
+  = _
+-/
+
+/-
 -- OLD construction of ExtQprime_iso_aux_system_obj
 begin
   refine (homology_functor _ _ (-n:ℤ)).map_iso _ ≪≫ _,
