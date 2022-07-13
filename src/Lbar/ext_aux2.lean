@@ -432,6 +432,14 @@ def hom_complex_map_T_inv (c : (ℝ≥0)ᵒᵖ) :
       (homological_complex.op_functor.map (quiver.hom.op $
       (QprimeFP_nat.ι BD κ₂ κ M).app _)))
 
+omit r
+
+lemma embed_hom_complex_nat_iso₀ (c : (ℝ≥0)ᵒᵖ) : (embed_hom_complex_nat_iso.{u} ((QprimeFP_nat.{u} r' BD κ₂ M).obj (unop.{1} c)) V.to_Cond).hom.f (int.of_nat 0) = 𝟙 _ := rfl
+
+lemma embed_hom_complex_nat_iso_neg (n : ℕ) (c : (ℝ≥0)ᵒᵖ) : (embed_hom_complex_nat_iso.{u} ((QprimeFP_nat.{u} r' BD κ₂ M).obj (unop.{1} c)) V.to_Cond).hom.f (-[1+ n]) = 𝟙 _ := rfl
+
+include r
+
 lemma aux₁ (c : (ℝ≥0)ᵒᵖ):
 (hom_complex_QprimeFP_nat_iso_aux_system.{u} r' BD κ M V (unop.{1} c)).hom ≫
   ((forget₂.{u+2 u+2 u+1 u+1 u+1} SemiNormedGroup.{u+1} Ab.{u+1}).map_homological_complex
@@ -463,10 +471,22 @@ lemma aux₂ (c : (ℝ≥0)ᵒᵖ) :
   (hom_complex_map_T_inv _ _ _ _ _ _ _ _) :=
 begin
   ext ((_ | k) | k ) : 2,
+  { dsimp only [functor.comp],
+    simp only [functor.right_op_map, quiver.hom.unop_op, category.assoc, homological_complex.comp_f,
+  homological_complex.unop_functor_map_f, functor.map_homological_complex_map_f],
+  rw embed_hom_complex_nat_iso₀,
+  rw embed_hom_complex_nat_iso₀,
   sorry,
+  },
   { apply is_zero.eq_of_tgt,
     exact is_zero_zero _ },
+  { dsimp only [functor.comp],
+    simp only [functor.right_op_map, quiver.hom.unop_op, category.assoc, homological_complex.comp_f,
+  homological_complex.unop_functor_map_f, functor.map_homological_complex_map_f],
+  rw embed_hom_complex_nat_iso_neg,
+  rw embed_hom_complex_nat_iso_neg,
   sorry,
+  },
 end
 
 end ExtQprime_iso_aux_system_comm_setup
