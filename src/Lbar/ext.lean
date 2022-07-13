@@ -27,6 +27,42 @@ variables (ι : ulift.{u+1} ℕ → ℝ≥0) (hι : monotone ι)
 
 set_option pp.universes true
 
+
+lemma Tinv2_iso_of_bicartesian_aux_1
+  (i : ℤ) : commsq.{u+2 u+1}
+  (shift_sub_id.{u+1}
+     ((QprimeFP.{u} r' BD.data κ₂ M).op ⋙
+        (Ext.{u+1 u+2} i).flip.obj ((single.{u+1 u+2} (Condensed.{u u+1 u+2} Ab.{u+1}) 0).obj V.to_Cond))
+     ι
+     hι)
+  (pi_Ext_iso_Ext_sigma.{u} BD κ₂ M V (λ (k : ulift.{u+1 0} ℕ), ι k) i).hom
+  (pi_Ext_iso_Ext_sigma.{u} BD κ₂ M V (λ (k : ulift.{u+1 0} ℕ), ι k) i).hom
+  (((Ext.{u+1 u+2} i).map
+      (of_hom.{u+1 u+2} (QprimeFP.shift_sub_id.{u u+2 u+1} ι hι (QprimeFP_int.{u} r' BD.data κ₂ M))).op).app
+     ((single.{u+1 u+2} (Condensed.{u u+1 u+2} Ab.{u+1}) 0).obj (Condensed.of_top_ab.{u} ↥V))) :=
+begin
+    apply commsq.of_eq,
+    dsimp only [shift_sub_id, QprimeFP.shift_sub_id],
+    simp only [sub_comp, comp_sub, homological_complex.of_hom_sub, category_theory.op_sub,
+      functor.map_sub, op_id, category_theory.functor.map_id, of_hom_id,
+      nat_trans.app_sub, nat_trans.id_app, category.comp_id, category.id_comp],
+    apply congr_arg2 _ _ rfl,
+    rw ← iso.eq_comp_inv,
+    dsimp only [pi_Ext_iso_Ext_sigma, iso.trans_hom, iso.trans_inv,
+      iso.symm_hom, iso.symm_inv, functor.map_iso_hom,
+      iso.op_hom, op_comp, functor.flip_obj_map, functor.map_iso_inv],
+    simp only [category.assoc, ← nat_trans.comp_app_assoc, ← functor.map_comp_assoc,
+      ← functor.map_comp, iso.op_inv, ← op_comp],
+    rw cofan_point_iso_colimit_conj_eq_desc,
+    rw iso.eq_inv_comp,
+    have := Ext_coproduct_iso_naturality_shift _
+      (λ (k : ulift ℕ), (QprimeFP r' BD.data κ₂ M).obj (ι k))
+      (λ k, (QprimeFP r' BD.data κ₂ M).map (hom_of_le $ hι $
+        by exact_mod_cast k.down.le_succ)) i ((single (Condensed Ab) 0).obj V.to_Cond),
+    exact this.symm,
+    sorry,
+end
+
 lemma Tinv2_iso_of_bicartesian_aux [normed_with_aut r V]
   [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]
   (i : ℤ)
@@ -47,52 +83,9 @@ begin
     (pi_Ext_iso_Ext_sigma _ _ _ _ _ _) (pi_Ext_iso_Ext_sigma _ _ _ _ _ _)
     (pi_Ext_iso_Ext_sigma _ _ _ _ _ _) (pi_Ext_iso_Ext_sigma _ _ _ _ _ _)
     h1 h2 h2 h3 H1,
-  sorry { apply commsq.of_eq,
-    dsimp only [shift_sub_id, QprimeFP.shift_sub_id],
-    simp only [sub_comp, comp_sub, homological_complex.of_hom_sub, category_theory.op_sub,
-      functor.map_sub, op_id, category_theory.functor.map_id, of_hom_id,
-      nat_trans.app_sub, nat_trans.id_app, category.comp_id, category.id_comp],
-    apply congr_arg2 _ _ rfl,
-    rw ← iso.eq_comp_inv,
-    dsimp only [pi_Ext_iso_Ext_sigma, iso.trans_hom, iso.trans_inv,
-      iso.symm_hom, iso.symm_inv, functor.map_iso_hom,
-      iso.op_hom, op_comp, functor.flip_obj_map, functor.map_iso_inv],
-    simp only [category.assoc, ← nat_trans.comp_app_assoc, ← functor.map_comp_assoc,
-      ← functor.map_comp, iso.op_inv, ← op_comp],
-    rw cofan_point_iso_colimit_conj_eq_desc,
-    rw iso.eq_inv_comp,
-    have := Ext_coproduct_iso_naturality_shift _
-      (λ (k : ulift ℕ), (QprimeFP r' BD.data κ₂ M).obj (ι k))
-      (λ k, (QprimeFP r' BD.data κ₂ M).map (hom_of_le $ hι $
-        by exact_mod_cast k.down.le_succ)) i ((single (Condensed Ab) 0).obj V.to_Cond),
-    exact this.symm,
-    sorry,
-
-  },
+  apply Tinv2_iso_of_bicartesian_aux_1,
   { sorry },
-  sorry { apply commsq.of_eq,
-    dsimp only [shift_sub_id, QprimeFP.shift_sub_id],
-    simp only [sub_comp, comp_sub, homological_complex.of_hom_sub, category_theory.op_sub,
-      functor.map_sub, op_id, category_theory.functor.map_id, of_hom_id,
-      nat_trans.app_sub, nat_trans.id_app, category.comp_id, category.id_comp],
-    apply congr_arg2 _ _ rfl,
-    rw ← iso.eq_comp_inv,
-    dsimp only [pi_Ext_iso_Ext_sigma, iso.trans_hom, iso.trans_inv,
-      iso.symm_hom, iso.symm_inv, functor.map_iso_hom,
-      iso.op_hom, op_comp, functor.flip_obj_map, functor.map_iso_inv],
-    simp only [category.assoc, ← nat_trans.comp_app_assoc, ← functor.map_comp_assoc,
-      ← functor.map_comp, iso.op_inv, ← op_comp],
-    rw cofan_point_iso_colimit_conj_eq_desc,
-    rw iso.eq_inv_comp,
-
-    have := Ext_coproduct_iso_naturality_shift _
-      (λ (k : ulift ℕ), (QprimeFP r' BD.data κ M).obj (ι k))
-      (λ k, (QprimeFP r' BD.data κ M).map (hom_of_le $ hι $
-        by exact_mod_cast k.down.le_succ)) i ((single (Condensed Ab) 0).obj V.to_Cond),
-
-    exact this.symm,
-
-    sorry }
+  apply Tinv2_iso_of_bicartesian_aux_1,
 end
 
 lemma Tinv2_iso_of_bicartesian [normed_with_aut r V]
