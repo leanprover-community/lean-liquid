@@ -155,19 +155,6 @@ begin
   sorry,
 end
 
--- lemma aux₃' (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) (n : ℕ)
---   (A B : homological_complex.{u+1 u+2 0} (Condensed.{u u+1 u+2} Ab.{u+1}) (complex_shape.down.{0} ℕ))
---   (f : A ⟶ B) :
---   (embed_hom_complex_nat_iso.{u} B V.to_Cond).hom ≫
---     (homological_complex.embed.{0 0 u+2 u+1} complex_shape.embedding.nat_up_int_down).map
---       (((preadditive_yoneda.{u+1 u+2}.obj V.to_Cond).map_homological_complex (complex_shape.down.{0} ℕ).symm).map
---          (homological_complex.op_functor.{u+2 u+1 0}.map (f).op)) =
---   homological_complex.unop_functor.{u+2 u+1 0}.right_op.map
---        (((preadditive_yoneda.{u+1 u+2}.obj V.to_Cond).right_op.map_homological_complex (complex_shape.up.{0} ℤ)).map (category_theory.functor.map _ _)).unop ≫
---     (embed_hom_complex_nat_iso.{u} A V.to_Cond).hom :=
--- begin
---  sorry,
--- end
 
 lemma aux₃ (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) (n : ℕ) :
   (homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.up.{0} ℤ).symm (-↑n)).map
@@ -190,9 +177,7 @@ begin
   dsimp only [functor.op_map, functor.comp_map],
   erw [← functor.map_comp],
   erw [← functor.map_comp],
-  -- erw [←
   congr' 1,
-  -- sorry,
   ext ((_ | k) | k ) : 2,
   { refine (category.id_comp _).trans (category.comp_id _).symm },
   { apply is_zero.eq_of_tgt,
@@ -360,7 +345,17 @@ lemma aux₂ :
        ((QprimeFP_int.Tinv.{u} BD κ₂ κ M).app (unop.{1} c))).unop ≫
     (homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.up.{0} ℤ).symm (-↑n)).map
       (embed_hom_complex_nat_iso.{u} ((QprimeFP_nat.{u} r' BD κ₂ M).obj (unop.{1} c)) V.to_Cond).hom :=
-sorry
+begin
+  dsimp only [functor.op_map, functor.comp_map],
+  erw [← functor.map_comp],
+  erw [← functor.map_comp],
+  congr' 1,
+  ext ((_ | k) | k ) : 2,
+  { refine (category.id_comp _).trans (category.comp_id _).symm },
+  { apply is_zero.eq_of_tgt,
+    exact is_zero_zero _ },
+  { refine (category.id_comp _).trans (category.comp_id _).symm },
+end
 
 end ExtQprime_iso_aux_system_comm_Tinv_setup
 
@@ -465,7 +460,14 @@ lemma aux₂ (c : (ℝ≥0)ᵒᵖ) :
   (embed_hom_complex_nat_iso.{u} ((QprimeFP_nat.{u} r' BD κ₂ M).obj (unop.{1} c)) V.to_Cond).hom =
   (embed_hom_complex_nat_iso.{u} ((QprimeFP_nat.{u} r' BD κ M).obj (unop.{1} c)) V.to_Cond).hom ≫
   category_theory.functor.map _
-  (hom_complex_map_T_inv _ _ _ _ _ _ _ _) := sorry
+  (hom_complex_map_T_inv _ _ _ _ _ _ _ _) :=
+begin
+  ext ((_ | k) | k ) : 2,
+  sorry,
+  { apply is_zero.eq_of_tgt,
+    exact is_zero_zero _ },
+  sorry,
+end
 
 end ExtQprime_iso_aux_system_comm_setup
 
