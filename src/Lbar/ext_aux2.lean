@@ -62,7 +62,15 @@ begin
   dsimp only [QprimeFP_int],
   simp only [category.assoc],
   congr' 1,
+  dsimp only [nat_iso.app_hom],
+  simp only [functor.map_comp, functor.comp_map, nat_trans.naturality,
+    nat_trans.naturality_assoc],
+  dsimp only [functor.op_map, quiver.hom.unop_op, functor.right_op_map],
+  simp only [← functor.map_comp, ← functor.map_comp_assoc],
+  dsimp [-homology_functor_map],
+  --refine congr_arg2 _ _ (congr_arg2 _ rfl _),
   sorry
+
 end
 
 def ExtQprime_iso_aux_system (n : ℕ) :
