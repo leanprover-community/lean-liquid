@@ -485,6 +485,14 @@ lemma embed_hom_complex_nat_iso₀ (c : (ℝ≥0)ᵒᵖ) : (embed_hom_complex_na
 
 lemma embed_hom_complex_nat_iso_neg (n : ℕ) (c : (ℝ≥0)ᵒᵖ) : (embed_hom_complex_nat_iso.{u} ((QprimeFP_nat.{u} r' BD κ₂ M).obj (unop.{1} c)) V.to_Cond).hom.f (-[1+ n]) = 𝟙 _ := rfl
 
+
+lemma add_equiv.to_AddCommGroup_iso_apply (A B : AddCommGroup.{u})
+  (e : A ≃+ B) (a : A) : e.to_AddCommGroup_iso.hom a = e a := rfl
+
+lemma preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab_apply (M) (X) (t) :
+  (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab M X).hom t =
+  yoneda'_equiv _ _ (Condensed_Ab_CondensedSet_adjunction.hom_equiv X.to_Condensed M t).val := rfl
+
 include r
 
 lemma aux₁ (c : (ℝ≥0)ᵒᵖ):
@@ -496,8 +504,28 @@ lemma aux₁ (c : (ℝ≥0)ᵒᵖ):
   hom_complex_map_T_inv _ _ _ _ _ _ _ _ ≫
   (hom_complex_QprimeFP_nat_iso_aux_system.{u} r' BD κ₂ M V (unop.{1} c)).hom :=
 begin
-  ext k : 2,
+  /-
+  ext k t : 3,
+  dsimp [hom_complex_nat] at t,
+  dsimp only [hom_complex_QprimeFP_nat_iso_aux_system, aux_system.T_inv,
+    aux_system.res, hom_complex_nat, functor.map_iso, iso.trans_hom,
+    homological_complex.unop_functor, homological_complex.comp_f,
+    nat_iso.map_homological_complex, nat_iso.app_hom, iso.op_hom, quiver.hom.unop_op,
+    nat_trans.map_homological_complex_app_f, ExtQprime_iso_aux_system_obj_aux,
+    nat_iso.of_components.hom_app, id, iso.symm_hom, nat_iso.app_inv,
+    whisker_right_app, nat_trans.op, functor.comp_map],
+  simp only [category_theory.functor.map_comp],
+  dsimp only [homological_complex.comp_f, functor.map_homological_complex, functor.op_obj,
+    functor.unop, forget₂_unop, nat_iso.of_components.hom_app,
+    homological_complex.hom.iso_of_components, iso.refl],
+  simp only [category.assoc, category.id_comp],
+  erw category.id_comp,
+  dsimp only [functor.op, quiver.hom.unop_op],
+  erw category.comp_id,
+  repeat { rw [comp_apply] },
+  -/ -- UUUUGGGHHH
   sorry
+
 end
 
 lemma aux₂ (c : (ℝ≥0)ᵒᵖ) :
