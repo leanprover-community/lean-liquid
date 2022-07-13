@@ -28,6 +28,22 @@ variables (ι : ulift.{u+1} ℕ → ℝ≥0) (hι : monotone ι)
 set_option pp.universes true
 
 
+lemma homotopy_category.colimit_cofan_bdd {A : Type u} [category.{v} A] [abelian A]
+[has_coproducts A] {α : Type v} (X : α → bounded_homotopy_category A)
+  [uniformly_bounded X] : homotopy_category.is_bounded_above
+  (homotopy_category.colimit_cofan $ λ a : α, (X a).val).X :=
+begin
+    obtain ⟨n,hn⟩ := homotopy_category.is_uniformly_bounded_above.cond (val ∘ X),
+      use n, intros i hi,
+    dsimp [homotopy_category.colimit_cofan],
+    let e : (∐ λ (a : α), (X a).val.as).X i ≅
+      (∐ λ (a : α), (X a).val.as.X i) := homotopy_category.coproduct_iso _ _,
+    refine is_zero_of_iso_of_zero _ e.symm,
+    apply category_theory.is_zero_colimit,
+    intros j,
+    apply hn j _ hi,
+  end
+
 lemma Tinv2_iso_of_bicartesian_aux_1
   (i : ℤ) : commsq.{u+2 u+1}
   (shift_sub_id.{u+1}
@@ -60,7 +76,7 @@ begin
       (λ k, (QprimeFP r' BD.data κ₂ M).map (hom_of_le $ hι $
         by exact_mod_cast k.down.le_succ)) i ((single (Condensed Ab) 0).obj V.to_Cond),
     exact this.symm,
-    sorry,
+    { apply homotopy_category.colimit_cofan_bdd },
 end
 
 lemma Tinv2_iso_of_bicartesian_aux [normed_with_aut r V]
