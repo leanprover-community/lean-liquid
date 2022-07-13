@@ -295,6 +295,43 @@ def ExtQprime.Tinv2 [normed_with_aut r V]
   (QprimeFP r' BD κ₂ M).op ⋙ (Ext n).flip.obj ((single _ 0).obj V.to_Cond) :=
 ExtQprime.Tinv r' BD κ κ₂ M V n - ExtQprime.T_inv r r' BD κ κ₂ M V n
 
+namespace ExtQprime_iso_aux_system_comm_Tinv_setup
+
+variables (c : (ℝ≥0)ᵒᵖ) (n : ℕ)
+  [∀ (c : ℝ≥0) (n : ℕ), fact (κ₂ c n ≤ r' * κ c n)]
+
+lemma aux₁  :
+(homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.up.{0} ℕ) n).map
+    (hom_complex_QprimeFP_nat_iso_aux_system.{u} r' BD κ M V (unop.{1} c)).hom ≫
+  ((forget₂.{u+2 u+2 u+1 u+1 u+1} SemiNormedGroup.{u+1} Ab.{u+1}).map_homological_complex
+       (complex_shape.up.{0} ℕ) ⋙
+     homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.up.{0} ℕ) n).map
+    ((aux_system.Tinv.{u u+1} r' BD ⟨M⟩ (SemiNormedGroup.ulift.{u+1 u}.obj V) κ₂ κ).app c) =
+  (homology_functor _ _ _).map
+  (category_theory.functor.map _
+      (homological_complex.op_functor.map (quiver.hom.op $
+      (QprimeFP_nat.Tinv  BD κ₂ κ M).app _))) ≫
+  (homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.up.{0} ℕ) n).map
+  (hom_complex_QprimeFP_nat_iso_aux_system.{u} r' BD κ₂ M V (unop.{1} c)).hom :=
+sorry
+
+lemma aux₂ :
+(homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.up.{0} ℤ).symm (-↑n)).map
+      (embed_hom_complex_nat_iso.{u} ((QprimeFP_nat.{u} r' BD κ M).obj (unop.{1} c)) V.to_Cond).hom ≫
+    (homological_complex.embed.{0 0 u+2 u+1} complex_shape.embedding.nat_up_int_down ⋙
+       homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.down.{0} ℤ) (-↑n)).map
+      (((preadditive_yoneda.{u+1 u+2}.obj V.to_Cond).map_homological_complex (complex_shape.down.{0} ℕ).symm).map
+         (homological_complex.op_functor.{u+2 u+1 0}.map ((QprimeFP_nat.Tinv.{u} BD κ₂ κ M).app (unop.{1} c)).op)) =
+  (((preadditive_yoneda.{u+1 u+2}.obj V.to_Cond).right_op.map_homological_complex (complex_shape.up.{0} ℤ) ⋙
+        homological_complex.unop_functor.{u+2 u+1 0}.right_op ⋙
+          (homology_functor.{u+1 u+2 0} AddCommGroup.{u+1} (complex_shape.up.{0} ℤ).symm (-↑n)).op).map
+       ((QprimeFP_int.Tinv.{u} BD κ₂ κ M).app (unop.{1} c))).unop ≫
+    (homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.up.{0} ℤ).symm (-↑n)).map
+      (embed_hom_complex_nat_iso.{u} ((QprimeFP_nat.{u} r' BD κ₂ M).obj (unop.{1} c)) V.to_Cond).hom :=
+sorry
+
+end ExtQprime_iso_aux_system_comm_Tinv_setup
+
 lemma ExtQprime_iso_aux_system_comm_Tinv
   [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)] (n : ℕ) :
   (ExtQprime_iso_aux_system r' BD κ M V n).hom ≫
@@ -302,7 +339,29 @@ lemma ExtQprime_iso_aux_system_comm_Tinv
     ((forget₂ _ _).map_homological_complex _ ⋙ homology_functor Ab.{u+1} (complex_shape.up ℕ) n) =
   ExtQprime.Tinv r' BD κ κ₂ M V n ≫
   (ExtQprime_iso_aux_system r' BD κ₂ M V n).hom :=
-sorry
+begin
+  ext c : 2,
+  dsimp only [ExtQprime_iso_aux_system_obj,
+    ExtQprime_iso_aux_system,
+    iso.trans_hom, id, functor.map_iso_hom, nat_iso.of_components.hom_app,
+    nat_trans.comp_app],
+  haveI : ((homotopy_category.quotient.{u+1 u+2 0} (Condensed.{u u+1 u+2} Ab.{u+1}) (complex_shape.up.{0} ℤ)).obj
+     ((QprimeFP_int.{u} r' BD κ M).obj (unop.{1} c))).is_bounded_above := sorry,
+  haveI : ((homotopy_category.quotient.{u+1 u+2 0} (Condensed.{u u+1 u+2} Ab.{u+1}) (complex_shape.up.{0} ℤ)).obj
+     ((QprimeFP_int.{u} r' BD κ₂ M).obj (unop.{1} c))).is_bounded_above := sorry,
+  have := Ext_compute_with_acyclic_naturality
+    ((QprimeFP_int.{u} r' BD κ₂ M).obj c.unop)
+    ((QprimeFP_int.{u} r' BD κ M).obj c.unop)
+    V.to_Cond sorry sorry
+    ((QprimeFP_int.Tinv BD κ₂ κ M).app _) n,
+  erw reassoc_of this, clear this, simp only [category.assoc], congr' 1,
+  dsimp only [whisker_right_app],
+  rw ExtQprime_iso_aux_system_comm_Tinv_setup.aux₁ r' BD κ κ₂ M V c n,
+  simp only [← category.assoc], congr' 1, simp only [category.assoc],
+  erw ← nat_trans.naturality,
+  simp only [← category.assoc], congr' 1,
+  exact ExtQprime_iso_aux_system_comm_Tinv_setup.aux₂ r' BD κ κ₂ M V c n,
+end
 
 
 -- lemma ExtQprime_iso_aux_system_comm_T_inv [normed_with_aut r V] (n : ℕ) (c : ℝ≥0ᵒᵖ) :
@@ -317,6 +376,9 @@ sorry
 --     (ExtQprime_iso_aux_system_obj.{u} r' BD κ₂ M V (unop.{1} c) n).hom :=
 -- sorry
 
+namespace ExtQprime_iso_aux_system_comm_setup
+end ExtQprime_iso_aux_system_comm_setup
+
 lemma ExtQprime_iso_aux_system_comm [normed_with_aut r V]
   [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)] (n : ℕ) :
   (ExtQprime_iso_aux_system r' BD κ M V n).hom ≫
@@ -329,11 +391,46 @@ begin
   simp only [sub_comp, nat_trans.app_sub, functor.map_sub, comp_sub],
   refine congr_arg2 _ _ _,
   { rw [← nat_trans.comp_app, ← ExtQprime_iso_aux_system_comm_Tinv], refl },
+
+  dsimp only [ExtQprime_iso_aux_system_obj,
+    ExtQprime_iso_aux_system,
+    iso.trans_hom, id, functor.map_iso_hom, nat_iso.of_components.hom_app,
+    nat_trans.comp_app],
+
+  haveI : ((homotopy_category.quotient.{u+1 u+2 0} (Condensed.{u u+1 u+2} Ab.{u+1})
+    (complex_shape.up.{0} ℤ)).obj
+     ((QprimeFP_int.{u} r' BD κ M).obj (unop.{1} c))).is_bounded_above := sorry,
+  haveI : ((homotopy_category.quotient.{u+1 u+2 0} (Condensed.{u u+1 u+2} Ab.{u+1})
+    (complex_shape.up.{0} ℤ)).obj
+     ((QprimeFP_int.{u} r' BD κ₂ M).obj (unop.{1} c))).is_bounded_above := sorry,
+  have := Ext_compute_with_acyclic_naturality
+    ((QprimeFP_int.{u} r' BD κ₂ M).obj c.unop)
+    ((QprimeFP_int.{u} r' BD κ M).obj c.unop)
+    V.to_Cond sorry sorry
+    ((QprimeFP_int.ι BD κ₂ κ M).app _) n,
+
+  simp only [category.assoc], dsimp only [ExtQprime.T_inv, nat_trans.comp_app,
+    whisker_right_app, whisker_left_app, functor.flip],
+  let η := (Ext.{u+1 u+2} ↑n).map ((nat_trans.op.{0 u+1 0 u+2} (QprimeFP.ι.{u} BD κ₂ κ M)).app c),
+
+  slice_rhs 1 2 { erw ← η.naturality },
+  slice_rhs 2 3 { erw this },
+  simp only [category.assoc], clear this η,
+
+  sorry
+
+  -- have := Ext_compute_with_acyclic_naturality, <-- we need naturality in the other variable?!
+
+  --simp only [category.assoc],
+  --erw reassoc_of this,
+   --clear this, simp only [category.assoc], congr' 1,
+
+  /-
   rw [nat_trans.comp_app, functor.map_comp, ExtQprime.T_inv,
     nat_trans.comp_app, whisker_right_app, whisker_left_app, category.assoc],
   dsimp only [ExtQprime_iso_aux_system, nat_iso.of_components.hom_app, aux_system,
     aux_system.res, functor.comp_map],
-  sorry
+  -/
 end
 
 lemma ExtQprime_iso_aux_system_comm' [normed_with_aut r V]
