@@ -211,8 +211,8 @@ end
 
 lemma Tinv2_iso_of_bicartesian [normed_with_aut r V]
   [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]
-  (hκ : Lbar.sufficiently_increasing κ ι hι)
-  (hκ₂ : Lbar.sufficiently_increasing κ₂ ι hι)
+  (hκ : Lbar.sufficiently_increasing κ ι)
+  (hκ₂ : Lbar.sufficiently_increasing κ₂ ι)
   (i : ℤ)
   (H1 : (shift_sub_id.commsq (ExtQprime.Tinv2 r r' BD.data κ κ₂ M V i) ι hι).bicartesian)
   (H2 : (shift_sub_id.commsq (ExtQprime.Tinv2 r r' BD.data κ κ₂ M V (i+1)) ι hι).bicartesian) :
@@ -248,8 +248,8 @@ end
 lemma Tinv2_iso_of_bicartesian' [normed_with_aut r V]
   [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]
   (H : ∀ i, ∃ (ι) (hι),
-    Lbar.sufficiently_increasing κ ι hι ∧
-    Lbar.sufficiently_increasing κ₂ ι hι ∧
+    Lbar.sufficiently_increasing κ ι ∧
+    Lbar.sufficiently_increasing κ₂ ι ∧
     (shift_sub_id.commsq (ExtQprime.Tinv2 r r' BD.data κ κ₂ M V i) ι hι).bicartesian ∧
     (shift_sub_id.commsq (ExtQprime.Tinv2 r r' BD.data κ κ₂ M V (i+1)) ι hι).bicartesian)
   (i : ℤ) :
