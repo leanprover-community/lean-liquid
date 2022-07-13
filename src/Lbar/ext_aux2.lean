@@ -494,7 +494,11 @@ lemma aux₁ (c : (ℝ≥0)ᵒᵖ):
     ⟨M⟩ (SemiNormedGroup.ulift.{u+1 u}.obj V) κ).app c ≫
   (aux_system.res.{u u+1} r' BD ⟨M⟩ (SemiNormedGroup.ulift.{u+1 u}.obj V) κ₂ κ).app c) =
   hom_complex_map_T_inv _ _ _ _ _ _ _ _ ≫
-  (hom_complex_QprimeFP_nat_iso_aux_system.{u} r' BD κ₂ M V (unop.{1} c)).hom := sorry
+  (hom_complex_QprimeFP_nat_iso_aux_system.{u} r' BD κ₂ M V (unop.{1} c)).hom :=
+begin
+  ext k : 2,
+  sorry
+end
 
 lemma aux₂ (c : (ℝ≥0)ᵒᵖ) :
 ((((preadditive_yoneda.{u+1 u+2}.obj (Condensed.of_top_ab.{u} ↥V)).right_op.map_homological_complex
