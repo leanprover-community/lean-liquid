@@ -165,7 +165,9 @@ end
 --   homological_complex.unop_functor.{u+2 u+1 0}.right_op.map
 --        (((preadditive_yoneda.{u+1 u+2}.obj V.to_Cond).right_op.map_homological_complex (complex_shape.up.{0} ℤ)).map (category_theory.functor.map _ _)).unop ≫
 --     (embed_hom_complex_nat_iso.{u} A V.to_Cond).hom :=
--- sorry
+-- begin
+--  sorry,
+-- end
 
 lemma aux₃ (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) (n : ℕ) :
   (homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.up.{0} ℤ).symm (-↑n)).map
@@ -190,7 +192,12 @@ begin
   erw [← functor.map_comp],
   -- erw [←
   congr' 1,
-  -- ext,
+  -- sorry,
+  ext ((_ | k) | k ) : 2,
+  { refine (category.id_comp _).trans (category.comp_id _).symm },
+  { apply is_zero.eq_of_tgt,
+    exact is_zero_zero _ },
+  { refine (category.id_comp _).trans (category.comp_id _).symm },
 end
 /-
 lemma naturality_helper {c₂ : ℝ≥0} (n : ℕ) :
