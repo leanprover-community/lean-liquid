@@ -98,4 +98,9 @@ begin
   exact (div_eq_iff this).mp rfl
 end
 
+def sufficiently_increasing
+  (κ : ℝ≥0 → ℕ → ℝ≥0) (ι : ulift ℕ → ℝ≥0) (hι : monotone ι)
+  [∀ n, fact (monotone (function.swap κ n))] : Prop :=
+∀ (r : ℝ≥0) (m : ℕ), ∃ n : ℕ, r ≤ κ (ι ⟨n⟩) m
+
 end Lbar
