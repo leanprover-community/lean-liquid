@@ -135,7 +135,7 @@ sorry
 
 lemma aux₂ (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) (n : ℕ) :
   (homological_complex.homology_embed_nat_iso.{0 0 u+2 u+1} Ab.{u+1}
-    complex_shape.embedding.nat_up_int_down nat_up_int_down_c_iff n (-↑n) sorry).hom.app
+    complex_shape.embedding.nat_up_int_down nat_up_int_down_c_iff n (-↑n) (by { cases n; refl})).hom.app
     (hom_complex_nat.{u} ((QprimeFP_nat.{u} r' BD κ M).obj c₂) V.to_Cond) ≫
     (homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.up.{0} ℕ) n).map
     (((preadditive_yoneda.{u+1 u+2}.obj V.to_Cond).map_homological_complex
@@ -146,7 +146,7 @@ lemma aux₂ (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) (n : ℕ) :
   (category_theory.functor.map _
       (homological_complex.op_functor.map ((QprimeFP_nat r' BD κ M).map h).op)) ≫
   (homological_complex.homology_embed_nat_iso.{0 0 u+2 u+1} Ab.{u+1}
-  complex_shape.embedding.nat_up_int_down nat_up_int_down_c_iff n (-↑n) sorry).hom.app
+  complex_shape.embedding.nat_up_int_down nat_up_int_down_c_iff n (-↑n) (by { cases n; refl})).hom.app
   (hom_complex_nat.{u} ((QprimeFP_nat.{u} r' BD κ M).obj c₁) V.to_Cond) :=
 sorry
 
@@ -172,7 +172,7 @@ lemma naturality_helper {c₂ : ℝ≥0} (n : ℕ) :
   (homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.up.{0} ℤ).symm (-↑n)).map
   (embed_hom_complex_nat_iso.{u} ((QprimeFP_nat.{u} r' BD κ M).obj c₂) V.to_Cond).hom ≫
   (homological_complex.homology_embed_nat_iso.{0 0 u+2 u+1} Ab.{u+1}
-  complex_shape.embedding.nat_up_int_down nat_up_int_down_c_iff n (-↑n) sorry).hom.app
+  complex_shape.embedding.nat_up_int_down nat_up_int_down_c_iff n (-↑n) (by { cases n; refl})).hom.app
   (hom_complex_nat.{u} ((QprimeFP_nat.{u} r' BD κ M).obj c₂) V.to_Cond) =
   _
 -/
