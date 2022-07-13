@@ -220,7 +220,14 @@ match i with
 | int.of_nat (i+1) := is_zero.iso (functor.map_is_zero _ (is_zero_zero _).op) (is_zero_zero _)
 | -[1+i] := iso.refl _
 end)
-sorry
+begin
+  rintro i (j|(_|j)) (rfl : _ = _),
+  { apply is_zero.eq_of_src,
+    refine functor.map_is_zero _ _,
+    dsimp, apply is_zero.op, exact is_zero_zero _ },
+  { refine (category.id_comp _).trans (category.comp_id _).symm, },
+  { refine (category.id_comp _).trans (category.comp_id _).symm, },
+end
 
 /-
 lemma embed_hom_complex_nat_iso_homology_iso (X : homological_complex (Condensed.{u} Ab.{u+1})
