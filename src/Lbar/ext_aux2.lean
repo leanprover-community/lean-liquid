@@ -531,7 +531,21 @@ lemma Ext_compute_with_acyclic_aux₃_naturality_snd_var (i) :
     refine nat_trans.app _ _,
     refine nat_trans.map_homological_complex _ _,
     exact preadditive_yoneda.map f,
-  end := sorry
+  end :=
+begin
+  dsimp only [Ext_compute_with_acyclic_aux₃],
+  erw ← (homology_functor.{u_2 u_2+1 0} AddCommGroup.{u_2}
+    (complex_shape.up.{0} ℤ).symm (-i)).map_comp,
+  erw ← (homology_functor.{u_2 u_2+1 0} AddCommGroup.{u_2}
+    (complex_shape.up.{0} ℤ).symm (-i)).map_comp,
+  congr' 1,
+  ext t x,
+  dsimp [Ext_compute_with_acyclic_HomB],
+  simp only [comp_apply],
+  dsimp [nat_trans.map_homological_complex, functor.right_op,
+    homological_complex.map_unop],
+  simp only [category.assoc],
+end
 
 lemma Ext_compute_with_acyclic_naturality_snd_var
   (h₁) (h₂) (i) :
