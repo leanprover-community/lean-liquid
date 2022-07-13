@@ -102,7 +102,7 @@ begin
 end
 
 lemma Tinv2_iso_of_bicartesian_aux_2
-  [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]
+  [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]
   (j) {e : (homotopy_category.colimit_cofan.{u+1 u+2}
      (λ (a : ulift.{u+1 0} ℕ),
         ((λ (k : ulift.{u+1 0} ℕ), (QprimeFP.{u} r' BD.data κ₂ M).obj (ι k)) a).val)).X.is_bounded_above } :
@@ -266,4 +266,3 @@ begin
 end
 
 end preps
-
