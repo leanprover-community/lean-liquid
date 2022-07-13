@@ -37,6 +37,73 @@ lemma QprimeFP_map (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) :
 
 variables [fact (0 < r')] [fact (r' < 1)]
 
+namespace ExtQprime_iso_aux_system_obj_naturality_setup
+
+variables (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) (n : ℕ)
+
+/-
+homological_complex.unop_functor.{u+2 u+1 0}.map
+    ((map_homological_complex_embed.{u+2 u+2 u+1 u+1}
+        (preadditive_yoneda_obj.{u+1 u+2} V.to_Cond ⋙
+           forget₂.{u+2 u+2 u+1 u+1 u+1} (Module.{u+1 u+1} (End.{u+1 u+2} V.to_Cond))
+             AddCommGroup.{u+1}).right_op).inv.app
+       ((QprimeFP_nat.{u} r' BD κ M).obj c₂)).op ≫
+  embed_unop.{u+2 u+1}.hom.app
+    (op.{u+3}
+       (((preadditive_yoneda_obj.{u+1 u+2} V.to_Cond ⋙
+            forget₂.{u+2 u+2 u+1 u+1 u+1} (Module.{u+1 u+1} (End.{u+1 u+2} V.to_Cond))
+              Ab.{u+1}).right_op.map_homological_complex
+           (complex_shape.down.{0} ℕ)).obj
+          ((QprimeFP_nat.{u} r' BD κ M).obj c₂)))
+-/
+
+lemma aux₁ :
+  begin
+    refine homological_complex.unop_functor.{u+2 u+1 0}.map
+    (((preadditive_yoneda_obj.{u+1 u+2} V.to_Cond ⋙
+         forget₂.{u+2 u+2 u+1 u+1 u+1} (Module.{u+1 u+1} (End.{u+1 u+2} V.to_Cond))
+           AddCommGroup.{u+1}).right_op.map_homological_complex
+        (complex_shape.up.{0} ℤ)).map
+       ((homological_complex.embed.{0 0 u+2 u+1} complex_shape.embedding.nat_down_int_up).map
+          ((QprimeFP_nat.{u} r' BD κ M).map h))).op ≫
+  homological_complex.unop_functor.{u+2 u+1 0}.map
+      ((map_homological_complex_embed.{u+2 u+2 u+1 u+1}
+          (preadditive_yoneda_obj.{u+1 u+2} V.to_Cond ⋙
+             forget₂.{u+2 u+2 u+1 u+1 u+1} (Module.{u+1 u+1} (End.{u+1 u+2} V.to_Cond))
+               AddCommGroup.{u+1}).right_op).inv.app
+         ((QprimeFP_nat.{u} r' BD κ M).obj c₁)).op ≫
+    embed_unop.{u+2 u+1}.hom.app
+      (op.{u+3}
+         (((preadditive_yoneda_obj.{u+1 u+2} V.to_Cond ⋙
+              forget₂.{u+2 u+2 u+1 u+1 u+1} (Module.{u+1 u+1} (End.{u+1 u+2} V.to_Cond))
+                Ab.{u+1}).right_op.map_homological_complex
+             (complex_shape.down.{0} ℕ)).obj
+            ((QprimeFP_nat.{u} r' BD κ M).obj c₁)))
+  end =
+  homological_complex.unop_functor.{u+2 u+1 0}.map
+    (((preadditive_yoneda_obj.{u+1 u+2} V.to_Cond ⋙
+         forget₂.{u+2 u+2 u+1 u+1 u+1} (Module.{u+1 u+1} (End.{u+1 u+2} V.to_Cond))
+           AddCommGroup.{u+1}).right_op.map_homological_complex
+        (complex_shape.up.{0} ℤ)).map
+       ((homological_complex.embed.{0 0 u+2 u+1} complex_shape.embedding.nat_down_int_up).map
+          ((QprimeFP_nat.{u} r' BD κ M).map h))).op ≫
+  homological_complex.unop_functor.{u+2 u+1 0}.map
+      ((map_homological_complex_embed.{u+2 u+2 u+1 u+1}
+          (preadditive_yoneda_obj.{u+1 u+2} V.to_Cond ⋙
+             forget₂.{u+2 u+2 u+1 u+1 u+1} (Module.{u+1 u+1} (End.{u+1 u+2} V.to_Cond))
+               AddCommGroup.{u+1}).right_op).inv.app
+         ((QprimeFP_nat.{u} r' BD κ M).obj c₁)).op ≫
+    embed_unop.{u+2 u+1}.hom.app
+      (op.{u+3}
+         (((preadditive_yoneda_obj.{u+1 u+2} V.to_Cond ⋙
+              forget₂.{u+2 u+2 u+1 u+1 u+1} (Module.{u+1 u+1} (End.{u+1 u+2} V.to_Cond))
+                Ab.{u+1}).right_op.map_homological_complex
+             (complex_shape.down.{0} ℕ)).obj
+            ((QprimeFP_nat.{u} r' BD κ M).obj c₁)))
+ := rfl
+
+end ExtQprime_iso_aux_system_obj_naturality_setup
+
 lemma ExtQprime_iso_aux_system_obj_natrality (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) (n : ℕ) :
   (ExtQprime_iso_aux_system_obj r' BD κ M V c₂ n).hom ≫
   (homology_functor _ _ _).map
@@ -68,10 +135,12 @@ begin
   simp only [functor.map_comp, functor.comp_map, nat_trans.naturality,
     nat_trans.naturality_assoc],
   dsimp only [functor.op_map, quiver.hom.unop_op, functor.right_op_map],
-  simp only [← functor.map_comp, ← functor.map_comp_assoc],
+  simp only [← functor.map_comp, ← functor.map_comp_assoc, category.assoc],
   dsimp [-homology_functor_map],
   --refine congr_arg2 _ _ (congr_arg2 _ rfl _),
-  sorry
+  --rw ExtQprime_iso_aux_system_obj_naturality_setup.aux₁,
+  --refl,
+  --sorry
 
 end
 
