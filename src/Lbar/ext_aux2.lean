@@ -438,11 +438,58 @@ lemma aux₂ (c : (ℝ≥0)ᵒᵖ) :
 
 end ExtQprime_iso_aux_system_comm_setup
 
-lemma Ext_compute_with_acyclic_naturality_snd_var
-  {A : Type*} [category A] [abelian A] [enough_projectives A]
+section naturality_snd_var
+
+variables {A : Type*} [category A] [abelian A] [enough_projectives A]
   (X : cochain_complex A ℤ)
   [((homotopy_category.quotient A (complex_shape.up.{0} ℤ)).obj X).is_bounded_above]
-  {B₁ B₂ : A} (f : B₁ ⟶ B₂) (h₁) (h₂) (i) :
+  {B₁ B₂ : A} (f : B₁ ⟶ B₂) -- (h₁) (h₂) (i)
+
+@[reassoc]
+lemma Ext_compute_with_acyclic_aux₁_naturality_snd_var (i) :
+  (Ext_compute_with_acyclic_aux₁ X B₁ i).hom ≫
+  begin
+    refine nat_trans.app _ _,
+    refine preadditive_yoneda.map _,
+    refine category_theory.functor.map _ f,
+  end =
+  category_theory.functor.map _
+  (category_theory.functor.map _ f) ≫
+  (Ext_compute_with_acyclic_aux₁ X B₂ i).hom := sorry
+
+@[reassoc]
+lemma Ext_compute_with_acyclic_aux₂_naturality_snd_var (i) :
+  (Ext_compute_with_acyclic_aux₂ X B₁ i).hom ≫
+  (homology_functor _ _ _).map
+  begin
+    refine nat_trans.app _ _,
+    refine nat_trans.map_homological_complex _ _,
+    exact preadditive_yoneda.map f,
+  end =
+  nat_trans.app
+  (preadditive_yoneda.map $ category_theory.functor.map _ f) _ ≫
+  (Ext_compute_with_acyclic_aux₂ X B₂ i).hom := sorry
+
+include f
+lemma Ext_compute_with_acyclic_aux₃_naturality_snd_var (i) :
+  (homology_functor _ _ _).map
+  begin
+    refine homological_complex.map_unop _ _ _,
+    refine nat_trans.app _ _,
+    refine nat_trans.map_homological_complex _ _,
+    refine nat_trans.right_op _,
+    exact preadditive_yoneda.map f,
+  end ≫ Ext_compute_with_acyclic_aux₃ X B₂ i =
+  Ext_compute_with_acyclic_aux₃ X B₁ i ≫
+  (homology_functor _ _ _).map
+  begin
+    refine nat_trans.app _ _,
+    refine nat_trans.map_homological_complex _ _,
+    exact preadditive_yoneda.map f,
+  end := sorry
+
+lemma Ext_compute_with_acyclic_naturality_snd_var
+  (h₁) (h₂) (i) :
   (Ext_compute_with_acyclic X B₁ h₁ i).hom ≫
   (homology_functor _ _ _).map
   (begin
@@ -453,7 +500,17 @@ lemma Ext_compute_with_acyclic_naturality_snd_var
   end) =
   category_theory.functor.map _
   (category_theory.functor.map _ f) ≫ (Ext_compute_with_acyclic X B₂ h₂ i).hom :=
-sorry
+begin
+  dsimp [Ext_compute_with_acyclic, - homology_functor_map],
+  simp only [category.assoc],
+  rw ← Ext_compute_with_acyclic_aux₁_naturality_snd_var_assoc,
+  rw ← Ext_compute_with_acyclic_aux₂_naturality_snd_var_assoc,
+  simp only [category.assoc], congr' 2,
+  rw [is_iso.eq_comp_inv, category.assoc, is_iso.inv_comp_eq],
+  apply Ext_compute_with_acyclic_aux₃_naturality_snd_var,
+end
+
+end naturality_snd_var
 
 lemma ExtQprime_iso_aux_system_comm [normed_with_aut r V]
   [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)] (n : ℕ) :
