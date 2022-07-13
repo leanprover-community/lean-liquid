@@ -151,55 +151,7 @@ lemma aux₂ (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) (n : ℕ) :
   complex_shape.embedding.nat_up_int_down nat_up_int_down_c_iff n (-↑n) (by { cases n; refl})).hom.app
   (hom_complex_nat.{u} ((QprimeFP_nat.{u} r' BD κ M).obj c₁) V.to_Cond) :=
 begin
-  ext k : 2,
-
-  /-
-  dsimp only [homological_complex.homology_embed_nat_iso, iso.trans_hom,
-    iso.trans_inv, iso.trans_symm, iso_whisker_left_hom, functor.associator,
-    iso.symm_hom, nat_trans.comp_app, whisker_left_app,
-    homological_complex.homology_embed_nat_iso, short_complex.homology_functor_iso,
-    nat_iso.of_components.hom_app, iso.refl, iso_whisker_right_hom,
-    whisker_right_app, short_complex.homology_functor, nat_iso.of_components.inv_app,
-    nat_iso.of_components, functor.comp_map],
-
-  simp only [category.id_comp, category.comp_id, category.assoc],
-  slice_lhs 2 3
-  { erw category.id_comp },
-  slice_lhs 3 4
-  { erw category.id_comp },
-  slice_lhs 1 2
-  { rw homology.map_eq_desc'_lift_left, erw homology.π'_desc' },
-  slice_lhs 2 3
-  { rw [homology_functor_map], rw homology.map_eq_lift_desc'_left,
-    rw homology.lift_ι },
-
-  slice_rhs 1 2
-  { rw homology_functor_map,
-    rw homology.map_eq_desc'_lift_left, rw homology.π'_desc' },
-  slice_rhs 2 3
-  { erw category.id_comp },
-  slice_rhs 2 3
-  { erw category.id_comp },
-  slice_rhs 2 3
-  { rw homology.map_eq_lift_desc'_left,
-    erw homology.lift_ι },
-
-  dsimp only [short_complex.functor_homological_complex, short_complex.mk],
-  let t := _, change homology.lift _ _ _ t _ ≫ _ = _,
-  let s := _, change _ ≫ homology.desc' _ _ _ s _ = _,
-  have := homology.lift_desc' _ _ _
-    ((hom_complex_nat.{u} ((QprimeFP_nat.{u} r' BD κ M).obj c₂) V.to_Cond).d_to n)
-    ((hom_complex_nat.{u} ((QprimeFP_nat.{u} r' BD κ M).obj c₂) V.to_Cond).d_from n)
-    (homological_complex.d_to_comp_d_from _ _) _ _ _ _ _ _ t s begin
-      dsimp only [t],
-      rw ← category.assoc
-    end rfl,
-  conv_lhs { erw this }, clear this, clear s, clear t,
-
-
-  -/
-
-  sorry,
+  erw nat_trans.naturality,
 end
 
 
