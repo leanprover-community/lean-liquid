@@ -508,7 +508,12 @@ lemma Ext_compute_with_acyclic_aux₂_naturality_snd_var (i) :
   end =
   nat_trans.app
   (preadditive_yoneda.map $ category_theory.functor.map _ f) _ ≫
-  (Ext_compute_with_acyclic_aux₂ X B₂ i).hom := sorry
+  (Ext_compute_with_acyclic_aux₂ X B₂ i).hom :=
+begin
+  dsimp only [Ext_compute_with_acyclic_aux₂, unop_op],
+  have := hom_single_iso_naturality_snd_var_good (of' X).replace (-i) f,
+  erw ← this,
+end
 
 include f
 lemma Ext_compute_with_acyclic_aux₃_naturality_snd_var (i) :
