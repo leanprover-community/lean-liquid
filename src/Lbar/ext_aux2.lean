@@ -8,7 +8,7 @@ open opposite category_theory category_theory.limits category_theory.preadditive
 open_locale nnreal zero_object
 
 variables (r r' : ℝ≥0)
-variables [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r < 1)] [fact (r' < 1)]
+variables [fact (0 < r)] [fact (r < r')] [fact (r < 1)]
 
 section
 
@@ -34,6 +34,8 @@ set_option pp.universes true
 
 lemma QprimeFP_map (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) :
   (QprimeFP r' BD κ M).map h = of'_hom ((QprimeFP_int r' BD κ _).map h) := rfl
+
+variables [fact (0 < r')] [fact (r' < 1)]
 
 def ExtQprime_iso_aux_system (n : ℕ) :
   (QprimeFP r' BD κ M).op ⋙ (Ext n).flip.obj ((single _ 0).obj V.to_Cond) ≅

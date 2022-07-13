@@ -252,9 +252,7 @@ end
 def coproduct_shift (A : Type u)
   [category.{v} A]
   [abelian A]
-  [enough_projectives A]
   [has_coproducts A]
-  [AB4 A]
   (X : ulift.{v} ℕ → bounded_homotopy_category A)
   [uniformly_bounded X]
   (e : X ⟶ (λ i, X (ulift.up $ ulift.down i + 1))) :

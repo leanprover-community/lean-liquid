@@ -9,8 +9,20 @@ open_locale nnreal
 namespace Lbar
 
 variables (r r' : ℝ≥0)
-variables [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r < 1)] [fact (r' < 1)]
+variables [fact (0 < r')] [fact (r < 1)]
 variables (i : ℕ)
+
+-- move me
+lemma κ_pos : ∀ m, 0 < eg.κ r r' m
+| 0 := zero_lt_one
+| (m+1) := begin
+  dsimp only [eg.κ, data.κ],
+  refine mul_pos _ _,
+  { refine nnreal.inv_pos.mpr (lt_max_of_lt_left zero_lt_one), },
+  { refine mul_pos (pow_pos (fact.out _) _) (κ_pos _), }
+end
+
+variables [fact (0 < r)] [fact (r < r')] [fact (r' < 1)]
 
 noncomputable!
 def ι' : ℕ → ℝ≥0
@@ -63,16 +75,6 @@ lemma hι'_self_le : ∀ j:ℕ, (j:ℝ≥0) ≤ ι' r r' i j
 | 0 := by { norm_cast, exact zero_le' }
 | (j+1) := by { refine (le_max_left _ _).trans (le_max_left _ _) }
 
--- move me
-lemma κ_pos : ∀ m, 0 < eg.κ r r' m
-| 0 := zero_lt_one
-| (m+1) := begin
-  dsimp only [eg.κ, data.κ],
-  refine mul_pos _ _,
-  { refine nnreal.inv_pos.mpr (lt_max_of_lt_left zero_lt_one), },
-  { refine mul_pos (pow_pos (fact.out _) _) (κ_pos _), }
-end
-
 lemma sufficiently_increasing_eg (s : ℝ≥0) (m : ℕ) :
   ∃ n : ℕ, s ≤ ι' r r' i n * eg.κ r r' m :=
 begin
@@ -99,8 +101,7 @@ begin
 end
 
 def sufficiently_increasing
-  (κ : ℝ≥0 → ℕ → ℝ≥0) (ι : ulift ℕ → ℝ≥0) (hι : monotone ι)
-  [∀ n, fact (monotone (function.swap κ n))] : Prop :=
+  (κ : ℝ≥0 → ℕ → ℝ≥0) (ι : ulift ℕ → ℝ≥0) : Prop :=
 ∀ (r : ℝ≥0) (m : ℕ), ∃ n : ℕ, r ≤ κ (ι ⟨n⟩) m
 
 end Lbar
