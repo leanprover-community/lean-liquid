@@ -43,7 +43,7 @@ begin
     apply hn j _ hi,
   end
 
-lemma Tinv2_iso_of_bicartesian_aux_1
+def Tinv2_iso_of_bicartesian_aux_1
   (i : ℤ) : commsq.{u+2 u+1}
   (shift_sub_id.{u+1}
      ((QprimeFP.{u} r' BD.data κ₂ M).op ⋙

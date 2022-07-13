@@ -1114,7 +1114,7 @@ Condensed_Ab_to_CondensedSet.map_iso $
 (limit.is_limit _).cone_point_unique_up_to_iso (biproduct.is_limit _)
 
 @[simp, reassoc]
-def Condensed_product_iso_biproduct_spec' (q : ℕ) (i : ulift.{u+1} (fin q)) :
+lemma Condensed_product_iso_biproduct_spec' (q : ℕ) (i : ulift.{u+1} (fin q)) :
   (Condensed_product_iso_biproduct M q).inv ≫
   Condensed_Ab_to_CondensedSet.map (pi.π _ i) =
   Condensed_Ab_to_CondensedSet.map (biproduct.π _ i) :=
@@ -1126,7 +1126,7 @@ begin
 end
 
 @[simp, reassoc]
-def Condensed_product_iso_biproduct_spec (q : ℕ) (i : ulift.{u+1} (fin q)) :
+lemma Condensed_product_iso_biproduct_spec (q : ℕ) (i : ulift.{u+1} (fin q)) :
   (Condensed_product_iso_biproduct M q).hom ≫
   Condensed_Ab_to_CondensedSet.map (biproduct.π _ i) =
   Condensed_Ab_to_CondensedSet.map (pi.π _ i) :=
