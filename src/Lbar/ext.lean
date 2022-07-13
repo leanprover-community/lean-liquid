@@ -60,7 +60,9 @@ begin
       (λ k, (QprimeFP r' BD.data κ₂ M).map (hom_of_le $ hι $
         by exact_mod_cast k.down.le_succ)) i ((single (Condensed Ab) 0).obj V.to_Cond),
     exact this.symm,
-    sorry,
+    exact (bounded_homotopy_category.cofan
+        (λ (a : ulift.{u+1 0} ℕ), ((λ (k : ulift.{u+1 0} ℕ),
+        (QprimeFP.{u} r' BD.data κ₂ M).obj (ι k)) a))).X.2,
 end
 
 lemma Tinv2_iso_of_bicartesian_aux [normed_with_aut r V]
