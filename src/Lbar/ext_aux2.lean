@@ -37,6 +37,15 @@ lemma QprimeFP_map (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) :
 
 variables [fact (0 < r')] [fact (r' < 1)]
 
+lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_c (c₁ c₂) (h : c₁ ⟶ c₂) :
+  (hom_complex_QprimeFP_nat_iso_aux_system r' BD κ M V c₂).hom ≫
+  (category_theory.functor.map _ h.op) =
+  (category_theory.functor.map _
+  begin
+    refine homological_complex.op_functor.map (quiver.hom.op _),
+    refine category_theory.functor.map _ h,
+  end) ≫ (hom_complex_QprimeFP_nat_iso_aux_system r' BD κ M V c₁).hom := sorry
+
 namespace ExtQprime_iso_aux_system_obj_naturality_setup
 
 /-
@@ -129,10 +138,7 @@ lemma aux₁ (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) (n : ℕ) :
 begin
   rw [← functor.map_comp, ← functor.map_comp],
   congr' 1,
-  ext k : 2,
-  dsimp only [homological_complex.comp_f, functor.map_homological_complex_map_f,
-    hom_complex_QprimeFP_nat_iso_aux_system, iso.trans_hom],
-  sorry
+  erw ← hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_c,
 end
 
 lemma aux₂ (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) (n : ℕ) :
