@@ -523,8 +523,7 @@ begin
   homological_complex.unop_functor_map_f, functor.map_homological_complex_map_f],
   rw embed_hom_complex_nat_iso₀,
   rw embed_hom_complex_nat_iso₀,
-  sorry,
-  },
+  ext, refl },
   { apply is_zero.eq_of_tgt,
     exact is_zero_zero _ },
   { dsimp only [functor.comp],
@@ -532,8 +531,7 @@ begin
   homological_complex.unop_functor_map_f, functor.map_homological_complex_map_f],
   rw embed_hom_complex_nat_iso_neg,
   rw embed_hom_complex_nat_iso_neg,
-  sorry,
-  },
+  ext, refl },
 end
 
 end ExtQprime_iso_aux_system_comm_setup
