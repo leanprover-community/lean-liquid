@@ -446,7 +446,8 @@ variables {A : Type*} [category A] [abelian A] [enough_projectives A]
   {B₁ B₂ : A} (f : B₁ ⟶ B₂) -- (h₁) (h₂) (i)
 
 @[reassoc]
-lemma Ext_compute_with_acyclic_aux₁_naturality_snd_var (i) :
+lemma Ext_compute_with_acyclic_aux₁_naturality_snd_var (i)
+  (e : (0 : ℤ) - i = -i) :
   (Ext_compute_with_acyclic_aux₁ X B₁ i).hom ≫
   begin
     refine nat_trans.app _ _,
@@ -455,7 +456,22 @@ lemma Ext_compute_with_acyclic_aux₁_naturality_snd_var (i) :
   end =
   category_theory.functor.map _
   (category_theory.functor.map _ f) ≫
-  (Ext_compute_with_acyclic_aux₁ X B₂ i).hom := sorry
+  (Ext_compute_with_acyclic_aux₁ X B₂ i).hom :=
+begin
+  ext t,
+  simp only [comp_apply],
+  dsimp [Ext_compute_with_acyclic_aux₁, Ext],
+  simp only [category.assoc],
+  generalize_proofs h1 h2,
+  let φ₁ := λ j, (single _ j).obj B₁,
+  let φ₂ := λ j, (single _ j).obj B₂,
+  change t ≫ _ ≫ eq_to_hom (congr_arg φ₁ e) ≫ _ =
+    _ ≫ _ ≫ _ ≫ eq_to_hom (congr_arg φ₂ e),
+  induction e,
+  dsimp, simp only [category.id_comp, category.comp_id],
+  erw ← nat_trans.naturality,
+  refl,
+end
 
 @[reassoc]
 lemma Ext_compute_with_acyclic_aux₂_naturality_snd_var (i) :
@@ -508,6 +524,7 @@ begin
   simp only [category.assoc], congr' 2,
   rw [is_iso.eq_comp_inv, category.assoc, is_iso.inv_comp_eq],
   apply Ext_compute_with_acyclic_aux₃_naturality_snd_var,
+  simp,
 end
 
 end naturality_snd_var
