@@ -131,7 +131,13 @@ lemma aux₁ (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) (n : ℕ) :
       (homological_complex.op_functor.map ((QprimeFP_nat r' BD κ M).map h).op)) ≫
   (homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.up.{0} ℕ) n).map
   (hom_complex_QprimeFP_nat_iso_aux_system.{u} r' BD κ M V c₁).hom :=
-sorry
+begin
+  rw [← functor.map_comp, ← functor.map_comp],
+  congr' 1,
+  ext k : 2,
+  dsimp only [homological_complex.comp_f, functor.map_homological_complex_map_f],
+  sorry
+end
 
 lemma aux₂ (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) (n : ℕ) :
   (homological_complex.homology_embed_nat_iso.{0 0 u+2 u+1} Ab.{u+1}
@@ -253,7 +259,7 @@ begin
 
   --congr' 1,
   --refl,
-  sorry
+  admit
 
   -/
 end
@@ -346,14 +352,19 @@ begin
     iso.trans_hom, id, functor.map_iso_hom, nat_iso.of_components.hom_app,
     nat_trans.comp_app],
   haveI : ((homotopy_category.quotient.{u+1 u+2 0} (Condensed.{u u+1 u+2} Ab.{u+1}) (complex_shape.up.{0} ℤ)).obj
-     ((QprimeFP_int.{u} r' BD κ M).obj (unop.{1} c))).is_bounded_above := sorry,
+     ((QprimeFP_int.{u} r' BD κ M).obj (unop.{1} c))).is_bounded_above :=
+     chain_complex.is_bounded_above _,
   haveI : ((homotopy_category.quotient.{u+1 u+2 0} (Condensed.{u u+1 u+2} Ab.{u+1}) (complex_shape.up.{0} ℤ)).obj
-     ((QprimeFP_int.{u} r' BD κ₂ M).obj (unop.{1} c))).is_bounded_above := sorry,
+     ((QprimeFP_int.{u} r' BD κ₂ M).obj (unop.{1} c))).is_bounded_above :=
+     chain_complex.is_bounded_above _,
   have := Ext_compute_with_acyclic_naturality
     ((QprimeFP_int.{u} r' BD κ₂ M).obj c.unop)
     ((QprimeFP_int.{u} r' BD κ M).obj c.unop)
-    V.to_Cond sorry sorry
+    V.to_Cond _ _
     ((QprimeFP_int.Tinv BD κ₂ κ M).app _) n,
+  rotate,
+  { intros k i hi, apply QprimeFP_acyclic, exact hi },
+  { intros k i hi, apply QprimeFP_acyclic, exact hi },
   erw reassoc_of this, clear this, simp only [category.assoc], congr' 1,
   dsimp only [whisker_right_app],
   rw ExtQprime_iso_aux_system_comm_Tinv_setup.aux₁ r' BD κ κ₂ M V c n,
@@ -374,7 +385,7 @@ end
 --           (Condensed.of_top_ab_map.{u} (normed_group_hom.to_add_monoid_hom.{u u} normed_with_aut.T.{u}.inv) _))).app
 --       ((QprimeFP.{u} r' BD κ₂ M).op.obj c) ≫
 --     (ExtQprime_iso_aux_system_obj.{u} r' BD κ₂ M V (unop.{1} c) n).hom :=
--- sorry
+-- by admit
 
 namespace ExtQprime_iso_aux_system_comm_setup
 end ExtQprime_iso_aux_system_comm_setup
@@ -399,15 +410,20 @@ begin
 
   haveI : ((homotopy_category.quotient.{u+1 u+2 0} (Condensed.{u u+1 u+2} Ab.{u+1})
     (complex_shape.up.{0} ℤ)).obj
-     ((QprimeFP_int.{u} r' BD κ M).obj (unop.{1} c))).is_bounded_above := sorry,
+     ((QprimeFP_int.{u} r' BD κ M).obj (unop.{1} c))).is_bounded_above :=
+     chain_complex.is_bounded_above _,
   haveI : ((homotopy_category.quotient.{u+1 u+2 0} (Condensed.{u u+1 u+2} Ab.{u+1})
     (complex_shape.up.{0} ℤ)).obj
-     ((QprimeFP_int.{u} r' BD κ₂ M).obj (unop.{1} c))).is_bounded_above := sorry,
+     ((QprimeFP_int.{u} r' BD κ₂ M).obj (unop.{1} c))).is_bounded_above :=
+     chain_complex.is_bounded_above _,
   have := Ext_compute_with_acyclic_naturality
     ((QprimeFP_int.{u} r' BD κ₂ M).obj c.unop)
     ((QprimeFP_int.{u} r' BD κ M).obj c.unop)
-    V.to_Cond sorry sorry
+    V.to_Cond _ _
     ((QprimeFP_int.ι BD κ₂ κ M).app _) n,
+  rotate,
+  { intros k i hi, apply QprimeFP_acyclic, exact hi },
+  { intros k i hi, apply QprimeFP_acyclic, exact hi },
 
   simp only [category.assoc], dsimp only [ExtQprime.T_inv, nat_trans.comp_app,
     whisker_right_app, whisker_left_app, functor.flip],
