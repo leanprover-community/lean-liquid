@@ -121,6 +121,62 @@ lemma naturality_helper {c₁ c₂ : ℝ≥0} (h : c₁ ⟶ c₂) (n : ℕ) (w1 
 admit
 -/
 
+lemma aux₁ (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) (n : ℕ) :
+  (homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.up.{0} ℕ) n).map
+  (hom_complex_QprimeFP_nat_iso_aux_system.{u} r' BD κ M V c₂).hom ≫
+  (homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.up.{0} ℕ) n).map
+  ((aux_system.{u u+1} r' BD ⟨M⟩ (SemiNormedGroup.ulift.{u+1 u}.obj V) κ).to_Ab.map h.op) =
+  (homology_functor _ _ _).map
+  (category_theory.functor.map _
+      (homological_complex.op_functor.map ((QprimeFP_nat r' BD κ M).map h).op)) ≫
+  (homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.up.{0} ℕ) n).map
+  (hom_complex_QprimeFP_nat_iso_aux_system.{u} r' BD κ M V c₁).hom :=
+sorry
+
+lemma aux₂ (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) (n : ℕ) :
+  (homological_complex.homology_embed_nat_iso.{0 0 u+2 u+1} Ab.{u+1}
+    complex_shape.embedding.nat_up_int_down nat_up_int_down_c_iff n (-↑n) sorry).hom.app
+    (hom_complex_nat.{u} ((QprimeFP_nat.{u} r' BD κ M).obj c₂) V.to_Cond) ≫
+    (homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.up.{0} ℕ) n).map
+    (((preadditive_yoneda.{u+1 u+2}.obj V.to_Cond).map_homological_complex
+    (complex_shape.down.{0} ℕ).symm).map (homological_complex.op_functor.{u+2 u+1 0}.map
+    ((QprimeFP_nat.{u} r' BD κ M).map h).op)) =
+  (homological_complex.embed.{0 0 u+2 u+1} complex_shape.embedding.nat_up_int_down ⋙
+  homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.down.{0} ℤ) (-↑n)).map
+  (category_theory.functor.map _
+      (homological_complex.op_functor.map ((QprimeFP_nat r' BD κ M).map h).op)) ≫
+  (homological_complex.homology_embed_nat_iso.{0 0 u+2 u+1} Ab.{u+1}
+  complex_shape.embedding.nat_up_int_down nat_up_int_down_c_iff n (-↑n) sorry).hom.app
+  (hom_complex_nat.{u} ((QprimeFP_nat.{u} r' BD κ M).obj c₁) V.to_Cond) :=
+sorry
+
+lemma aux₃ (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) (n : ℕ) :
+  (homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.up.{0} ℤ).symm (-↑n)).map
+  (embed_hom_complex_nat_iso.{u} ((QprimeFP_nat.{u} r' BD κ M).obj c₂) V.to_Cond).hom ≫
+  (homological_complex.embed.{0 0 u+2 u+1} complex_shape.embedding.nat_up_int_down ⋙
+  homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.down.{0} ℤ) (-↑n)).map
+  (((preadditive_yoneda.{u+1 u+2}.obj V.to_Cond).map_homological_complex
+  (complex_shape.down.{0} ℕ).symm).map (homological_complex.op_functor.{u+2 u+1 0}.map
+  ((QprimeFP_nat.{u} r' BD κ M).map h).op))
+  =
+  ((homology_functor.{u+1 u+2 0} AddCommGroup.{u+1}
+  (complex_shape.up.{0} ℤ).symm (-↑n)).op.map
+  (homological_complex.unop_functor.{u+2 u+1 0}.right_op.map
+  (((preadditive_yoneda.{u+1 u+2}.obj V.to_Cond).right_op.map_homological_complex
+  (complex_shape.up.{0} ℤ)).map ((QprimeFP_int.{u} r' BD κ M).map h)))).unop ≫
+  (homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.up.{0} ℤ).symm (-↑n)).map
+  (embed_hom_complex_nat_iso.{u} ((QprimeFP_nat.{u} r' BD κ M).obj c₁) V.to_Cond).hom
+  := sorry
+/-
+lemma naturality_helper {c₂ : ℝ≥0} (n : ℕ) :
+  (homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.up.{0} ℤ).symm (-↑n)).map
+  (embed_hom_complex_nat_iso.{u} ((QprimeFP_nat.{u} r' BD κ M).obj c₂) V.to_Cond).hom ≫
+  (homological_complex.homology_embed_nat_iso.{0 0 u+2 u+1} Ab.{u+1}
+  complex_shape.embedding.nat_up_int_down nat_up_int_down_c_iff n (-↑n) sorry).hom.app
+  (hom_complex_nat.{u} ((QprimeFP_nat.{u} r' BD κ M).obj c₂) V.to_Cond) =
+  _
+-/
+
 end ExtQprime_iso_aux_system_obj_naturality_setup
 
 lemma QprimeFP_acyclic (c) (k i : ℤ) (hi : 0 < i) :
@@ -161,13 +217,21 @@ begin
   erw reassoc_of this, clear this,
   simp only [category.assoc, nat_iso.app_hom],
   congr' 1,
+  rw ExtQprime_iso_aux_system_obj_naturality_setup.aux₁ r' BD κ M V c₁ c₂ h n,
+  simp only [← category.assoc], congr' 1,
+  simp only [category.assoc],
+  rw ExtQprime_iso_aux_system_obj_naturality_setup.aux₂ r' BD κ M V c₁ c₂ h n,
+  simp only [← category.assoc], congr' 1,
+
+  exact ExtQprime_iso_aux_system_obj_naturality_setup.aux₃ r' BD κ M V c₁ c₂ h n,
+
+  --- OLD PROOF FROM HERE
   --have := ExtQprime_iso_aux_system_obj_naturality_setup.naturality_helper r' BD κ
   --  M V h n _ _,
   --simp only [category.assoc, functor.map_comp],
   --slice_rhs 3 4
   --{ erw ← this },
 
-  sorry
   /-
   dsimp only [QprimeFP_int],
   congr' 1,
