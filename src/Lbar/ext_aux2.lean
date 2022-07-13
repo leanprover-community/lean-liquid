@@ -84,6 +84,28 @@ def ExtQprime.Tinv2 [normed_with_aut r V]
   (QprimeFP r' BD κ₂ M).op ⋙ (Ext n).flip.obj ((single _ 0).obj V.to_Cond) :=
 ExtQprime.Tinv r' BD κ κ₂ M V n - ExtQprime.T_inv r r' BD κ κ₂ M V n
 
+lemma ExtQprime_iso_aux_system_comm_Tinv
+  [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)] (n : ℕ) :
+  (ExtQprime_iso_aux_system r' BD κ M V n).hom ≫
+  whisker_right (aux_system.Tinv.{u} r' BD ⟨M⟩ (SemiNormedGroup.ulift.{u+1}.obj V) κ₂ κ)
+    ((forget₂ _ _).map_homological_complex _ ⋙ homology_functor Ab.{u+1} (complex_shape.up ℕ) n) =
+  ExtQprime.Tinv r' BD κ κ₂ M V n ≫
+  (ExtQprime_iso_aux_system r' BD κ₂ M V n).hom :=
+sorry
+
+
+-- lemma ExtQprime_iso_aux_system_comm_T_inv [normed_with_aut r V] (n : ℕ) (c : ℝ≥0ᵒᵖ) :
+--   (ExtQprime_iso_aux_system_obj.{u} r' BD κ₂ M V (unop.{1} c) n).hom ≫
+--     ((forget₂.{u+2 u+2 u+1 u+1 u+1} SemiNormedGroup.{u+1} Ab.{u+1}).map_homological_complex (complex_shape.up.{0} ℕ) ⋙
+--    homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.up.{0} ℕ) n).map
+--   ((aux_system.res.{u u+1} r' BD ⟨M⟩ (SemiNormedGroup.ulift.{u+1 u}.obj V) κ₂ κ).app c) =
+--   ((Ext.{u+1 u+2} ↑n).flip.map
+--       ((single.{u+1 u+2} (Condensed.{u u+1 u+2} Ab.{u+1}) 0).map
+--           (Condensed.of_top_ab_map.{u} (normed_group_hom.to_add_monoid_hom.{u u} normed_with_aut.T.{u}.inv) _))).app
+--       ((QprimeFP.{u} r' BD κ₂ M).op.obj c) ≫
+--     (ExtQprime_iso_aux_system_obj.{u} r' BD κ₂ M V (unop.{1} c) n).hom :=
+-- sorry
+
 lemma ExtQprime_iso_aux_system_comm [normed_with_aut r V]
   [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)] (n : ℕ) :
   (ExtQprime_iso_aux_system r' BD κ M V n).hom ≫
@@ -91,7 +113,16 @@ lemma ExtQprime_iso_aux_system_comm [normed_with_aut r V]
     ((forget₂ _ _).map_homological_complex _ ⋙ homology_functor Ab.{u+1} (complex_shape.up ℕ) n) =
   ExtQprime.Tinv2 r r' BD κ κ₂ M V n ≫
   (ExtQprime_iso_aux_system r' BD κ₂ M V n).hom :=
-sorry
+begin
+  ext c : 2, dsimp only [aux_system.Tinv2, ExtQprime.Tinv2, nat_trans.comp_app, whisker_right_app],
+  simp only [sub_comp, nat_trans.app_sub, functor.map_sub, comp_sub],
+  refine congr_arg2 _ _ _,
+  { rw [← nat_trans.comp_app, ← ExtQprime_iso_aux_system_comm_Tinv], refl },
+  rw [nat_trans.comp_app, functor.map_comp, ExtQprime.T_inv,
+    nat_trans.comp_app, whisker_right_app, whisker_left_app, category.assoc],
+  dsimp only [ExtQprime_iso_aux_system, nat_iso.of_components.hom_app],
+  sorry
+end
 
 lemma ExtQprime_iso_aux_system_comm' [normed_with_aut r V]
   [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)] (n : ℕ) :
