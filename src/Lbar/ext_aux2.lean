@@ -46,6 +46,16 @@ lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_c (c₁ c₂) (h : c
     refine category_theory.functor.map _ h,
   end) ≫ (hom_complex_QprimeFP_nat_iso_aux_system r' BD κ M V c₁).hom := sorry
 
+lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_κ (c : (ℝ≥0))
+  [∀ (c : ℝ≥0) (n : ℕ), fact (κ₂ c n ≤ κ c n)] :
+  (hom_complex_QprimeFP_nat_iso_aux_system r' BD κ M V c).hom ≫
+  (whisker_right (aux_system.res _ _ _ _ _ _) _).app _ =
+  begin
+    refine category_theory.functor.map _ _,
+    refine homological_complex.op_functor.map (quiver.hom.op _),
+    refine (QprimeFP_nat.ι BD κ₂ κ M).app _,
+  end ≫ (hom_complex_QprimeFP_nat_iso_aux_system r' BD κ₂ M V c).hom := sorry
+
 namespace ExtQprime_iso_aux_system_obj_naturality_setup
 
 /-
@@ -335,7 +345,11 @@ lemma aux₁  :
       (QprimeFP_nat.Tinv  BD κ₂ κ M).app _))) ≫
   (homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.up.{0} ℕ) n).map
   (hom_complex_QprimeFP_nat_iso_aux_system.{u} r' BD κ₂ M V (unop.{1} c)).hom :=
-sorry
+begin
+  simp only [← category_theory.functor.map_comp, functor.comp_map], congr' 1,
+  --erw ← hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_κ,
+  sorry
+end
 
 lemma aux₂ :
 (homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.up.{0} ℤ).symm (-↑n)).map
