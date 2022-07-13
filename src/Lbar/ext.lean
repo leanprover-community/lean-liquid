@@ -43,7 +43,20 @@ lemma cofan_point_iso_colimit_conj_eq_desc
     refine (QprimeFP r' BD.data κ₂ M).map _,
     refine hom_of_le (hι _),
     exact_mod_cast k.down.le_succ,
-  end := sorry
+  end :=
+begin
+  ext j,
+  dsimp only [cofan_point_iso_colimit],
+  rw [colimit.ι_desc, cofan.mk_ι_app,
+      colimit.comp_cocone_point_unique_up_to_iso_inv_assoc],
+  simp only [← category.assoc], rw [← iso.eq_comp_inv], simp only [category.assoc],
+  rw [colimit.comp_cocone_point_unique_up_to_iso_inv],
+  dsimp only [sigma_shift, bounded_homotopy_category.cofan, cofan.mk_ι_app,
+    of_hom, homotopy_category.colimit_cofan],
+  erw [← functor.map_comp, colimit.ι_desc],
+  dsimp only [sigma_shift_cone, discrete.nat_trans_app],
+  refine functor.map_comp _ _ _,
+end
 
 def pi_Ext_iso_Ext_sigma (i : ℤ) :
   (∏ λ (k : ulift ℕ), ((QprimeFP r' BD.data κ₂ M).op ⋙
