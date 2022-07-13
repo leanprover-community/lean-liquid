@@ -400,7 +400,7 @@ def hom_complex_map_T_inv (c : (ℝ≥0)ᵒᵖ) :
     refine nat_trans.map_homological_complex _ _,
     refine preadditive_yoneda.map _,
     refine Condensed.of_top_ab_map.{u} (normed_group_hom.to_add_monoid_hom.{u u}
-      normed_with_aut.T.{u}.inv) sorry
+      normed_with_aut.T.{u}.inv) (normed_group_hom.continuous _)
   end ≫
   (category_theory.functor.map _
       (homological_complex.op_functor.map (quiver.hom.op $
@@ -425,7 +425,7 @@ lemma aux₂ (c : (ℝ≥0)ᵒᵖ) :
        ((nat_trans.map_homological_complex.{u+1 u+2 0 u+2 u+1}
            (nat_trans.right_op.{u+1 u+1 u+2 u+2} (preadditive_yoneda.{u+1 u+2}.map
            (Condensed.of_top_ab_map.{u} (normed_group_hom.to_add_monoid_hom.{u u}
-        normed_with_aut.T.{u}.inv) sorry)))
+        normed_with_aut.T.{u}.inv) (normed_group_hom.continuous _))))
            (complex_shape.up.{0} ℤ)).app
           ((QprimeFP_int.{u} r' BD κ M).obj (unop.{1} c))) ≫
      (homological_complex.unop_functor.{u+2 u+1 0}.right_op.map
@@ -500,9 +500,12 @@ begin
 
   let t : Condensed.of_top_ab V ⟶ _ :=
     Condensed.of_top_ab_map.{u} (normed_group_hom.to_add_monoid_hom.{u u}
-      normed_with_aut.T.{u}.inv) sorry,
+      normed_with_aut.T.{u}.inv) (normed_group_hom.continuous _),
   have := Ext_compute_with_acyclic_naturality_snd_var
-    ((QprimeFP_int r' BD κ M).obj c.unop) t sorry sorry n,
+    ((QprimeFP_int r' BD κ M).obj c.unop) t _ _ n,
+  rotate,
+  { intros k i hi, apply QprimeFP_acyclic, exact hi },
+  { intros k i hi, apply QprimeFP_acyclic, exact hi },
   erw ← reassoc_of this, clear this, congr' 1,
   simp only [functor.comp_map, category_theory.functor.map_comp,
     functor.op_map, quiver.hom.unop_op],
