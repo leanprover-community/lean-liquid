@@ -48,10 +48,12 @@ begin
     iso.trans_hom, id, functor.map_iso_hom],
   haveI : ((homotopy_category.quotient.{u+1 u+2 0}
     (Condensed.{u u+1 u+2} Ab.{u+1}) (complex_shape.up.{0} ℤ)).obj
-     ((QprimeFP_int.{u} r' BD κ M).obj c₁)).is_bounded_above := sorry,
+     ((QprimeFP_int.{u} r' BD κ M).obj c₁)).is_bounded_above :=
+    chain_complex.is_bounded_above _,
   haveI : ((homotopy_category.quotient.{u+1 u+2 0}
     (Condensed.{u u+1 u+2} Ab.{u+1}) (complex_shape.up.{0} ℤ)).obj
-     ((QprimeFP_int.{u} r' BD κ M).obj c₂)).is_bounded_above := sorry,
+     ((QprimeFP_int.{u} r' BD κ M).obj c₂)).is_bounded_above :=
+    chain_complex.is_bounded_above _,
   have := Ext_compute_with_acyclic_naturality
     ((QprimeFP_int.{u} r' BD κ M).obj c₁)
     ((QprimeFP_int.{u} r' BD κ M).obj c₂)
