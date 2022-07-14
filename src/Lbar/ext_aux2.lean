@@ -289,6 +289,32 @@ lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_T_inv_aux_helper
   (ExtQprime_iso_aux_system_obj_aux' V X).hom
    := sorry
 
+lemma another_aux_lemma [normed_with_aut r V] (X : Profinite) :
+  (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab V.to_Cond X).hom
+  ≫ (Condensed_Ab_to_presheaf.map_iso (Condensed_LCC_iso_of_top_ab V)).inv.app (op X)
+  ≫
+  begin
+    refine nat_trans.app _ _,
+    refine Condensed_Ab_to_presheaf.map _,
+    refine Sheaf.hom.mk _,
+    dsimp [Condensed_LCC],
+    refine whisker_right _ _,
+    refine whisker_right _ _,
+    refine SemiNormedGroup.LCC.map _,
+    exact V_T_inv r V,
+  end =
+  (preadditive_yoneda.map
+    (to_Cond_T_inv r V)).app _ ≫
+  (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab V.to_Cond X).hom ≫
+  (Condensed_Ab_to_presheaf.map_iso (Condensed_LCC_iso_of_top_ab V)).inv.app _ := sorry
+
+/-
+lemma this_is_getting_silly
+  [normed_with_aut r V] (X : Profinite.{u}) :
+  (locally_constant.map_hom (V_T_inv r V)).completion =
+  (SemiNormedGroup.LCC.map (V_T_inv r V)).app (op X) := sorry
+-/
+
 lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_T_inv_aux (c : ℝ≥0)
   [normed_with_aut r V] (n : ℕ) (t) :
 ((forget₂.{u+2 u+2 u+1 u+1 u+1} SemiNormedGroup.{u+1} Ab.{u+1}).map
@@ -332,9 +358,20 @@ begin
   apply_fun (λ e, e s) at this,
   erw this, clear this,
   simp only [comp_apply],
+  congr' 1, dsimp only [s],
+  simp only [← comp_apply],
   congr' 1,
-
-  sorry
+  simp only [category.assoc],
+  erw ← another_aux_lemma r V X,
+  congr' 2,
+  ext1 ⟨x⟩, dsimp only [Ab.ulift, Condensed_Ab_to_presheaf, whisker_right_app,
+    Sheaf_to_presheaf],
+  ext1,
+  dsimp,
+  congr' 2,
+  dsimp only [SemiNormedGroup.LCC, curry, curry_obj, functor.comp_map, uncurry],
+  simp only [category_theory.functor.map_id, category.comp_id],
+  refl,
 end
 
 
