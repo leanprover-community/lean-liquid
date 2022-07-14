@@ -28,6 +28,14 @@ lemma QprimeFP_map (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) :
 
 variables [fact (0 < r')] [fact (r' < 1)]
 
+@[reassoc]
+lemma massive_aux₁ (X Y : Profinite.{u}) (f : X ⟶ Y) :
+  (preadditive_yoneda.{u+1 u+2}.obj V.to_Cond).map (freeCond.{u}.map f).op ≫
+  (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab.{u} V.to_Cond X).hom =
+  (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab.{u} V.to_Cond Y).hom ≫
+  V.to_Cond.val.map f.op :=
+sorry
+
 lemma massive_aux (X Y : Profinite.{u}) (f : X ⟶ Y) :
   (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab.{u} V.to_Cond Y).hom ≫
       Ab.ulift.{u+1 u}.map ((LCC_iso_Cond_of_top_ab.{u} V).inv.app (op.{u+2} Y)) ≫
@@ -46,6 +54,9 @@ begin
   dsimp only [functor.map_FreeAb, FreeAb.of_functor, FreeAb.eval],
   simp only [free_abelian_group.map_of_apply, free_abelian_group.lift.of, id],
   dsimp only [functor.right_op_map, quiver.hom.op_unop, quiver.hom.unop_op],
+  rw massive_aux₁_assoc, congr' 1,
+  ext1 x, simp only [comp_apply],
+  dsimp only [ExtQprime_iso_aux_system_obj_aux'],
   sorry
 end
 
