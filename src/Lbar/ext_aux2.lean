@@ -52,7 +52,16 @@ lemma final_boss_aux₃ [normed_with_aut r V] (X : Profinite) :
   (λ (x : C(X,V)),
   ((locally_constant.map_hom.{u u u} normed_with_aut.T.{u}.inv).completion)
   (((uniform_space.completion.cpkg.{u}.compare_equiv (locally_constant.pkg.{u} X ↥V)).symm) x)) :=
-sorry
+begin
+  dsimp [abstract_completion.compare_equiv],
+  refine (normed_group_hom.continuous _).comp _,
+  letI : uniform_space.{u} (locally_constant.pkg.{u} X ↥V).space :=
+    (locally_constant.pkg X V).uniform_struct,
+  letI : uniform_space (
+      (uniform_space.completion.cpkg : abstract_completion
+      (locally_constant X V)).space) := abstract_completion.uniform_struct _,
+  refine ((locally_constant.pkg X V).uniform_continuous_compare _).continuous,
+end
 
 lemma final_boss_aux₄ [normed_with_aut r V] (X : Profinite) :
 @continuous.{u u} _ _ _ (uniform_space.completion.cpkg.uniform_struct.to_topological_space)
@@ -60,7 +69,20 @@ lemma final_boss_aux₄ [normed_with_aut r V] (X : Profinite) :
   ((locally_constant.pkg X V).compare
     uniform_space.completion.cpkg.{u}
   {to_fun := (V_T_inv r V) ∘ x.to_fun, continuous_to_fun :=
-  (normed_with_aut.T.inv.continuous.comp x.2)})) := sorry
+  (normed_with_aut.T.inv.continuous.comp x.2)})) :=
+begin
+  let e : C(X,V) → C(X,V) := λ e, ⟨(V_T_inv r V) ∘ e,
+    (V_T_inv r V).continuous.comp e.2⟩,
+  have he : continuous e := continuous_map.continuous_comp
+    ((⟨(V_T_inv r V), (V_T_inv r V).continuous⟩ : C(V,V))),
+  letI : uniform_space.{u} (locally_constant.pkg.{u} X ↥V).space :=
+    (locally_constant.pkg X V).uniform_struct,
+  letI : uniform_space (
+      (uniform_space.completion.cpkg : abstract_completion
+      (locally_constant X V)).space) := abstract_completion.uniform_struct _,
+  refine continuous.comp _ he,
+  refine ((locally_constant.pkg X V).uniform_continuous_compare _).continuous,
+end
 
 lemma final_boss [normed_with_aut r V] (X : Profinite)
   (x : ((Condensed.of_top_ab.presheaf V).obj (op X))) :
