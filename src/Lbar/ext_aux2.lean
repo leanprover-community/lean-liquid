@@ -70,11 +70,19 @@ instance (X : Profinite) :
         (Top.topological_space.{u} X.to_CompHaus.to_Top))
      locally_constant.semi_normed_group)
 
+instance (X : Profinite) : topological_space ↥(V.to_Cond.val.obj (op X)) :=
+@ulift.topological_space _ (continuous_map.compact_open.{u u})
+
 set_option pp.universes false
 
 lemma to_Cond_val_map_apply (X Y : Profinite.{u}) (f : X ⟶ Y) (x) :
-  V.to_Cond.val.map f.op x = ⟨⟨x.down.1 ∘ f, x.down.continuous.comp f.continuous⟩⟩ :=
+  V.to_Cond.val.map f.op x = ⟨continuous_map.comp_right_continuous_map V f x.down⟩ :=
 rfl
+
+lemma to_Cond_val_map (X Y : Profinite.{u}) (f : X ⟶ Y) :
+  ⇑(V.to_Cond.val.map f.op) =
+  (λ x, ⟨continuous_map.comp_right_continuous_map V f x.down⟩ : ↥(V.to_Cond.val.obj (op Y)) → ↥(V.to_Cond.val.obj (op X))) :=
+by { ext x, rw to_Cond_val_map_apply }
 
 lemma massive_aux₂ (X Y : Profinite.{u}) (f : X ⟶ Y) (x : (V.to_Cond.val.obj (op.{u+2} Y))) :
   uniform_space.completion.map.{u u} (locally_constant.comap_hom.{u u u} f f.continuous)
@@ -84,7 +92,19 @@ lemma massive_aux₂ (X Y : Profinite.{u}) (f : X ⟶ Y) (x : (V.to_Cond.val.obj
 begin
   cases x,
   apply abstract_completion.induction_on (locally_constant.pkg.{u} Y V) x,
-  { sorry },
+  { apply is_closed_eq,
+    { apply uniform_space.completion.continuous_map.comp,
+      apply (abstract_completion.uniform_continuous_compare _ _).continuous },
+    { apply (abstract_completion.uniform_continuous_compare _ _).continuous.comp,
+      let φ : C(Y, V) → C(X, V) := _, change continuous φ,
+      let ψ := V.to_Cond.val.map f.op, have hψ : φ = ulift.down ∘ ψ ∘ ulift.up := rfl,
+      rw hψ, clear hψ,
+      refine continuous_induced_dom.comp _,
+      refine continuous.comp _ continuous_ulift_up,
+      rw [to_Cond_val_map],
+      refine continuous.comp _ _, { exact continuous_ulift_up },
+      dsimp only [Condensed.of_top_ab, Condensed.of_top_ab.presheaf],
+      exact (map_continuous (continuous_map.comp_right_continuous_map ↥V f)).comp continuous_induced_dom, } },
   { intro φ, dsimp only [abstract_completion.compare, to_Cond_val_map_apply],
     rw [abstract_completion.extend_def],
     swap, { apply abstract_completion.uniform_continuous_coe },
