@@ -23,7 +23,7 @@ noncomputable theory
 open_locale liquid_tensor_experiment nnreal zero_object
 open liquid_tensor_experiment category_theory category_theory.limits
 
-variables (p' p : ℝ≥0) [fact (0 < p')] [fact (p' < p)] [fact (p' ≤ 1)] [fact (p ≤ 1)]
+variables (p' p : ℝ≥0) [fact (0 < p')] [fact (p' < p)] [fact (p ≤ 1)]
 
 theorem liquid_tensor_experiment (S : Profinite.{0}) (V : pBanach.{0} p) :
   ∀ i > 0, Ext i (ℳ_{p'} S) V ≅ 0 :=
