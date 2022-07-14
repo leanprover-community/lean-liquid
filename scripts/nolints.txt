@@ -2,19 +2,34 @@ import .all
 run_cmd tactic.skip
 
 -- Lbar/ext.lean
-apply_nolint ExtQprime.T_inv unused_arguments
-apply_nolint ExtQprime.Tinv unused_arguments
 apply_nolint Lbar.Tinv_sub unused_arguments
 apply_nolint Lbar.condensify_iso_extend unused_arguments
-apply_nolint auux unused_arguments
-apply_nolint eval'_is_bounded_above unused_arguments
-apply_nolint of_hom_id unused_arguments
-apply_nolint pi_Ext_iso_Ext_sigma unused_arguments
-apply_nolint sigma_Qprime_int_bounded_above unused_arguments
-apply_nolint sufficiently_increasing unused_arguments
 
 -- Lbar/ext_aux1.lean
 apply_nolint ExtQprime_iso_aux_system_obj_aux' unused_arguments
+apply_nolint hom_complex_QprimeFP_nat_iso_aux_system unused_arguments
+apply_nolint sigma_Qprime_int_bounded_above unused_arguments
+
+-- Lbar/ext_aux2.lean
+apply_nolint ExtQprime.T_inv unused_arguments
+apply_nolint ExtQprime.Tinv unused_arguments
+apply_nolint ExtQprime_iso_aux_system_comm_Tinv_setup.aux₂ unused_arguments
+apply_nolint ExtQprime_iso_aux_system_comm_setup.embed_hom_complex_nat_iso_neg unused_arguments
+apply_nolint ExtQprime_iso_aux_system_comm_setup.embed_hom_complex_nat_iso₀ unused_arguments
+apply_nolint ExtQprime_iso_aux_system_comm_setup.hom_complex_map_T_inv unused_arguments
+apply_nolint ExtQprime_iso_aux_system_obj_naturality_setup.aux₂ unused_arguments
+apply_nolint ExtQprime_iso_aux_system_obj_naturality_setup.aux₃ unused_arguments
+apply_nolint QprimeFP_acyclic unused_arguments
+apply_nolint auux unused_arguments
+apply_nolint of_hom_id unused_arguments
+
+-- Lbar/ext_aux3.lean
+apply_nolint cofan_point_iso_colimit_conj_eq_desc unused_arguments
+apply_nolint pi_Ext_iso_Ext_sigma unused_arguments
+
+-- Lbar/ext_aux4.lean
+apply_nolint Tinv2_iso_of_bicartesian_aux_2 unused_arguments
+apply_nolint Tinv2_iso_of_bicartesian_aux_3 unused_arguments
 
 -- Lbar/ext_preamble.lean
 apply_nolint ExtQprime_iso_aux_system_aux unused_arguments ge_or_gt
@@ -535,6 +550,8 @@ apply_nolint commsq_shift_sub_id_Tinv def_lemma
 apply_nolint commsq_shift_sub_id_ι def_lemma
 apply_nolint commsq_sigma_proj_Tinv def_lemma
 apply_nolint commsq_sigma_proj_ι def_lemma
+apply_nolint iso_on_the_left_neg_conj_aux unused_arguments
+apply_nolint iso_on_the_left_zero_conj_aux unused_arguments
 apply_nolint iso_on_the_right_neg unused_arguments
 apply_nolint iso_on_the_right_zero unused_arguments
 apply_nolint sigma_map unused_arguments
