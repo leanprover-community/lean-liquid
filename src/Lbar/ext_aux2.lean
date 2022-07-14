@@ -58,6 +58,39 @@ begin
   exact hf
 end
 
+instance (X : Profinite) :
+  uniform_space.{u} (locally_constant.{u u} X V) :=
+@metric_space.to_uniform_space'.{u}
+  (@locally_constant.{u u} (@coe_sort.{u+2 u+2} Profinite.{u} (Type u) Profinite.has_coe_to_sort.{u} X)
+     (@coe_sort.{u+2 u+2} SemiNormedGroup.{u} (Type u) SemiNormedGroup.has_coe_to_sort.{u} V)
+     (Top.topological_space.{u} X.to_CompHaus.to_Top))
+  (@semi_normed_group.to_pseudo_metric_space.{u}
+     (@locally_constant.{u u} (@coe_sort.{u+2 u+2} Profinite.{u} (Type u) Profinite.has_coe_to_sort.{u} X)
+        (@coe_sort.{u+2 u+2} SemiNormedGroup.{u} (Type u) SemiNormedGroup.has_coe_to_sort.{u} V)
+        (Top.topological_space.{u} X.to_CompHaus.to_Top))
+     locally_constant.semi_normed_group)
+
+set_option pp.universes false
+
+lemma to_Cond_val_map_apply (X Y : Profinite.{u}) (f : X ⟶ Y) (x) :
+  V.to_Cond.val.map f.op x = ⟨⟨x.down.1 ∘ f, x.down.continuous.comp f.continuous⟩⟩ :=
+rfl
+
+lemma massive_aux₂ (X Y : Profinite.{u}) (f : X ⟶ Y) (x : (V.to_Cond.val.obj (op.{u+2} Y))) :
+  uniform_space.completion.map.{u u} (locally_constant.comap_hom.{u u u} f f.continuous)
+    ((locally_constant.pkg.{u} Y ↥V).compare uniform_space.completion.cpkg.{u} x.down) =
+  ((locally_constant.pkg.{u} X ↥V).compare uniform_space.completion.cpkg.{u})
+    ((V.to_Cond.val.map f.op) x).down :=
+begin
+  cases x,
+  apply abstract_completion.induction_on (locally_constant.pkg.{u} Y V) x,
+  { sorry },
+  { intro φ, dsimp only [abstract_completion.compare, to_Cond_val_map_apply],
+    rw [abstract_completion.extend_def],
+    swap, { apply abstract_completion.uniform_continuous_coe },
+    sorry }
+end
+
 lemma massive_aux (X Y : Profinite.{u}) (f : X ⟶ Y) :
   (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab.{u} V.to_Cond Y).hom ≫
       Ab.ulift.{u+1 u}.map ((LCC_iso_Cond_of_top_ab.{u} V).inv.app (op.{u+2} Y)) ≫
@@ -108,7 +141,7 @@ begin
   { apply normed_group_hom.uniform_continuous, },
   dsimp only [function.comp, Z, quiver.hom.unop_op],
   congr' 1, clear Z g F,
-  sorry
+  exact massive_aux₂ V X Y f x,
 end
 
 lemma massive (X Y : FreeAb Profinite.{u}) (f : X ⟶ Y) :
