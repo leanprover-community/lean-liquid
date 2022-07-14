@@ -133,6 +133,24 @@ begin
   exact this,
 end
 
+def to_Cond_T_inv [normed_with_aut r V] : V.to_Cond ⟶ V.to_Cond :=
+(Condensed.of_top_ab_map.{u} (normed_group_hom.to_add_monoid_hom.{u u} normed_with_aut.T.{u}.inv)
+  sorry)
+
+lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_T_inv (c : ℝ≥0)
+  [normed_with_aut r V] :
+(hom_complex_QprimeFP_nat_iso_aux_system.{u} r' BD κ M V c).hom ≫
+  ((forget₂.{u+2 u+2 u+1 u+1 u+1} SemiNormedGroup.{u+1} Ab.{u+1}).map_homological_complex
+       (complex_shape.up.{0} ℕ)).map (nat_trans.app
+        ((aux_system.T_inv.{u u+1} r r' BD ⟨M⟩ (SemiNormedGroup.ulift.{u+1 u}.obj V) κ)) _) =
+  begin
+    let e := preadditive_yoneda.map (to_Cond_T_inv r V),
+    let e' := nat_trans.map_homological_complex e (complex_shape.down ℕ).symm,
+    let Q := ((QprimeFP_nat r' BD κ M).obj c).op,
+    exact e'.app Q,
+  end ≫
+  (hom_complex_QprimeFP_nat_iso_aux_system.{u} r' BD κ M V (c)).hom := sorry
+
 namespace ExtQprime_iso_aux_system_obj_naturality_setup
 
 /-
@@ -556,12 +574,9 @@ begin
   dsimp only [hom_complex_map_T_inv], simp only [category.assoc],
   rw ← hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_κ r' BD κ κ₂ M V c.unop,
   simp only [functor.map_comp, ← category.assoc], congr' 1,
-  sorry -- TODO: pull out separate lemma for this, naturality of
-    -- `hom_complex_QprimeFP_nat_iso_aux_system` w.r.t. `T_inv`.
-    -- (Note: T_inv should be defined using the endomorphism on `V`,
-    -- but this turns out to be a pain to even formulate...).
+  apply hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_T_inv
 
-  /-
+  /- -- IGNORE THIS
   ext k t : 3,
   dsimp [hom_complex_nat] at t,
   dsimp only [hom_complex_QprimeFP_nat_iso_aux_system, aux_system.T_inv,
