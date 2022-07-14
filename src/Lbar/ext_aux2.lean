@@ -56,6 +56,18 @@ lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_κ (c : (ℝ≥0))
     refine (QprimeFP_nat.ι BD κ₂ κ M).app _,
   end ≫ (hom_complex_QprimeFP_nat_iso_aux_system r' BD κ₂ M V c).hom := sorry
 
+lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_Tinv (c : ℝ≥0)
+  [∀ (c : ℝ≥0) (n : ℕ), fact (κ₂ c n ≤ r' * κ c n)] :
+  (hom_complex_QprimeFP_nat_iso_aux_system r' BD κ M V c).hom ≫
+  (whisker_right
+    (aux_system.Tinv _ _ _ _ _ _) _).app _ =
+  begin
+    refine category_theory.functor.map _ _,
+    refine homological_complex.op_functor.map (quiver.hom.op _),
+    refine (QprimeFP_nat.Tinv BD κ₂ κ M).app _,
+  end
+  ≫ (hom_complex_QprimeFP_nat_iso_aux_system r' BD κ₂ M V c).hom := sorry
+
 namespace ExtQprime_iso_aux_system_obj_naturality_setup
 
 /-
@@ -346,9 +358,8 @@ lemma aux₁  :
   (homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.up.{0} ℕ) n).map
   (hom_complex_QprimeFP_nat_iso_aux_system.{u} r' BD κ₂ M V (unop.{1} c)).hom :=
 begin
-  -- TODO: pull out separate lemma for this, naturality of
-  -- `hom_complex_QprimeFP_nat_iso_aux_system` w.r.t. `Tinv`.
-  sorry
+  simp only [← functor.map_comp, functor.comp_map], congr' 1,
+  apply hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_Tinv,
 end
 
 lemma aux₂ :
@@ -482,6 +493,8 @@ begin
   simp only [functor.map_comp, ← category.assoc], congr' 1,
   sorry -- TODO: pull out separate lemma for this, naturality of
     -- `hom_complex_QprimeFP_nat_iso_aux_system` w.r.t. `T_inv`.
+    -- (Note: T_inv should be defined using the endomorphism on `V`,
+    -- but this turns out to be a pain to even formulate...).
 
   /-
   ext k t : 3,
