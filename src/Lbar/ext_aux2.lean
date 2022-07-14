@@ -23,19 +23,50 @@ variables (V : SemiNormedGroup.{u}) [complete_space V] [separated_space V]
 
 set_option pp.universes true
 
--- jmc: is this helpful??
--- @[reassoc]
--- def preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab_natural
---   (M : Condensed.{u} Ab.{u+1}) (X Y : Profinite) (f : X ⟶ Y) :
---   (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab M Y).hom ≫ M.val.map f.op =
---   ((preadditive_yoneda.obj M).map (CondensedSet_to_Condensed_Ab.map $ Profinite_to_Condensed.map f).op) ≫
---    (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab M X).hom :=
--- by admit
-
 lemma QprimeFP_map (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) :
   (QprimeFP r' BD κ M).map h = of'_hom ((QprimeFP_int r' BD κ _).map h) := rfl
 
 variables [fact (0 < r')] [fact (r' < 1)]
+
+lemma massive (X Y : FreeAb Profinite.{u}) (f : X ⟶ Y) :
+(((preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab.{u} V.to_Cond Y.as).hom ≫
+  (Condensed_Ab_to_presheaf.{u}.map (Condensed_LCC_iso_of_top_ab.{u} V).inv).app (op.{u+2} Y.as) ≫
+  (ExtQprime_iso_aux_system_obj_aux'.{u} V Y.as).hom) ≫
+  (𝟙 _)) ≫
+  (forget₂.{u+2 u+2 u+1 u+1 u+1} SemiNormedGroup.{u+1} Ab.{u+1}).map
+    (((CLC.{u+1 u} (SemiNormedGroup.ulift.{u+1 u}.obj V)).right_op.map_FreeAb ⋙
+      FreeAb.eval.{u+1 u+2} SemiNormedGroup.{u+1}ᵒᵖ).map f).unop
+=
+(preadditive_yoneda.{u+1 u+2}.obj V.to_Cond).map
+  ((freeCond.{u}.map_FreeAb ⋙ FreeAb.eval.{u+1 u+2} (Condensed.{u u+1 u+2} Ab.{u+1})).map f).op ≫
+  ((preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab.{u} V.to_Cond X.as).hom ≫
+  (Condensed_Ab_to_presheaf.{u}.map (Condensed_LCC_iso_of_top_ab.{u} V).inv).app (op.{u+2} X.as) ≫
+  (ExtQprime_iso_aux_system_obj_aux'.{u} V X.as).hom) ≫  𝟙 _
+:=
+begin
+  sorry
+end
+
+/- ## useful set of dsimps -/
+  -- dsimp only [hom_complex_QprimeFP_nat_iso_aux_system, iso.trans_hom, functor.map_iso_hom,
+  --   nat_trans.comp_app, homological_complex.comp_f, iso.op_hom, iso.app_hom,
+  --   quiver.hom.op_unop, quiver.hom.unop_op, homological_complex.unop_functor_map_f,
+  --   nat_iso.map_homological_complex, nat_trans.map_homological_complex_app_f],
+  -- dsimp only [forget₂_unop, nat_iso.of_components.hom_app,
+  --   homological_complex.hom.iso_of_components_hom_f, iso.refl_hom],
+  -- dsimp only [system_of_complexes.to_Ab, functor.comp_map],
+  -- dsimp only [ExtQprime_iso_aux_system_obj_aux, nat_iso.of_components.hom_app,
+  --   homological_complex.hom.iso_of_components_hom_f, id, iso.trans_hom,
+  --   functor.map_iso_hom, functor.map_iso_inv, iso.symm_hom, functor.map_iso_hom, functor.map_iso_inv,
+  --   nat_trans.comp_app, homological_complex.comp_f, iso.op_hom, iso.app_hom, iso.app_inv,
+  --   quiver.hom.op_unop, quiver.hom.unop_op, homological_complex.unop_functor_map_f],
+  -- dsimp only [breen_deligne.FPsystem, chain_complex.of_X, chain_complex.of_hom_f],
+  -- dsimp only [aux_system, chain_complex.of_X, chain_complex.of_hom_f, functor.comp_map,
+  --   functor.op_map, quiver.hom.op_unop, quiver.hom.unop_op],
+  -- erw [functor.map_homological_complex_map_f, homological_complex.unop_functor_map_f],
+  -- dsimp only [quiver.hom.op_unop, quiver.hom.unop_op,
+  --   breen_deligne.FPsystem, functor.map_homological_complex_map_f],
+
 
 lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_c (c₁ c₂) (h : c₁ ⟶ c₂) :
   (hom_complex_QprimeFP_nat_iso_aux_system r' BD κ M V c₂).hom ≫
@@ -44,7 +75,16 @@ lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_c (c₁ c₂) (h : c
   begin
     refine homological_complex.op_functor.map (quiver.hom.op _),
     refine category_theory.functor.map _ h,
-  end) ≫ (hom_complex_QprimeFP_nat_iso_aux_system r' BD κ M V c₁).hom := sorry
+  end) ≫ (hom_complex_QprimeFP_nat_iso_aux_system r' BD κ M V c₁).hom :=
+begin
+  ext n : 2,
+  haveI : fact (κ c₁ n ≤ κ c₂ n) := sorry,
+  have := massive V
+    (breen_deligne.FPsystem.X.{u} r' BD ⟨M⟩ κ c₁ n)
+    (breen_deligne.FPsystem.X.{u} r' BD ⟨M⟩ κ c₂ n)
+    ((breen_deligne.FP2.res.{u} r' _ _ _).app ⟨M⟩),
+  exact this
+end
 
 lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_κ (c : (ℝ≥0))
   [∀ (c : ℝ≥0) (n : ℕ), fact (κ₂ c n ≤ κ c n)] :
@@ -54,7 +94,15 @@ lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_κ (c : (ℝ≥0))
     refine category_theory.functor.map _ _,
     refine homological_complex.op_functor.map (quiver.hom.op _),
     refine (QprimeFP_nat.ι BD κ₂ κ M).app _,
-  end ≫ (hom_complex_QprimeFP_nat_iso_aux_system r' BD κ₂ M V c).hom := sorry
+  end ≫ (hom_complex_QprimeFP_nat_iso_aux_system r' BD κ₂ M V c).hom :=
+begin
+  ext n : 2,
+  have := massive V
+    (breen_deligne.FPsystem.X.{u} r' BD ⟨M⟩ κ₂ c n)
+    (breen_deligne.FPsystem.X.{u} r' BD ⟨M⟩ κ c n)
+    ((breen_deligne.FP2.res.{u} r' _ _ _).app ⟨M⟩),
+  exact this
+end
 
 lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_Tinv (c : ℝ≥0)
   [∀ (c : ℝ≥0) (n : ℕ), fact (κ₂ c n ≤ r' * κ c n)] :
@@ -66,7 +114,15 @@ lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_Tinv (c : ℝ≥0)
     refine homological_complex.op_functor.map (quiver.hom.op _),
     refine (QprimeFP_nat.Tinv BD κ₂ κ M).app _,
   end
-  ≫ (hom_complex_QprimeFP_nat_iso_aux_system r' BD κ₂ M V c).hom := sorry
+  ≫ (hom_complex_QprimeFP_nat_iso_aux_system r' BD κ₂ M V c).hom :=
+begin
+  ext n : 2,
+  have := massive V
+    (breen_deligne.FPsystem.X.{u} r' BD ⟨M⟩ κ₂ c n)
+    (breen_deligne.FPsystem.X.{u} r' BD ⟨M⟩ κ c n)
+    (((breen_deligne.FPsystem.Tinv.{u} r' BD ⟨M⟩ κ₂ κ).app c).f n),
+  exact this,
+end
 
 namespace ExtQprime_iso_aux_system_obj_naturality_setup
 
