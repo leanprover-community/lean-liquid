@@ -122,11 +122,10 @@ begin
     have : (continuous_map.comp_right_continuous_map ↥V f) ((locally_constant.pkg Y V).coe φ) =
       (locally_constant.pkg X V).coe _ := _,
     rw [this, abstract_completion.compare_coe],
-    dsimp only [locally_constant.comap_hom_apply],
     ext1,
     erw [locally_constant.coe_comap],
     refl,
-    exact f.continuous }
+    exact f.continuous },
 end
 
 lemma massive_aux (X Y : Profinite.{u}) (f : X ⟶ Y) :
