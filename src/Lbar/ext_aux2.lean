@@ -19,20 +19,24 @@ variables (κ κ₂ : ℝ≥0 → ℕ → ℝ≥0)
 variables [∀ (c : ℝ≥0), BD.suitable (κ c)] [∀ n, fact (monotone (function.swap κ n))]
 variables [∀ (c : ℝ≥0), BD.suitable (κ₂ c)] [∀ n, fact (monotone (function.swap κ₂ n))]
 variables (M : ProFiltPseuNormGrpWithTinv₁.{u} r')
-variables (V : SemiNormedGroup.{u}) [complete_space V] [separated_space V]
-
-set_option pp.universes true
+variables (V : SemiNormedGroup.{u})
 
 lemma QprimeFP_map (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) :
   (QprimeFP r' BD κ M).map h = of'_hom ((QprimeFP_int r' BD κ _).map h) := rfl
-
-variables [fact (0 < r')] [fact (r' < 1)]
 
 instance aaahrg (X : Profinite) : semi_normed_group (locally_constant X V) :=
 locally_constant.semi_normed_group
 
 def V_T_inv [normed_with_aut r V] : V ⟶ V :=
 normed_with_aut.T.{u}.inv
+
+variables [fact (0 < r')] [fact (r' < 1)]
+
+section
+
+variables [complete_space V] [separated_space V]
+
+set_option pp.universes true
 
 lemma final_boss [normed_with_aut r V] (X : Profinite)
   (x : ((Condensed.of_top_ab.presheaf V).obj (op X))) (h) :
@@ -44,6 +48,7 @@ begin
   sorry
 end
 
+end
 
 @[reassoc]
 lemma massive_aux₁ (X Y : Profinite.{u}) (f : X ⟶ Y) :
@@ -92,8 +97,6 @@ instance (X : Profinite) :
 
 instance (X : Profinite) : topological_space ↥(V.to_Cond.val.obj (op X)) :=
 @ulift.topological_space _ (continuous_map.compact_open.{u u})
-
-set_option pp.universes false
 
 lemma to_Cond_val_map_apply (X Y : Profinite.{u}) (f : X ⟶ Y) (x) :
   V.to_Cond.val.map f.op x = ⟨continuous_map.comp_right_continuous_map V f x.down⟩ :=
@@ -144,6 +147,8 @@ begin
     refl,
     exact f.continuous },
 end
+
+variables [complete_space V] [separated_space V]
 
 lemma massive_aux (X Y : Profinite.{u}) (f : X ⟶ Y) :
   (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab.{u} V.to_Cond Y).hom ≫
