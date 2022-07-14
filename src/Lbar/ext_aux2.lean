@@ -346,8 +346,8 @@ lemma aux₁  :
   (homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.up.{0} ℕ) n).map
   (hom_complex_QprimeFP_nat_iso_aux_system.{u} r' BD κ₂ M V (unop.{1} c)).hom :=
 begin
-  simp only [← category_theory.functor.map_comp, functor.comp_map], congr' 1,
-  --erw ← hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_κ,
+  -- TODO: pull out separate lemma for this, naturality of
+  -- `hom_complex_QprimeFP_nat_iso_aux_system` w.r.t. `Tinv`.
   sorry
 end
 
@@ -476,6 +476,13 @@ lemma aux₁ (c : (ℝ≥0)ᵒᵖ):
   hom_complex_map_T_inv _ _ _ _ _ _ _ _ ≫
   (hom_complex_QprimeFP_nat_iso_aux_system.{u} r' BD κ₂ M V (unop.{1} c)).hom :=
 begin
+  --simp only [← category_theory.functor.map_comp, functor.comp_map], congr' 1,
+  dsimp only [hom_complex_map_T_inv], simp only [category.assoc],
+  rw ← hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_κ r' BD κ κ₂ M V c.unop,
+  simp only [functor.map_comp, ← category.assoc], congr' 1,
+  sorry -- TODO: pull out separate lemma for this, naturality of
+    -- `hom_complex_QprimeFP_nat_iso_aux_system` w.r.t. `T_inv`.
+
   /-
   ext k t : 3,
   dsimp [hom_complex_nat] at t,
@@ -496,7 +503,6 @@ begin
   erw category.comp_id,
   repeat { rw [comp_apply] },
   -/ -- UUUUGGGHHH
-  sorry
 
 end
 
