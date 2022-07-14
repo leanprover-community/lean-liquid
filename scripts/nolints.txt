@@ -61,8 +61,10 @@ apply_nolint breen_deligne.universal_map.suitable class_structure
 apply_nolint breen_deligne.universal_map.very_suitable class_structure
 
 -- challenge.lean
+apply_nolint liquid_tensor_experiment def_lemma ge_or_gt
+
+-- challenge_prerequisites.lean
 apply_nolint has_lt.lt.fact unused_arguments
-apply_nolint liquid_tensor_experiment def_lemma
 
 -- combinatorial_lemma/profinite.lean
 apply_nolint ProFiltPseuNormGrpWithTinv₁.level unused_arguments
