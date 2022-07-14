@@ -31,9 +31,9 @@ structure has_p_norm (V : Type*) (p : ℝ)
 (uniformity : uniformity V = ⨅ (ε : ℝ) (H : ε > 0),
   filter.principal {p : V × V | ∥p.fst - p.snd∥ < ε})
 
-variables (V : Type*) (p : ℝ) [fact (0 < p)] [add_comm_group V] [module ℝ V] [uniform_space V]
+variables (V : Type*) (p : ℝ) [add_comm_group V] [module ℝ V] [uniform_space V]
 
-def has_p_norm.semi_normed_group (h : has_p_norm V p) : semi_normed_group V :=
+def has_p_norm.semi_normed_group [fact (0 < p)] (h : has_p_norm V p) : semi_normed_group V :=
 { to_uniform_space := by apply_instance,
   uniformity_dist := h.uniformity,
   to_add_comm_group := by apply_instance,
@@ -53,7 +53,7 @@ structure p_banach : Prop :=
 
 end
 
-structure pBanach (p : ℝ) [fact (0 < p)] :=
+structure pBanach (p : ℝ) :=
 (V : Type*)
 [add_comm_group' : add_comm_group V]
 [module' : module ℝ V]
@@ -62,7 +62,7 @@ structure pBanach (p : ℝ) [fact (0 < p)] :=
 
 namespace pBanach
 
-variables (p : ℝ) [fact (0 < p)] (V : pBanach p)
+variables (p : ℝ) (V : pBanach p)
 
 instance : has_coe_to_sort (pBanach p) (Type*) := ⟨λ X, X.V⟩
 
@@ -77,17 +77,17 @@ instance : _root_.separated_space V := V.p_banach'.separated
 variables {p}
 
 /-- Highly non-canonical! -/
-def choose_semi_normed_group : semi_normed_group V :=
+def choose_semi_normed_group [fact (0 < p)] : semi_normed_group V :=
 (classical.choice V.p_banach'.exists_p_norm).semi_normed_group V p
 
-@[simps] def smul_normed_hom (x : ℝ) :
+@[simps] def smul_normed_hom [fact (0 < p)] (x : ℝ) :
   @normed_group_hom V V V.choose_semi_normed_group V.choose_semi_normed_group :=
 { to_fun := λ v, x • v,
   map_add' := λ v₁ v₂, smul_add _ _ _,
   bound' := ⟨|x|^p, λ v, by rw [has_p_norm.norm_smul, smul_eq_mul]⟩ }
 
 /-- Highly non-canonical! -/
-def choose_normed_with_aut (x : ℝ≥0) [fact (0 < x)] :
+def choose_normed_with_aut [fact (0 < p)] (x : ℝ≥0) [fact (0 < x)] :
   normed_with_aut (x ^ p) ⟨V, choose_semi_normed_group V⟩ :=
 { T :=
   { hom := smul_normed_hom V x,
@@ -100,12 +100,12 @@ def choose_normed_with_aut (x : ℝ≥0) [fact (0 < x)] :
     rw abs_eq_self, exact x.coe_nonneg } }
 
 @[simp]
-lemma choose_normed_with_aut_T_hom (x : ℝ≥0) [fact (0 < x)] (v : V) :
+lemma choose_normed_with_aut_T_hom [fact (0 < p)] (x : ℝ≥0) [fact (0 < x)] (v : V) :
   (@normed_with_aut.T (x ^ p) ⟨V, choose_semi_normed_group V⟩ (V.choose_normed_with_aut x)).hom v =
   x • v := rfl
 
 @[simp]
-lemma choose_normed_with_aut_T_inv (x : ℝ≥0) [fact (0 < x)] (v : V) :
+lemma choose_normed_with_aut_T_inv [fact (0 < p)] (x : ℝ≥0) [fact (0 < x)] (v : V) :
   (@normed_with_aut.T (x ^ p) ⟨V, choose_semi_normed_group V⟩ (V.choose_normed_with_aut x)).inv v =
   x⁻¹ • v := rfl
 
