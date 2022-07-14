@@ -27,7 +27,7 @@ lemma QprimeFP_map (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) :
 instance aaahrg (X : Profinite) : semi_normed_group (locally_constant X V) :=
 locally_constant.semi_normed_group
 
-def V_T_inv [normed_with_aut r V] : V ⟶ V :=
+def V_T_inv (r : ℝ≥0) (V : SemiNormedGroup.{u}) [normed_with_aut r V] : V ⟶ V :=
 normed_with_aut.T.{u}.inv
 
 variables [fact (0 < r')] [fact (r' < 1)]
@@ -289,7 +289,7 @@ end
 
 
 
-def to_Cond_T_inv [normed_with_aut r V] : V.to_Cond ⟶ V.to_Cond :=
+def to_Cond_T_inv (r : ℝ≥0) (V : SemiNormedGroup.{u}) [normed_with_aut r V] : V.to_Cond ⟶ V.to_Cond :=
 (Condensed.of_top_ab_map.{u} (normed_group_hom.to_add_monoid_hom.{u u} normed_with_aut.T.{u}.inv)
   (normed_group_hom.continuous _))
 
