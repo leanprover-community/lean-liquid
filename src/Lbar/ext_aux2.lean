@@ -159,8 +159,19 @@ lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_T_inv_aux (c : ℝ�
         (((breen_deligne.FPsystem.{u} r' BD ⟨M⟩ κ).obj c).X n)).unop)
         (t ≫ to_Cond_T_inv.{u} r V) :=
 begin
-  dsimp [ExtQprime_iso_aux_system_obj_aux],
+  /-
+  Note: This should reduce to some calcuation with the sheafification adjunction,
+  as well as something about completion/ulift compatibiity.
+  If we can reduce this to such statements, we will be in pretty good shape.
+  -/
+  /- This code block is pretty slow.
+  dsimp [ExtQprime_iso_aux_system_obj_aux, ExtQprime_iso_aux_system_obj_aux'],
   simp only [comp_apply],
+  dsimp [forget₂, has_forget₂.forget₂, aux_system.T_inv,
+    Condensed_LCC_iso_of_top_ab, LCC_iso_Cond_of_top_ab],
+  rw nat_iso.of_components.inv_app,
+  dsimp only [unop_op],
+  -/
   sorry
 end
 
