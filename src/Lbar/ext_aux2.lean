@@ -36,6 +36,28 @@ lemma massive_aux₁ (X Y : Profinite.{u}) (f : X ⟶ Y) :
   V.to_Cond.val.map f.op :=
 sorry
 
+lemma add_equiv.mk_symm {A B : Type*} [add_comm_group A] [add_comm_group B]
+  (f : A →+ B) (g : B →+ A) (h1 h2 h3) :
+  (add_equiv.mk f g h1 h2 h3).symm =
+  add_equiv.mk g f h2 h1 (by { intros x y, apply h1.injective, rw [h3, h2, h2, h2] }) := rfl
+
+lemma add_equiv.mk_symm_apply {A B : Type*} [add_comm_group A] [add_comm_group B]
+  (f : A →+ B) (g : B →+ A) (h1 h2 h3) (x : B) :
+  (add_equiv.mk f g h1 h2 h3).symm x = g x := rfl
+
+lemma locally_constant.comap_hom_map_hom {X Y V W : Type*}
+  [topological_space X] [compact_space X]
+  [topological_space Y] [compact_space Y]
+  [semi_normed_group V] [semi_normed_group W]
+  (f : X → Y) (hf : continuous f) (g : normed_group_hom V W) (φ : locally_constant Y V) :
+  locally_constant.comap_hom f hf (locally_constant.map_hom g φ) =
+  ((locally_constant.map_hom g) ∘ (locally_constant.comap_hom f hf)) φ :=
+begin
+  dsimp only [locally_constant.comap_hom_apply, locally_constant.map_hom_apply, function.comp],
+  rw locally_constant.comap_map,
+  exact hf
+end
+
 lemma massive_aux (X Y : Profinite.{u}) (f : X ⟶ Y) :
   (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab.{u} V.to_Cond Y).hom ≫
       Ab.ulift.{u+1 u}.map ((LCC_iso_Cond_of_top_ab.{u} V).inv.app (op.{u+2} Y)) ≫
@@ -56,7 +78,36 @@ begin
   dsimp only [functor.right_op_map, quiver.hom.op_unop, quiver.hom.unop_op],
   rw massive_aux₁_assoc, congr' 1,
   ext1 x, simp only [comp_apply],
-  dsimp only [ExtQprime_iso_aux_system_obj_aux'],
+  dsimp only [ExtQprime_iso_aux_system_obj_aux', LCC_iso_Cond_of_top_ab,
+    LCC_iso_Cond_of_top_ab_add_equiv, LCC_iso_Cond_of_top_ab_equiv, CLC, LC, functor.comp_map,
+    Condensed.of_top_ab],
+  simp only [add_equiv.to_fun_eq_coe, normed_group_hom.completion_coe_to_fun,
+    add_equiv.to_AddCommGroup_iso_hom, add_equiv.coe_to_add_monoid_hom, add_equiv.trans_apply,
+    add_equiv.ulift_apply, equiv.to_fun_as_coe, equiv.ulift_apply_2,
+    Ab.ulift_map_apply_down, add_equiv.coe_mk, nat_iso.of_components.inv_app,
+    add_equiv.to_AddCommGroup_iso, add_equiv.mk_symm,
+    SemiNormedGroup.forget₂_Ab_map, normed_group_hom.coe_to_add_monoid_hom],
+  let F := SemiNormedGroup.Completion.{u+1}.map ((SemiNormedGroup.LocallyConstant.{u+1 u}.obj
+    (SemiNormedGroup.ulift.{u+1 u}.obj V)).map f.op),
+  let g := _,
+  let Z := _,
+  change F ((uniform_space.completion.map g) Z) = _,
+  change (F ∘ uniform_space.completion.map g) Z = _,
+  erw [uniform_space.completion.map_comp],
+  rotate,
+  { apply normed_group_hom.uniform_continuous, },
+  { apply normed_group_hom.uniform_continuous, },
+  conv_lhs
+  { dsimp only [function.comp, normed_group_hom.coe_to_add_monoid_hom, g,
+      SemiNormedGroup.LocallyConstant_obj_map], },
+  simp only [locally_constant.comap_hom_map_hom],
+  letI : uniform_space.{u} (locally_constant.{u u} ↥(unop.{u+2} (op.{u+2} X)) ↥V) := _,
+  erw [← uniform_space.completion.map_comp],
+  rotate,
+  { apply normed_group_hom.uniform_continuous, },
+  { apply normed_group_hom.uniform_continuous, },
+  dsimp only [function.comp, Z, quiver.hom.unop_op],
+  congr' 1, clear Z g F,
   sorry
 end
 
