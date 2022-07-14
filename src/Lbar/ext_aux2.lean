@@ -107,6 +107,8 @@ lemma to_Cond_val_map (X Y : Profinite.{u}) (f : X ⟶ Y) :
   (λ x, ⟨continuous_map.comp_right_continuous_map V f x.down⟩ : ↥(V.to_Cond.val.obj (op Y)) → ↥(V.to_Cond.val.obj (op X))) :=
 by { ext x, rw to_Cond_val_map_apply }
 
+variables [complete_space V] [separated_space V]
+
 lemma massive_aux₂ (X Y : Profinite.{u}) (f : X ⟶ Y) (x : (V.to_Cond.val.obj (op.{u+2} Y))) :
   uniform_space.completion.map.{u u} (locally_constant.comap_hom.{u u u} f f.continuous)
     ((locally_constant.pkg.{u} Y ↥V).compare uniform_space.completion.cpkg.{u} x.down) =
@@ -147,8 +149,6 @@ begin
     refl,
     exact f.continuous },
 end
-
-variables [complete_space V] [separated_space V]
 
 lemma massive_aux (X Y : Profinite.{u}) (f : X ⟶ Y) :
   (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab.{u} V.to_Cond Y).hom ≫
