@@ -38,14 +38,76 @@ variables [complete_space V] [separated_space V]
 
 set_option pp.universes true
 
+lemma final_boss_aux₁ (X : Profinite) (x) :
+ ((LCC_iso_Cond_of_top_ab_add_equiv.{u} X V).symm) x =
+ (LCC_iso_Cond_of_top_ab_equiv X V).symm x := rfl
+
+lemma final_boss_aux₂ [normed_with_aut r V] (X : Profinite) (x : locally_constant X V) :
+((locally_constant.map_hom.{u u u} (V_T_inv r V)).completion)
+  (uniform_space.completion.cpkg.{u}.coe x) =
+  uniform_space.completion.map (locally_constant.map_hom (V_T_inv r V)) x := rfl
+
+lemma final_boss_aux₃ [normed_with_aut r V] (X : Profinite) :
+  continuous.{u u}
+  (λ (x : C(X,V)),
+  ((locally_constant.map_hom.{u u u} normed_with_aut.T.{u}.inv).completion)
+  (((uniform_space.completion.cpkg.{u}.compare_equiv (locally_constant.pkg.{u} X ↥V)).symm) x)) :=
+sorry
+
+lemma final_boss_aux₄ [normed_with_aut r V] (X : Profinite) :
+@continuous.{u u} _ _ _ (uniform_space.completion.cpkg.uniform_struct.to_topological_space)
+  (λ (x : C(X,V)),
+  ((locally_constant.pkg X V).compare
+    uniform_space.completion.cpkg.{u}
+  {to_fun := (V_T_inv r V) ∘ x.to_fun, continuous_to_fun :=
+  (normed_with_aut.T.inv.continuous.comp x.2)})) := sorry
+
 lemma final_boss [normed_with_aut r V] (X : Profinite)
-  (x : ((Condensed.of_top_ab.presheaf V).obj (op X))) (h) :
+  (x : ((Condensed.of_top_ab.presheaf V).obj (op X))) :
 ((locally_constant.map_hom (V_T_inv r V)).completion)
     (((LCC_iso_Cond_of_top_ab_add_equiv X V).symm) x) =
   ((LCC_iso_Cond_of_top_ab_add_equiv X V).symm)
-    {to_fun := (normed_with_aut.T.inv) ∘ x.1, continuous_to_fun := h} :=
+    {to_fun := (normed_with_aut.T.inv) ∘ x.1, continuous_to_fun :=
+      (normed_with_aut.T.inv.continuous.comp x.2)} :=
 begin
-  sorry
+  rw final_boss_aux₁,
+  rw final_boss_aux₁,
+  dsimp only [V_T_inv],
+  dsimp only [LCC_iso_Cond_of_top_ab_equiv],
+  change C(X,V) at x,
+  apply abstract_completion.induction_on (locally_constant.pkg.{u} X ↥V) x,
+  { apply is_closed_eq,
+    { apply final_boss_aux₃ },
+    { apply final_boss_aux₄ } },
+  clear x,
+  intros x,
+  change ((locally_constant.map_hom.{u u u} normed_with_aut.T.{u}.inv).completion)
+    ((locally_constant.pkg.{u} X ↥V).compare uniform_space.completion.cpkg.{u}
+       ((locally_constant.pkg.{u} X ↥V).coe x)) = _,
+  --dsimp [abstract_completion.compare_equiv],
+  rw abstract_completion.compare_coe,
+  erw final_boss_aux₂,
+  erw uniform_space.completion.map_coe,
+  let q : C(X,V) :=
+    {to_fun := (normed_with_aut.T.{u}.inv) ∘ ((locally_constant.pkg.{u} X ↥V).coe x).to_fun,
+    continuous_to_fun := _},
+  swap,
+  { apply continuous.comp,
+    apply normed_group_hom.continuous,
+    refine ((locally_constant.pkg.{u} X ↥V).coe x).2 },
+  have hq : q = (locally_constant.pkg X V).coe
+    ((locally_constant.map_hom.{u u u} (V_T_inv.{u} r V)) x),
+  { ext, refl },
+
+  change _ =
+    ((locally_constant.pkg.{u} X ↥V).compare uniform_space.completion.cpkg) q,
+  rw hq,
+
+  rw abstract_completion.compare_coe,
+
+  refl,
+
+  apply normed_group_hom.uniform_continuous,
 end
 
 end
