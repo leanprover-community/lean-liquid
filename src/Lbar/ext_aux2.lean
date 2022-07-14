@@ -28,14 +28,6 @@ lemma QprimeFP_map (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) :
 
 variables [fact (0 < r')] [fact (r' < 1)]
 
--- lemma massive_aux (X Y : FreeAb Profinite.{u}) (f : X ⟶ Y) :
---   (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab.{u} V.to_Cond Y.as).hom ≫
---   _ =
---   (preadditive_yoneda.{u+1 u+2}.obj V.to_Cond).map
---   ((FreeAb.eval.{u+1 u+2} (Condensed.{u u+1 u+2} Ab.{u+1})).map (freeCond.{u}.map_FreeAb.map f)).op ≫
---   (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab.{u} V.to_Cond X.as).hom :=
--- sorry
-
 lemma massive_aux (X Y : Profinite.{u}) (f : X ⟶ Y) :
   (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab.{u} V.to_Cond Y).hom ≫
       Ab.ulift.{u+1 u}.map ((LCC_iso_Cond_of_top_ab.{u} V).inv.app (op.{u+2} Y)) ≫
@@ -51,6 +43,9 @@ lemma massive_aux (X Y : Profinite.{u}) (f : X ⟶ Y) :
         Ab.ulift.{u+1 u}.map ((LCC_iso_Cond_of_top_ab.{u} V).inv.app (op.{u+2} X)) ≫
           (ExtQprime_iso_aux_system_obj_aux'.{u} V X).hom :=
 begin
+  dsimp only [functor.map_FreeAb, FreeAb.of_functor, FreeAb.eval],
+  simp only [free_abelian_group.map_of_apply, free_abelian_group.lift.of, id],
+  dsimp only [functor.right_op_map, quiver.hom.op_unop, quiver.hom.unop_op],
   sorry
 end
 
