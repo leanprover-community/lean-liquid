@@ -148,6 +148,23 @@ def to_Cond_T_inv [normed_with_aut r V] : V.to_Cond ⟶ V.to_Cond :=
 (Condensed.of_top_ab_map.{u} (normed_group_hom.to_add_monoid_hom.{u u} normed_with_aut.T.{u}.inv)
   (normed_group_hom.continuous _))
 
+lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_T_inv_aux (c : ℝ≥0)
+  [normed_with_aut r V] (n : ℕ) (t) :
+((forget₂.{u+2 u+2 u+1 u+1 u+1} SemiNormedGroup.{u+1} Ab.{u+1}).map
+       (((aux_system.T_inv.{u u+1} r r' BD ⟨M⟩ (SemiNormedGroup.ulift.{u+1 u}.obj V) κ).app
+           (op.{1} c)).f n))
+    ((((ExtQprime_iso_aux_system_obj_aux.{u} V).hom.app
+           (((breen_deligne.FPsystem.{u} r' BD ⟨M⟩ κ).obj c).X n)).unop) t) =
+  (((ExtQprime_iso_aux_system_obj_aux.{u} V).hom.app
+        (((breen_deligne.FPsystem.{u} r' BD ⟨M⟩ κ).obj c).X n)).unop)
+        (t ≫ to_Cond_T_inv.{u} r V) :=
+begin
+  dsimp [ExtQprime_iso_aux_system_obj_aux],
+  simp only [comp_apply],
+  sorry
+end
+
+
 lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_T_inv (c : ℝ≥0)
   [normed_with_aut r V] :
 (hom_complex_QprimeFP_nat_iso_aux_system.{u} r' BD κ M V c).hom ≫
@@ -160,7 +177,16 @@ lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_T_inv (c : ℝ≥0)
     let Q := ((QprimeFP_nat r' BD κ M).obj c).op,
     exact e'.app Q,
   end ≫
-  (hom_complex_QprimeFP_nat_iso_aux_system.{u} r' BD κ M V (c)).hom := sorry
+  (hom_complex_QprimeFP_nat_iso_aux_system.{u} r' BD κ M V (c)).hom :=
+begin
+  ext n : 2, ext1 t,
+  dsimp [hom_complex_QprimeFP_nat_iso_aux_system],
+  simp only [comp_apply],
+  dsimp [nat_iso.map_homological_complex, forget₂_unop],
+  erw id_apply, erw id_apply,
+  erw [functor.map_homological_complex_map_f],
+  apply hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_T_inv_aux,
+end
 
 namespace ExtQprime_iso_aux_system_obj_naturality_setup
 
