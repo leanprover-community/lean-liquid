@@ -34,7 +34,10 @@ lemma massive_aux₁ (X Y : Profinite.{u}) (f : X ⟶ Y) :
   (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab.{u} V.to_Cond X).hom =
   (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab.{u} V.to_Cond Y).hom ≫
   V.to_Cond.val.map f.op :=
-sorry
+begin
+  erw preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab_natural',
+  refl,
+end
 
 lemma add_equiv.mk_symm {A B : Type*} [add_comm_group A] [add_comm_group B]
   (f : A →+ B) (g : B →+ A) (h1 h2 h3) :
