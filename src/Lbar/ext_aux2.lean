@@ -78,7 +78,11 @@ lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_c (c₁ c₂) (h : c
   end) ≫ (hom_complex_QprimeFP_nat_iso_aux_system r' BD κ M V c₁).hom :=
 begin
   ext n : 2,
-  haveI : fact (κ c₁ n ≤ κ c₂ n) := sorry,
+  haveI : fact (κ c₁ n ≤ κ c₂ n) := begin
+    constructor,
+    apply fact.out (monotone (function.swap κ n)),
+    exact h.le
+  end,
   have := massive V
     (breen_deligne.FPsystem.X.{u} r' BD ⟨M⟩ κ c₁ n)
     (breen_deligne.FPsystem.X.{u} r' BD ⟨M⟩ κ c₂ n)
