@@ -108,10 +108,25 @@ begin
       refine continuous.comp _ _, { exact continuous_ulift_up },
       dsimp only [Condensed.of_top_ab, Condensed.of_top_ab.presheaf],
       exact (map_continuous (continuous_map.comp_right_continuous_map ↥V f)).comp continuous_induced_dom, } },
-  { intro φ, dsimp only [abstract_completion.compare, to_Cond_val_map_apply],
-    rw [abstract_completion.extend_def],
-    swap, { apply abstract_completion.uniform_continuous_coe },
-    sorry }
+  { intro φ,
+    dsimp only,
+    simp only [abstract_completion.compare_coe, to_Cond_val_map_apply,
+      uniform_space.completion.map],
+    rw [abstract_completion.map_coe],
+    swap,
+    { letI : semi_normed_group (locally_constant ↥(X.to_CompHaus.to_Top) ↥V),
+      { exact locally_constant.semi_normed_group },
+      letI : semi_normed_group (locally_constant ↥(Y.to_CompHaus.to_Top) ↥V),
+      { exact locally_constant.semi_normed_group },
+      exact normed_group_hom.uniform_continuous _, },
+    have : (continuous_map.comp_right_continuous_map ↥V f) ((locally_constant.pkg Y V).coe φ) =
+      (locally_constant.pkg X V).coe _ := _,
+    rw [this, abstract_completion.compare_coe],
+    dsimp only [locally_constant.comap_hom_apply],
+    ext1,
+    erw [locally_constant.coe_comap],
+    refl,
+    exact f.continuous }
 end
 
 lemma massive_aux (X Y : Profinite.{u}) (f : X ⟶ Y) :
