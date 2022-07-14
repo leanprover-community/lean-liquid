@@ -265,9 +265,29 @@ begin
   exact this,
 end
 
+def V_T_inv [normed_with_aut r V] : V ⟶ V :=
+normed_with_aut.T.{u}.inv
+
 def to_Cond_T_inv [normed_with_aut r V] : V.to_Cond ⟶ V.to_Cond :=
 (Condensed.of_top_ab_map.{u} (normed_group_hom.to_add_monoid_hom.{u u} normed_with_aut.T.{u}.inv)
   (normed_group_hom.continuous _))
+
+lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_T_inv_aux_helper
+  [normed_with_aut r V]
+  (X : Profinite.{u}) :
+  (ExtQprime_iso_aux_system_obj_aux' V X).hom ≫
+  category_theory.functor.map _
+  (SemiNormedGroup.Completion.map
+  (nat_trans.app
+    (SemiNormedGroup.LocallyConstant.map
+    (category_theory.functor.map _ $ V_T_inv _ _)) _)) =
+  Ab.ulift.map
+  (category_theory.functor.map _ $
+  category_theory.functor.map _ $
+  nat_trans.app
+  (SemiNormedGroup.LocallyConstant.map $ V_T_inv _ _) _) ≫
+  (ExtQprime_iso_aux_system_obj_aux' V X).hom
+   := sorry
 
 lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_T_inv_aux (c : ℝ≥0)
   [normed_with_aut r V] (n : ℕ) (t) :
@@ -293,6 +313,27 @@ begin
   rw nat_iso.of_components.inv_app,
   dsimp only [unop_op],
   -/
+  dsimp only [forget₂, has_forget₂.forget₂, ExtQprime_iso_aux_system_obj_aux,
+    nat_iso.of_components.hom_app, id, iso.op, iso.trans_hom, iso.symm,
+    nat_iso.app_inv, aux_system.T_inv, quiver.hom.op_unop, quiver.hom.unop_op,
+    homological_complex.unop],
+  simp only [comp_apply],
+  let X : Profinite := (((breen_deligne.FPsystem r' BD ⟨M⟩ κ).obj c).X n).as,
+  have := preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab_natural
+    (to_Cond_T_inv r V) X,
+  apply_fun (λ e, e t) at this,
+  erw this, clear this,
+  simp only [comp_apply],
+  dsimp only [SemiNormedGroup.LocallyConstant],
+  have := hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_T_inv_aux_helper r V X,
+  let s := ((Condensed_Ab_to_presheaf.map_iso (Condensed_LCC_iso_of_top_ab V)).inv.app (op X))
+    (((preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab V.to_Cond X).hom)
+    (t)),
+  apply_fun (λ e, e s) at this,
+  erw this, clear this,
+  simp only [comp_apply],
+  congr' 1,
+
   sorry
 end
 
