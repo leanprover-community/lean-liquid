@@ -135,7 +135,7 @@ end
 
 def to_Cond_T_inv [normed_with_aut r V] : V.to_Cond ⟶ V.to_Cond :=
 (Condensed.of_top_ab_map.{u} (normed_group_hom.to_add_monoid_hom.{u u} normed_with_aut.T.{u}.inv)
-  sorry)
+  (normed_group_hom.continuous _))
 
 lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_T_inv (c : ℝ≥0)
   [normed_with_aut r V] :
