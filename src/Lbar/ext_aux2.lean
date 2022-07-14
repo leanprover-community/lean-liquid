@@ -335,7 +335,40 @@ lemma another_aux_lemma [normed_with_aut r V] (X : Profinite) :
   (preadditive_yoneda.map
     (to_Cond_T_inv r V)).app _ ≫
   (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab V.to_Cond X).hom ≫
-  (Condensed_Ab_to_presheaf.map_iso (Condensed_LCC_iso_of_top_ab V)).inv.app _ := sorry
+  (Condensed_Ab_to_presheaf.map_iso (Condensed_LCC_iso_of_top_ab V)).inv.app _ :=
+begin
+  have := preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab_natural
+    (to_Cond_T_inv r V) X,
+  erw ← reassoc_of this,
+  congr' 1,
+  dsimp only [Condensed_Ab_to_presheaf, functor.map_iso_inv, nat_iso.app_inv,
+    Sheaf_to_presheaf_map, id, whisker_right_app, SemiNormedGroup.LCC,
+    curry, uncurry, curry_obj, functor.comp_map],
+  simp only [category_theory.functor.map_id, category.comp_id],
+  rw ← nat_trans.comp_app,
+  rw ← Sheaf.hom.comp_val, -- how to make those commute?
+  ext ⟨x⟩,
+  dsimp only [Condensed_LCC_iso_of_top_ab, Sheaf.iso.mk, iso_whisker_right, to_Cond_T_inv,
+    Ab.ulift],
+  simp only [comp_apply],
+  dsimp [Condensed.of_top_ab_map],
+  simp only [comp_apply],
+  dsimp [LCC_iso_Cond_of_top_ab, forget₂, has_forget₂.forget₂],
+  rw nat_iso.of_components.inv_app,
+  sorry -- gotta go!
+  ---dsimp [LCC_iso_Cond_of_top_ab_add_equiv],
+
+  /-
+
+  ext t,
+  dsimp [Condensed_LCC_iso_of_top_ab, to_Cond_T_inv, Ab.ulift],
+  simp only [comp_apply], dsimp [LCC_iso_Cond_of_top_ab, forget₂, has_forget₂.forget₂,
+    SemiNormedGroup.LCC],
+  rw nat_iso.of_components.inv_app,
+  -/
+
+
+end
 
 /-
 lemma this_is_getting_silly
