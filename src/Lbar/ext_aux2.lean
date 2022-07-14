@@ -47,6 +47,10 @@ lemma final_boss_aux₂ [normed_with_aut r V] (X : Profinite) (x : locally_const
   (uniform_space.completion.cpkg.{u}.coe x) =
   uniform_space.completion.map (locally_constant.map_hom (V_T_inv r V)) x := rfl
 
+-- should this be a global instance earlier in mathlib?
+local attribute [instance]
+abstract_completion.uniform_struct
+
 lemma final_boss_aux₃ [normed_with_aut r V] (X : Profinite) :
   continuous.{u u}
   (λ (x : C(X,V)),
@@ -55,13 +59,11 @@ lemma final_boss_aux₃ [normed_with_aut r V] (X : Profinite) :
 begin
   dsimp [abstract_completion.compare_equiv],
   refine (normed_group_hom.continuous _).comp _,
-  letI : uniform_space.{u} (locally_constant.pkg.{u} X ↥V).space :=
-    (locally_constant.pkg X V).uniform_struct,
-  letI : uniform_space (
-      (uniform_space.completion.cpkg : abstract_completion
-      (locally_constant X V)).space) := abstract_completion.uniform_struct _,
   refine ((locally_constant.pkg X V).uniform_continuous_compare _).continuous,
 end
+
+example {β : Type*} [uniform_space β] (a : abstract_completion β) : uniform_space a.space :=
+by apply_instance
 
 lemma final_boss_aux₄ [normed_with_aut r V] (X : Profinite) :
 @continuous.{u u} _ _ _ (uniform_space.completion.cpkg.uniform_struct.to_topological_space)
@@ -75,11 +77,6 @@ begin
     (V_T_inv r V).continuous.comp e.2⟩,
   have he : continuous e := continuous_map.continuous_comp
     ((⟨(V_T_inv r V), (V_T_inv r V).continuous⟩ : C(V,V))),
-  letI : uniform_space.{u} (locally_constant.pkg.{u} X ↥V).space :=
-    (locally_constant.pkg X V).uniform_struct,
-  letI : uniform_space (
-      (uniform_space.completion.cpkg : abstract_completion
-      (locally_constant X V)).space) := abstract_completion.uniform_struct _,
   refine continuous.comp _ he,
   refine ((locally_constant.pkg X V).uniform_continuous_compare _).continuous,
 end
