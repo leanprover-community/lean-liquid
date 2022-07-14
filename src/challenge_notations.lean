@@ -14,7 +14,24 @@ noncomputable theory
 
 variables (p' p : ℝ≥0) [fact (0 < p')] [fact (p' ≤ 1)] [fact (p' < p)]
 
-localized "notation `ℳ_{` p' `}` S := (real_measures.condensed p').obj S"
+section
+open tactic
+meta def tactic.extract_facts : tactic unit := do
+  ctx ← local_context,
+  ctx.mmap' $ λ hyp, do
+    hyp_tp ← infer_type hyp,
+    when (hyp_tp.is_app_of `fact) $
+      mk_app `fact.out [hyp] >>= note_anon none >> skip
+
+meta def tactic.interactive.fact_arith : tactic unit :=
+tactic.extract_facts >>
+`[norm_cast at *,
+  simp only [← nnreal.coe_lt_coe, ← nnreal.coe_le_coe] at *,
+  refine fact.mk _,
+  linarith]
+end
+
+localized "notation `ℳ_{` p' `}` S := (@real_measures.condensed p' _ (by fact_arith)).obj S"
   in liquid_tensor_experiment
 
 abbreviation liquid_tensor_experiment.Ext (i : ℤ) (A B : Condensed.{u} Ab.{u+1}) :=
