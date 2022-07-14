@@ -1,7 +1,5 @@
 import challenge_notations
-import for_mathlib.derived.les_facts
-import laurent_measures.ses2
-import laurent_measures.ext
+import challenge_prerequisites
 
 /-!
 # Liquid Tensor Experiment
@@ -25,20 +23,7 @@ noncomputable theory
 open_locale liquid_tensor_experiment nnreal zero_object
 open liquid_tensor_experiment category_theory category_theory.limits
 
-variables (p' p : ℝ≥0) [fact (0 < p')] [fact (0 < (p : ℝ))]
-variables [fact (p' < p)] [fact (p' ≤ 1)] [fact (p ≤ 1)]
-
-set_option pp.universes true
-
--- move me
-instance : fact (@r p < 1) :=
-begin
-  constructor, delta r,
-  apply real.rpow_lt_one,
-  { norm_num },
-  { norm_num },
-  { exact fact.out _ }
-end
+variables (p' p : ℝ≥0) [fact (0 < p')] [fact (p' < p)] [fact (p' ≤ 1)] [fact (p ≤ 1)]
 
 theorem liquid_tensor_experiment (S : Profinite.{0}) (V : pBanach.{0} p) :
   ∀ i > 0, Ext i (ℳ_{p'} S) V ≅ 0 :=
@@ -46,6 +31,7 @@ begin
   intros i hi,
   apply is_zero.iso_zero,
   revert i,
+  haveI : fact (0 < (p:ℝ)) := ⟨lt_trans (fact.out _ : 0 < p') (fact.out _)⟩,
   haveI : fact (p' < 1) := ⟨lt_of_lt_of_le (fact.out _ : p' < p) (fact.out _)⟩,
   erw is_zero_iff_epi_and_is_iso _ _ (V : Condensed.{0 1 2} Ab) (laurent_measures.short_exact p' S),
   let := pBanach.choose_semi_normed_group V,
