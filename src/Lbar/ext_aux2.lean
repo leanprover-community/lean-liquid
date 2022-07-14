@@ -272,6 +272,16 @@ def to_Cond_T_inv [normed_with_aut r V] : V.to_Cond ⟶ V.to_Cond :=
 (Condensed.of_top_ab_map.{u} (normed_group_hom.to_add_monoid_hom.{u u} normed_with_aut.T.{u}.inv)
   (normed_group_hom.continuous _))
 
+lemma uniform_space.completion.map_comp'
+  {α β γ : Type*} [uniform_space α] [uniform_space β] [uniform_space γ]
+  {g : β → γ} {f : α → β}
+  (hg : uniform_continuous g) (hf : uniform_continuous f) (x) :
+  uniform_space.completion.map g (uniform_space.completion.map f x) =
+  uniform_space.completion.map (g ∘ f) x :=
+begin
+  rw [← uniform_space.completion.map_comp hg hf],
+end
+
 lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_T_inv_aux_helper
   [normed_with_aut r V]
   (X : Profinite.{u}) :
@@ -287,7 +297,26 @@ lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_T_inv_aux_helper
   nat_trans.app
   (SemiNormedGroup.LocallyConstant.map $ V_T_inv _ _) _) ≫
   (ExtQprime_iso_aux_system_obj_aux' V X).hom
-   := sorry
+   :=
+begin
+  ext1 ⟨f⟩,
+  simp only [comp_apply],
+  dsimp only [ExtQprime_iso_aux_system_obj_aux', add_equiv.to_AddCommGroup_iso,
+    add_equiv.coe_to_add_monoid_hom, add_equiv.trans_apply],
+  simp only [add_equiv.to_fun_eq_coe, SemiNormedGroup.LocallyConstant_map_app, SemiNormedGroup.Completion_map,
+  normed_group_hom.completion_coe_to_fun, add_equiv.ulift_apply, equiv.to_fun_as_coe, equiv.ulift_apply_2,
+  add_equiv.coe_mk, Ab.ulift_map_apply_down, SemiNormedGroup.forget₂_Ab_map,
+    normed_group_hom.coe_to_add_monoid_hom],
+  rw uniform_space.completion.map_comp',
+  rotate,
+  { apply normed_group_hom.uniform_continuous },
+  { apply normed_group_hom.uniform_continuous },
+  rw uniform_space.completion.map_comp',
+  rotate,
+  { apply normed_group_hom.uniform_continuous },
+  { apply normed_group_hom.uniform_continuous },
+  refl
+end
 
 lemma another_aux_lemma [normed_with_aut r V] (X : Profinite) :
   (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab V.to_Cond X).hom
