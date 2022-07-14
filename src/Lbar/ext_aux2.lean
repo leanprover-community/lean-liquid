@@ -28,6 +28,23 @@ lemma QprimeFP_map (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) :
 
 variables [fact (0 < r')] [fact (r' < 1)]
 
+instance aaahrg (X : Profinite) : semi_normed_group (locally_constant X V) :=
+locally_constant.semi_normed_group
+
+def V_T_inv [normed_with_aut r V] : V ⟶ V :=
+normed_with_aut.T.{u}.inv
+
+lemma final_boss [normed_with_aut r V] (X : Profinite)
+  (x : ((Condensed.of_top_ab.presheaf V).obj (op X))) (h) :
+((locally_constant.map_hom (V_T_inv r V)).completion)
+    (((LCC_iso_Cond_of_top_ab_add_equiv X V).symm) x) =
+  ((LCC_iso_Cond_of_top_ab_add_equiv X V).symm)
+    {to_fun := (normed_with_aut.T.inv) ∘ x.1, continuous_to_fun := h} :=
+begin
+  sorry
+end
+
+
 @[reassoc]
 lemma massive_aux₁ (X Y : Profinite.{u}) (f : X ⟶ Y) :
   (preadditive_yoneda.{u+1 u+2}.obj V.to_Cond).map (freeCond.{u}.map f).op ≫
@@ -265,8 +282,7 @@ begin
   exact this,
 end
 
-def V_T_inv [normed_with_aut r V] : V ⟶ V :=
-normed_with_aut.T.{u}.inv
+
 
 def to_Cond_T_inv [normed_with_aut r V] : V.to_Cond ⟶ V.to_Cond :=
 (Condensed.of_top_ab_map.{u} (normed_group_hom.to_add_monoid_hom.{u u} normed_with_aut.T.{u}.inv)
@@ -318,6 +334,8 @@ begin
   refl
 end
 
+
+
 lemma another_aux_lemma [normed_with_aut r V] (X : Profinite) :
   (preadditive_yoneda_obj_obj_CondensedSet_to_Condensed_Ab V.to_Cond X).hom
   ≫ (Condensed_Ab_to_presheaf.map_iso (Condensed_LCC_iso_of_top_ab V)).inv.app (op X)
@@ -355,27 +373,8 @@ begin
   simp only [comp_apply],
   dsimp [LCC_iso_Cond_of_top_ab, forget₂, has_forget₂.forget₂],
   rw nat_iso.of_components.inv_app,
-  sorry -- gotta go!
-  ---dsimp [LCC_iso_Cond_of_top_ab_add_equiv],
-
-  /-
-
-  ext t,
-  dsimp [Condensed_LCC_iso_of_top_ab, to_Cond_T_inv, Ab.ulift],
-  simp only [comp_apply], dsimp [LCC_iso_Cond_of_top_ab, forget₂, has_forget₂.forget₂,
-    SemiNormedGroup.LCC],
-  rw nat_iso.of_components.inv_app,
-  -/
-
-
+  apply final_boss,
 end
-
-/-
-lemma this_is_getting_silly
-  [normed_with_aut r V] (X : Profinite.{u}) :
-  (locally_constant.map_hom (V_T_inv r V)).completion =
-  (SemiNormedGroup.LCC.map (V_T_inv r V)).app (op X) := sorry
--/
 
 lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_T_inv_aux (c : ℝ≥0)
   [normed_with_aut r V] (n : ℕ) (t) :
