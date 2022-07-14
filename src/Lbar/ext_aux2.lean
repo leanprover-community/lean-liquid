@@ -98,6 +98,8 @@ instance (X : Profinite) :
 instance (X : Profinite) : topological_space ↥(V.to_Cond.val.obj (op X)) :=
 @ulift.topological_space _ (continuous_map.compact_open.{u u})
 
+variables [complete_space V] [separated_space V]
+
 lemma to_Cond_val_map_apply (X Y : Profinite.{u}) (f : X ⟶ Y) (x) :
   V.to_Cond.val.map f.op x = ⟨continuous_map.comp_right_continuous_map V f x.down⟩ :=
 rfl
@@ -106,8 +108,6 @@ lemma to_Cond_val_map (X Y : Profinite.{u}) (f : X ⟶ Y) :
   ⇑(V.to_Cond.val.map f.op) =
   (λ x, ⟨continuous_map.comp_right_continuous_map V f x.down⟩ : ↥(V.to_Cond.val.obj (op Y)) → ↥(V.to_Cond.val.obj (op X))) :=
 by { ext x, rw to_Cond_val_map_apply }
-
-variables [complete_space V] [separated_space V]
 
 lemma massive_aux₂ (X Y : Profinite.{u}) (f : X ⟶ Y) (x : (V.to_Cond.val.obj (op.{u+2} Y))) :
   uniform_space.completion.map.{u u} (locally_constant.comap_hom.{u u u} f f.continuous)
