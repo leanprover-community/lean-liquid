@@ -304,7 +304,7 @@ begin
 end
 
 lemma hom_complex_QprimeFP_nat_iso_aux_system_naturality_in_T_inv_aux_helper
-  [normed_with_aut r V]
+  (r : ℝ≥0) (V : SemiNormedGroup.{u}) [normed_with_aut r V]
   (X : Profinite.{u}) :
   (ExtQprime_iso_aux_system_obj_aux' V X).hom ≫
   category_theory.functor.map _
