@@ -130,7 +130,7 @@ jobs:
           lean --run scripts/lint_project.lean
 
   test:
-    name: Test Theorem 9.5 is sorry-free
+    name: Test liquid_tensor_experiment is sorry-free
     runs-on: ubuntu-latest
     needs: build
 
@@ -157,7 +157,7 @@ jobs:
           python-version: 3.8
 
       - name: test thm95 is sorry free
-        run: python scripts/ensure_thm95_sorry_free.py
+        run: python scripts/ensure_lte_sorry_free.py
 
   stats:
     name: Stats for lean-liquid
