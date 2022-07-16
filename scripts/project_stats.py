@@ -31,7 +31,12 @@ os.chdir(get_git_root())
 
 def count_in_file(file_contents, lexer):
     counters = defaultdict(int)
+
+    counters["lines"] = len(file_contents.split("\n")) - 1
+
     generator = pygments.lex(file_contents, lexer)
+    line_is_nonblank = False
+    line_is_nonblank_and_not_entirely_comment = False
     for token in generator:
         token_type, token_text = token
         if token_type == Token.Keyword.Declaration and token_text in [
@@ -39,7 +44,23 @@ def count_in_file(file_contents, lexer):
             "lemma",
             "theorem",
         ]:
-            counters[token_text] += 1
+            counters[token_text + "s"] += 1
+
+        if not str.isspace(token_text):
+            line_is_nonblank = True
+            if (
+                token_type not in Token.Comment
+                and token_type != Token.Literal.String.Doc
+            ):
+                line_is_nonblank_and_not_entirely_comment = True
+
+        if "\n" in token_text:
+            if line_is_nonblank:
+                counters["nonblank lines"] += 1
+                line_is_nonblank = False
+            if line_is_nonblank_and_not_entirely_comment:
+                counters["nonblank lines excluding comments and docstrings"] += 1
+                line_is_nonblank_and_not_entirely_comment = False
     return counters
 
 
@@ -50,9 +71,9 @@ for path in Path("src").rglob("*.lean"):
         continue
     with open(path, "r") as f:
         file_counter = count_in_file(f.read(), LeanLexer())
-        for key, value in file_counter.items():
-            global_counter[key] += value
+    for key, value in file_counter.items():
+        global_counter[key] += value
 
 for key, value in global_counter.items():
-    print(f"Number of {key}s: {value}")
-print("\nCounters exclude commented-out code.")
+    print(f"Number of {key}: {value}")
+print("\nCounts for defs, lemmas, and theorems exclude commented-out code.")
