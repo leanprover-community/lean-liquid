@@ -135,7 +135,6 @@ begin
   rw [finsupp.map_domain_equiv_fun_on_fintype_symm, finset.sum_apply'],
   classical,
   simp only [finsupp.single_apply, ← finset.sum_filter],
-  congr'
 end
 
 def Profinite.condensed_free_pfpng_specialize_cone (S B : Profinite.{u}) (b : B) :
