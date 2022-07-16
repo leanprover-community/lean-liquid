@@ -431,11 +431,14 @@ def S : C := ⨁ (λ i : ulift.{u+1} ι, KC.obj (op (X i.down)))
 
 def prod_iso_P : P₀ ≅ P :=
 { hom := pi.lift $ λ i, pi.π _ _,
-  inv := pi.lift $ λ i, pi.π _ ⟨i⟩ ≫ (iso.refl _).hom } .
+  inv := pi.lift $ λ i, pi.π _ ⟨i⟩ ≫ (iso.refl _).hom,
+  hom_inv_id' := by { ext ⟨j⟩, simp },
+  inv_hom_id' := by { ext ⟨⟨j⟩⟩, simp }, }
 
 def biprod_iso_P : P ≅ S :=
 { hom := biproduct.lift $ λ b, pi.π _ _,
   inv := pi.lift $ λ b, biproduct.π _ _,
+  hom_inv_id' := by { ext ⟨j⟩, simp },
   inv_hom_id' := begin
     apply biproduct.hom_ext, -- we need to choose the correct extensionality lemma here...
     intros i,
@@ -448,11 +451,14 @@ def T (j : J) : C := ⨁ (λ i : ulift.{u+1} ι, (K.obj j).val.obj (op (X i.down
 
 def prod_iso_Q (j : J) : Q₀ j ≅ Q j :=
 { hom := pi.lift $ λ b, pi.π _ _,
-  inv := pi.lift $ λ b, pi.π _ ⟨b⟩ ≫ (iso.refl _).hom }
+  inv := pi.lift $ λ b, pi.π _ ⟨b⟩ ≫ (iso.refl _).hom,
+  hom_inv_id' := by { ext ⟨j⟩, simp },
+  inv_hom_id' := by { ext ⟨⟨j⟩⟩, simp }, }
 
 def biprod_iso_Q (j : J) : Q j ≅ T j :=
 { hom := biproduct.lift $ λ b, pi.π _ _,
   inv := pi.lift $ λ b, biproduct.π _ _,
+  hom_inv_id' := by { ext ⟨j⟩, simp },
   inv_hom_id' := begin
     apply biproduct.hom_ext, -- we need to choose the correct extensionality lemma here...
     intros i,
@@ -484,7 +490,7 @@ def Q₀_functor : J ⥤ C :=
   map_id' := begin
     intros i,
     dsimp [map_Q₀],
-    ext1,
+    ext1 ⟨j⟩,
     simp,
   end,
   map_comp' := begin
@@ -498,7 +504,7 @@ def Q_functor : J ⥤ C :=
 { obj := Q,
   map := λ i j f, map_Q f,
   map_id' := begin
-    intros i, dsimp [map_Q], ext1, simp,
+    intros i, dsimp [map_Q], ext1 ⟨j⟩, simp,
   end,
   map_comp' := begin
     intros i j k f g, dsimp [map_Q], ext1, simp
