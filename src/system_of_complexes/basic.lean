@@ -298,7 +298,7 @@ begin
   apply normed_group_hom.isometry_of_norm,
   intro v,
   rw ← normed_group_hom.norm_eq_of_isometry (hf c n),
-  simp only [←apply_hom_eq_hom_apply, ←apply_inv_eq_inv_apply, iso.symm_hom, coe_inv_hom_id],
+  simp only [←apply_hom_eq_hom_apply, ←apply_inv_eq_inv_apply, iso.symm_hom, iso.inv_hom_id_apply],
 end
 
 end is_weak_bounded_exact
