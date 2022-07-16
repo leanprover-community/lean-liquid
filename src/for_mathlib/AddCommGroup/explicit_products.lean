@@ -43,16 +43,16 @@ by { ext y a, specialize h a, apply_fun (λ e, e y) at h, exact h }
 
 def is_limit_pi_fan {α : Type v} (X : α → AddCommGroup.{max v u}) :
   is_limit (pi_fan X) :=
-{ lift := λ S, pi_lift _ $ S.π.app,
+{ lift := λ S, pi_lift _ $ λ a, S.π.app ⟨_⟩,
   fac' := begin
-    intros S j,
+    rintros S ⟨j⟩,
     apply pi_lift_π,
   end,
   uniq' := begin
     intros S m hm,
     apply pi_hom_ext,
     intros i,
-    erw [hm, pi_lift_π],
+    erw [hm ⟨i⟩, pi_lift_π],
   end }
 
 noncomputable
@@ -87,7 +87,7 @@ begin
   apply_instance,
   { rw mono_iff_injective,
     intros f g h,
-    ext1 j,
+    ext1 ⟨j⟩,
     apply_fun (λ e, e j) at h,
     exact h },
   { rw epi_iff_surjective,
@@ -147,16 +147,16 @@ end
 
 def is_limit_direct_sum_fan {α : Type v} [fintype α]
   (X : α → AddCommGroup.{max v u}) : is_limit (direct_sum_fan X) :=
-{ lift := λ S, direct_sum_lift _ $ S.π.app,
+{ lift := λ S, direct_sum_lift _ $ λ a, S.π.app ⟨a⟩, -- S.π.app,
   fac' := begin
-    intros S j,
+    rintros S ⟨j⟩,
     apply direct_sum_lift_π,
   end,
   uniq' := begin
     intros S m hm,
     apply direct_sum_hom_ext,
     intros i,
-    specialize hm i,
+    specialize hm ⟨i⟩,
     erw [hm, direct_sum_lift_π],
   end }
 
@@ -218,16 +218,16 @@ cofan.mk _ (direct_sum_ι _)
 
 def is_colimit_direct_sum_cofan {α : Type v}
   (X : α → AddCommGroup.{max v u}) : is_colimit (direct_sum_cofan X) :=
-{ desc := λ S, direct_sum_desc X S.ι.app,
+{ desc := λ S, direct_sum_desc X (λ a, S.ι.app ⟨a⟩), -- S.ι.app,
   fac' := begin
-    intros X j,
+    rintros X ⟨j⟩,
     apply direct_sum_ι_desc,
   end,
   uniq' := begin
     intros S m hm,
     apply direct_sum_hom_ext',
     intros i,
-    specialize hm i,
+    specialize hm ⟨i⟩,
     erw hm, rw direct_sum_ι_desc,
   end }
 
