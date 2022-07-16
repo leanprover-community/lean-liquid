@@ -22,12 +22,15 @@ def op_product_iso {α : Type v} (X : α → C) [has_product X] [has_coproduct (
       limit.lift_π, fan.mk_π_app, unop_id_op, category.id_comp],
     rw [← unop_comp, colimit.ι_desc, cofan.mk_ι_app],
     erw [category.id_comp],
+    rcases j,
     refl
   end,
   inv_hom_id' := begin
     ext j,
     simp only [eq_to_hom_refl, category.comp_id, colimit.ι_desc_assoc, cofan.mk_ι_app],
-    rw [← op_comp, limit.lift_π, fan.mk_π_app], refl
+    rw [← op_comp, limit.lift_π, fan.mk_π_app],
+    rcases j,
+    refl
   end }
 
 end category_theory.limits
