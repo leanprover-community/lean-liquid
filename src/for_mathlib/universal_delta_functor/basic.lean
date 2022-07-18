@@ -109,54 +109,51 @@ class universal (F : A ⥤δ B) : Prop :=
 
 namespace stacks_010T
 
-class preuniversal (F : A ⥤δ B) : Prop :=
-(cond [] : ∀ (X : A) (n : ℕ), ∃ (I : A) (f : X ⟶ I) (hf : category_theory.mono f),
-  (F (n+1)).map f = 0)
+structure effacement (F : A ⥤δ B) (X : A) (n : ℕ) :=
+(I : A)
+(ι : X ⟶ I)
+[mono : category_theory.mono ι]
+(w : (F (n+1)).map ι = 0)
 
-variables (F : A ⥤δ B) [preuniversal F]
+instance effacement_mono (F : A ⥤δ B) (X : A) (n : ℕ)
+  (e : effacement F X n) : category_theory.mono e.ι := e.mono
 
-def hull (X : A) (n : ℕ) : A :=
-(preuniversal.cond F X n).some
+class effacable (F : A ⥤δ B) : Prop :=
+(cond [] : ∀ (X : A) (n : ℕ), nonempty (effacement F X n))
 
-def ι (X : A) (n : ℕ) : X ⟶ hull F X n :=
-(preuniversal.cond F X n).some_spec.some
+def choose_effacement (F : A ⥤δ B) [effacable F] (X : A) (n : ℕ) : effacement F X n :=
+(effacable.cond F X n).some
 
-instance mono_ι (X : A) (n : ℕ) : category_theory.mono (ι F X n) :=
-(preuniversal.cond F X n).some_spec.some_spec.some
-
-def ι_spec (X : A) (n : ℕ) : (F (n+1)).map (ι F X n) = 0 :=
-(preuniversal.cond F X n).some_spec.some_spec.some_spec
-
-def ses (X : A) (n : ℕ) : short_exact_sequence A :=
+def effacement.ses {F : A ⥤δ B} {X n} (e : effacement F X n) : short_exact_sequence A :=
 { fst := X,
-  snd := hull F X n,
-  trd := limits.cokernel (ι F X n),
-  f := ι F X n,
+  snd := e.I,
+  trd := limits.cokernel e.ι,
+  f := e.ι,
   g := limits.cokernel.π _,
-  exact' := abelian.exact_cokernel (ι F X n) }
+  exact' := abelian.exact_cokernel e.ι }
 
-def cokernel_comparison (X : A) (n : ℕ) :
-  limits.cokernel ((F n).map (limits.cokernel.π (ι F X n))) ⟶ (F (n+1)).obj X :=
-limits.cokernel.desc _ ((F.δ n).app $ ses F X n) (F.exact_δ n (ses F X n)).w
+def effacement.cokernel_comparison {F : A ⥤δ B} {X n} (e : effacement F X n) :
+  limits.cokernel ((F n).map (limits.cokernel.π e.ι)) ⟶ (F (n+1)).obj X :=
+limits.cokernel.desc _ ((F.δ n).app e.ses) (F.exact_δ n e.ses).w
 
-instance epi_cokernel_comparison (X : A) (n : ℕ) :
-  epi (cokernel_comparison F X n) := sorry
+instance effacement.epi_cokernel_comparison {F : A ⥤δ B} {X n} (e : effacement F X n) :
+  epi e.cokernel_comparison := sorry
 
-instance mono_cokernel_comparison (X : A) (n : ℕ) :
-  category_theory.mono (cokernel_comparison F X n) := sorry
+instance effacement.mono_cokernel_comparison {F : A ⥤δ B} {X n} (e : effacement F X n) :
+  category_theory.mono e.cokernel_comparison := sorry
 
-instance is_iso_cokernel_comparison (X : A) (n : ℕ) :
-  is_iso (cokernel_comparison F X n) :=
+instance effacement.is_iso_cokernel_comparison {F : A ⥤δ B} {X n} (e : effacement F X n) :
+  is_iso e.cokernel_comparison :=
 is_iso_of_mono_of_epi _
 
-def cokernel_iso (X : A) (n : ℕ) :
-  limits.cokernel ((F n).map (limits.cokernel.π (ι F X n))) ≅ (F (n+1)).obj X :=
-as_iso (cokernel_comparison F X n)
+def effacement.cokernel_iso {F : A ⥤δ B} {X n} (e : effacement F X n) :
+  limits.cokernel ((F n).map (limits.cokernel.π e.ι)) ≅ (F (n+1)).obj X :=
+as_iso e.cokernel_comparison
 
 @[simp, reassoc]
-lemma cokernel_iso_spec (X : A) (n : ℕ) :
-  limits.cokernel.π _ ≫ (cokernel_iso F X n).hom =
-  (F.δ n).app (ses F X n) :=
+lemma cokernel_iso_spec {F : A ⥤δ B} {X n} (e : effacement F X n) :
+  limits.cokernel.π _ ≫ e.cokernel_iso.hom =
+  (F.δ n).app e.ses :=
 limits.cokernel.π_desc _ _ _
 
 end stacks_010T
