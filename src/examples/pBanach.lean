@@ -39,16 +39,16 @@ def pBanach.has_norm : has_norm V :=
 local attribute [instance] pBanach.has_norm
 
 /- The chosen norm on $V$ is a $p$-norm: it scales via the rule $∥rv∥ = |r|^p * ∥v∥$ -/
-example (r : ℝ) (v : V) : ∥ r • v ∥ = |r|^(p : ℝ) * ∥ v ∥ :=
+example (r : ℝ) (v : V) : ∥r • v∥ = |r|^(p : ℝ) * ∥v∥ :=
 (p_banach.exists_p_norm V.p_banach').some.norm_smul r v
 
 /- The chosen norm on $V$ satisfies the triangle inequality -/
-example (v w : V) : ∥ v + w ∥ ≤ ∥ v ∥ + ∥ w ∥ :=
+example (v w : V) : ∥v + w∥ ≤ ∥v∥ + ∥w∥ :=
 (p_banach.exists_p_norm V.p_banach').some.triangle v w
 
 /- The uniform space structure on `V` is induced by the chosen norm. -/
 example : uniformity V = ⨅ (ε : ℝ) (H : ε > 0),
-  filter.principal { p : V × V | ∥ p.fst - p.snd ∥ < ε } :=
+  filter.principal { p : V × V | ∥p.fst - p.snd∥ < ε } :=
 (p_banach.exists_p_norm V.p_banach').some.uniformity
 
 end pBanach
