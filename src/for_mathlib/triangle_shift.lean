@@ -14,17 +14,17 @@ universes v u
 -- Move + generalize!
 @[simp]
 lemma category_theory.discrete.associator_def (a b c : discrete ℤ) :
-  α_ a b c = eq_to_iso (add_assoc a b c) := rfl
+  α_ a b c = eq_to_iso (discrete.ext _ _ $ add_assoc a.1 b.1 c.1) := rfl
 
 -- Move + generalize!
 @[simp]
 lemma category_theory.discrete.left_unitor_def (a : discrete ℤ) :
-  λ_ a = eq_to_iso (zero_add _) := rfl
+  λ_ a = eq_to_iso (discrete.ext _ _ $ zero_add _) := rfl
 
 -- Move + generalize!
 @[simp]
 lemma category_theory.discrete.right_unitor_def (a : discrete ℤ) :
-  ρ_ a = eq_to_iso (add_zero _) := rfl
+  ρ_ a = eq_to_iso (discrete.ext _ _ $ add_zero _) := rfl
 
 namespace category_theory.triangulated
 open category_theory.category
@@ -284,35 +284,38 @@ def triangle_shift_core : shift_mk_core (triangle C) ℤ :=
 
 @[simps]
 def map_triangle_shift_functor (m n : discrete ℤ) (f : m ⟶ n) :
-  triangle_shift_functor C m ⟶ triangle_shift_functor C n :=
+  triangle_shift_functor C m.1 ⟶ triangle_shift_functor C n.1 :=
 { app := λ T,
   { hom₁ := eq_to_hom $ by rw discrete.eq_of_hom f,
     hom₂ := eq_to_hom $ by rw discrete.eq_of_hom f,
     hom₃ := eq_to_hom $ by rw discrete.eq_of_hom f,
-    comm₁' := by { rcases f with ⟨⟨⟨⟩⟩⟩, simp only [eq_to_hom_refl, id_comp, comp_id], },
-    comm₂' := by { rcases f with ⟨⟨⟨⟩⟩⟩, simp only [eq_to_hom_refl, id_comp, comp_id], },
-    comm₃' := by { rcases f with ⟨⟨⟨⟩⟩⟩,
+    comm₁' := by { rcases ⟨m, n⟩ with ⟨⟨_⟩, ⟨_⟩⟩, rcases f with ⟨⟨rfl : m = n⟩⟩,
+      simp only [eq_to_hom_refl, id_comp, comp_id], },
+    comm₂' := by { rcases ⟨m, n⟩ with ⟨⟨_⟩, ⟨_⟩⟩, rcases f with ⟨⟨rfl : m = n⟩⟩,
+      simp only [eq_to_hom_refl, id_comp, comp_id], },
+    comm₃' := by { rcases ⟨m, n⟩ with ⟨⟨_⟩, ⟨_⟩⟩, rcases f with ⟨⟨rfl : m = n⟩⟩,
       dsimp, rw (shift_functor C (1 : ℤ)).map_id, simp only [comp_id, id_comp]} },
   naturality' := begin
-    rcases f with ⟨⟨⟨⟩⟩⟩,
+    rcases ⟨m, n⟩ with ⟨⟨_⟩, ⟨_⟩⟩, rcases f with ⟨⟨rfl : m = n⟩⟩,
     rintros X Y g, ext;
     { dsimp, simp only [eq_to_hom_refl, id_comp, comp_id] },
   end } .
 
 
 
-lemma associativity_aux (X : C) (a b c : discrete ℤ) :
+lemma associativity_aux (X : C) (a b c : ℤ) :
 (𝟙 ((shift_functor C c).obj ((shift_functor C b).obj ((shift_functor C a).obj X))) ≫
-  (shift_functor C c).map (((shift_monoidal_functor C ℤ).to_lax_monoidal_functor.μ a b).app X)) ≫
-  ((shift_monoidal_functor C ℤ).to_lax_monoidal_functor.μ (a ⊗ b) c).app X ≫
-  eq_to_hom (by { congr' 2, apply add_assoc }) =
+  (shift_functor C c).map (((shift_monoidal_functor C ℤ).μ ⟨a⟩ ⟨b⟩).app X)) ≫
+  ((shift_monoidal_functor C ℤ).μ (⟨a⟩ ⊗ ⟨b⟩) ⟨c⟩).app X ≫
+  eq_to_hom (show ((shift_monoidal_functor C ℤ).obj ((⟨a⟩ ⊗ ⟨b⟩) ⊗ ⟨c⟩)).obj X =
+    ((shift_monoidal_functor C ℤ).obj (⟨a⟩ ⊗ ⟨b⟩ ⊗ ⟨c⟩)).obj X, by { congr' 2, ext, apply add_assoc }) =
   𝟙 ((shift_functor C c).obj
-  ((shift_functor C b).obj ((shift_functor C a).obj X))) ≫ (((shift_monoidal_functor C ℤ).to_lax_monoidal_functor.μ b c).app
+  ((shift_functor C b).obj ((shift_functor C a).obj X))) ≫ (((shift_monoidal_functor C ℤ).μ ⟨b⟩ ⟨c⟩).app
   ((shift_functor C a).obj X) ≫ (shift_functor C (b + c)).map
-  (𝟙 ((shift_functor C a).obj X))) ≫ ((shift_monoidal_functor C ℤ).to_lax_monoidal_functor.μ a
-  (b ⊗ c)).app X :=
+  (𝟙 ((shift_functor C a).obj X))) ≫ ((shift_monoidal_functor C ℤ).to_lax_monoidal_functor.μ ⟨a⟩
+  (⟨b⟩ ⊗ ⟨c⟩)).app X :=
 begin
-  have := (shift_monoidal_functor C ℤ).associativity' a b c,
+  have := (shift_monoidal_functor C ℤ).associativity' ⟨a⟩ ⟨b⟩ ⟨c⟩,
   apply_fun (λ e, e.app X) at this,
   dsimp at this ⊢,
   simp only [id_comp, comp_id, category_theory.functor.map_id,
@@ -321,13 +324,13 @@ begin
   exact this
 end
 
-lemma left_unitality_aux (X : C) (a : discrete ℤ) : 𝟙 ((shift_functor C a).obj X) =
+lemma left_unitality_aux (X : C) (a : ℤ) : 𝟙 ((shift_functor C a).obj X) =
   (𝟙 ((shift_functor C a).obj X) ≫ (shift_functor C a).map
     ((shift_monoidal_functor C ℤ).to_lax_monoidal_functor.ε.app X)) ≫
     ((shift_monoidal_functor C ℤ).to_lax_monoidal_functor.μ
-    (𝟙_ (discrete ℤ)) a).app X ≫ eq_to_hom (by { congr, exact zero_add a }) :=
+    (𝟙_ (discrete ℤ)) ⟨a⟩).app X ≫ eq_to_hom (by { congr, ext, exact zero_add a }) :=
 begin
-  have := (shift_monoidal_functor C ℤ).left_unitality' a,
+  have := (shift_monoidal_functor C ℤ).left_unitality' ⟨a⟩,
   apply_fun (λ e, e.app X) at this,
   dsimp at this ⊢,
   simp only [id_comp, comp_id, category_theory.functor.map_id,
@@ -335,13 +338,13 @@ begin
   exact this
 end
 
-lemma right_unitality_aux (X : C) (a : discrete ℤ) : 𝟙 ((shift_functor C a).obj X) =
+lemma right_unitality_aux (X : C) (a : ℤ) : 𝟙 ((shift_functor C a).obj X) =
   ((shift_monoidal_functor C ℤ).to_lax_monoidal_functor.ε.app ((shift_functor C a).obj X) ≫
-       (shift_functor C (𝟙_ (discrete ℤ))).map (𝟙 ((shift_functor C a).obj X))) ≫
-    ((shift_monoidal_functor C ℤ).to_lax_monoidal_functor.μ a (𝟙_ (discrete ℤ))).app X ≫
-    eq_to_hom (by { congr, apply add_zero }) :=
+       (shift_functor C (𝟙_ (discrete ℤ)).as).map (𝟙 ((shift_functor C a).obj X))) ≫
+    ((shift_monoidal_functor C ℤ).to_lax_monoidal_functor.μ ⟨a⟩ (𝟙_ (discrete ℤ))).app X ≫
+    eq_to_hom (by { congr, ext, apply add_zero }) :=
 begin
-  have := (shift_monoidal_functor C ℤ).right_unitality' a,
+  have := (shift_monoidal_functor C ℤ).right_unitality' ⟨a⟩,
   apply_fun (λ e, e.app X) at this,
   dsimp at this ⊢,
   simp only [id_comp, comp_id, category_theory.functor.map_id,
@@ -351,14 +354,14 @@ begin
 end
 
 instance has_shift : has_shift (triangle C) ℤ := has_shift.mk $
-{ obj := triangle_shift_functor _,
+{ obj := λ i, triangle_shift_functor _ i.as,
   map := λ m n f, map_triangle_shift_functor _ _ _ f,
   map_id' := λ X, by { ext; refl },
   map_comp' := λ X Y Z f g, by { ext; simp },
   ε := (triangle_shift_functor_ε _).hom,
-  μ := λ m n, (triangle_shift_functor_μ _ m n).hom,
+  μ := λ m n, (triangle_shift_functor_μ _ m.as n.as).hom,
   μ_natural' := begin
-    rintros m m' n n' ⟨⟨⟨⟩⟩⟩ ⟨⟨⟨⟩⟩⟩, ext;
+    rintros ⟨m⟩ ⟨m'⟩ ⟨n⟩ ⟨n'⟩ ⟨⟨⟨⟩⟩⟩ ⟨⟨⟨⟩⟩⟩, ext;
     { dsimp, simp only [id_comp, comp_id, category_theory.functor.map_id] },
   end,
   associativity' := λ a b c, by ext; apply associativity_aux,
