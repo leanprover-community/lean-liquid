@@ -39,6 +39,11 @@ jobs:
     outputs:
       artifact_name: ${{ steps.setup_precompiled.outputs.artifact_name }}
     steps:
+      - name: bump swap space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 10
+
       - uses: actions/checkout@v2
         with:
           fetch-depth: ${{ env.GIT_HISTORY_DEPTH }}
