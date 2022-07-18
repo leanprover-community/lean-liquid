@@ -59,6 +59,7 @@ For technical reasons related to size issues in topos theory,
 we need to lift the space of continuous maps to a higher universe using `ulift`. -/
 example : (Γ_ (V : Condensed.{0} Ab.{1}) S : Type 1) = ulift C(S,V) := rfl
 
+/- Continuous maps behave as expected: they are continuous functions. -/
 example (f : C(S,V)) : S → V := f
 example (f : C(S,V)) : continuous f := f.continuous
 example (f : S → V) (hf : continuous f) : C(S,V) := ⟨f,hf⟩
