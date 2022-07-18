@@ -151,10 +151,28 @@ def effacement.cokernel_iso {F : A ⥤δ B} {X n} (e : effacement F X n) :
 as_iso e.cokernel_comparison
 
 @[simp, reassoc]
-lemma cokernel_iso_spec {F : A ⥤δ B} {X n} (e : effacement F X n) :
+lemma effacement.cokernel_iso_spec {F : A ⥤δ B} {X n} (e : effacement F X n) :
   limits.cokernel.π _ ≫ e.cokernel_iso.hom =
   (F.δ n).app e.ses :=
 limits.cokernel.π_desc _ _ _
+
+def effacement.lift_app_aux {F G : A ⥤δ B} {X n}
+  (η : F n ⟶ G n) (e : effacement F X n) :
+  (F (n+1)).obj X ⟶ (G (n+1)).obj X :=
+e.cokernel_iso.inv ≫
+limits.cokernel.desc _
+(η.app _ ≫ (G.δ n).app e.ses)
+begin
+  rw [← category.assoc, η.naturality, category.assoc],
+  erw (G.exact_δ n e.ses).w,
+  rw [limits.comp_zero]
+end
+
+lemma effacement.lift_app_aux_well_defined
+  {F G : A ⥤δ B} {X n}
+  (η : F n ⟶ G n) (e₁ e₂ : effacement F X n) (Y : A) :
+  e₁.lift_app_aux η = e₂.lift_app_aux η :=
+sorry
 
 end stacks_010T
 
