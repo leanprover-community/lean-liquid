@@ -76,6 +76,7 @@ The proof reduces to `thm95''` (a variant of Theorem 9.5).
 
 example : first_target_stmt r r' BD κ := first_target r r' BD κ
 
+
 /-- Theorem 9.4 in [Analytic] for weak bounded exactness -/
 theorem thm94_weak :
   ∀ m : ℕ, ∃ (k K : ℝ≥0) (hk : fact (1 ≤ k)) (c₀ : ℝ≥0),
