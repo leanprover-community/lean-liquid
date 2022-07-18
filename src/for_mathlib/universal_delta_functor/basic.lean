@@ -9,6 +9,7 @@ variables (A : Type u) (B : Type u')
   [category.{v} A] [category.{v} B] [abelian A] [abelian B]
 
 /-- Cohomological covariant delta functor. -/
+@[nolint has_inhabited_instance]
 structure delta_functor :=
 (F : ℕ → A ⥤ B)
 [additive : ∀ n, functor.additive (F n)]
@@ -29,7 +30,8 @@ instance : has_coe_to_fun (A ⥤δ B) (λ F, ℕ → (A ⥤ B)) := ⟨F⟩
 
 variables {A B}
 
-@[ext]
+/-- Morphisms of cohomological covariant delta functors. -/
+@[nolint has_inhabited_instance]
 structure hom (F G : A ⥤δ B) :=
 (η : Π n, F n ⟶ G n)
 (comm' : ∀ m n h, F.δ m n h ≫ whisker_left _ (η _) = whisker_left _ (η _) ≫ G.δ _ _ h)
@@ -41,6 +43,10 @@ namespace hom
 
 instance {F G : A ⥤δ B} : has_coe_to_fun (F ⟶ G) (λ η, Π n, F n ⟶ G n) :=
 ⟨η⟩
+
+@[ext]
+lemma ext {F G : A ⥤δ B} (η γ : F ⟶ G) (h : ∀ n, η n = γ n) : η = γ :=
+by { cases η, cases γ, congr, ext1, apply h }
 
 @[simp]
 lemma η_eq_coe {F G : A ⥤δ B} (η : F ⟶ G) (n : ℕ) :
@@ -56,6 +62,7 @@ begin
   exact this,
 end
 
+/-- Identity morphisms of delta functors. -/
 def id (F : A ⥤δ B) : F ⟶ F :=
 ⟨λ n, 𝟙 _, begin
   rintros m n ⟨rfl⟩,
@@ -69,6 +76,7 @@ end⟩
 lemma id_apply (F : A ⥤δ B) (n : ℕ) :
   id F n = 𝟙 _ := rfl
 
+/-- Compositions of morphisms of delta functors. -/
 def comp {F G H : A ⥤δ B} (η : F ⟶ G) (γ : G ⟶ H) :
   hom F H :=
 { η := λ n, η n ≫ γ n,
@@ -84,6 +92,7 @@ lemma comp_apply {F G H : A ⥤δ B} (η : F ⟶ G) (γ : G ⟶ H) (n : ℕ) :
 
 end hom
 
+/-- delta functors form a category. -/
 instance category : category (A ⥤δ B) :=
 { id := λ F, hom.id _,
   comp := λ X Y Z F G, hom.comp F G,
@@ -92,13 +101,14 @@ instance category : category (A ⥤δ B) :=
   assoc' := by { intros F G H W a b c, ext, dsimp, simp },
   ..(infer_instance : quiver (A ⥤δ B)) }
 
+/-- Universal delta functors. -/
 class universal (F : A ⥤δ B) : Prop :=
 (cond : ∀ (G : A ⥤δ B) (e0 : F 0 ⟶ G 0), ∃! e : F ⟶ G, (e : Π n, F n ⟶ G n) 0 = e0)
 
 -- Sketch:
 -- TODO: Prove stacks tag 010T.
 -- TODO: Construct `Ext^*(-,X)` a delta functor (on objects!).
--- These should be functors `Aᵒᵖ ⥤ Ab` (assuming `A`) has enough projectives.
+-- These should be functors `Aᵒᵖ ⥤ Ab` (assuming `A` has enough projectives).
 -- Use `010T` to see that `Ext^*(-,X)` is universal.
 
 end delta_functor
