@@ -48,7 +48,7 @@ example (v w : V) : ∥v + w∥ ≤ ∥v∥ + ∥w∥ :=
 
 /- The uniform space structure on `V` is induced by the chosen norm. -/
 example : uniformity V = ⨅ (ε : ℝ) (H : ε > 0),
-  filter.principal { p : V × V | ∥p.fst - p.snd∥ < ε } :=
+  filter.principal { p : V × V | ∥p.1 - p.2∥ < ε } :=
 (p_banach.exists_p_norm V.p_banach').some.uniformity
 
 end pBanach
@@ -57,7 +57,7 @@ end pBanach
 over $S$ are the continuous maps $S → V$.
 For technical reasons related to size issues in topos theory,
 we need to lift the space of continuous maps to a higher universe using `ulift`. -/
-example : (Γ_ (V : Condensed.{0} Ab.{1}) S : Type 1) = ulift C(S,V) := rfl
+example : (Γ_ V S : Type 1) = ulift C(S,V) := rfl
 
 /- Continuous maps behave as expected: they are continuous functions. -/
 example (f : C(S,V)) : S → V := f
@@ -65,6 +65,4 @@ example (f : C(S,V)) : continuous f := f.continuous
 example (f : S → V) (hf : continuous f) : C(S,V) := ⟨f,hf⟩
 
 /- The group operation on `Γ_ V S` is pointwise addition, as expected. -/
-example (f g : Γ_ (V : Condensed.{0} Ab.{1}) S) (s : S) :
-  (f + g) s = f s + g s :=
-rfl
+example (f g : Γ_ V S) (s : S) : (f + g) s = f s + g s := rfl

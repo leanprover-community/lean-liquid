@@ -40,13 +40,13 @@ abbreviation liquid_tensor_experiment.Ext (i : ℤ) (A B : Condensed.{u} Ab.{u+1
 instance : has_coe (pBanach.{u} p) (Condensed.{u} Ab.{u+1}) :=
 { coe := λ V, Condensed.of_top_ab V }
 
-abbreviation liquid_tensor_experiment.sections (F : Condensed.{u} Ab.{u+1}) (S : Profinite.{u}) :
-  Ab.{u+1} := F.val.obj (opposite.op S)
+abbreviation liquid_tensor_experiment.sections (F : Condensed.{0} Ab.{1}) (S : Profinite.{0}) :
+  Ab.{1} := F.val.obj (opposite.op S)
 
 localized "notation `Γ_` := liquid_tensor_experiment.sections" in liquid_tensor_experiment
 
-def pBanach.has_coe_to_fun_condensed_eval (V : pBanach.{u} p) (S : Profinite.{u}) :
-  has_coe_to_fun (Γ_ (V : Condensed.{u} Ab.{u+1}) S) (λ _, S → V) :=
+def pBanach.has_coe_to_fun_condensed_eval (V : pBanach.{0} p) (S : Profinite.{0}) :
+  has_coe_to_fun (Γ_ (V : Condensed.{0} Ab.{1}) S) (λ _, S → V) :=
 ⟨λ f, ((ulift.down f : C(S,V)) : S → V)⟩
 
 localized "attribute [instance] pBanach.has_coe_to_fun_condensed_eval" in
