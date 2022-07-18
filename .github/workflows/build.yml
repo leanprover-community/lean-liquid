@@ -156,7 +156,7 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: test thm95 is sorry free
+      - name: test liquid_tensor_experiment is sorry free
         run: python scripts/ensure_lte_sorry_free.py
 
   stats:
