@@ -631,6 +631,15 @@ end
 
 
 
+-- Has better def-eqs than `ordinal.enum_iso`. The mathlib fix is at #15454.
+@[simps] noncomputable def _root_.ordinal.enum_iso' {α} (r : α → α → Prop) [is_well_order α r] :
+  subrel (<) (< ordinal.type r) ≃r r :=
+{ to_fun := λ x, ordinal.enum r x.1 x.2,
+  inv_fun := λ x, ⟨ordinal.typein r x, ordinal.typein_lt_type r x⟩,
+  left_inv := λ ⟨o, h⟩, subtype.ext_val (ordinal.typein_enum _ _),
+  right_inv := λ h, ordinal.enum_typein _ _,
+  map_rel_iff' := by { rintros ⟨a, _⟩ ⟨b, _⟩, apply ordinal.enum_lt_enum } }
+
 /-- A submodule of a free module over a principal ideal domain is free. -/
 theorem submodule.nonempty_basis_of_pid' [is_domain R] [is_principal_ideal_ring R]
   {ι : Type u}
@@ -658,12 +667,12 @@ begin
   let u := λ i, Exists.some (a_mem i),
   have hu := λ i, Exists.some_spec (a_mem i),
 
-  let B : basis ords R M := basis.reindex b (ordinal.enum_iso r).symm.to_equiv,
+  let B : basis ords R M := basis.reindex b (ordinal.enum_iso' r).to_equiv.symm,
 
   let good := {j : ords // a j ≠ 0},
   let BB : good → N := cod_restrict (λ i, u i.1) N (λ i, by {apply hU i.1, exact (hu i.1).1}),
 
-  have hu' : ∀ j : good, (B.coord j) (BB j) = a j.1 := sorry, --λ j, (hu j).2,
+  have hu' : ∀ j : good, (B.coord j) (BB j) = a j.1 := λ j, by simpa using (hu j).2,
 
   -- Prove lemmas about the data which are useful as hypotheses to the auxiliary lemmas above.
   have hc : ∀ i : ordinal, ∀ l : ords →₀ R, finsupp.total ords M R B l ∈ N →
@@ -680,7 +689,7 @@ begin
     split,
     rw finsupp.map_domain_support_of_inj_on l (inj_on_of_injective (basis.injective B) _),
     simp only [B, finset.coe_image, basis.reindex_apply_image],
-    have h : ((ordinal.enum_iso r).symm.to_equiv.symm) '' (l.support : set ords) ⊆ seg j,
+    have h : ((ordinal.enum_iso' r).symm.to_equiv.symm) '' (l.support : set ords) ⊆ seg j,
     simp only [equiv.subset_image, rel_iso.coe_fn_to_equiv],
     intros x hx,
     use enum x,
@@ -692,17 +701,16 @@ begin
     have goal : ¬r (enum j) (enum x),
     rwa ordinal.enum_le_enum,
     exact goal,
-    simp only [ordinal.enum_iso, ordinal.typein_enum, subtype.val_eq_coe, subtype.coe_eta,
+    simp only [ordinal.enum_iso', ordinal.typein_enum, subtype.val_eq_coe, subtype.coe_eta,
       rel_iso.coe_fn_symm_mk, equiv.coe_fn_symm_mk],
     rw image_comp,
     exact image_subset b h,
-    simp only [ordinal.enum_iso, subtype.val_eq_coe, basis.coe_reindex, equiv.coe_fn_symm_mk],
+    simp only [ordinal.enum_iso', subtype.val_eq_coe, basis.coe_reindex, equiv.coe_fn_symm_mk],
     rw ←@finsupp.total_apply M M R _ _ _ (λ x, x) _,
     rw finsupp.total_map_domain,
     rw function.injective.of_comp_iff (basis.injective b),
-    exact equiv.injective (ordinal.enum_iso r).to_equiv,
-    simp [B, ordinal.enum_iso],
-    sorry,
+    exact equiv.injective (ordinal.enum_iso' r).to_equiv,
+    simpa [B, ordinal.enum_iso'],
     rw ←submodule.is_principal.span_singleton_generator (ideal j) at hI,
     rw submodule.is_principal.mem_iff_eq_smul_generator  at hI,
     rw submodule.is_principal.span_singleton_generator at hI,
@@ -740,11 +748,10 @@ begin
     rw [←ne.def, ←finsupp.mem_support_iff] at hx,
     have hx := mem_of_subset_of_mem hsupp hx,
     rw function.injective.mem_set_image (basis.injective b) at hx,
-    have : ¬r (enum i) (ordinal.enum r ↑x x.2) := sorry,
-    dsimp [enum] at this,
     have henum := ordinal.enum_le_enum r x.2 i.1.2,
     simp at henum,
-    exact henum.1 this
+    apply henum.1,
+    assumption
   },
 
   have hB_BB : ∀ i : ordinal, ∀ l : good →₀ R, ((l.support : set good) ⊆ λ x, x.1.1 < i) →
