@@ -39,3 +39,10 @@ abbreviation liquid_tensor_experiment.Ext (i : ℤ) (A B : Condensed.{u} Ab.{u+1
 
 instance : has_coe (pBanach.{u} p) (Condensed.{u} Ab.{u+1}) :=
 { coe := λ V, Condensed.of_top_ab V }
+
+def pBanach.has_coe_to_fun_condensed_eval (V : pBanach.{u} p) (S : Profinite.{u}) :
+  has_coe_to_fun ((Condensed_Ab_to_presheaf.{u}.obj V).obj (op S)) (λ _, S → V) :=
+⟨λ f, ((ulift.down f : C(S,V)) : S → V)⟩
+
+localized "attribute [instance] pBanach.has_coe_to_fun_condensed_eval" in
+  liquid_tensor_experiment
