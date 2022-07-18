@@ -72,7 +72,6 @@ begin
     { intro _, dsimp, refl } }
 end
 
-noncomputable
 def category_theory.functor.map_homological_complex_X_prev_eq (X : homological_complex C c)
   {i j : ι} (r : c.rel j i) :
   F.map_homological_complex_X_prev X i = ((F.map_homological_complex c).obj X).X_prev_iso r ≪≫
@@ -100,7 +99,6 @@ begin
     { intro _, dsimp, refl } }
 end
 
-noncomputable
 def category_theory.functor.map_homological_complex_X_next_eq (X : homological_complex C c)
   {i j : ι} (r : c.rel i j) :
   F.map_homological_complex_X_next X i = ((F.map_homological_complex c).obj X).X_next_iso r ≪≫
@@ -114,7 +112,6 @@ begin
   { simp }
 end
 
-noncomputable
 def category_theory.functor.map_homological_complex_d_from (X : homological_complex C c) (i : ι) :
   ((F.map_homological_complex c).obj X).d_from i = F.map (X.d_from i) ≫
     (F.map_homological_complex_X_next X i).inv :=
@@ -125,7 +122,6 @@ begin
   { rw [iso.eq_comp_inv, F.map_homological_complex_X_next_eq X r], dsimp, simp, }
 end
 
-noncomputable
 def category_theory.functor.map_homological_complex_d_to (X : homological_complex C c) (i : ι) :
   ((F.map_homological_complex c).obj X).d_to i =
     (F.map_homological_complex_X_prev X i).hom ≫ F.map (X.d_to i) :=
