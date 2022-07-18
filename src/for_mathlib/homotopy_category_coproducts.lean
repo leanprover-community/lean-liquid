@@ -18,8 +18,8 @@ instance is_iso_coproduct {α : Type v} (X Y : α → A) (f : Π a, X a ⟶ Y a)
 begin
   use sigma.desc (λ a, inv (f a) ≫ sigma.ι _ a),
   split,
-  { ext, dsimp, simp },
-  { ext, dsimp, simp }
+  { ext, dsimp, cases j, simp },
+  { ext, dsimp, cases j, simp }
 end
 
 noncomputable
@@ -29,7 +29,7 @@ lemma is_initial_colimit {J : Type v} [small_category J] (K : J ⥤ A)
 { desc := λ T, colimit.desc _ ⟨_,
   { app := λ j, (hK j).to _,
     naturality' := λ i j f, (hK _).hom_ext _ _ }⟩,
-  fac' := by rintros S ⟨⟩,
+  fac' := by rintros S ⟨⟨⟩⟩,
   uniq' := begin
     intros S m hm, apply colimit.hom_ext, intros j,
     apply (hK _).hom_ext
@@ -71,10 +71,10 @@ begin
   { intros f g h, dsimp [preadditive_yoneda_coproduct_to_product] at f g h ⊢,
     apply colimit.hom_ext,
     intros a,
-    let q : (∏ λ (a : α), AddCommGroup.of (X a ⟶ Y)) ⟶ (AddCommGroup.of (X a ⟶ Y)) :=
-      pi.π _ a,
+    let q : (∏ λ (a : α), AddCommGroup.of (X a ⟶ Y)) ⟶ (AddCommGroup.of (X a.1 ⟶ Y)) :=
+      pi.π _ a.1,
     apply_fun (λ e, q e) at h,
-    simp only [← comp_apply, limit.lift_π] at h, exact h },
+    simp only [← comp_apply, limit.lift_π] at h, cases a, exact h },
   { intros f, dsimp at f,
     let P : Π a, (∏ λ (a : α), AddCommGroup.of (X a ⟶ Y)) ⟶ (AddCommGroup.of (X a ⟶ Y)) :=
       λ a, pi.π _ a,
@@ -83,7 +83,7 @@ begin
     apply concrete.limit_ext (discrete.functor (λ a, AddCommGroup.of (X a ⟶ Y))),
     intros i, dsimp [preadditive_yoneda_coproduct_to_product],
     simp only [← comp_apply, limit.lift_π],
-    dsimp, rw colimit.ι_desc, refl }
+    dsimp, rw colimit.ι_desc, cases i, refl }
 end
 
 noncomputable
@@ -103,11 +103,11 @@ def pi_iso {A : Type u} [category.{v} A] {α : Type v}
 { hom := pi.lift $ λ b, pi.π _ _ ≫ (I b).hom,
   inv := pi.lift $ λ b, pi.π _ _ ≫ (I b).inv,
   hom_inv_id' := begin
-    apply limit.hom_ext, intros i,
+    apply limit.hom_ext, rintros ⟨i⟩,
     simp,
   end,
   inv_hom_id' := begin
-    apply limit.hom_ext, intros i,
+    apply limit.hom_ext, rintros ⟨i⟩,
     simp,
   end }
 
@@ -122,7 +122,7 @@ def coproduct_iso {α : Type v} (X : α → cochain_complex A ℤ) (i) :
   (complex_shape.up ℤ) i) (discrete.functor X)) ≪≫
   has_colimit.iso_of_nat_iso
   (nat_iso.of_components (λ _, iso.refl _) begin
-    rintros i _ ⟨⟨⟨⟩⟩⟩,
+    rintros ⟨⟩ ⟨⟩ ⟨⟨⟨⟩⟩⟩,
     simp,
   end)
 
@@ -158,12 +158,12 @@ def homotopy_coprod {α : Type v} (X : α → cochain_complex A ℤ) (Y)
     intros i j hh,
     simp only [preadditive.is_iso.comp_left_eq_zero],
     apply colimit.hom_ext, intros a,
-    simp only [colimit.ι_desc, cofan.mk_ι_app, comp_zero, (h a).zero' i j hh],
+    simp only [colimit.ι_desc, cofan.mk_ι_app, comp_zero, (h a.1).zero' i j hh],
   end,
   comm := begin
     intros i,
     rw ← cancel_epi (coproduct_iso X i).inv,
-    apply colimit.hom_ext, intros a,
+    apply colimit.hom_ext, rintros ⟨a⟩,
     simp only [coproduct_ι_coproduct_iso_inv_assoc, homological_complex.cochain_complex_d_next,
       homological_complex.cochain_complex_prev_d, category.assoc, preadditive.comp_add,
       homological_complex.hom.comm_assoc, coproduct_ι_coproduct_iso_hom_assoc,
@@ -204,9 +204,9 @@ cofan.mk
 noncomputable
 def is_colimit_cofan {α : Type v} (X : α → homotopy_category A (complex_shape.up ℤ)) :
   is_colimit (colimit_cofan X) :=
-{ desc := λ S, (quotient _ _).map $ sigma.desc $ λ a, (S.ι.app a).out,
+{ desc := λ S, (quotient _ _).map $ sigma.desc $ λ a, (S.ι.app ⟨a⟩).out,
   fac' := begin
-    intros S j,
+    rintros S ⟨j⟩,
     dsimp,
     erw [← (quotient A (complex_shape.up ℤ)).map_comp, colimit.ι_desc],
     dsimp [quotient],
@@ -221,11 +221,11 @@ def is_colimit_cofan {α : Type v} (X : α → homotopy_category A (complex_shap
     apply quotient.comp_closure.of,
     apply homotopic_coprod,
     intros a,
-    specialize hm a, rw ← this at hm, dsimp at hm,
+    specialize hm ⟨a⟩, rw ← this at hm, dsimp at hm,
     erw [← (quotient A (complex_shape.up ℤ)).map_comp] at hm,
     erw colimit.ι_desc,
     dsimp,
-    have : S.ι.app a = (quotient _ _).map (S.ι.app a).out, by simp,
+    have : S.ι.app ⟨a⟩ = (quotient _ _).map (S.ι.app ⟨a⟩).out, by simp,
     rw this at hm,
     apply homotopic_of_quotient_map_eq,
     exact hm
@@ -239,7 +239,7 @@ instance {α : Type v} : has_colimits_of_shape (discrete α)
   (homotopy_category A (complex_shape.up ℤ)) :=
 begin
   constructor, intros K,
-  let E : K ≅ discrete.functor K.obj := discrete.nat_iso (λ _, iso.refl _),
+  let E : K ≅ discrete.functor (λ n, K.obj ⟨n⟩) := discrete.nat_iso (λ ⟨i⟩, iso.refl _),
   apply has_colimit_of_iso E,
 end
 
@@ -251,27 +251,35 @@ begin
   apply preserves_colimit_of_preserves_colimit_cocone
     (colimit.is_colimit K),
   let T : K ⋙ quotient A _ ≅ discrete.functor
-    ((λ a : α, (quotient _ _).obj (K.obj a))) := nat_iso.of_components
-    (λ _, iso.refl _) _,
+    ((λ a : α, (quotient _ _).obj ((λ n, K.obj ⟨n⟩) a))) := nat_iso.of_components
+    (λ ⟨i⟩, iso.refl _) _,
   swap,
-  { rintros i _ ⟨⟨⟨⟩⟩⟩, dsimp, simpa },
+  { rintros ⟨i⟩ ⟨⟩ ⟨⟨⟨⟩⟩⟩,
+    dsimp,
+    simp only [category_theory.functor.map_id, category.id_comp],
+    dsimp,
+    simp only [category.comp_id]},
   apply (is_colimit.precompose_inv_equiv T
     ((quotient A (complex_shape.up ℤ)).map_cocone (colimit.cocone K))).to_fun,
-  let ee : colimit_cofan (λ a : α, (quotient _ _).obj (K.obj a)) ≅
+  let ee : colimit_cofan (λ a : α, (quotient _ _).obj (K.obj ⟨a⟩)) ≅
     (cocones.precompose T.inv).obj
     ((quotient A (complex_shape.up ℤ)).map_cocone (colimit.cocone K)) := _,
   swap,
   { refine cocones.ext _ _,
     { apply functor.map_iso,
       refine has_colimit.iso_of_nat_iso _,
-      refine nat_iso.of_components (λ _, iso.refl _) _,
-      rintro i _ ⟨⟨⟨⟩⟩⟩, dsimp, simpa },
-    intros i,
+      refine nat_iso.of_components (λ ⟨i⟩, iso.refl _) _,
+      rintro ⟨i⟩ ⟨⟩ ⟨⟨⟨⟩⟩⟩,
+      dsimp,
+      simp only [discrete.functor_map_id, category.comp_id],
+      dsimp,
+      simp only [category.id_comp]},
+    rintros ⟨i⟩,
     dsimp [colimit_cofan, T, nat_iso.of_components,
       has_colimit.iso_of_nat_iso, is_colimit.map],
     simp only [← functor.map_comp, category.id_comp, colimit.ι_desc],
     dsimp [cocones.precompose],
-    simp only [category.id_comp] },
+    simpa only [functor.map_comp] },
   apply is_colimit.of_iso_colimit _ ee,
   apply is_colimit_cofan,
 end
@@ -283,7 +291,7 @@ begin
   constructor,
   introsI Y hY f,
   apply colimit.hom_ext,
-  intros a,
+  rintros ⟨a⟩,
   rw comp_zero,
   apply is_K_projective.cond Y,
   dsimp, apply_instance,

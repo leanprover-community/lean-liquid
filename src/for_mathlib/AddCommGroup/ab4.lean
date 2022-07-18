@@ -24,8 +24,9 @@ noncomputable
 def is_colimit_cofan {α : Type (u)} (X : α → Ab.{u}) :
   is_colimit (cofan X) :=
 { desc := λ S, dfinsupp.lift_add_hom
-    (λ i, let e : X i ⟶ S.X := S.ι.app i in e),
+    (λ i, let e : X i ⟶ S.X := S.ι.app ⟨i⟩ in e),
   fac' := λ S j, begin
+    cases j,
     dsimp [cofan], ext t,
     simp only [comp_apply, dfinsupp.single_add_hom_apply,
       dfinsupp.sum_add_hom_single],
@@ -36,7 +37,7 @@ def is_colimit_cofan {α : Type (u)} (X : α → Ab.{u}) :
     swap, apply_instance,
     dsimp,
     erw add_equiv.symm_apply_apply, ext1 a,
-    rw ← hm,
+    simp_rw ← hm,
     ext,
     dsimp [cofan],
     simp only [comp_apply, dfinsupp.single_add_hom_apply],
@@ -53,8 +54,8 @@ begin
     (colimit.is_colimit _).cocone_point_unique_up_to_iso (is_colimit_cofan Y),
   let q : (cofan X).X ⟶ (cofan Y).X :=
     (is_colimit_cofan X).desc ⟨(cofan Y).X,
-    λ a, f a ≫ (cofan Y).ι.app a, _⟩,
-  swap, { rintros i _ ⟨⟨⟨⟩⟩⟩, dsimp, simp, dsimp, simp },
+    λ a, f a.1 ≫ (cofan Y).ι.app a, _⟩,
+  swap, { rintros ⟨i⟩ ⟨⟩ ⟨⟨⟨⟩⟩⟩, dsimp, simp, dsimp, simp },
   haveI : mono q,
   { apply concrete_category.mono_of_injective,
     rintros (u v : Π₀ x, X x) h, ext w,
@@ -81,6 +82,7 @@ begin
   { rw this, apply_instance },
   dsimp [t, eX, q, eY],
   apply colimit.hom_ext,
+  rintro ⟨j⟩,
   simp only [colimit.ι_desc, cofan.mk_ι_app,
     is_colimit.cocone_point_unique_up_to_iso_hom_desc_assoc,
     colimit.is_colimit_desc, colimit.ι_desc_assoc, category.assoc,
