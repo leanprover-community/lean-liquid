@@ -78,6 +78,7 @@ jobs:
       - name: leanpkg build
         id: build
         run: |
+          set -o pipefail
           echo "::set-output name=started::true"
           lean --json --make src | python scripts/detect_errors.py
           lean --json --make src | python scripts/detect_errors.py
