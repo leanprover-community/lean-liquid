@@ -1,6 +1,7 @@
 import category_theory.abelian.basic
 import category_theory.preadditive.additive_functor
 import for_mathlib.short_exact_sequence
+import for_mathlib.abelian_category
 
 noncomputable theory
 
@@ -155,11 +156,37 @@ def effacement.cokernel_comparison {F : A ⥤δ B} {X n} (e : effacement F X n) 
   limits.cokernel ((F n).map (limits.cokernel.π e.ι)) ⟶ (F (n+1)).obj X :=
 limits.cokernel.desc _ ((F.δ n).app e.ses) (F.exact_δ n e.ses).w
 
+open_locale zero_object
 instance effacement.epi_cokernel_comparison {F : A ⥤δ B} {X n} (e : effacement F X n) :
-  epi e.cokernel_comparison := sorry
+  epi e.cokernel_comparison :=
+begin
+  dsimp [effacement.cokernel_comparison],
+  let t := _, change epi t,
+  suffices : epi (limits.cokernel.π _ ≫ t),
+  { resetI,
+    apply epi_of_epi (limits.cokernel.π _) t },
+  simp only [limits.cokernel.π_desc],
+  have : exact ((F.δ n).app e.ses) ((F (n+1)).map e.ι) :=
+    F.δ_exact n e.ses,
+  rw e.w at this,
 
+  apply abelian.pseudoelement.epi_of_pseudo_surjective,
+  intros q,
+  exact (abelian.pseudoelement.pseudo_exact_of_exact this).2 q (by simp),
+end
+
+/- This is true with fewer assumptions... -/
 instance effacement.mono_cokernel_comparison {F : A ⥤δ B} {X n} (e : effacement F X n) :
-  category_theory.mono e.cokernel_comparison := sorry
+  category_theory.mono e.cokernel_comparison :=
+begin
+  dsimp [effacement.cokernel_comparison],
+  let t := _, change category_theory.mono t,
+  suffices : exact ((F n).map (limits.cokernel.π e.ι)) ((F.δ n).app e.ses),
+  exact abelian.category_theory.limits.cokernel.desc.category_theory.mono
+    ((F n).map (limits.cokernel.π e.ι))
+    ((F.δ n).app (effacement.ses e)) this,
+  exact F.exact_δ n e.ses,
+end
 
 instance effacement.is_iso_cokernel_comparison {F : A ⥤δ B} {X n} (e : effacement F X n) :
   is_iso e.cokernel_comparison :=
@@ -308,7 +335,7 @@ end
 lemma effacement.lift_δ_naturality
   {F G : A ⥤δ B} {n}
   (η : F n ⟶ G n) (S : short_exact_sequence A)
-  (e₁ : effacement F S.fst n):
+  (e₁ : effacement F S.fst n) :
   (F.δ n).app S ≫ e₁.lift_app_aux η =
   η.app _ ≫ (G.δ _).app S :=
 begin
