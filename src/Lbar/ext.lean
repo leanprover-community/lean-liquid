@@ -198,7 +198,7 @@ lemma is_zero_pi {𝓒 : Type*} [category 𝓒] [abelian 𝓒] {ι : Type*} (f :
   is_zero (∏ f) :=
 begin
   rw is_zero_iff_id_eq_zero,
-  ext,
+  ext ⟨j⟩,
   apply (hf j).eq_of_tgt,
 end
 
