@@ -1544,16 +1544,15 @@ commsq.of_eq begin
   delta QprimeFP.shift_sub_id,
   rw [sub_comp, comp_sub, category.id_comp, category.comp_id],
   refine congr_arg2 _ _ rfl,
-  apply colimit.hom_ext, rintro ⟨j⟩,
+  apply colimit.hom_ext, rintro ⟨⟨j⟩⟩,
   dsimp [sigma_shift, sigma_shift', sigma_shift_cone, sigma_map],
   rw [colimit.ι_desc_assoc, colimit.ι_desc_assoc],
   dsimp [sigma_shift_cone],
   simp only [category.assoc, colimit.ι_desc],
   dsimp [sigma_shift_cone],
-  --  refl,
-  -- simp only [sigma_shift, sigma_shift', sigma_shift_cone, sigma_map, colimit.ι_desc_assoc,
-  --   colimit.ι_desc, cofan.mk_ι_app, category.assoc, nat_trans.naturality_assoc,
-  --   discrete.nat_trans_app],
+  simp only [sigma_shift, sigma_shift', sigma_shift_cone, sigma_map, colimit.ι_desc_assoc,
+     colimit.ι_desc, cofan.mk_ι_app, category.assoc, nat_trans.naturality_assoc,
+     discrete.nat_trans_app],
 end
 
 lemma commsq_shift_sub_id_ι [∀ (c : ℝ≥0) (n : ℕ), fact (κ₂ c n ≤ κ c n)] :
@@ -1565,9 +1564,9 @@ commsq.of_eq begin
   delta QprimeFP.shift_sub_id,
   rw [sub_comp, comp_sub, category.id_comp, category.comp_id],
   refine congr_arg2 _ _ rfl,
-  apply colimit.hom_ext, rintro ⟨j⟩,
+  apply colimit.hom_ext, rintro ⟨⟨j⟩⟩,
   dsimp [sigma_shift, sigma_shift', sigma_shift_cone],
-  simp only [sigma_shift, sigma_shift', sigma_shift_cone, sigma_map, colimit.ι_desc_assoc,
+  simpa only [sigma_shift, sigma_shift', sigma_shift_cone, sigma_map, colimit.ι_desc_assoc,
     colimit.ι_desc, cofan.mk_ι_app, category.assoc, nat_trans.naturality_assoc,
     discrete.nat_trans_app],
 end
