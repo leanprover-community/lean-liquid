@@ -115,6 +115,22 @@ structure effacement (F : A ⥤δ B) (X : A) (n : ℕ) :=
 [mono : category_theory.mono ι]
 (w : (F (n+1)).map ι = 0)
 
+@[ext]
+structure effacement.hom (F : A ⥤δ B) (X : A) (n : ℕ)
+  (e₁ e₂ : effacement F X n) :=
+(t : e₁.I ⟶ e₂.I)
+(w : e₁.ι ≫ t = e₂.ι)
+
+instance effacement.category (F : A ⥤δ B) (X : A) (n : ℕ) :
+  category (effacement F X n) :=
+{ hom := λ e₁ e₂, e₁.hom _ _ _ e₂,
+  id := λ e, ⟨𝟙 _, category.comp_id _⟩,
+  comp := λ a b c f g, ⟨f.t ≫ g.t, by simp [reassoc_of f.w, g.w]⟩,
+  id_comp' := λ a b f, effacement.hom.ext _ _ $ category.id_comp _,
+  comp_id' := λ a b f, effacement.hom.ext _ _ $ category.comp_id _,
+  assoc' := λ a b c d f g h,
+    effacement.hom.ext _ _ $ category.assoc _ _ _ }
+
 instance effacement_mono (F : A ⥤δ B) (X : A) (n : ℕ)
   (e : effacement F X n) : category_theory.mono e.ι := e.mono
 
@@ -168,11 +184,56 @@ begin
   rw [limits.comp_zero]
 end
 
+lemma effacement.lift_app_aux_eq_of_hom
+  {F G : A ⥤δ B} {X n}
+  (η : F n ⟶ G n) (e₁ e₂ : effacement F X n) (q : e₁ ⟶ e₂) :
+  e₁.lift_app_aux η = e₂.lift_app_aux η :=
+begin
+  dsimp only [effacement.lift_app_aux],
+  rw iso.inv_comp_eq,
+  apply limits.coequalizer.hom_ext,
+  simp only [limits.cokernel.π_desc, effacement.cokernel_iso_spec_assoc],
+  rw ← category.assoc, let t := _, change _ = t ≫ _,
+  have ht : t = (F n).map _ ≫ limits.cokernel.π _,
+  rotate 2,
+  { refine limits.cokernel.desc _ _ _,
+    refine _ ≫ limits.cokernel.π _,
+    exact q.t,
+    rw [← category.assoc, q.w, limits.cokernel.condition] },
+  { sorry },
+  rw ht, clear ht t,
+  simp only [category.assoc, limits.cokernel.π_desc],
+  simp only [nat_trans.naturality_assoc],
+  congr' 1,
+  let qq : e₁.ses ⟶ e₂.ses := _,
+  swap,
+  { fconstructor, exact 𝟙 _, exact q.t,
+    refine limits.cokernel.desc _ _ _,
+    refine _ ≫ limits.cokernel.π _,
+    exact q.t,
+    rw [← category.assoc, q.w, limits.cokernel.condition],
+    { sorry },
+    { sorry } },
+  erw (G.δ n).naturality qq,
+  symmetry,
+  convert category.comp_id _,
+  dsimp [qq],
+  exact functor.map_id _ _,
+end
+
 lemma effacement.lift_app_aux_well_defined
   {F G : A ⥤δ B} {X n}
-  (η : F n ⟶ G n) (e₁ e₂ : effacement F X n) (Y : A) :
+  (η : F n ⟶ G n) (e₁ e₂ : effacement F X n) :
   e₁.lift_app_aux η = e₂.lift_app_aux η :=
-sorry
+begin
+  let II := limits.biprod e₁.I e₂.I,
+  let ι : X ⟶ II := limits.biprod.lift e₁.ι e₂.ι,
+  let e : effacement F X n := ⟨II, ι, sorry⟩,
+  let π₁ : e ⟶ e₁ := ⟨limits.biprod.fst, sorry⟩,
+  let π₂ : e ⟶ e₂ := ⟨limits.biprod.snd, sorry⟩,
+  rw ← effacement.lift_app_aux_eq_of_hom η _ _ π₁,
+  rw ← effacement.lift_app_aux_eq_of_hom η _ _ π₂,
+end
 
 end stacks_010T
 
