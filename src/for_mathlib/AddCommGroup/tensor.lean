@@ -521,7 +521,10 @@ begin
     exact map_tensor (𝟙 _) f },
   { dsimp [eX, eY],
     apply (limits.is_colimit_of_preserves (tensor_functor.flip.obj X) _).hom_ext,
-    intros j,
+    rotate,
+    { apply limits.colimit.is_colimit },
+    { apply_instance },
+    rintro ⟨j⟩,
     slice_rhs 1 2
     { erw (limits.is_colimit_of_preserves (tensor_functor.flip.obj X)
       (limits.colimit.is_colimit _)).fac },
@@ -530,9 +533,7 @@ begin
       category.assoc, limits.colimit.ι_desc, limits.cofan.mk_ι_app,
       limits.has_colimit.iso_of_nat_iso_ι_inv, discrete.nat_iso_inv_app,
       ι_preserves_colimits_iso_inv, functor.flip_obj_map, tensor_functor_map_app],
-    dsimp, simp only [category.id_comp, ← map_tensor_comp_comp, category.comp_id],
-    apply limits.colimit.is_colimit,
-    apply_instance },
+    dsimp, simp only [category.id_comp, ← map_tensor_comp_comp, category.comp_id], },
   rw this, clear this,
   let t := _, change mono (eX.hom ≫ t ≫ eY.inv),
   suffices : mono t, { resetI, apply_instance },
