@@ -184,6 +184,21 @@ begin
   rw [limits.comp_zero]
 end
 
+def effacement.map_ses {F : A ⥤δ B} {X n}
+  (e₁ e₂ : effacement F X n) (q : e₁ ⟶ e₂) :
+  e₁.ses ⟶ e₂.ses :=
+{ fst := 𝟙 _,
+  snd := q.t,
+  trd := begin
+    refine limits.cokernel.desc _ _ _,
+    refine _ ≫ limits.cokernel.π _,
+    exact q.t,
+    rw [← category.assoc, q.w, limits.cokernel.condition]
+  end,
+  sq1' := sorry,
+  sq2' := sorry }
+
+
 lemma effacement.lift_app_aux_eq_of_hom
   {F G : A ⥤δ B} {X n}
   (η : F n ⟶ G n) (e₁ e₂ : effacement F X n) (q : e₁ ⟶ e₂) :
@@ -194,30 +209,15 @@ begin
   apply limits.coequalizer.hom_ext,
   simp only [limits.cokernel.π_desc, effacement.cokernel_iso_spec_assoc],
   rw ← category.assoc, let t := _, change _ = t ≫ _,
-  have ht : t = (F n).map _ ≫ limits.cokernel.π _,
-  rotate 2,
-  { refine limits.cokernel.desc _ _ _,
-    refine _ ≫ limits.cokernel.π _,
-    exact q.t,
-    rw [← category.assoc, q.w, limits.cokernel.condition] },
+  have ht : t = (F n).map (e₁.map_ses e₂ q).trd ≫ limits.cokernel.π _,
   { sorry },
   rw ht, clear ht t,
   simp only [category.assoc, limits.cokernel.π_desc],
-  simp only [nat_trans.naturality_assoc],
+  erw [nat_trans.naturality_assoc],
   congr' 1,
-  let qq : e₁.ses ⟶ e₂.ses := _,
-  swap,
-  { fconstructor, exact 𝟙 _, exact q.t,
-    refine limits.cokernel.desc _ _ _,
-    refine _ ≫ limits.cokernel.π _,
-    exact q.t,
-    rw [← category.assoc, q.w, limits.cokernel.condition],
-    { sorry },
-    { sorry } },
-  erw (G.δ n).naturality qq,
+  erw (G.δ n).naturality (e₁.map_ses e₂ q),
   symmetry,
   convert category.comp_id _,
-  dsimp [qq],
   exact functor.map_id _ _,
 end
 
