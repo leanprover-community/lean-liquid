@@ -117,8 +117,9 @@ begin
   let x := biproduct.is_limit (λ (i : ulift (fin n)), M.to_Condensed),
   let y := is_limit_of_preserves (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf) x,
   refine ⟨y.lift ⟨_, ⟨λ i, ⟨_, _⟩, _⟩⟩⟩,
-  { refine QprimeFP_incl_aux' _ _ _ i.down, },
+  { refine QprimeFP_incl_aux' _ _ _ i.as.down, },
   { intros S T f,
+    rcases i with ⟨⟨i⟩⟩,
     dsimp [QprimeFP_incl_aux', ProFiltPseuNormGrpWithTinv₁.to_Condensed],
     rw [← ulift_functor.map_comp, Ab.ulift_map_apply, ← ulift_functor.map_comp],
     congr' 1, },
@@ -284,7 +285,7 @@ def QprimeFP_incl (c : ℝ≥0) :
     ext1,
     let x := λ n, biproduct.is_limit (λ (i : ulift (fin (BD.data.X n))), M.to_Condensed),
     let y := λ n, is_limit_of_preserves (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf) (x n),
-    apply (y _).hom_ext, intro j,
+    apply (y _).hom_ext, rintro ⟨j⟩,
     rw [← CondensedSet_to_presheaf_map, ← CondensedSet_to_presheaf_map, functor.map_comp,
       ← functor.comp_map, category.assoc, functor.map_comp, category.assoc],
     erw [← functor.map_comp, biproduct.matrix_π],
@@ -294,7 +295,7 @@ def QprimeFP_incl (c : ℝ≥0) :
     rw [QprimeFP_incl_aux1],
     have help : ∀ n i,
       ((Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).map_cone
-        (biproduct.bicone (λ (i : ulift (fin (BD.data.X n))), M.to_Condensed)).to_cone).π.app i =
+        (biproduct.bicone (λ (i : ulift (fin (BD.data.X n))), M.to_Condensed)).to_cone).π.app ⟨i⟩ =
       (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).map
         (biproduct.π (λ (i : ulift (fin (BD.data.X n))), M.to_Condensed) i),
     { intros, refl },
@@ -350,11 +351,16 @@ variables (A B : ℝ≥0 ⥤ C)
 variables [has_coproduct (λ (k : ulift ℕ), A.obj (ι k))]
 variables [has_coproduct (λ (k : ulift ℕ), B.obj (ι k))]
 
+include hι
+
 def sigma_shift_cone (c : cofan (λ k, A.obj (ι k))) :
   cofan (λ k, A.obj (ι k)) :=
 { X := c.X,
-  ι := discrete.nat_trans $ λ (j:ulift ℕ),
-    A.map (hom_of_le $ hι $ (by { cases j, apply nat.le_succ } : j ≤ ⟨j.down+1⟩)) ≫ c.ι.app _ }
+  ι := discrete.nat_trans $ λ ⟨(j: ulift ℕ)⟩,
+        A.map (hom_of_le $ hι $ (by { cases j, apply nat.le_succ } : j ≤ ⟨j.down+1⟩)) ≫
+          c.ι.app ⟨⟨j.down + 1⟩⟩ }
+
+omit hι
 
 def sigma_shift' (c : cofan (λ k, A.obj (ι k))) (hc : is_colimit c) :
   c.X ⟶ (sigma_shift_cone ι hι A c).X := hc.desc _
@@ -514,17 +520,17 @@ fan.mk (ProFiltPseuNormGrp₁.product X) $ λ i, ProFiltPseuNormGrp₁.product.�
 def ProFiltPseuNormGrp₁.is_limit_product_fan {α : Type u} [fintype α]
   (X : α → ProFiltPseuNormGrp₁.{u}) :
   is_limit (ProFiltPseuNormGrp₁.product_fan X) :=
-{ lift := λ S, ProFiltPseuNormGrp₁.product.lift _ _ $ λ i, S.π.app _,
+{ lift := λ S, ProFiltPseuNormGrp₁.product.lift _ _ $ λ i, S.π.app ⟨i⟩,
   fac' := begin
-    intros S j,
+    rintro S ⟨j⟩,
     dsimp,
     erw ProFiltPseuNormGrp₁.product.lift_π,
   end,
   uniq' := begin
     intros S m hm,
     apply ProFiltPseuNormGrp₁.product.hom_ext,
-    intros j,
-    erw hm,
+    rintro j,
+    erw hm ⟨j⟩,
     erw ProFiltPseuNormGrp₁.product.lift_π,
   end }
 
@@ -676,11 +682,11 @@ ulift_functor.map_iso
       ((PFPNGT₁_to_PFPNG₁ₑₗ.{u} r').obj M))) (ulift.up $ ulift.down i) t in q.down,
   hom_inv_id' := begin
     ext ⟨t⟩ : 2, dsimp,
-    apply limit.hom_ext, rintros ⟨q⟩,
+    apply limit.hom_ext, rintros ⟨⟨q⟩⟩,
     simp,
   end,
   inv_hom_id' := begin
-    apply limit.hom_ext, rintro ⟨q⟩,
+    apply limit.hom_ext, rintro ⟨⟨q⟩⟩,
     simp only [category.assoc, limit.lift_π, fan.mk_π_app, category.id_comp],
     ext t,
     dsimp,
@@ -724,7 +730,7 @@ begin
     refine profinite_pow_filtration_iso_component _ _ _ _ },
   { intros X Y f, dsimp,
     apply (is_limit_of_preserves ((evaluation _ _).obj Y) (limit.is_limit _)).hom_ext,
-    intros i, swap, apply_instance,
+    rintro ⟨i⟩, swap, apply_instance,
     dsimp, simp only [category.assoc],
     erw [functor_prod_eval_iso_spec', nat_trans.naturality,
       functor_prod_eval_iso_spec'_assoc, profinite_pow_filtration_iso_component_spec,
@@ -879,7 +885,7 @@ lemma iso_on_the_left_zero_conj_aux (j : ℕ) :
     (fact.out (monotone (function.swap κ 0)) (hι $ by { exact_mod_cast j.le_succ }))) :=
 begin
   rw iso.comp_inv_eq,
-  apply limit.hom_ext, intros k,
+  apply limit.hom_ext, rintro ⟨k⟩,
   dsimp [Condensed.as_nat_diagram_pow, pow_functor], simp only [category.assoc],
   erw profinite_pow_filtration_iso_spec,
   simp only [lim_map_π, discrete.nat_trans_app],
@@ -908,7 +914,7 @@ begin
     category.assoc], congr' 1,
   apply (is_colimit_of_preserves (homological_complex.eval _ _ _)
     (colimit.is_colimit _)).hom_ext, swap, apply_instance,
-  rintros ⟨j⟩, dsimp,
+  rintros ⟨⟨j⟩⟩, dsimp,
   erw [← homological_complex.comp_f, colimit.ι_desc],
   dsimp [sigma_shift_cone],
   rw iso_on_the_left_zero_spec_alt_assoc,
@@ -1028,7 +1034,7 @@ lemma iso_on_the_left_neg_conj_aux (q : ℕ) (j : ℕ) :
     (fact.out (monotone (function.swap κ (q+1))) (hι $ by { exact_mod_cast j.le_succ }))) :=
 begin
   rw iso.comp_inv_eq,
-  apply limit.hom_ext, intros k,
+  apply limit.hom_ext, rintro ⟨k⟩,
   dsimp [Condensed.as_nat_diagram_pow, pow_functor], simp only [category.assoc],
   erw profinite_pow_filtration_iso_spec,
   simp only [lim_map_π, discrete.nat_trans_app],
@@ -1057,7 +1063,7 @@ begin
     category.assoc], congr' 1,
   apply (is_colimit_of_preserves (homological_complex.eval _ _ _)
     (colimit.is_colimit _)).hom_ext, swap, apply_instance,
-  rintros ⟨j⟩, dsimp,
+  rintros ⟨⟨j⟩⟩, dsimp,
   erw [← homological_complex.comp_f, colimit.ι_desc],
   dsimp [sigma_shift_cone],
   rw iso_on_the_left_neg_spec_alt_assoc,
@@ -1203,7 +1209,7 @@ begin
   apply (is_colimit_of_preserves (homological_complex.eval _ _ 0)
     (colimit.is_colimit (discrete.functor $
     λ (k : ulift.{u+1 0} ℕ), (QprimeFP_int.{u} r' BD.data κ M).obj (ι k)))).hom_ext,
-  rintros ⟨i⟩, dsimp, rw [← homological_complex.comp_f, colimit.ι_desc], dsimp,
+  rintros ⟨⟨i⟩⟩, dsimp, rw [← homological_complex.comp_f, colimit.ι_desc], dsimp,
   slice_rhs 1 2 { erw iso_on_the_left_zero_spec_alt BD κ M ι hι i },
   dsimp [Condensed.coproduct_presentation_with_pow,
     -CondensedSet_to_Condensed_Ab_map], simp only [category.assoc, colimit.ι_desc],
@@ -1211,7 +1217,7 @@ begin
   dsimp [QprimeFP_incl, -CondensedSet_to_Condensed_Ab_map, iso_on_the_right_zero],
   simp only [← functor.map_comp], congr' 1,
   simp_rw ← category.assoc, rw [← iso.comp_inv_eq, iso.eq_comp_inv],
-  apply limit.hom_ext, intros j,
+  apply limit.hom_ext, rintro ⟨j⟩,
   simp only [category.assoc, lim_map_π],
   erw Condensed_product_iso_product_spec,
   erw Condensed_product_iso_biproduct_spec',
@@ -1219,10 +1225,11 @@ begin
   ext S : 3,
   dsimp [QprimeFP_incl_aux],
   rw [← whisker_right_app, ← nat_trans.comp_app],
-  erw (is_limit_of_preserves.{u+1 u+1 u+1 u+1 u+2 u+2} (Condensed_Ab_to_CondensedSet.{u} ⋙
-    CondensedSet_to_presheaf.{u})
+  have := (is_limit_of_preserves.{u+1 u+1 u+1 u+1 u+2 u+2}
+    (Condensed_Ab_to_CondensedSet.{u} ⋙ CondensedSet_to_presheaf.{u})
     (biproduct.is_limit.{u+1 u+2} (λ (i : ulift.{u+1 0} (fin (BD.data.X 0))),
     M.to_Condensed))).fac,
+  dsimp at this, erw this _ ⟨j⟩,
   ext, refl,
 end
 
@@ -1270,7 +1277,7 @@ begin
   apply (is_colimit_of_preserves (homological_complex.eval _ _ (-[1+q]))
     (colimit.is_colimit (discrete.functor $
     λ (k : ulift.{u+1 0} ℕ), (QprimeFP_int.{u} r' BD.data κ M).obj (ι k)))).hom_ext,
-  rintros ⟨i⟩, dsimp, rw [← homological_complex.comp_f, colimit.ι_desc], dsimp,
+  rintros ⟨⟨i⟩⟩, dsimp, rw [← homological_complex.comp_f, colimit.ι_desc], dsimp,
   slice_rhs 1 2 { erw iso_on_the_left_neg_spec_alt BD κ M ι hι q i },
   dsimp [Condensed.coproduct_presentation_with_pow,
     -CondensedSet_to_Condensed_Ab_map], simp only [category.assoc, colimit.ι_desc],
@@ -1278,7 +1285,7 @@ begin
   dsimp [QprimeFP_incl, -CondensedSet_to_Condensed_Ab_map, iso_on_the_right_neg],
   simp only [← functor.map_comp], congr' 1,
   simp_rw ← category.assoc, rw [← iso.comp_inv_eq, iso.eq_comp_inv],
-  apply limit.hom_ext, intros j,
+  apply limit.hom_ext, rintro ⟨j⟩,
   simp only [category.assoc, lim_map_π],
   erw Condensed_product_iso_product_spec,
   erw Condensed_product_iso_biproduct_spec',
@@ -1289,7 +1296,7 @@ begin
   erw (is_limit_of_preserves.{u+1 u+1 u+1 u+1 u+2 u+2} (Condensed_Ab_to_CondensedSet.{u} ⋙
     CondensedSet_to_presheaf.{u})
     (biproduct.is_limit.{u+1 u+2} (λ (i : ulift.{u+1 0} (fin (BD.data.X (q+1)))),
-    M.to_Condensed))).fac,
+    M.to_Condensed))).fac _ ⟨j⟩,
   ext, refl,
 end
 
@@ -1537,11 +1544,16 @@ commsq.of_eq begin
   delta QprimeFP.shift_sub_id,
   rw [sub_comp, comp_sub, category.id_comp, category.comp_id],
   refine congr_arg2 _ _ rfl,
-  apply colimit.hom_ext, intro j,
-  dsimp [sigma_shift, sigma_shift', sigma_shift_cone],
-  simp only [sigma_shift, sigma_shift', sigma_shift_cone, sigma_map, colimit.ι_desc_assoc,
-    colimit.ι_desc, cofan.mk_ι_app, category.assoc, nat_trans.naturality_assoc,
-    discrete.nat_trans_app],
+  apply colimit.hom_ext, rintro ⟨j⟩,
+  dsimp [sigma_shift, sigma_shift', sigma_shift_cone, sigma_map],
+  rw [colimit.ι_desc_assoc, colimit.ι_desc_assoc],
+  dsimp [sigma_shift_cone],
+  simp only [category.assoc, colimit.ι_desc],
+  dsimp [sigma_shift_cone],
+  --  refl,
+  -- simp only [sigma_shift, sigma_shift', sigma_shift_cone, sigma_map, colimit.ι_desc_assoc,
+  --   colimit.ι_desc, cofan.mk_ι_app, category.assoc, nat_trans.naturality_assoc,
+  --   discrete.nat_trans_app],
 end
 
 lemma commsq_shift_sub_id_ι [∀ (c : ℝ≥0) (n : ℕ), fact (κ₂ c n ≤ κ c n)] :
@@ -1553,7 +1565,7 @@ commsq.of_eq begin
   delta QprimeFP.shift_sub_id,
   rw [sub_comp, comp_sub, category.id_comp, category.comp_id],
   refine congr_arg2 _ _ rfl,
-  apply colimit.hom_ext, intro j,
+  apply colimit.hom_ext, rintro ⟨j⟩,
   dsimp [sigma_shift, sigma_shift', sigma_shift_cone],
   simp only [sigma_shift, sigma_shift', sigma_shift_cone, sigma_map, colimit.ι_desc_assoc,
     colimit.ι_desc, cofan.mk_ι_app, category.assoc, nat_trans.naturality_assoc,
@@ -1588,7 +1600,7 @@ lemma commsq_sigma_proj_Tinv [∀ (c : ℝ≥0) (n : ℕ), fact (κ₂ c n ≤ r
   ((BD.eval' freeCond').map M.Tinv_cond)
   (QprimeFP_sigma_proj BD κ M ι) :=
 commsq.of_eq begin
-  apply colimit.hom_ext, intro j,
+  apply colimit.hom_ext, rintro ⟨j⟩,
   simp only [QprimeFP_sigma_proj, sigma_map, colimit.ι_desc_assoc, colimit.ι_desc,
     cofan.mk_ι_app, category.assoc, nat_trans.naturality_assoc],
   dsimp only [QprimeFP_incl, QprimeFP_int.Tinv, whisker_right_app,
@@ -1608,13 +1620,13 @@ commsq.of_eq begin
   ext1,
   let x := biproduct.is_limit (λ (i : ulift (fin (BD.data.X n))), M.to_Condensed),
   let y := is_limit_of_preserves (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf) x,
-  apply y.hom_ext, intro k,
+  apply y.hom_ext, rintro ⟨k⟩,
   simp only [Sheaf.hom.comp_val, category.assoc, QprimeFP_incl_aux, y.fac],
   rw [← CondensedSet_to_presheaf_map, ← functor.comp_map],
   simp only [functor.map_cone_π_app, bicone.to_cone_π_app, biproduct.bicone_π],
   rw [← functor.map_comp, biproduct.map_π, functor.map_comp],
   have : ((Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).map_cone
-    (biproduct.bicone (λ (i : ulift (fin (BD.data.X n))), M.to_Condensed)).to_cone).π.app k =
+    (biproduct.bicone (λ (i : ulift (fin (BD.data.X n))), M.to_Condensed)).to_cone).π.app ⟨k⟩ =
     (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_presheaf).map
     (biproduct.π (λ (j : ulift (fin (BD.data.X n))), M.to_Condensed) k) := rfl,
   rw [← this, ← category.assoc, y.fac], clear this y x,
