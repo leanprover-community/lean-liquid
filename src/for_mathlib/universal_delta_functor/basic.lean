@@ -4,8 +4,15 @@ import for_mathlib.short_exact_sequence
 import for_mathlib.abelian_category
 import for_mathlib.exact_lift_desc
 
-noncomputable theory
+/-!
 
+Refs:
+1. Grothendieck's Tôhoku paper
+2. Stacks tag 010T
+
+-/
+
+noncomputable theory
 namespace category_theory
 
 universes v v' u u'
@@ -112,15 +119,18 @@ instance category : category (A ⥤δ B) :=
 class universal (F : A ⥤δ B) : Prop :=
 (cond : ∀ (G : A ⥤δ B) (e0 : F 0 ⟶ G 0), ∃! e : F ⟶ G, (e : Π n, F n ⟶ G n) 0 = e0)
 
-namespace stacks_010T
+namespace tohoku
 
+/-- An effacement relative to a δ functor. -/
+@[nolint has_inhabited_instance]
 structure effacement (F : A ⥤δ B) (X : A) (n : ℕ) :=
 (I : A)
 (ι : X ⟶ I)
 [mono : category_theory.mono ι]
 (w : (F (n+1)).map ι = 0)
 
-@[ext]
+/-- Morphisms between effacements. -/
+@[ext, nolint has_inhabited_instance]
 structure effacement.hom (F : A ⥤δ B) (X : A) (n : ℕ)
   (e₁ e₂ : effacement F X n) :=
 (t : e₁.I ⟶ e₂.I)
@@ -139,12 +149,15 @@ instance effacement.category (F : A ⥤δ B) (X : A) (n : ℕ) :
 instance effacement_mono (F : A ⥤δ B) (X : A) (n : ℕ)
   (e : effacement F X n) : category_theory.mono e.ι := e.mono
 
+/-- Effacable δ functors. -/
 class effacable (F : A ⥤δ B) : Prop :=
 (cond [] : ∀ (X : A) (n : ℕ), nonempty (effacement F X n))
 
+/-- A choice of effacement. -/
 def choose_effacement (F : A ⥤δ B) [effacable F] (X : A) (n : ℕ) : effacement F X n :=
 (effacable.cond F X n).some
 
+/-- A short exact sequence associated to an effacement -/
 def effacement.ses {F : A ⥤δ B} {X n} (e : effacement F X n) : short_exact_sequence A :=
 { fst := X,
   snd := e.I,
@@ -153,6 +166,7 @@ def effacement.ses {F : A ⥤δ B} {X n} (e : effacement F X n) : short_exact_se
   g := limits.cokernel.π _,
   exact' := abelian.exact_cokernel e.ι }
 
+/-- An auxiliary definition used to obtain the isomorphism below -/
 def effacement.cokernel_comparison {F : A ⥤δ B} {X n} (e : effacement F X n) :
   limits.cokernel ((F n).map (limits.cokernel.π e.ι)) ⟶ (F (n+1)).obj X :=
 limits.cokernel.desc _ ((F.δ n).app e.ses) (F.exact_δ n e.ses).w
@@ -193,6 +207,7 @@ instance effacement.is_iso_cokernel_comparison {F : A ⥤δ B} {X n} (e : efface
   is_iso e.cokernel_comparison :=
 is_iso_of_mono_of_epi _
 
+/-- The cokernel isomorphism associated to an effacement. -/
 def effacement.cokernel_iso {F : A ⥤δ B} {X n} (e : effacement F X n) :
   limits.cokernel ((F n).map (limits.cokernel.π e.ι)) ≅ (F (n+1)).obj X :=
 as_iso e.cokernel_comparison
@@ -203,6 +218,7 @@ lemma effacement.cokernel_iso_spec {F : A ⥤δ B} {X n} (e : effacement F X n) 
   (F.δ n).app e.ses :=
 limits.cokernel.π_desc _ _ _
 
+/-- An auxiliary definition used in `lift` below. -/
 def effacement.lift_app_aux {F G : A ⥤δ B} {X n}
   (η : F n ⟶ G n) (e : effacement F X n) :
   (F (n+1)).obj X ⟶ (G (n+1)).obj X :=
@@ -215,6 +231,7 @@ begin
   rw [limits.comp_zero]
 end
 
+/-- An auxiliary definition used in `lift` below. -/
 def effacement.map_ses {F : A ⥤δ B} {X n}
   (e₁ e₂ : effacement F X n) (q : e₁ ⟶ e₂) :
   e₁.ses ⟶ e₂.ses :=
@@ -365,10 +382,82 @@ begin
   { dsimp, simpa only [exact.comp_epi_desc] }
 end
 
-end stacks_010T
+/-- An auxiliary definition used in `lift` below. -/
+def effacable.lift_component (F G : A ⥤δ B) [effacable F] (n) (η : F n ⟶ G n) :
+  F (n+1) ⟶ G (n+1) :=
+{ app := λ X, (choose_effacement F X n).lift_app_aux η,
+  naturality' := begin
+    intros X Y f,
+    symmetry,
+    apply effacement.lift_naturality,
+  end }
+
+/-- The lift of η0. -/
+noncomputable
+def effacable.lift (F G : A ⥤δ B) [effacable F] (η0 : F 0 ⟶ G 0) : Π n, F n ⟶ G n
+| 0 := η0
+| (n+1) := effacable.lift_component _ _ _ (effacable.lift n)
+
+/-- The lift of η0, as an actual delta functor. -/
+def effacable.lift_with_δ (F G : A ⥤δ B) [effacable F] (η0 : F 0 ⟶ G 0) :
+  F ⟶ G :=
+{ η := effacable.lift _ _ η0,
+  comm' := begin
+    intros n, ext S : 2,
+    dsimp,
+    rcases n with (_|n),
+    { dsimp [effacable.lift],
+      apply effacement.lift_δ_naturality,
+      apply choose_effacement },
+    { dsimp [effacable.lift],
+      apply effacement.lift_δ_naturality,
+      apply choose_effacement },
+  end }
+
+lemma effacable.lift_with_δ_unique (F G : A ⥤δ B) [effacable F] (η0 : F 0 ⟶ G 0)
+  (η : F ⟶ G) (hη : η 0 = η0) : η = effacable.lift_with_δ F G η0 :=
+begin
+  ext1 n, induction n with n hn,
+  { rw hη, refl },
+  { ext T, dsimp [effacable.lift_with_δ] at ⊢ hn,
+    change _ = ((effacable.lift F G η0) _).app _,
+    dsimp [effacable.lift],
+    change _ = effacable.lift F G η0 n at hn,
+    erw ← hn,
+    dsimp [effacable.lift_component],
+    dsimp [effacement.lift_app_aux],
+    rw iso.eq_inv_comp,
+    apply limits.coequalizer.hom_ext,
+    dsimp,
+    simp only [effacement.cokernel_iso_spec_assoc, limits.cokernel.π_desc],
+    have := effacement.lift_δ_naturality (η n) ((choose_effacement F T n).ses)
+      (choose_effacement _ _ _) (choose_effacement _ _ _),
+    erw ← this, congr' 1,
+    dsimp only [effacement.lift_app_aux],
+    rw iso.eq_inv_comp,
+
+    apply limits.coequalizer.hom_ext,
+    simp only [effacement.cokernel_iso_spec_assoc, limits.cokernel.π_desc],
+    clear this,
+    have := η.comm' n,
+    apply_fun (λ e, e.app ((choose_effacement F (choose_effacement F T n).ses.fst n).ses)) at this,
+    exact this },
+end
+
+end tohoku
+open tohoku
+
+theorem universal_of_effacable (F : A ⥤δ B) [effacable F] : universal F :=
+begin
+  constructor, intros G η0,
+  use effacable.lift_with_δ F G η0,
+  split,
+  { ext, refl, },
+  { intros η hη, apply effacable.lift_with_δ_unique, exact hη, }
+end
 
 -- Sketch:
--- TODO: Prove stacks tag 010T.
+-- TODO: Prove stacks tag 010T. -- DONE!
 -- TODO: Construct `Ext^*(-,X)` a delta functor (on objects!).
 -- These should be functors `Aᵒᵖ ⥤ Ab` (assuming `A` has enough projectives).
 -- Use `010T` to see that `Ext^*(-,X)` is universal.
