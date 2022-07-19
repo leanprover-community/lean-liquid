@@ -83,11 +83,11 @@ jobs:
           # We record hashes of the oleans for debugging purposes.
           find src -name "*.olean" -exec md5sum {} \; | awk '{print $2,$1}' | sort > olean_hashes_at_start.txt
           echo "Starting build at $(date +'%T')"
-          lean --json --make src | python scripts/detect_errors.py
+          lean -T200000 --json --make src | python scripts/detect_errors.py
           result_run1=$?
           echo "Run 1 complete at $(date +'%T'); return value $result_run1"
           find src -name "*.olean" -exec md5sum {} \; | awk '{print $2,$1}' | sort > olean_hashes_after_run_1.txt
-          lean --json --make src | python scripts/detect_errors.py || echo "run 2 failed"
+          lean -T200000 --json --make src | python scripts/detect_errors.py || echo "run 2 failed"
           result_run2=$?
           echo "Run 2 complete at $(date +'%T'); return value $result_run2"
           find src -name "*.olean" -exec md5sum {} \; | awk '{print $2,$1}' | sort > olean_hashes_after_run_2.txt
