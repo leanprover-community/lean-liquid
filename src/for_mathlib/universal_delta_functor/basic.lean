@@ -30,6 +30,9 @@ infixr ` ⥤δ `:26 := delta_functor
 
 instance : has_coe_to_fun (A ⥤δ B) (λ F, ℕ → (A ⥤ B)) := ⟨F⟩
 
+instance additive_apply (F : A ⥤δ B) (n : ℕ) :
+  functor.additive (F n) := F.additive n
+
 variables {A B}
 
 /-- Morphisms of cohomological covariant delta functors. -/
@@ -235,13 +238,81 @@ lemma effacement.lift_app_aux_well_defined
 begin
   let II := limits.biprod e₁.I e₂.I,
   let ι : X ⟶ II := limits.biprod.lift e₁.ι e₂.ι,
-  let e : effacement F X n := ⟨II, ι, sorry⟩, -- use additivity of `F n`.
+  let e : effacement F X n := ⟨II, ι, _⟩, -- use additivity of `F n`.
+  swap,
+  { haveI : limits.preserves_binary_biproducts (F (n+1)) :=
+      limits.preserves_binary_biproducts_of_preserves_biproducts (F (n + 1)),
+    let E : (F (n + 1)).obj (e₁.I ⊞ e₂.I) ≅ (F (n + 1)).obj (e₁.I) ⊞ (F (n+1)).obj (e₂.I) :=
+      functor.map_biprod (F (n+1)) _ _,
+    rw [← cancel_mono E.hom, limits.zero_comp],
+    rw functor.map_biprod_hom,
+    apply limits.biprod.hom_ext,
+    { simp only [category.assoc, limits.biprod.lift_fst, limits.zero_comp],
+      simp only [← functor.map_comp, limits.biprod.lift_fst, e₁.w] },
+    { simp only [category.assoc, limits.biprod.lift_snd, limits.zero_comp],
+      simp only [← functor.map_comp, limits.biprod.lift_snd, e₂.w] } },
   let π₁ : e ⟶ e₁ := ⟨limits.biprod.fst, _⟩,
   swap, { dsimp [e], simp, },
   let π₂ : e ⟶ e₂ := ⟨limits.biprod.snd, _⟩,
   swap, { dsimp [e], simp, },
   rw ← effacement.lift_app_aux_eq_of_hom η _ _ π₁,
   rw ← effacement.lift_app_aux_eq_of_hom η _ _ π₂,
+end
+
+lemma effacement.lift_naturality
+  {F G : A ⥤δ B} {X Y n}
+  (η : F n ⟶ G n) (e₁ : effacement F X n) (e₂ : effacement F Y n) (f : X ⟶ Y) :
+  e₁.lift_app_aux η ≫ (G (n+1)).map f =
+  (F (n+1)).map f ≫ e₂.lift_app_aux η :=
+begin
+  let e₁' : effacement F X n :=
+    ⟨limits.biprod e₁.I e₂.I, limits.biprod.lift e₁.ι (f ≫ e₂.ι), _⟩, -- again, additivity
+  swap,
+  { haveI : limits.preserves_binary_biproducts (F (n+1)) :=
+      limits.preserves_binary_biproducts_of_preserves_biproducts (F (n + 1)),
+    let E : (F (n + 1)).obj (e₁.I ⊞ e₂.I) ≅ (F (n + 1)).obj (e₁.I) ⊞ (F (n+1)).obj (e₂.I) :=
+      functor.map_biprod (F (n+1)) _ _,
+    rw [← cancel_mono E.hom, limits.zero_comp],
+    rw functor.map_biprod_hom,
+    apply limits.biprod.hom_ext,
+    simp only [category.assoc, limits.biprod.lift_fst, limits.zero_comp],
+    simp only [← functor.map_comp, limits.biprod.lift_fst],
+    exact e₁.w,
+    simp only [category.assoc, limits.biprod.lift_snd, limits.zero_comp],
+    simp only [← functor.map_comp, limits.biprod.lift_snd],
+    simp only [functor.map_comp, e₂.w, limits.comp_zero] },
+  rw e₁.lift_app_aux_well_defined η e₁',
+  dsimp [effacement.lift_app_aux],
+  simp only [category.assoc, iso.inv_comp_eq],
+  apply limits.coequalizer.hom_ext,
+  simp only [limits.coequalizer_as_cokernel, limits.cokernel.π_desc_assoc, category.assoc],
+  erw limits.cokernel.π_desc_assoc,
+  let q : e₁'.ses ⟶ e₂.ses := ⟨f, limits.biprod.snd,
+    limits.cokernel.desc _ (limits.biprod.snd ≫ limits.cokernel.π _) _, _, _⟩,
+  erw ← (F.δ n).naturality_assoc q,
+  erw ← (G.δ n).naturality q,
+  dsimp,
+  have : (F.δ n).app e₂.ses ≫ e₂.cokernel_iso.inv = limits.cokernel.π _,
+  { rw iso.comp_inv_eq, simp, },
+  rw reassoc_of this, clear this,
+  simp only [category.assoc, limits.cokernel.π_desc],
+  erw ← nat_trans.naturality_assoc,
+  refl,
+  { dsimp [e₁'],
+    simp },
+  { dsimp [e₁', effacement.ses],
+    simp },
+  { dsimp [e₁', effacement.ses], simp, },
+end
+
+lemma effacement.lift_δ_naturality
+  {F G : A ⥤δ B} {n}
+  (η : F n ⟶ G n) (S : short_exact_sequence A)
+  (e₁ : effacement F S.fst n):
+  (F.δ n).app S ≫ e₁.lift_app_aux η =
+  η.app _ ≫ (G.δ _).app S :=
+begin
+  sorry
 end
 
 end stacks_010T
