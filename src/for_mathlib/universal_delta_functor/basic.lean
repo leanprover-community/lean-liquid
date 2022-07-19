@@ -2,6 +2,7 @@ import category_theory.abelian.basic
 import category_theory.preadditive.additive_functor
 import for_mathlib.short_exact_sequence
 import for_mathlib.abelian_category
+import for_mathlib.exact_lift_desc
 
 noncomputable theory
 
@@ -335,11 +336,33 @@ end
 lemma effacement.lift_δ_naturality
   {F G : A ⥤δ B} {n}
   (η : F n ⟶ G n) (S : short_exact_sequence A)
-  (e₁ : effacement F S.fst n) :
+  (e₁ : effacement F S.fst n) (e₂ : effacement F S.snd n) :
   (F.δ n).app S ≫ e₁.lift_app_aux η =
   η.app _ ≫ (G.δ _).app S :=
 begin
-  sorry
+  let e₁' : effacement F S.fst n :=
+  ⟨e₂.I, S.f ≫ e₂.ι, by simp [e₂.w]⟩,
+  rw e₁.lift_app_aux_well_defined η e₁',
+  let q : S ⟶ e₁'.ses :=
+    ⟨𝟙 _, e₂.ι, S.exact'.epi_desc (e₂.ι ≫ limits.cokernel.π _) _, _, _⟩,
+  dsimp only [effacement.lift_app_aux],
+  have : (F.δ n).app S ≫ e₁'.cokernel_iso.inv = (F n).map q.trd ≫
+    limits.cokernel.π _,
+  { rw iso.comp_inv_eq,
+    simp,
+    erw (F.δ n).naturality q,
+    dsimp,
+    simp only [functor.map_id, category.comp_id] },
+  slice_lhs 1 2
+  { erw this },
+  simp only [category.assoc, limits.cokernel.π_desc],
+  erw η.naturality_assoc,
+  congr' 1,
+  erw (G.δ n).naturality q, convert category.comp_id _,
+  { dsimp, simpa only [functor.map_id], },
+  rw ← category.assoc, exact limits.cokernel.condition _,
+  { dsimp, simpa },
+  { dsimp, simpa only [exact.comp_epi_desc] }
 end
 
 end stacks_010T
