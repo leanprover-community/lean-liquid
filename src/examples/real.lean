@@ -17,5 +17,5 @@ example : linear_ordered_field ℝ := infer_instance
 
 example : ℝ≥0 = {r : ℝ // r ≥ 0} := rfl
 
--- TODO: once we bump mathlib past #3292 we can show that `ℝ` is the unique
+-- TODO: once we bump mathlib past [#3292](https://github.com/leanprover-community/mathlib/pull/3292) we can show that `ℝ` is the unique
 -- conditionally complete linearly ordered field, up to isomorphism.
