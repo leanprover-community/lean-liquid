@@ -16,14 +16,14 @@ def sigma_single_component {α : Type v} (i : ℤ) (X : α → A) :
   (∐ (λ a, (single A (complex_shape.up ℤ) i).obj (X a))).X i ≅ ∐ X :=
 { hom := (is_colimit_of_preserves (eval _ _ i) (colimit.is_colimit
       (discrete.functor $ λ a, (single A (complex_shape.up ℤ) i).obj (X a)))).desc ⟨∐ X,
-    discrete.nat_trans $ λ a, eq_to_hom (if_pos rfl) ≫ sigma.ι _ a⟩,
+    discrete.nat_trans $ λ a, eq_to_hom (if_pos rfl) ≫ sigma.ι _ a.as⟩,
   inv := sigma.desc $ λ a, eq_to_hom (if_pos rfl).symm ≫
     (sigma.ι (λ (a : α), (single A (complex_shape.up ℤ) i).obj (X a)) a).f i,
   hom_inv_id' := begin
     apply (is_colimit_of_preserves (eval A (complex_shape.up ℤ) i)
       (colimit.is_colimit (discrete.functor
         (λ (a : α), (single A (complex_shape.up ℤ) i).obj (X a))))).hom_ext,
-    intros j,
+    rintro ⟨j⟩,
     dsimp,
     rw category.comp_id,
     slice_lhs 1 2
@@ -31,15 +31,16 @@ def sigma_single_component {α : Type v} (i : ℤ) (X : α → A) :
         (colimit.is_colimit (discrete.functor
         (λ (a : α), (single A (complex_shape.up ℤ) i).obj (X a))))).fac },
     dsimp,
-    rw [category.assoc, colimit.ι_desc], dsimp, simp,
+    rw [category.assoc, colimit.ι_desc], dsimp,
+    simp only [eq_to_hom_trans_assoc, eq_to_hom_refl, category.id_comp],
   end,
   inv_hom_id' := begin
-    ext j,
+    ext ⟨j⟩,
     simp only [colimit.ι_desc_assoc, cofan.mk_ι_app, category.assoc, category.comp_id],
     erw (is_colimit_of_preserves (eval A (complex_shape.up ℤ) i)
       (colimit.is_colimit (discrete.functor (λ (a : α),
       (single A (complex_shape.up ℤ) i).obj (X a))))).fac,
-    dsimp, simp,
+    dsimp, simp only [eq_to_hom_trans_assoc, eq_to_hom_refl, category.id_comp],
   end }
 
 noncomputable
@@ -88,17 +89,17 @@ def single_sigma_iso {α : Type v} (i : ℤ) (X : α → A) :
     { rw [dif_pos rfl],
       simp only [category.assoc],
       rw ← is_iso.eq_inv_comp (eq_to_hom _), swap, apply_instance,
-      ext, simp only [colimit.ι_desc_assoc, cofan.mk_ι_app, category.assoc,
+      ext ⟨a⟩, simp only [colimit.ι_desc_assoc, cofan.mk_ι_app, category.assoc,
         inv_eq_to_hom, category.comp_id],
       dsimp [sigma_single_component_of_eq, sigma_single_component],
       simp only [category.comp_id, colimit.ι_desc_assoc, cofan.mk_ι_app, category.assoc],
       rw [← homological_complex.comp_f, colimit.ι_desc], dsimp,
-      rw dif_pos rfl, simp },
+      rw dif_pos rfl, simp only [eq_to_hom_trans_assoc, eq_to_hom_refl, category.id_comp] },
     { rw [dif_neg hij, zero_comp, if_neg hij, eq_comm, ← is_zero_iff_id_eq_zero],
       exact limits.is_zero_zero A }
   end,
   inv_hom_id' := begin
-    apply colimit.hom_ext, intro j,
+    apply colimit.hom_ext, rintro ⟨j⟩,
     rw [colimit.ι_desc_assoc, cofan.mk_ι_app, category.comp_id],
     ext n,
     simp only [comp_f],
