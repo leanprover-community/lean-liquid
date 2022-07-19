@@ -150,12 +150,12 @@ instance effacement_mono (F : A ⥤δ B) (X : A) (n : ℕ)
   (e : effacement F X n) : category_theory.mono e.ι := e.mono
 
 /-- Effacable δ functors. -/
-class effacable (F : A ⥤δ B) : Prop :=
+class effaceable (F : A ⥤δ B) : Prop :=
 (cond [] : ∀ (X : A) (n : ℕ), nonempty (effacement F X n))
 
 /-- A choice of effacement. -/
-def choose_effacement (F : A ⥤δ B) [effacable F] (X : A) (n : ℕ) : effacement F X n :=
-(effacable.cond F X n).some
+def choose_effacement (F : A ⥤δ B) [effaceable F] (X : A) (n : ℕ) : effacement F X n :=
+(effaceable.cond F X n).some
 
 /-- A short exact sequence associated to an effacement -/
 def effacement.ses {F : A ⥤δ B} {X n} (e : effacement F X n) : short_exact_sequence A :=
@@ -383,7 +383,7 @@ begin
 end
 
 /-- An auxiliary definition used in `lift` below. -/
-def effacable.lift_component (F G : A ⥤δ B) [effacable F] (n) (η : F n ⟶ G n) :
+def effaceable.lift_component (F G : A ⥤δ B) [effaceable F] (n) (η : F n ⟶ G n) :
   F (n+1) ⟶ G (n+1) :=
 { app := λ X, (choose_effacement F X n).lift_app_aux η,
   naturality' := begin
@@ -394,37 +394,37 @@ def effacable.lift_component (F G : A ⥤δ B) [effacable F] (n) (η : F n ⟶ G
 
 /-- The lift of η0. -/
 noncomputable
-def effacable.lift (F G : A ⥤δ B) [effacable F] (η0 : F 0 ⟶ G 0) : Π n, F n ⟶ G n
+def effaceable.lift (F G : A ⥤δ B) [effaceable F] (η0 : F 0 ⟶ G 0) : Π n, F n ⟶ G n
 | 0 := η0
-| (n+1) := effacable.lift_component _ _ _ (effacable.lift n)
+| (n+1) := effaceable.lift_component _ _ _ (effaceable.lift n)
 
 /-- The lift of η0, as an actual delta functor. -/
-def effacable.lift_with_δ (F G : A ⥤δ B) [effacable F] (η0 : F 0 ⟶ G 0) :
+def effaceable.lift_with_δ (F G : A ⥤δ B) [effaceable F] (η0 : F 0 ⟶ G 0) :
   F ⟶ G :=
-{ η := effacable.lift _ _ η0,
+{ η := effaceable.lift _ _ η0,
   comm' := begin
     intros n, ext S : 2,
     dsimp,
     rcases n with (_|n),
-    { dsimp [effacable.lift],
+    { dsimp [effaceable.lift],
       apply effacement.lift_δ_naturality,
       apply choose_effacement },
-    { dsimp [effacable.lift],
+    { dsimp [effaceable.lift],
       apply effacement.lift_δ_naturality,
       apply choose_effacement },
   end }
 
-lemma effacable.lift_with_δ_unique (F G : A ⥤δ B) [effacable F] (η0 : F 0 ⟶ G 0)
-  (η : F ⟶ G) (hη : η 0 = η0) : η = effacable.lift_with_δ F G η0 :=
+lemma effaceable.lift_with_δ_unique (F G : A ⥤δ B) [effaceable F] (η0 : F 0 ⟶ G 0)
+  (η : F ⟶ G) (hη : η 0 = η0) : η = effaceable.lift_with_δ F G η0 :=
 begin
   ext1 n, induction n with n hn,
   { rw hη, refl },
-  { ext T, dsimp [effacable.lift_with_δ] at ⊢ hn,
-    change _ = ((effacable.lift F G η0) _).app _,
-    dsimp [effacable.lift],
-    change _ = effacable.lift F G η0 n at hn,
+  { ext T, dsimp [effaceable.lift_with_δ] at ⊢ hn,
+    change _ = ((effaceable.lift F G η0) _).app _,
+    dsimp [effaceable.lift],
+    change _ = effaceable.lift F G η0 n at hn,
     erw ← hn,
-    dsimp [effacable.lift_component],
+    dsimp [effaceable.lift_component],
     dsimp [effacement.lift_app_aux],
     rw iso.eq_inv_comp,
     apply limits.coequalizer.hom_ext,
@@ -447,13 +447,13 @@ end
 end tohoku
 open tohoku
 
-theorem universal_of_effacable (F : A ⥤δ B) [effacable F] : universal F :=
+theorem universal_of_effacable (F : A ⥤δ B) [effaceable F] : universal F :=
 begin
   constructor, intros G η0,
-  use effacable.lift_with_δ F G η0,
+  use effaceable.lift_with_δ F G η0,
   split,
   { ext, refl, },
-  { intros η hη, apply effacable.lift_with_δ_unique, exact hη, }
+  { intros η hη, apply effaceable.lift_with_δ_unique, exact hη, }
 end
 
 -- Sketch:
