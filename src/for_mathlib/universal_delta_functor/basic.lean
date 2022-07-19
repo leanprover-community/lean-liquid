@@ -195,8 +195,11 @@ def effacement.map_ses {F : A ⥤δ B} {X n}
     exact q.t,
     rw [← category.assoc, q.w, limits.cokernel.condition]
   end,
-  sq1' := sorry,
-  sq2' := sorry }
+  sq1' := by { simp only [category.id_comp], exact q.w.symm },
+  sq2' := begin
+    erw limits.cokernel.π_desc,
+    refl,
+  end }
 
 
 lemma effacement.lift_app_aux_eq_of_hom
@@ -210,7 +213,11 @@ begin
   simp only [limits.cokernel.π_desc, effacement.cokernel_iso_spec_assoc],
   rw ← category.assoc, let t := _, change _ = t ≫ _,
   have ht : t = (F n).map (e₁.map_ses e₂ q).trd ≫ limits.cokernel.π _,
-  { sorry },
+  { dsimp [t], rw iso.comp_inv_eq,
+    simp only [category.assoc, effacement.cokernel_iso_spec],
+    erw (F.δ n).naturality (e₁.map_ses e₂ q),
+    dsimp [effacement.map_ses],
+    simp },
   rw ht, clear ht t,
   simp only [category.assoc, limits.cokernel.π_desc],
   erw [nat_trans.naturality_assoc],
@@ -228,9 +235,11 @@ lemma effacement.lift_app_aux_well_defined
 begin
   let II := limits.biprod e₁.I e₂.I,
   let ι : X ⟶ II := limits.biprod.lift e₁.ι e₂.ι,
-  let e : effacement F X n := ⟨II, ι, sorry⟩,
-  let π₁ : e ⟶ e₁ := ⟨limits.biprod.fst, sorry⟩,
-  let π₂ : e ⟶ e₂ := ⟨limits.biprod.snd, sorry⟩,
+  let e : effacement F X n := ⟨II, ι, sorry⟩, -- use additivity of `F n`.
+  let π₁ : e ⟶ e₁ := ⟨limits.biprod.fst, _⟩,
+  swap, { dsimp [e], simp, },
+  let π₂ : e ⟶ e₂ := ⟨limits.biprod.snd, _⟩,
+  swap, { dsimp [e], simp, },
   rw ← effacement.lift_app_aux_eq_of_hom η _ _ π₁,
   rw ← effacement.lift_app_aux_eq_of_hom η _ _ π₂,
 end
