@@ -1566,9 +1566,8 @@ commsq.of_eq begin
   refine congr_arg2 _ _ rfl,
   apply colimit.hom_ext, rintro ⟨⟨j⟩⟩,
   dsimp [sigma_shift, sigma_shift', sigma_shift_cone],
-  simpa only [sigma_shift, sigma_shift', sigma_shift_cone, sigma_map, colimit.ι_desc_assoc,
-    colimit.ι_desc, cofan.mk_ι_app, category.assoc, nat_trans.naturality_assoc,
-    discrete.nat_trans_app],
+  simp only [sigma_shift_cone, sigma_map, colimit.ι_desc_assoc, colimit.ι_desc, cofan.mk_ι_app,
+    category.assoc, nat_trans.naturality_assoc, discrete.nat_trans_app, colimit.cocone_ι],
 end
 
 end step5
