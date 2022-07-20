@@ -60,7 +60,7 @@ jobs:
         if: ${{ ! 0 }}
         uses: actions/setup-python@v1
         with:
-          python-version: 3.8
+          python-version: 3.9
 
       - name: install mathlibtools
         run: python -m pip install --upgrade pip mathlibtools
