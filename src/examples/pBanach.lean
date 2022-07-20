@@ -97,11 +97,12 @@ example : has_continuous_smul ℝ (lp T q) := infer_instance  --needs 1 ≤ q, n
 example : complete_space (lp T q) := infer_instance --needs 1 ≤ q, and completeness of every (F n)
 /-The true example-/
 
+@[reducible]
 def E : ℕ → Type* := λ n, ℝ
 /-First, three basic instances to access `lp E p`-/
-instance normed_group_En : Π n : ℕ, normed_group (E n) := by {intro _, unfold E, apply_instance}
-instance normed_space_En : Π n : ℕ, normed_space ℝ (E n) := sorry --by {intro _, unfold E, apply_instance}
-instance complete_space_En : Π n : ℕ, complete_space (E n) := sorry --by {intro _, unfold E, apply_instance}
+instance normed_group_En : Π n : ℕ, normed_group (E n) := infer_instance
+instance normed_space_En : Π n : ℕ, normed_space ℝ (E n) := infer_instance
+instance complete_space_En : Π n : ℕ, complete_space (E n) := infer_instance
 
 
 /-Then, one instance to make the following lemmas type-check; and five lemmas corresponding to the relevant fields of `p_banach`-/
