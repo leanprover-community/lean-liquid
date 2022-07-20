@@ -305,11 +305,11 @@ def colimit_pow_iso (α : Type (u+1)) [fintype α] (F : J ⥤ CondensedSet.{u}) 
 colimit_limit_iso_limit_colimit (discrete.functor $ λ i : α, F) ≪≫
 has_limit.iso_of_nat_iso (discrete.nat_iso $ λ i,
 begin
-  dsimp,
   refine (preserves_colimit_iso ((category_theory.evaluation _ _).obj i) _) ≪≫ _,
   refine has_colimit.iso_of_nat_iso _,
   refine nat_iso.of_components (λ j, iso.refl _) _,
-  intros j k f, dsimp, simp,
+  intros j k f, dsimp,
+  simp only [category.comp_id, category.id_comp], refl
 end)
 .
 

@@ -255,13 +255,9 @@ begin
     dsimp only [f, y, set.indicator, equiv.sigma_equiv_prod_apply],
     simp only [equiv.symm_apply_apply, Lbar.of_mask_to_fun, aux],
     rw [tsum_sigma'],
-    { congr' 1, ext1 s, congr' 1, ext1 n, split_ifs; refl },
-    { convert (y i).summable, ext1, apply forall_congr, intro s, convert iff.rfl, ext1 n,
-      dsimp only [y, Lbar.of_mask], congr, convert rfl, },
+    { exact (y i).summable },
     { rw nnreal.summable_sigma,
-      refine ⟨_, ⟨_, has_sum_fintype _⟩⟩,
-      convert (y i).summable, ext1, apply forall_congr, intro s, convert iff.rfl, ext1 n,
-      dsimp only [y, Lbar.of_mask], congr, convert rfl, } }
+      exact ⟨(y i).summable, ⟨_, has_sum_fintype _⟩⟩ } }
 end
 
 lemma lem98_aux' [fact (r' < 1)] (N : ℕ)

@@ -63,11 +63,11 @@ end
 -- begin
 --   have h_shift := int_tsum_shift (λ n, (F s n : ℝ) * (2 ^ (-n))) N,
 --   simp only at h_shift,
---   simp_rw [subtype.val_eq_coe, ← zpow_neg₀],
+--   simp_rw [subtype.val_eq_coe, ← zpow_neg],
 --   rw [← h_shift, ← _root_.tsum_mul_left, tsum_congr],
 --   intro n,
 --   rw [mul_comm (_ ^ N), mul_assoc, ← (zpow_add₀ (@two_ne_zero ℝ _ _)), neg_add_rev,
---     neg_add_cancel_comm, zpow_neg₀, zpow_coe_nat, add_comm],
+--     neg_add_cancel_comm, zpow_neg, zpow_coe_nat, add_comm],
 -- end
 
 variable [fact (r < 1)]
@@ -149,7 +149,7 @@ def θ : ℒ S → ℳ S := ϑ 2⁻¹ r p S
 lemma θ_natural [fact (0 < p)] [fact (p ≤ 1)] (S T : Fintype) (f : S ⟶ T) (F : ℒ S) (t : T) :
   θ (map f F) t = real_measures.map f (θ F) t :=
 begin
-  simp only [θ, ϑ, one_div, map_apply, int.cast_sum, inv_zpow', zpow_neg₀, real_measures.map_apply],
+  simp only [θ, ϑ, one_div, map_apply, int.cast_sum, inv_zpow', zpow_neg, real_measures.map_apply],
   rw ← tsum_sum,
   { congr', ext n, exact sum_mul, },
   intros,
@@ -389,7 +389,7 @@ begin
     rw ← nnreal.tsum_mul_right,
     apply tsum_congr,
     intro n,
-    simp only [zpow_add₀ r_pos.ne.symm, zpow_coe_nat, one_div, inv_pow₀, div_zpow₀],
+    simp only [zpow_add₀ r_pos.ne.symm, zpow_coe_nat, one_div, inv_pow, div_zpow],
     have foo : (2 * r) ^ k ≠ 0,
     { apply pow_ne_zero, apply mul_ne_zero,
       { norm_num },
@@ -438,10 +438,10 @@ begin
     intro m,
     apply tsum_congr,
     intro b,
-    rw [inv_zpow₀,inv_zpow₀],
-    rw [← zpow_neg₀, ←zpow_neg₀],
+    rw [inv_zpow , inv_zpow],
+    rw [← zpow_neg, ←zpow_neg],
     have h2 : (2 : ℝ≥0) ≠ 0 := two_ne_zero,
-    simp only [zpow_add₀, ne.def, bit0_eq_zero, one_ne_zero, not_false_iff, zpow_coe_nat, neg_add_rev, zpow_neg₀,
+    simp only [zpow_add₀, ne.def, bit0_eq_zero, one_ne_zero, not_false_iff, zpow_coe_nat, neg_add_rev, zpow_neg,
   mul_eq_mul_right_iff],
     field_simp [zpow_ne_zero _ h2], left,
     ring,
@@ -513,7 +513,7 @@ begin
             simpa using h2 },
             convert summable_comp_injective this hinj,
             ext1 k,
-            simp [← zpow_neg₀] },
+            simp [← zpow_neg] },
         { rw ← nnreal.tsum_mul_right,
           apply le_of_eq,
           apply tsum_congr,
@@ -570,7 +570,7 @@ def ψ (F : ℒ S) (hF : θ F = 0) : ℒ S :=
         swap, exact neg_ne_zero.2 (zpow_ne_zero _ two_ne_zero),
       convert @tsum_add_tsum_compl ℝ ℤ _ _ _ _ _ {x : ℤ | x < n}
         (summable.subtype (F.summable_half s) _) (summable.subtype (F.summable_half s) _) using 2,
-      { simp_rw [← inv_zpow₀, mul_comm ((2⁻¹ : ℝ)^(n-1)), mul_assoc],
+      { simp_rw [← inv_zpow, mul_comm ((2⁻¹ : ℝ)^(n-1)), mul_assoc],
         simp_rw (show ∀ (x : ℕ), (2 : ℝ)^x = 2⁻¹^(-(x : ℤ)), by {intros, simp}),
         simp_rw [← zpow_add₀ (by norm_num : (2⁻¹ : ℝ) ≠ 0), add_comm, ← sub_eq_add_neg],
         rw ← tsum_eq_sum,

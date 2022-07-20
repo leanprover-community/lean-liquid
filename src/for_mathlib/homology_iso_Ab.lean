@@ -72,9 +72,6 @@ A ⧸ C ≃* B ⧸ D :=
   map_mul' := λ x y, monoid_hom.map_mul _ _ _ }
 .
 
-
-attribute [elementwise] iso.hom_inv_id
-
 namespace AddCommGroup
 
 open category_theory.limits

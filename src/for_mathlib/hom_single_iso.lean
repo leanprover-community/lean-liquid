@@ -326,7 +326,6 @@ begin
   dsimp, simp_rw aux₃_apply,
   dsimp [map_explicit_homology, ker_hom, map_hom_complex],
   rw ← sub_eq_zero,
-  erw ← (quotient_add_group.mk' _).map_sub,
   erw quotient_add_group.eq_zero_iff,
   rw [add_subgroup.mem_comap],
   dsimp,

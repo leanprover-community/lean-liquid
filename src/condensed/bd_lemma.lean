@@ -208,7 +208,7 @@ def nat_trans_eval_free :
     cases h with y hy,
     subst hy,
     simp only [comp_apply, free_abelian_group.map_of_apply, AddCommGroup.of_hom_apply,
-      free_abelian_group.lift.of, id.def, coe_inv_hom_id, biproduct.map_eq],
+      free_abelian_group.lift.of, id.def, iso.inv_hom_id_apply, biproduct.map_eq],
     let z : fin (eg.data.X 0) := ⟨0, begin
       dsimp [eg, eg.BD, eg.rank],
       linarith,

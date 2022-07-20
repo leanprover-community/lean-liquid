@@ -39,7 +39,7 @@ begin
       (∐ λ (a : α), (X a).val.as.X i) := homotopy_category.coproduct_iso _ _,
     refine is_zero_of_iso_of_zero _ e.symm,
     apply category_theory.is_zero_colimit,
-    intros j,
+    rintros ⟨j⟩,
     apply hn j _ hi,
   end
 
@@ -110,7 +110,7 @@ lemma Tinv2_iso_of_bicartesian_aux_2
      of_hom.{u+1 u+2} (sigma_map.{u u+2 u+1} ι (QprimeFP_int.Tinv.{u} BD.data κ₂ κ M))) ≫
   (cofan_point_iso_colimit.{u} (λ (k : ulift.{u+1 0} ℕ), (QprimeFP.{u} r' BD.data κ M).obj (ι k))).hom =
   (QprimeFP.Tinv _ _ _ _).app _ ≫
-  sigma.ι (λ (k : ulift.{u+1 0} ℕ), (QprimeFP.{u} r' BD.data κ M).obj (ι k)) j :=
+  sigma.ι (λ (k : ulift.{u+1 0} ℕ), (QprimeFP.{u} r' BD.data κ M).obj (ι k)) j.1 :=
 begin
   rw [← iso.eq_comp_inv], simp only [category.assoc, cofan_point_iso_colimit,
     colimit.comp_cocone_point_unique_up_to_iso_inv],
@@ -136,7 +136,7 @@ lemma Tinv2_iso_of_bicartesian_aux_3
   of_hom.{u+1 u+2} (sigma_map.{u u+2 u+1} ι (QprimeFP_int.ι.{u} BD.data κ₂ κ M)) ≫
     (cofan_point_iso_colimit.{u} (λ (k : ulift.{u+1 0} ℕ), (QprimeFP.{u} r' BD.data κ M).obj (ι k))).hom =
   (QprimeFP.ι _ κ₂ κ M).app _ ≫
-  sigma.ι ((λ (k : ulift.{u+1 0} ℕ), (QprimeFP.{u} r' BD.data κ M).obj (ι k))) j :=
+  sigma.ι ((λ (k : ulift.{u+1 0} ℕ), (QprimeFP.{u} r' BD.data κ M).obj (ι k))) j.1 :=
 begin
   simp only [← category.assoc], rw [← iso.eq_comp_inv],
   simp only [category.assoc, cofan_point_iso_colimit, colimit.comp_cocone_point_unique_up_to_iso_inv],
@@ -173,7 +173,7 @@ begin
     h1 h2 h2 h3 H1,
   apply Tinv2_iso_of_bicartesian_aux_1,
   { clear h1, apply commsq.of_eq, rw ← iso.eq_comp_inv,
-    apply limit.hom_ext, intros j, rw lim_map_π,
+    apply limit.hom_ext, rintros ⟨j⟩, rw lim_map_π,
     dsimp [pi_Ext_iso_Ext_sigma],
     simp only [category.assoc],
     have := Ext_coproduct_iso_π _

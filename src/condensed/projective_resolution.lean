@@ -182,15 +182,16 @@ begin
     intros S,
     have := is_colimit_empty_cocone_equiv Ab (as_empty_cocone (A.val.obj (op S.unop.val)))
       (((evaluation ExtrDiscᵒᵖ Ab).obj S).map_cocone (FF.map_cocone (as_empty_cocone A)))
-      (eq_to_iso rfl),
+     (eq_to_iso rfl),
     apply this.to_fun,
     specialize e S.unop,
     let t : as_empty_cocone (A.val.obj (op (unop S).val)) ≅ as_empty_cocone (⊥_ _) :=
-      cocones.ext e (by tidy),
+      cocones.ext e (by rintros ⟨⟨⟩⟩),
     apply is_colimit.of_iso_colimit _ t.symm,
     refine ⟨λ r, _, _, _⟩,
     { dsimp, refine initial.to r.X, },
-    { tidy },
+    { simp only [as_empty_cocone_ι_app, id.def, auto_param_eq],
+      rintros s ⟨⟨⟩⟩ },
     { tidy } }
 end
 

@@ -48,9 +48,9 @@ variables {α : Type u} [fintype α] (X : α → Profinite.{u})
 def sigma_cone : cocone (discrete.functor X ⋙ Profinite_to_Condensed) :=
 { X := (Profinite.sigma X).to_Condensed,
   ι :=
-  { app := λ i, Profinite_to_Condensed.map $ Profinite.sigma.ι X i,
+  { app := λ i, Profinite_to_Condensed.map $ Profinite.sigma.ι X i.1,
     naturality' := begin
-      rintros i j ⟨⟨⟨⟩⟩⟩, dsimp, simp, dsimp, simp, dsimp, simp,
+      rintros ⟨i⟩ ⟨j⟩ ⟨⟨⟨⟩⟩⟩, dsimp, simp, dsimp, simp, dsimp, simp,
     end } } .
 
 noncomputable
@@ -152,16 +152,16 @@ noncomputable
 def is_colimit_sigma_cone : is_colimit (sigma_cone X) :=
 { desc := λ S, (Profinite.to_Condensed_equiv _ _).symm $
     (S.X.val_obj_sigma_equiv X).symm $ λ a,
-    (Profinite.to_Condensed_equiv _ _) $ S.ι.app _,
+    (Profinite.to_Condensed_equiv _ _) $ S.ι.app ⟨_⟩,
   fac' := begin
-    intros Q T,
+    rintros Q ⟨T⟩,
     dsimp,
     rw val_obj_sigma_equiv_symm_apply,
     ext W ⟨(t : _ ⟶ _)⟩,
     dsimp [Profinite.to_Condensed_equiv],
-    change ((Q.ι.app T).val.app (op (X T)) ≫ Q.X.val.map t.op) _ = _,
-    erw ← (Q.ι.app T).val.naturality,
-    change (Q.ι.app T).val.app (op (unop W)) _ = _,
+    change ((Q.ι.app ⟨T⟩).val.app (op (X T)) ≫ Q.X.val.map t.op) _ = _,
+    erw ← (Q.ι.app ⟨T⟩).val.naturality,
+    change (Q.ι.app ⟨T⟩).val.app (op (unop W)) _ = _,
     congr' 1,
     dsimp [Profinite.to_Condensed], ext, refl,
   end,
@@ -171,7 +171,7 @@ def is_colimit_sigma_cone : is_colimit (sigma_cone X) :=
     apply_fun (val_obj_sigma_equiv X S.X),
     simp only [equiv.apply_symm_apply],
     ext a,
-    specialize hm a,
+    specialize hm ⟨a⟩,
     dsimp [val_obj_sigma_equiv],
     change (m.val.app (op (Profinite.sigma X)) ≫
       S.X.val.map _) _ = _,

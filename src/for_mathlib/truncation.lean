@@ -747,96 +747,113 @@ end
   (f : B ⟶ C) : mono (e ≫ f) ↔ mono f :=
 mono_comp_iso_iff_mono (as_iso e) _
 
-lemma ι_succ_to_imker_ex_π {i n : ℤ} : epi (kernel.lift ((to_imker C (i + 1)).f n)
+lemma ι_succ_to_imker_ex_π_aux₁ {i n : ℤ} (h : n = i) :
+  epi (kernel.lift ((to_imker C (i + 1)).f n)
   ((ι_succ C i).f n) (ι_succ.comp_to_imker_zero C)) :=
 begin
   delta to_imker ι_succ map_of_le, dsimp only,
+  have hn : n = n+1-1, by ring,
+  subst h,
+  -- `simp_rw dif_pos (show n = n + 1 - 1, by ring)` fails so we hack our way around it.
+  suffices : epi (kernel.lift ((X_iso_of_lt C _).hom ≫ eq_to_hom _ ≫
+    factor_thru_image (C.d (n + 1 - 1) (n + 1)) ≫
+    eq_to_hom _ ≫
+    image.pre_comp (homological_complex.X_prev_iso C _).inv (homological_complex.d_to C (n + 1)) ≫
+    (imker.X_iso_image_of_eq C (show n = n + 1 - 1, by ring)).inv) _ _),
+  -- 14 goals but bear with me
+  convert this, -- 11 goals
+  rw dif_pos hn, -- 4 goals
+  rw dif_pos hn, -- 3 goals
+  swap, apply_instance, -- 2 goals
+  swap,
+  { convert ι_succ.comp_to_imker_zero C,
+    delta to_imker, dsimp only, rw dif_pos hn, },-- rw finally works!,
+  -- back to 1 goal
+  simp only [zero_lt_one, dif_pos, dif_neg, eq_to_hom_refl, category.id_comp, eq_self_iff_true,
+    not_false_iff, eq_to_iso.hom, eq_to_hom_trans, lt_add_iff_pos_right, lt_self_iff_false,
+    eq_to_iso.inv],
+  -- goal is epi (mess : ker(d)->)
+  rw ← epi_iso_comp_iff_epi _ (kernel_is_iso_comp _ _),
+  -- now knock them off the other end
+  rw ← epi_iso_comp_iff_epi _ (kernel_iso_assoc _ _ _),
+  rw ← epi_iso_comp_iff_epi _ (kernel_comp_is_iso _ _),
+  -- simp now goes down the wrong track
+  /- The goal is now to prove that some monstrous map
+
+  (C.truncation n).X n ⟶ kernel (eq_to_hom _ ≫ factor_thru_image (C.d (n + 1 - 1) (n + 1)))
+
+  is an epimorphism. This map is essentially the identity map
+  from ker C.d n (n+1) to itself, modulo the usual cannonical
+  isomorphisms. My plan is to pre and post compose with some more
+  canonical isomorphisms to actually get a map from an object
+  to itself and then claim that it is epi because it's the identity
+  and then hopefully `ext, simp` will do it.
+  -/
+
+  rw ← epi_comp_iso_iff_epi (X_iso_of_eq C rfl).symm,
+  have foo : eq_to_hom _ ≫ C.d (n + 1 - 1) (n + 1) = C.d n (n + 1) := C.eq_to_hom_comp_d
+    (show n + 1 = n + 1, by refl) (show (n + 1 - 1) + 1 = n + 1, by ring),
+  rw ← epi_iso_comp_iff_epi _ (kernel_iso_of_eq (image.factor_thru_image_pre_comp _ _).symm),
+  swap, apply_instance, swap, apply_instance,
+  rw ← epi_iso_comp_iff_epi _ (kernel_comp_is_iso _ _),
+  rw ← epi_iso_comp_iff_epi _ (kernel_factor_thru_image_iso _),
+  rw ← epi_iso_comp_iff_epi _ (kernel_iso_of_eq foo),
+  let t := _, change epi t,
+  suffices : t = 𝟙 _,
+  { rw this, apply_instance },
+
+  apply equalizer.hom_ext,
+  dsimp only [t, kernel_comp_is_iso, kernel_iso_assoc, kernel_factor_thru_image_iso,
+    iso.trans_hom, iso.symm_hom],
+
+  simp only [category.id_comp, category.assoc, kernel_iso_of_eq_hom_comp_ι,
+    kernel_iso_of_eq_hom_comp_ι_assoc, kernel_comp_mono_inv,
+    kernel.lift_ι, kernel_is_iso_comp_hom, kernel.lift_ι_assoc],
+  simp only [eq_to_iso.inv, eq_to_iso.hom, eq_to_hom_trans, eq_to_hom_refl,
+    category.comp_id, eq_to_hom_trans_assoc, category.id_comp],
+end
+
+lemma ι_succ_to_imker_ex_π {i n : ℤ} : epi (kernel.lift ((to_imker C (i + 1)).f n)
+  ((ι_succ C i).f n) (ι_succ.comp_to_imker_zero C)) :=
+begin
   by_cases h : n = i,
-  { subst h,
-    -- `simp_rw dif_pos (show n = n + 1 - 1, by ring)` fails so we hack our way around it.
-    suffices : epi (kernel.lift ((X_iso_of_lt C _).hom ≫ eq_to_hom _ ≫
-      factor_thru_image (C.d (n + 1 - 1) (n + 1)) ≫
-      eq_to_hom _ ≫
-      image.pre_comp (homological_complex.X_prev_iso C _).inv (homological_complex.d_to C (n + 1)) ≫
-      (imker.X_iso_image_of_eq C (show n = n + 1 - 1, by ring)).inv) _ _),
-    -- 14 goals but bear with me
-    convert this, -- 11 goals
-    rw dif_pos (show n = n + 1 - 1, by ring), -- 4 goals
-    rw dif_pos (show n = n + 1 - 1, by ring), -- 3 goals
-    swap, apply_instance, -- 2 goals
+  { apply ι_succ_to_imker_ex_π_aux₁, exact h },
+  delta to_imker ι_succ map_of_le, dsimp only,
+  by_cases hn : n = i + 1,
+  { apply epi_of_target_iso_zero,
+    apply is_zero.iso_zero,
+    apply @is_zero_kernel_of_mono _ _ _ _ _ _ _,
+    subst hn,
+    rw [dif_neg (show i + 1 ≠ i + 1 - 1, by linarith), dif_pos rfl],
+    apply mono_comp, },
+  { suffices : epi (kernel.lift (0 : (C.truncation (i + 1)).X n ⟶ (C.imker (i + 1)).X n) _ _),
+    { convert this,
+      rw dif_neg (show n ≠ i + 1 - 1, by ring_nf; exact h),
+      rw dif_neg hn,
+      rw dif_neg (show n ≠ i + 1 - 1, by ring_nf; exact h),
+      rw dif_neg hn, },
     swap,
     { convert ι_succ.comp_to_imker_zero C,
-      delta to_imker, dsimp only, rw dif_pos (show n = n + 1 - 1, by ring), },-- rw finally works!,
-    -- back to 1 goal
-    simp only [zero_lt_one, dif_pos, dif_neg, eq_to_hom_refl, category.id_comp, eq_self_iff_true,
-      not_false_iff, eq_to_iso.hom, eq_to_hom_trans, lt_add_iff_pos_right, lt_self_iff_false,
-      eq_to_iso.inv],
-    -- goal is epi (mess : ker(d)->)
-    rw ← epi_iso_comp_iff_epi _ (kernel_is_iso_comp _ _),
-    -- now knock them off the other end
-    rw ← epi_iso_comp_iff_epi _ (kernel_iso_assoc _ _ _),
-    rw ← epi_iso_comp_iff_epi _ (kernel_comp_is_iso _ _),
-    -- simp now goes down the wrong track
-    /- The goal is now to prove that some monstrous map
-
-    (C.truncation n).X n ⟶ kernel (eq_to_hom _ ≫ factor_thru_image (C.d (n + 1 - 1) (n + 1)))
-
-    is an epimorphism. This map is essentially the identity map
-    from ker C.d n (n+1) to itself, modulo the usual cannonical
-    isomorphisms. My plan is to pre and post compose with some more
-    canonical isomorphisms to actually get a map from an object
-    to itself and then claim that it is epi because it's the identity
-    and then hopefully `ext, simp` will do it.
-    -/
-    rw ← epi_comp_iso_iff_epi (X_iso_of_eq C rfl).symm,
-    have foo : eq_to_hom _ ≫ C.d (n + 1 - 1) (n + 1) = C.d n (n + 1) := C.eq_to_hom_comp_d
-      (show n + 1 = n + 1, by refl) (show (n + 1 - 1) + 1 = n + 1, by ring),
-    rw ← epi_iso_comp_iff_epi _ (kernel_iso_of_eq (image.factor_thru_image_pre_comp _ _).symm),
-    swap, apply_instance, swap, apply_instance,
-    rw ← epi_iso_comp_iff_epi _ (kernel_comp_is_iso _ _),
-    rw ← epi_iso_comp_iff_epi _ (kernel_factor_thru_image_iso _),
-    rw ← epi_iso_comp_iff_epi _ (kernel_iso_of_eq foo),
-    -- finally there!
-    convert category_struct.id.epi _,
-    ext,
-    simp [kernel_comp_is_iso, kernel_iso_assoc, kernel_factor_thru_image_iso], },
-  -- this compiles fine
-  { by_cases hn : n = i + 1,
-    { apply epi_of_target_iso_zero,
+      delta to_imker, dsimp only,
+      rw dif_neg (show n ≠ i + 1 - 1, by ring_nf; exact h),
+      rw dif_neg hn, },
+    rw epi_kernel_lift_zero_iff_epi,
+    by_cases hi : n < i,
+    { rw dif_pos hi,
+      apply_instance, },
+    { rw dif_neg hi,
+      rw dif_neg h,
+      apply epi_of_target_iso_zero,
       apply is_zero.iso_zero,
-      apply @is_zero_kernel_of_mono _ _ _ _ _ _ _,
-      subst hn,
-      rw [dif_neg (show i + 1 ≠ i + 1 - 1, by linarith), dif_pos rfl],
-      apply mono_comp, },
-    { suffices : epi (kernel.lift (0 : (C.truncation (i + 1)).X n ⟶ (C.imker (i + 1)).X n) _ _),
-      { convert this,
-        rw dif_neg (show n ≠ i + 1 - 1, by ring_nf; exact h),
-        rw dif_neg hn,
-        rw dif_neg (show n ≠ i + 1 - 1, by ring_nf; exact h),
-        rw dif_neg hn,
-      },
-      swap,
-      { convert ι_succ.comp_to_imker_zero C,
-        delta to_imker, dsimp only,
-        rw dif_neg (show n ≠ i + 1 - 1, by ring_nf; exact h),
-        rw dif_neg hn, },
-      rw epi_kernel_lift_zero_iff_epi,
-      by_cases hi : n < i,
-      { rw dif_pos hi,
-        apply_instance, },
-      { rw dif_neg hi,
-        rw dif_neg h,
-        apply epi_of_target_iso_zero,
-        apply is_zero.iso_zero,
-        apply is_zero_X_of_lt,
-        -- we've been here before
-        rw not_lt at hi,
-        obtain (hlt | rfl) := lt_or_eq_of_le hi,
-        { rw int.lt_iff_add_one_le at hlt,
-          obtain (hlt' | rfl) := lt_or_eq_of_le hlt,
-          { exact hlt' },
-          { exact hn.elim rfl, }, },
-        { exact h.elim rfl, }, } }, }
+      apply is_zero_X_of_lt,
+      -- we've been here before
+      rw not_lt at hi,
+      obtain (hlt | rfl) := lt_or_eq_of_le hi,
+      { rw int.lt_iff_add_one_le at hlt,
+        obtain (hlt' | rfl) := lt_or_eq_of_le hlt,
+        { exact hlt' },
+        { exact hn.elim rfl, }, },
+      { exact h.elim rfl, }, } },
 end
 .
 

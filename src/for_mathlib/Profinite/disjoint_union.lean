@@ -107,12 +107,17 @@ def sigma_cofan : limits.cofan X :=
 limits.cofan.mk (sigma X) (sigma.ι X)
 
 def sigma_cofan_is_colimit : limits.is_colimit (sigma_cofan X) :=
-{ desc := λ S, sigma.desc _ $ λ a, S.ι.app a,
+{ desc := λ S, sigma.desc _ $ λ a, S.ι.app ⟨a⟩,
+  fac' := begin
+    rintros S ⟨j⟩,
+    ext t,
+    refl,
+  end,
   uniq' := begin
     intros S m h,
     apply sigma.hom_ext,
     intros a,
-    convert h a,
+    convert h ⟨a⟩,
     simp,
   end }
 

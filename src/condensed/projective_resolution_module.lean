@@ -190,13 +190,17 @@ begin
   { intro h,
     let FF := ((Sheaf_to_presheaf _ _ : CondensedMod R ⥤ _) ⋙
       (whiskering_left _ _ _).obj (ExtrDisc_to_Profinite.op)),
-    haveI : creates_colimits FF :=
-      by apply Condensed_to_ExtrDisc_presheaf_creates_colimits,
     suffices : A ≅ ⊥_ _, by { apply is_zero_of_iso_of_zero _ this.symm, exact is_zero_initial },
     let e : Π S : ExtrDisc, (A.val.obj (op S.val)) ≅ ⊥_ _ :=
       λ S, is_zero.iso (h S) is_zero_initial,
     symmetry,
     apply (colimit.is_colimit _).cocone_point_unique_up_to_iso (_ : is_colimit (as_empty_cocone _)),
+    haveI : creates_colimits FF :=
+      @Condensed_to_ExtrDisc_presheaf_creates_colimits.{u u+2} (@Module.{u+1 u+1} R _)
+        (@Module.Module_category.{u+1 u+1} R _) _ _
+        (@preadditive.preadditive_has_zero_morphisms.{u+1 u+2} (@Module.{u+1 u+1} R _)
+          (@Module.Module_category.{u+1 u+1} R _)
+          (@Module.category_theory.preadditive.{u+1 u+1} R _)) _ _,
     apply is_colimit_of_reflects FF,
     apply evaluation_jointly_reflects_colimits,
     intros S,
@@ -207,12 +211,12 @@ begin
     apply this.to_fun,
     specialize e S.unop,
     let t : as_empty_cocone (A.val.obj (op (unop S).val)) ≅ as_empty_cocone (⊥_ _) :=
-      cocones.ext e (by tidy),
+      cocones.ext e (by rintro ⟨⟨⟩⟩),
     apply is_colimit.of_iso_colimit _ t.symm,
     refine ⟨λ r, _, _, _⟩,
     { dsimp, refine initial.to r.X, },
-    { tidy },
-    { tidy } }
+    { rintro s ⟨⟨⟩⟩ },
+    { intros s m h, apply is_zero.eq_of_src, apply is_zero_initial } }
 end
 
 lemma is_epi_iff_forall_surjective_Mod {A B : CondensedMod R} (f : A ⟶ B) :

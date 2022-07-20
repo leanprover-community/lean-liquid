@@ -92,7 +92,8 @@ local attribute[instance] endofunctor_monoidal_category
 @[simp] lemma shift_f {X Y : cochain_complex V ℤ} (f : X ⟶ Y) (n i : ℤ) :
   (f⟦n⟧').f i = f.f (i + n) := rfl
 
-instance (n : ℤ) : functor.additive ((shift_monoidal_functor (cochain_complex V ℤ) ℤ).obj n) := {}
+instance (n : ℤ) : functor.additive ((shift_monoidal_functor (cochain_complex V ℤ) ℤ).obj ⟨n⟩) :=
+  {}
 instance shift_functor_additive (n : ℤ) : functor.additive (shift_functor V n) := {}
 
 variable {V}
@@ -232,15 +233,15 @@ begin
 end
 
 @[simp] lemma shift_μ_app (i j : ℤ) (X : cochain_complex V ℤ) :
-  ((shift_monoidal_functor _ ℤ).μ i j).app ((homotopy_category.quotient _ _).obj X) =
-    (homotopy_category.quotient _ _).map (((shift_monoidal_functor _ ℤ).μ i j).app X) := rfl
+  ((shift_monoidal_functor _ ℤ).μ ⟨i⟩ ⟨j⟩).app ((homotopy_category.quotient _ _).obj X) =
+    (homotopy_category.quotient _ _).map (((shift_monoidal_functor _ ℤ).μ ⟨i⟩ ⟨j⟩).app X) := rfl
 
 @[simp]
 lemma shift_μ_inv_app (i j : ℤ) (X : cochain_complex V ℤ) :
-  ((shift_monoidal_functor _ ℤ).μ_iso i j).inv.app ((homotopy_category.quotient _ _).obj X) =
-    (homotopy_category.quotient _ _).map (((shift_monoidal_functor _ ℤ).μ_iso i j).inv.app X) :=
+  ((shift_monoidal_functor _ ℤ).μ_iso ⟨i⟩ ⟨j⟩).inv.app ((homotopy_category.quotient _ _).obj X) =
+    (homotopy_category.quotient _ _).map (((shift_monoidal_functor _ ℤ).μ_iso ⟨i⟩ ⟨j⟩).inv.app X) :=
 begin
-  rw [← cancel_mono (((shift_monoidal_functor _ ℤ).μ i j).app
+  rw [← cancel_mono (((shift_monoidal_functor _ ℤ).μ ⟨i⟩ ⟨j⟩).app
       ((homotopy_category.quotient _ _).obj X)),
     μ_inv_hom_app, shift_μ_app, ← functor.map_comp, μ_inv_hom_app],
   refl
@@ -248,11 +249,11 @@ end
 local attribute [reducible] discrete.add_monoidal
 
 @[simp] lemma shift_μ_hom_app_f (A : cochain_complex V ℤ) (i j k : ℤ) :
-  hom.f (((shift_monoidal_functor _ ℤ).μ i j).app A) k =
+  hom.f (((shift_monoidal_functor _ ℤ).μ ⟨i⟩ ⟨j⟩).app A) k =
     (A.X_eq_to_iso $ by { dsimp, ring }).hom := rfl
 
 @[simp] lemma shift_μ_inv_app_f (A : cochain_complex V ℤ) (i j k : ℤ) :
-  hom.f (((shift_monoidal_functor _ ℤ).μ_iso i j).inv.app A) k =
+  hom.f (((shift_monoidal_functor _ ℤ).μ_iso ⟨i⟩ ⟨j⟩).inv.app A) k =
     (A.X_eq_to_iso $ by { dsimp, ring }).hom :=
 begin
   generalize_proofs h,

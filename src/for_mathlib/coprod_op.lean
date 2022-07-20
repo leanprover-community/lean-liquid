@@ -16,12 +16,13 @@ fan.mk (op $ ∐ X) (λ b, (sigma.ι _ _).op)
 noncomputable
 def is_limit_op_fan {α : Type v} (X : α → A) :
   is_limit (op_fan X) :=
-{ lift := λ S, let e : ∐ X ⟶ S.X.unop := sigma.desc $ λ b, (S.π.app b).unop in
+{ lift := λ S, let e : ∐ X ⟶ S.X.unop := sigma.desc $ λ b, (S.π.app (discrete.mk b)).unop in
     e.op,
   fac' := begin
     intros S j,
     dsimp [op_fan],
     rw [← op_comp, colimit.ι_desc],
+    cases j,
     refl,
   end,
   uniq' := begin
@@ -31,6 +32,7 @@ def is_limit_op_fan {α : Type v} (X : α → A) :
     apply colimit.hom_ext,
     intros j,
     simp only [colimit.ι_desc, cofan.mk_ι_app, ← hm],
+    cases j,
     refl,
   end }
 

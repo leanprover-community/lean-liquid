@@ -249,7 +249,7 @@ begin
         { push_neg,
           change d ≤ n + d,
           linarith, } },
-      { rw [inv_zpow₀, nnreal.div_inv], }
+      { rw [inv_zpow, nnreal.div_inv], }
     },
   }
 end

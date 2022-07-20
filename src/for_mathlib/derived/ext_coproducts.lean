@@ -26,9 +26,9 @@ def cofan {α : Type v} (X : α → bounded_homotopy_category A)
     refine is_zero_of_iso_of_zero _ e.symm,
     apply category_theory.is_zero_colimit,
     intros j,
-    apply hn j _ hi,
+    refine hn j.as _ hi,
   end }
-(λ a, (homotopy_category.colimit_cofan _).ι.app a)
+(λ a, (homotopy_category.colimit_cofan (λ a : α, (X a).val)).ι.app ⟨a⟩)
 
 noncomputable
 def is_colimit_cofan {α : Type v} (X : α → bounded_homotopy_category A)
@@ -287,22 +287,22 @@ lemma preserves_coproducts_aux
   preserves_colimits_of_shape (discrete α) F :=
 begin
   constructor, intros K,
-  let E : K ≅ discrete.functor K.obj := discrete.nat_iso (λ _, iso.refl _),
+  let E : K ≅ discrete.functor (K.obj ∘ discrete.mk) := discrete.nat_iso (λ ⟨a⟩, iso.refl _),
   apply preserves_colimit_of_iso_diagram _ E.symm,
   apply preserves_colimit_of_preserves_colimit_cocone (colimit.is_colimit _),
   swap, apply_instance,
   let P := _, change is_colimit P,
-  let P' := (cocones.precompose (whisker_discrete_functor F K.obj).inv).obj P,
+  let P' := (cocones.precompose (whisker_discrete_functor F _).inv).obj P,
   suffices : is_colimit P',
   { exact is_colimit.precompose_inv_equiv _ _ this },
   apply is_colimit.of_iso_colimit (colimit.is_colimit _), swap,
-  change has_colimit (discrete.functor (λ a : α, F.obj (K.obj a))),
+  change has_colimit (discrete.functor (λ a : α, F.obj (K.obj ⟨a⟩))),
   apply_instance,
   symmetry,
   fapply cocones.ext,
   apply e,
-  intros a,
-  convert (he (λ b, (K.obj b))) a,
+  rintro ⟨a⟩,
+  convert (he (λ b, (K.obj ⟨b⟩))) a,
   dsimp [P', whisker_discrete_functor],
   rw category.id_comp,
 end
@@ -356,7 +356,7 @@ end) begin
     rw homological_complex.embed.d_of_some_of_some (∐ X) h₁ h₂,
     simp only [category.assoc, iso.inv_hom_id_assoc],
     apply (is_colimit_of_preserves (homological_complex.eval A c₁ i') _).hom_ext,
-    intros a,
+    rintro ⟨a⟩,
     simp only [functor.map_cocone_ι_app, colimit.cocone_ι, homological_complex.eval_map],
     slice_lhs 1 2 {
       erw (is_colimit_of_preserves (homological_complex.eval A c₁ i') _).fac },
@@ -372,7 +372,7 @@ end) begin
     simp only [has_colimit.iso_of_nat_iso_ι_hom, discrete.nat_iso_hom_app, iso.symm_hom,
       category.assoc, ι_preserves_colimits_iso_inv, homological_complex.eval_map],
     slice_rhs 1 3
-    { rw ← homological_complex.embed.d_of_some_of_some (X a) h₁ h₂ },
+    { erw ← homological_complex.embed.d_of_some_of_some (X a) h₁ h₂ },
     apply colimit.is_colimit,
     apply_instance, }
     -- still annoying
@@ -420,7 +420,7 @@ cocones.ext
 (bounded_homotopy_category.mk_iso $
   (homotopy_category.quotient _ _).map_iso $ (embed_coproduct_iso X).symm)
 begin
-  intros a,
+  rintro ⟨a⟩,
   dsimp [bounded_homotopy_category.cofan,
     homotopy_category.colimit_cofan, whisker_discrete_functor],
   erw [category.id_comp, ← functor.map_comp],
@@ -442,13 +442,13 @@ instance chain_complex_to_bounded_homotopy_category_preserves_coproducts
   (chain_complex.to_bounded_homotopy_category : chain_complex A _ ⥤ _) :=
 begin
   constructor, intros K,
-  let E : K ≅ discrete.functor K.obj := discrete.nat_iso (λ _, iso.refl _),
+  let E : K ≅ discrete.functor (K.obj ∘ discrete.mk) := discrete.nat_iso (λ ⟨a⟩, iso.refl _),
   apply preserves_colimit_of_iso_diagram _ E.symm,
   apply preserves_colimit_of_preserves_colimit_cocone (colimit.is_colimit _),
   let Q : α → bounded_homotopy_category A := λ a,
-    chain_complex.to_bounded_homotopy_category.obj (K.obj a),
+    chain_complex.to_bounded_homotopy_category.obj (K.obj ⟨a⟩),
   let P := _, change is_colimit P,
-  let T : discrete.functor K.obj ⋙ chain_complex.to_bounded_homotopy_category ≅
+  let T : discrete.functor (K.obj ∘ discrete.mk) ⋙ chain_complex.to_bounded_homotopy_category ≅
     discrete.functor Q := discrete.nat_iso (λ _, iso.refl _),
   let P' := (cocones.precompose T.inv).obj P,
   suffices : is_colimit P',

@@ -329,7 +329,7 @@ begin
   { refine sigma.desc _, rintro ⟨i⟩, refine nat.rec_on i 0 (λ j ψ, _),
     refine ((sigma.ι (λ (i : ulift ℕ), A) (ulift.up j)) ≫ φ) + (ψ ≫ g) },
   refine ⟨ψ, _⟩,
-  ext ⟨i⟩,
+  ext ⟨⟨i⟩⟩,
   dsimp only [τ, add_monoid_hom.mk'_apply, free, unop_op, op_unop, ψ],
   rw [comp_sub, sub_eq_iff_eq_add],
   simp only [colimit.ι_desc_assoc, colimit.ι_desc, limits.cofan.mk_ι_app],

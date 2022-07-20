@@ -364,7 +364,7 @@ end
   (w : sigma.ι (λ i : ulift.{v} ℕ, X) ⟨0⟩ ≫ f.f = sigma.ι (λ i : ulift.{v} ℕ, X) ⟨0⟩ ≫ g.f) :
   f = g :=
 begin
-  ext ⟨i⟩, dsimp,
+  ext ⟨⟨i⟩⟩, dsimp,
   induction i with i ih, { exact w },
   apply_fun (λ α, α ≫ A.e) at ih,
   simp only [category.assoc, ← hom.comm, free.ι_comp_e_assoc] at ih,
@@ -425,7 +425,7 @@ def cofree.lift {X : C} {A : endomorphisms C} (f : A.X ⟶ X) :
 { f := pi.lift $ λ i, (A.e ^ i.down : End A.X) ≫ f,
   comm := begin
     dsimp [cofree],
-    ext ⟨j⟩, dsimp,
+    ext ⟨⟨j⟩⟩, dsimp,
     simp only [category.assoc, limit.lift_π, fan.mk_π_app],
     rw [← category.assoc, pow_succ, ← End.mul_def], congr' 1,
     induction j with j hj,
@@ -496,7 +496,7 @@ instance projective_sigma {C ι : Type*} [category C] (P : ι → C) [has_coprod
   introsI E X f e he,
   let φ : ∐ P ⟶ E := sigma.desc (λ i, projective.factor_thru (sigma.ι _ _ ≫ f) e),
   refine ⟨φ, _⟩,
-  ext i,
+  ext ⟨i⟩,
   rw [limits.colimit.ι_desc_assoc, limits.cofan.mk_ι_app, projective.factor_thru_comp],
 end }
 

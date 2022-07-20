@@ -74,8 +74,6 @@ lemma quotient_add_group.lift_mk''
   (quotient_add_group.lift N φ HN) (quotient_add_group.mk' N g) = φ g :=
 quotient_add_group.lift_mk' _ _ _
 
-attribute [elementwise] iso.inv_hom_id
-
 lemma _root_.AddCommGroup.has_homology_ι_eq {A B C : AddCommGroup} (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0) :
   (AddCommGroup.has_homology f g w).ι =
   (AddCommGroup.of_hom $ quotient_add_group.lift _ ((quotient_add_group.mk' f.range).comp g.ker.subtype)

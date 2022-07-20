@@ -384,7 +384,7 @@ begin
   intro a,
   change ⟦over.mk _⟧ = ⟦a⟧,
   erw category.comp_id,
-  rcases a with ⟨_, ⟨⟩, _⟩,
+  rcases a with ⟨_, ⟨⟨⟩⟩, _⟩,
   congr,
 end
 

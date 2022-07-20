@@ -9,5 +9,9 @@
   "files.trimTrailingWhitespace": true,
   "search.usePCRE2": true,
   "workbench.startupEditor": "none",
-  "editor.hover.delay": 2000
+  "editor.hover.delay": 2000,
+  "lean.memoryLimit": 30096,
+  "lean.timeLimit": 500000,
+  "files.maxMemoryForLargeFilesMB": 30096,
+  "typescript.tsserver.maxTsServerMemory": 30072
 }
