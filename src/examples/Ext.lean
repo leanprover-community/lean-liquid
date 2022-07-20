@@ -1,9 +1,10 @@
 import challenge_notations
 import challenge_prerequisites
+import for_mathlib.universal_delta_functor.Ext
 
 /-!
 
-This file shows that `Ext` is a universal δ-functor (TODO)
+This file shows that `Ext` is a universal δ-functor
 and performs the computation `Ext^1(ℤ/nℤ, ℤ/nℤ) = ℤ/nℤ`.
 
 -/
@@ -11,9 +12,55 @@ and performs the computation `Ext^1(ℤ/nℤ, ℤ/nℤ) = ℤ/nℤ`.
 noncomputable theory
 
 open category_theory category_theory.limits opposite
+open bounded_homotopy_category bounded_derived_category
+
+section Ext
+
+universes v u
+-- Let's work with an abelian category which has enough projectives.
+variables {A : Type u} [category.{v} A] [abelian A] [enough_projectives A]
+
+/-- This is the (contravariant) delta functor `X ↦ Ext^*(X,B)`. -/
+example (B : A) : Aᵒᵖ ⥤δ Ab.{v} := Ext_δ_functor A B
+
+/-- The `n-th` component of this delta functor. -/
+example (n : ℕ) (X B : A) : Aᵒᵖ ⥤ Ab.{v} := Ext_δ_functor A B n
+example (n : ℕ) (X B : A) : Ext_δ_functor A B n = (Ext' n).flip.obj B := rfl
+
+/-- `Ext' n (X,B) = Ext' n (X[0], B[0])`, functorially in `X`. -/
+example (n : ℕ) (X B : A) : (Ext' n).flip.obj B =
+  (single _ 0).op ⋙ (Ext n).flip.obj ((single _ 0).obj B) := rfl
+
+/-- `Ext' 0 (-, B) ≅ Hom(-,B)` -/
+example (B : A) : (Ext' 0).flip.obj B ≅ preadditive_yoneda.obj B :=
+Ext'_zero_flip_iso _ _
+
+/-- Any natural transformation `Hom(-,B) ⟶ F 0` to the zeroth-component of some
+delta functor `F` extends in a unique way to a morphism of delta functors
+`Ext_δ_functor A B ⟶ F`.
+
+Note that `Ext' 0 (X,B)` is not defeq to `Hom(X,B)`, so we must compose with the isomorphism
+`Ext'_zero_flip_iso` that was mentioned in the previous example.
+-/
+theorem Ext_δ_functor_is_universal_for_Hom (B : A) (F : Aᵒᵖ ⥤δ Ab.{v})
+  (e0 : preadditive_yoneda.obj B ⟶ F 0) :
+  ∃! (e : Ext_δ_functor A B ⟶ F),
+  e0 = (Ext'_zero_flip_iso _ _).inv ≫ (e : Ext_δ_functor A B ⟶ F) 0 :=
+begin
+  let e0' : Ext_δ_functor A B 0 ⟶ F 0 := (Ext'_zero_flip_iso _ _).hom ≫ e0,
+  obtain ⟨e,he1,he2⟩ := delta_functor.universal.cond F e0',
+  refine ⟨e,_,_⟩,
+  { dsimp, simp only [e0', he1, iso.inv_hom_id_assoc], },
+  { intros η hη, specialize he2 η,
+    apply he2, rw iso.eq_inv_comp at hη,
+    exact hη.symm },
+end
+
+end Ext
 
 namespace AddCommGroup
 
+/-- An explicit computation: `Ext^1(ℤ/n,ℤ/n) = ℤ/n`. -/
 example (n : ℕ) (hn : n ≠ 0) :
   ((Ext' 1).obj (op $ of $ zmod n)).obj (of $ zmod n) ≅ of (zmod n) :=
 begin
