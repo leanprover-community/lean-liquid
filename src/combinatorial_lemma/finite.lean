@@ -178,8 +178,8 @@ begin
   calc S × ℕ ≃ fin (fintype.card S) × ℕ : equiv.prod_congr_left (λ _, e')
          ... ≃ ℕ : classical.choice $ cardinal.eq.1 _,
   rw [← cardinal.lift_id (cardinal.mk ℕ),
-    cardinal.mk_prod, ← cardinal.omega, cardinal.mul_eq_right];
-  simp [le_of_lt (cardinal.nat_lt_omega _), le_refl],
+    cardinal.mk_prod, ← cardinal.aleph_0, cardinal.mul_eq_right];
+  simp [le_of_lt (cardinal.nat_lt_aleph_0 _), le_refl],
   rw ← fintype.card_pos_iff at hS,
   exact_mod_cast hS.ne'
 end

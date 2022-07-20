@@ -369,7 +369,7 @@ variable [additive_category A]
 
 instance : additive_category (Sheaf J A) :=
 { has_biproducts_of_shape := begin
-    introsI J _ _,
+    introsI J _,
     constructor,
     intros F,
     apply limits.has_biproduct.of_has_product

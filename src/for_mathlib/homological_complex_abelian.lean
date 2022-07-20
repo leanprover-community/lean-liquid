@@ -241,7 +241,7 @@ instance : has_binary_biproducts (homological_complex V c) :=
 end biproduct
 
 instance [has_zero_morphisms V] [has_finite_products V] :
-  has_finite_products (homological_complex V c) := ⟨λ J _ _, by exactI infer_instance⟩
+  has_finite_products (homological_complex V c) := ⟨λ J _, by exactI infer_instance⟩
 
 -- instance [has_zero_morphisms V] [has_kernels V] : has_kernels (homological_complex V c) :=
 -- begin
