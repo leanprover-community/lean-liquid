@@ -48,14 +48,14 @@ let e₁ := is_colimit_of_preserves ((evaluation _ _).obj (op Profinite.empty))
             e₅ := (limit.is_limit _).cone_point_unique_up_to_iso e₄,
             e₆ : functor.empty C ≅
               (functor.empty Profiniteᵒᵖ ⋙ G.flip) ⋙ (evaluation J C).obj j :=
-              nat_iso.of_components (λ i, i.elim) (λ i, i.elim) in
+              nat_iso.of_components (λ i, i.as.elim) (λ i, i.as.elim) in
         as_iso (comparison_component G j) ≪≫
           has_limit.iso_of_nat_iso e₆ ≪≫ e₅)
       begin
         intros X Y f, dsimp [comparison_component],
         apply (is_limit_of_preserves ((evaluation J C).obj Y)
           (limit.is_limit (functor.empty Profiniteᵒᵖ ⋙ G.flip))).hom_ext,
-        intros j, cases j,
+        intros j, rcases j with ⟨⟨⟩⟩
       end in
 e₂ ≪≫ has_colimit.iso_of_nat_iso e₃
 
@@ -66,7 +66,7 @@ def second_iso : colimit (limit (functor.empty _ ⋙ G.flip)) ≅
 
 noncomputable
 def third_iso : limit (colimit (functor.empty _ ⋙ G.flip).flip) ≅ ⊤_ _ :=
-has_limit.iso_of_nat_iso $ nat_iso.of_components (λ i, i.elim) (λ i, i.elim)
+has_limit.iso_of_nat_iso $ nat_iso.of_components (λ i, i.as.elim) (λ i, i.as.elim)
 
 noncomputable
 def comparison : (colimit G).obj (op Profinite.empty) ⟶ ⊤_ _ := terminal.from _
@@ -99,8 +99,8 @@ let e₄ : pair ((G.obj j).obj (op X)) ((G.obj j).obj (op Y)) ≅
   pair (G.flip.obj (op X)) (G.flip.obj (op Y)) ⋙ (evaluation J C).obj j :=
   nat_iso.of_components
   (λ p, match p with
-    | walking_pair.left := iso.refl _
-    | walking_pair.right := iso.refl _
+    | discrete.mk walking_pair.left := iso.refl _
+    | discrete.mk walking_pair.right := iso.refl _
     end) begin
       rintros (_|_) (_|_) (_|_), refl, refl,
     end in
@@ -123,22 +123,22 @@ begin
     have h1 :=
       (is_limit_of_preserves ((evaluation J C).obj j)
         (limit.is_limit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))))).fac
-          (limit.cone _) walking_pair.left,
+          (limit.cone _) (discrete.mk walking_pair.left),
     have h2 :=
       (is_limit_of_preserves ((evaluation J C).obj i)
         (limit.is_limit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))))).fac
-          (limit.cone _) walking_pair.left,
+          (limit.cone _) (discrete.mk walking_pair.left),
     dsimp at h1 h2, simp [h1, reassoc_of h2],
     dsimp [first_iso_aux_aux._match_1], simp },
   { dsimp [is_limit.cone_point_unique_up_to_iso],
     have h1 :=
       (is_limit_of_preserves ((evaluation J C).obj j)
         (limit.is_limit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))))).fac
-          (limit.cone _) walking_pair.right,
+          (limit.cone _) (discrete.mk walking_pair.right),
     have h2 :=
       (is_limit_of_preserves ((evaluation J C).obj i)
         (limit.is_limit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))))).fac
-          (limit.cone _) walking_pair.right,
+          (limit.cone _) (discrete.mk walking_pair.right),
     dsimp at h1 h2, simp [h1, reassoc_of h2],
     dsimp [first_iso_aux_aux._match_1], simp },
 end
@@ -158,10 +158,10 @@ colimit_limit_iso _
 
 noncomputable
 def third_iso_aux_left :
-  (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip).obj walking_pair.left ≅
+  (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip).obj (discrete.mk walking_pair.left) ≅
   (colimit G).obj (op X) :=
 let e₁ :=
-  is_colimit_of_preserves ((evaluation _ _).obj walking_pair.left)
+  is_colimit_of_preserves ((evaluation _ _).obj (discrete.mk walking_pair.left))
     (colimit.is_colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip),
     e₂ :=
   is_colimit_of_preserves ((evaluation _ _).obj (op X))
@@ -170,10 +170,10 @@ e₁.cocone_point_unique_up_to_iso e₂
 
 noncomputable
 def third_iso_aux_right :
-  (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip).obj walking_pair.right ≅
+  (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip).obj (discrete.mk walking_pair.right) ≅
   (colimit G).obj (op Y) :=
 let e₁ :=
-  is_colimit_of_preserves ((evaluation _ _).obj walking_pair.right)
+  is_colimit_of_preserves ((evaluation _ _).obj (discrete.mk walking_pair.right))
     (colimit.is_colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip),
     e₂ :=
   is_colimit_of_preserves ((evaluation _ _).obj (op Y))
@@ -210,8 +210,8 @@ def third_iso_aux : cone (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y)))
   π :=
   { app := λ p,
     match p with
-    | walking_pair.left := limits.prod.fst ≫ (third_iso_aux_left _ _ _).inv
-    | walking_pair.right := limits.prod.snd ≫ (third_iso_aux_right _ _ _).inv
+    | discrete.mk walking_pair.left := limits.prod.fst ≫ (third_iso_aux_left _ _ _).inv
+    | discrete.mk walking_pair.right := limits.prod.snd ≫ (third_iso_aux_right _ _ _).inv
     end,
     naturality' := begin
       rintros (_|_) (_|_) (_|_),
@@ -224,8 +224,8 @@ def third_iso :
   limit (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip)
     ≅ prod ((colimit G).obj (op X)) ((colimit G).obj (op Y)) :=
 { hom := prod.lift
-    (limit.π _ walking_pair.left ≫ (third_iso_aux_left _ _ _).hom)
-    (limit.π _ walking_pair.right ≫ (third_iso_aux_right _ _ _).hom),
+    (limit.π _ (discrete.mk walking_pair.left) ≫ (third_iso_aux_left _ _ _).hom)
+    (limit.π _ (discrete.mk walking_pair.right) ≫ (third_iso_aux_right _ _ _).hom),
   inv := limit.lift _ (third_iso_aux _ _ _),
   hom_inv_id' := begin
     ext (_|_),
@@ -299,12 +299,12 @@ begin
     category.id_comp, category.assoc],
   have := (is_limit_of_preserves ((evaluation J C).obj j)
     (limit.is_limit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))))).fac _
-      walking_pair.left, dsimp at this,
+      (discrete.mk walking_pair.left), dsimp at this,
   slice_rhs 2 3 { rw this }, clear this,
   simp only [limit.cone_π, category.assoc, limit.lift_π_assoc,
     cones.postcompose_obj_π, nat_trans.comp_app,
     binary_fan.mk_π_app_left, nat_iso.of_components.hom_app],
-  have := (is_colimit_of_preserves ((evaluation _ C).obj walking_pair.left)
+  have := (is_colimit_of_preserves ((evaluation _ C).obj (discrete.mk walking_pair.left))
     (colimit.is_colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip)).fac _ j,
   dsimp at this, slice_rhs 3 4 { rw this }, clear this,
   dsimp [first_iso_aux_aux._match_1], simp only [category.id_comp, nat_trans.naturality],
@@ -338,12 +338,12 @@ begin
     category.id_comp, category.assoc],
   have := (is_limit_of_preserves ((evaluation J C).obj j)
     (limit.is_limit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))))).fac _
-      walking_pair.right, dsimp at this,
+      (discrete.mk walking_pair.right), dsimp at this,
   slice_rhs 2 3 { rw this }, clear this,
   simp only [limit.cone_π, category.assoc, limit.lift_π_assoc,
     cones.postcompose_obj_π, nat_trans.comp_app,
     binary_fan.mk_π_app_left, nat_iso.of_components.hom_app],
-  have := (is_colimit_of_preserves ((evaluation _ C).obj walking_pair.right)
+  have := (is_colimit_of_preserves ((evaluation _ C).obj (discrete.mk walking_pair.right))
     (colimit.is_colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip)).fac _ j,
   dsimp at this, slice_rhs 3 4 { rw this }, clear this,
   dsimp [first_iso_aux_aux._match_1], simp only [category.id_comp, nat_trans.naturality],

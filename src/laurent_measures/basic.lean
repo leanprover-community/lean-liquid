@@ -327,7 +327,7 @@ lemma zpow_strict_anti {K : Type} [linear_ordered_field K] {x : K} (hx₀ : 0 < 
 begin
   intros n m H,
   rw [← inv_inv x],
-  simp only [inv_zpow₀ x⁻¹, inv_lt_inv (zpow_pos_of_pos (inv_pos.mpr hx₀) _)
+  simp only [inv_zpow x⁻¹, inv_lt_inv (zpow_pos_of_pos (inv_pos.mpr hx₀) _)
     (zpow_pos_of_pos (inv_pos.mpr hx₀) _)],
   exact zpow_strict_mono (one_lt_inv hx₀ hx₁) H,
 end
@@ -767,7 +767,7 @@ instance [fact (0 < r)] :
     refine comphaus_filtered_pseudo_normed_group_hom.mk_of_bound_bound_by _ _ _ hF,
     intro c',
     have := @shift.shift_spec r S _ 1 c',
-    rwa [zpow_neg_one₀] at this,
+    rwa [zpow_neg_one] at this,
   end,
   .. (_: profinitely_filtered_pseudo_normed_group (ℒ S))}
 

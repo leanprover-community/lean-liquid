@@ -214,7 +214,7 @@ begin
     suffices : ∥f b∥₊ * (2 ^ b)⁻¹ ≤ ∥f b∥₊ * r ^ b,
     { simpa },
     apply nnreal.mul_le_mul_left,
-    rw ← inv_zpow₀,
+    rw ← inv_zpow,
     apply nnreal.zpow_le_zpow' hb hr2.le, },
 end
 example (r : ℝ≥0) (n : ℕ) : r ^ (n : ℤ) = r ^ n := zpow_coe_nat r n
@@ -228,7 +228,7 @@ lemma step4 {f : ℤ → ℝ} {n d : ℤ} {r : ℝ≥0} (hr1 : r < 1) (hr2 : 2�
 begin
   have : ∀ l : ℕ, (2 : ℝ) ^ l = 2⁻¹ ^ (n - 1 - l) * (2⁻¹ * 2 ^ n),
   { intro l,
-    rw [inv_zpow₀, ← zpow_neg₀, ← zpow_neg_one, ← zpow_coe_nat],
+    rw [inv_zpow, ← zpow_neg, ← zpow_neg_one, ← zpow_coe_nat],
     push_cast,
     rw ← zpow_add₀ (two_ne_zero : (2 : ℝ) ≠ 0),
     rw ← zpow_add₀ (two_ne_zero : (2 : ℝ) ≠ 0),
@@ -241,8 +241,8 @@ begin
   rw tsum_mul_right,
   have : ∀ m : ℕ, (2⁻¹ : ℝ) ^ m = 2⁻¹ ^ (n + m) * 2 ^ n,
   { intro m,
-    rw [inv_zpow₀, ← zpow_neg₀, ← zpow_coe_nat, ← zpow_add₀ (two_ne_zero : (2 : ℝ) ≠ 0),
-      inv_zpow₀, ← zpow_neg₀],
+    rw [inv_zpow, ← zpow_neg, ← zpow_coe_nat, ← zpow_add₀ (two_ne_zero : (2 : ℝ) ≠ 0),
+      inv_zpow, ← zpow_neg],
     ring_nf, },
   conv_rhs begin
     congr, skip,

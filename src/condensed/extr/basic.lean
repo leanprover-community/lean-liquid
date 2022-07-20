@@ -715,6 +715,7 @@ begin
       dsimp,
       simp [hs i] },
     { ext1 i,
+      cases i,
       simp [hs i] } }
 end
 

@@ -17,20 +17,21 @@ instance : add_comm_group (K ⋙ category_theory.forget _).sections :=
 { add := λ u v, ⟨ u + v, λ i j f, begin
     have u2 := u.2 f,
     have v2 := v.2 f,
-    dsimp at *,
-    simp [u2,v2],
+    dsimp only [functor.comp_map, pi.add_apply, forget_map_eq_coe, subtype.val_eq_coe] at ⊢ u2 v2,
+    simp only [u2, v2, map_add],
   end⟩,
-  add_assoc := λ a b c, by { ext, simp [add_assoc] },
-  zero := ⟨0, λ i j f, by { dsimp, simp }⟩,
-  zero_add := λ a, by { ext, dsimp, simp },
-  add_zero := λ a, by { ext, dsimp, simp },
+  add_assoc := λ a b c, by { ext, simp only [add_assoc, subtype.coe_mk] },
+  zero := ⟨0, λ i j f, by { dsimp only [functor.comp_map, pi.zero_apply,
+    forget_map_eq_coe], rw [map_zero] }⟩,
+  zero_add := λ a, by { ext, simp only [subtype.coe_mk, zero_add] },
+  add_zero := λ a, by { ext, simp only [subtype.coe_mk, add_zero] },
   neg := λ t, ⟨ -t, begin
     intros i j f,
     have t2 := t.2 f,
-    dsimp at *,
-    simp [t2],
+    dsimp only [functor.comp_map, pi.neg_apply, forget_map_eq_coe, subtype.val_eq_coe] at ⊢ t2,
+    simp only [map_neg, t2],
   end ⟩,
-  add_left_neg := λ a, by { ext, change - (a.1 x) + a.1 x = 0, simp },
+  add_left_neg := λ a, by { ext, change - (a.1 x) + a.1 x = 0, simp only [add_left_neg] },
   add_comm := λ a b, by { ext, change (a.1 x) + (b.1 x) = (b.1 x) + (a.1 x), rw [add_comm] } }
 
 def explicit_limit_cone : cone K :=

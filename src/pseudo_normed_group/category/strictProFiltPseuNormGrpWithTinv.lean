@@ -362,9 +362,9 @@ def product.fan {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrpWithTin
 
 def product.is_limit {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrpWithTinv₁.{u} r) :
   limits.is_limit (product.fan r X) :=
-{ lift := λ M, product.lift _ _ _ $ λ i, M.π.app i,
+{ lift := λ M, product.lift _ _ _ $ λ i, M.π.app ⟨i⟩,
   fac' := begin
-    intros S j,
+    rintros S ⟨j⟩,
     dsimp [product.fan],
     simp,
   end,
@@ -373,7 +373,7 @@ def product.is_limit {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrpWi
     apply product.hom_ext,
     intros i,
     dsimp [product.fan] at hm,
-    simp [hm],
+    simpa using hm ⟨i⟩,
   end }
 
 end explicit_products

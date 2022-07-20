@@ -57,7 +57,7 @@ def shift_cofan (S : ExtrDisc.{u}) (T : cofan (λ i, (F.obj i).val.obj (op S.val
   cofan (λ i, (F.obj i).val.obj (op S.val)) :=
 cofan.mk T.X $ λ (i : as_small.{u+1} ℕ),
 begin
-  refine _ ≫ T.ι.app (as_small.up.obj $ as_small.down.obj i + 1),
+  refine _ ≫ T.ι.app ⟨as_small.up.obj $ as_small.down.obj i + 1⟩,
   refine (F.map _).val.app _,
   refine as_small.up.map _,
   refine hom_of_le _,
@@ -114,7 +114,7 @@ begin
     rw AddCommGroup.explicit_cocone_point_kernel_eq_of_as_small_nat at hx,
     apply add_subgroup.closure_induction hx,
     { rintros x ⟨i,t,rfl⟩, let tt := (AddCommGroup.direct_sum_cofan.{u+1 u+1}
-        (λ j, (F.obj j).val.obj (op S.val))).ι.app i t,
+        (λ j, (F.obj j).val.obj (op S.val))).ι.app ⟨i⟩ t,
       use tt,
       change _ - _ = _ - _, congr' 1,
       swap,
@@ -226,7 +226,7 @@ begin
   let D := AddCommGroup.direct_sum_cofan.{u+1 u+1} φ,
   let hD : is_colimit D := AddCommGroup.is_colimit_direct_sum_cofan _,
   let D' : cofan φ := cofan.mk D.X
-    (λ i, _ ≫ D.ι.app (as_small.up.obj (as_small.down.obj i + 1))),
+    (λ i, _ ≫ D.ι.app ⟨as_small.up.obj (as_small.down.obj i + 1)⟩),
   swap,
   { refine (F.map _).val.app _,
     refine as_small.up.map _,
@@ -236,14 +236,14 @@ begin
   have ht : (coproduct_to_coproduct F).val.app (op S.val) = e.hom ≫ t ≫ e.inv,
   { rw [← category.assoc, iso.eq_comp_inv],
     apply (is_colimit_of_preserves (Condensed.evaluation Ab.{u+1} S.val)
-      (colimit.is_colimit _)).hom_ext, intros j, swap, apply_instance,
+      (colimit.is_colimit _)).hom_ext, rintro ⟨j⟩, swap, apply_instance,
     dsimp [coproduct_to_coproduct],
     rw [← category.assoc, ← nat_trans.comp_app, ← Sheaf.hom.comp_val, colimit.ι_desc],
     dsimp, rw category.assoc,
     erw ι_sigma_eval_iso_direct_sum,
     rw ← category.assoc,
     erw ι_sigma_eval_iso_direct_sum,
-    erw hD.fac, refl },
+    exact (hD.fac D' ⟨j⟩).symm, },
   rw ht,
   have : 𝟙 ((∐ F.obj).val.obj (op S.val)) = e.hom ≫ 𝟙 _ ≫ e.inv, by simp,
   rw this,

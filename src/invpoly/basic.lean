@@ -182,12 +182,12 @@ begin
   have : ∥(F s).coeff n∥₊ * r ^ (-n : ℤ) ≤ ∑' k, ∥(F s).coeff k∥₊ * r ^ (-k:ℤ),
   { exact le_tsum (F.nnreal_summable s) _ (λ k _, zero_le'), },
   rw [mul_comm, nnreal.mul_le_iff_le_inv (zpow_ne_zero_of_ne_zero (hr.elim.ne).symm _)] at this,
-  simp only [zpow_neg₀, zpow_coe_nat, inv_inv, mul_comm (r^n)] at this,
+  simp only [zpow_neg, zpow_coe_nat, inv_inv, mul_comm (r^n)] at this,
   refine le_trans this _,
   rw mul_le_mul_right (pow_pos hr.elim n),
   refine le_trans _ hF,
   unfold nnnorm,
-  simp only [zpow_neg₀, zpow_coe_nat],
+  simp only [zpow_neg, zpow_coe_nat],
   apply @finset.single_le_sum S ℝ≥0 _ (λ s, ∑' n, ∥(F s).coeff n∥₊ * (r^n)⁻¹),
     { rintros s -, exact zero_le', },
     { exact finset.mem_univ _ }
@@ -256,7 +256,7 @@ lemma zpow_strict_anti {K : Type} [linear_ordered_field K] {x : K} (hx₀ : 0 < 
 begin
   intros n m H,
   rw [← inv_inv x],
-  simp only [inv_zpow₀ x⁻¹, inv_lt_inv (zpow_pos_of_pos (inv_pos.mpr hx₀) _)
+  simp only [inv_zpow x⁻¹, inv_lt_inv (zpow_pos_of_pos (inv_pos.mpr hx₀) _)
     (zpow_pos_of_pos (inv_pos.mpr hx₀) _)],
   exact zpow_strict_mono (one_lt_inv hx₀ hx₁) H,
 end
@@ -339,7 +339,7 @@ begin
   transitivity ∑' n, ∥(F s).coeff n∥₊ * r^(-n:ℤ) * r⁻¹,
   { rw ← sum_add_tsum_nat_add' 1,
     swap, { apply Tinv_aux_summable },
-    simp only [finset.range_one, zpow_neg₀, zpow_coe_nat, finset.sum_singleton,
+    simp only [finset.range_one, zpow_neg, zpow_coe_nat, finset.sum_singleton,
       pow_zero, inv_one, mul_one, int.coe_nat_succ, neg_add, zpow_add₀ hr.out.ne',
       zpow_one, mul_assoc, Tinv_aux_zero, nnnorm_zero, Tinv_aux_succ, zero_add], },
   refine le_of_eq _, ext,

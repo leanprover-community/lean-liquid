@@ -31,7 +31,10 @@ def sigma_functor
   [has_coproducts A]
   (α : Type v) : (α → A) ⥤ A :=
 { obj := λ X, sigma_obj X,
-  map := λ X Y f, sigma.desc $ λ a, f a ≫ sigma.ι _ a } .
+  map := λ X Y f, sigma.desc $ λ a, f a ≫ sigma.ι _ a,
+  map_id' := λ X, by { ext ⟨j⟩, simp },
+  map_comp' := λ X Y Z f j, by { ext ⟨j⟩, simp } }.
+
 variable {A}
 
 instance sigma_functor_preserves_mono
@@ -49,9 +52,9 @@ instance sigma_functor_preserves_epi
 begin
   constructor, intros Z s t h,
   apply colimit.hom_ext,
-  intros a,
+  rintros ⟨a⟩,
   dsimp [sigma_functor] at h,
-  apply_fun (λ e, colimit.ι _ a ≫ e) at h,
+  apply_fun (λ e, colimit.ι _ (discrete.mk a) ≫ e) at h,
   simp at h,
   rwa cancel_epi at h,
 end
@@ -74,12 +77,12 @@ begin
     (is_colimit_of_preserves F (colimit.is_colimit _)).cocone_point_unique_up_to_iso
       (colimit.is_colimit _) ≪≫ has_colimit.iso_of_nat_iso
       (nat_iso.of_components (λ _, iso.refl _) _),
-  swap, { rintro i _ ⟨⟨⟨⟩⟩⟩, dsimp, simp, dsimp, simp },
+  swap, { rintro ⟨⟩ ⟨⟩ ⟨⟨⟨⟩⟩⟩, dsimp, simp, dsimp, simp },
   let eY : F.obj (∐ λ (a : a), Y a) ≅ (∐ λ a, F.obj (Y a)) :=
     (is_colimit_of_preserves F (colimit.is_colimit _)).cocone_point_unique_up_to_iso
       (colimit.is_colimit _) ≪≫ has_colimit.iso_of_nat_iso
       (nat_iso.of_components (λ _, iso.refl _) _),
-  swap, { rintro i _ ⟨⟨⟨⟩⟩⟩, dsimp, simp, dsimp, simp },
+  swap, { rintro ⟨⟩ ⟨⟩ ⟨⟨⟨⟩⟩⟩, dsimp, simp, dsimp, simp },
   let tt : (∐ λ a, F.obj (X a)) ⟶ (∐ λ a, F.obj (Y a)) :=
     sigma.desc (λ a, F.map (f a) ≫ sigma.ι _ a),
   haveI : mono tt,
@@ -89,7 +92,7 @@ begin
   { rw this, apply mono_comp },
   apply (is_colimit_of_preserves F (colimit.is_colimit _)).hom_ext,
   swap, apply_instance,
-  intros i,
+  rintros ⟨i⟩,
   erw [← F.map_comp, colimit.ι_desc, F.map_comp],
   dsimp [eX, tt, t, eY, limits.is_colimit.cocone_point_unique_up_to_iso, is_colimit_of_preserves,
     has_colimit.iso_of_nat_iso, is_colimit.map],
@@ -98,6 +101,10 @@ begin
   slice_rhs 0 1
   { erw colimit.ι_desc },
   dsimp [iso.refl],
+  simp only [category.id_comp, colimit.ι_desc, cofan.mk_ι_app, category.assoc,
+    cocones.precompose_obj_ι, nat_trans.comp_app, nat_iso.of_components.inv_app,
+    colimit.cocone_ι, functor.map_cocone_ι_app],
+  dsimp,
   simp,
 end
 
@@ -390,10 +397,12 @@ begin
   simp only [category.assoc, colimit.ι_desc, cofan.mk_ι_app, eq_self_iff_true,
     cokernel_cofork.condition, comp_zero,
     colimit.ι_desc_assoc, cokernel.π_desc, implies_true_iff],
+  rintro ⟨j⟩,
+  simp,
 end
 begin
   intros S m hm,
-  apply colimit.hom_ext, intros a,
+  apply colimit.hom_ext, rintros ⟨a⟩,
   simp only [colimit.ι_desc, cofan.mk_ι_app],
   apply coequalizer.hom_ext, simp only [coequalizer_as_cokernel, cokernel.π_desc],
   simp_rw [← hm, ← category.assoc], congr' 1,
@@ -433,7 +442,7 @@ begin
   { apply colimit.hom_ext, intros a,
     dsimp [sigma_functor],
     simp only [colimit.ι_desc_assoc, cofan.mk_ι_app, category.assoc, colimit.ι_desc, comp_zero],
-    rw [← category.assoc, (w a).w, zero_comp] },
+    rw [← category.assoc, (w a.1).w, zero_comp] },
   simp only [exact_iff_exact_cokernel_desc] at w,
   choose w₁ w₂ using w,
   convert AB4.cond _ Z ι w₂ using 1,
@@ -490,7 +499,7 @@ begin
     dsimp [coproduct_kernel_comparison],
     simp only [category.id_comp, colimit.ι_desc_assoc, cofan.mk_ι_app, kernel.lift_ι] },
   have sqπ : π₁ ≫ Q.inv = E.inv ≫ π₂,
-  { dsimp [π₁, Q, E, π₂, coproduct_kernel_comparison], apply colimit.hom_ext, intros a,
+  { dsimp [π₁, Q, E, π₂, coproduct_kernel_comparison], apply colimit.hom_ext, rintros ⟨a⟩,
     simp only [colimit.ι_desc_assoc, cofan.mk_ι_app, category.assoc,
       has_colimit.iso_of_nat_iso_ι_inv_assoc, discrete.nat_iso_inv_app,
       colimit.comp_cocone_point_unique_up_to_iso_inv, functor.map_cocone_ι_app,
@@ -558,7 +567,7 @@ begin
     rw is_iso.comp_inv_eq,
     apply (is_colimit_of_preserves (eval_prev A S i)
       (colimit.is_colimit (discrete.functor X))).hom_ext,
-    intros j,
+    rintros ⟨j⟩,
     apply equalizer.hom_ext,
     simp only [functor.map_cocone_ι_app, colimit.cocone_ι,
       equalizer_as_kernel, category.assoc, kernel.lift_ι],
@@ -590,7 +599,7 @@ def coproduct_homology_iso
   inv := coproduct_homology_comparison_inv _ _ _ _ _,
   hom_inv_id' := begin
     dsimp [coproduct_homology_comparison, coproduct_homology_comparison_inv],
-    apply colimit.hom_ext, intros a,
+    apply colimit.hom_ext, rintros ⟨a⟩,
     dsimp,
     simp only [colimit.ι_desc_assoc, cofan.mk_ι_app, category.comp_id],
     apply homology.hom_from_ext,
@@ -626,7 +635,7 @@ def coproduct_homology_iso
     apply homology.hom_from_ext,
     simp only [homology.π'_desc'_assoc, category.assoc, category.comp_id,
       is_iso.inv_comp_eq],
-    apply colimit.hom_ext, intros a,
+    apply colimit.hom_ext, rintros ⟨a⟩,
     dsimp,
     simp only [homological_complex.hom.sq_from_right, homological_complex.hom.sq_to_right,
       colimit.ι_desc_assoc, cofan.mk_ι_app, category.assoc, colimit.ι_desc, homology.π'_map],
@@ -637,9 +646,9 @@ noncomputable
 def is_colimit_homology_map_cocone  (M : Type*) (S : complex_shape M) (α : Type v)
   [abelian A] [has_coproducts A] [AB4 A] (i : M) (X : α → homological_complex A S) :
   is_colimit ((homology_functor A S i).map_cocone (colimit.cocone (discrete.functor X))) :=
-{ desc := λ E, (coproduct_homology_iso _ _ _ _ _).inv ≫ sigma.desc (λ a, E.ι.app _),
+{ desc := λ E, (coproduct_homology_iso _ _ _ _ _).inv ≫ sigma.desc (λ a, E.ι.app ⟨_⟩),
   fac' := begin
-    intros E j,
+    rintros E ⟨j⟩,
     dsimp [coproduct_homology_comparison_inv, coproduct_homology_iso],
     apply homology.hom_from_ext,
     rw homology.map_eq_desc'_lift_left,
@@ -670,7 +679,7 @@ def is_colimit_homology_map_cocone  (M : Type*) (S : complex_shape M) (α : Type
   uniq' := begin
     intros E m hm,
     rw iso.eq_inv_comp, dsimp [coproduct_homology_comparison, coproduct_homology_iso],
-    apply colimit.hom_ext, intros j, specialize hm j,
+    apply colimit.hom_ext, rintros ⟨j⟩, specialize hm ⟨j⟩,
     simpa only [←hm, colimit.ι_desc_assoc, cofan.mk_ι_app, colimit.ι_desc,
       functor.map_cocone_ι_app, colimit.cocone_ι,
       homology_functor_map],
@@ -684,11 +693,11 @@ instance homology_functor_preserves_coproducts
   (homology_functor A S i) :=
 begin
   constructor, intros K,
-  let E : K ≅ discrete.functor K.obj := discrete.nat_iso (λ i, iso.refl _),
-  suffices : preserves_colimit (discrete.functor K.obj) (homology_functor A _ i),
+  let E : K ≅ discrete.functor (λ n, K.obj ⟨n⟩) := discrete.nat_iso (λ ⟨i⟩, iso.refl _),
+  suffices : preserves_colimit (discrete.functor (λ n, K.obj ⟨n⟩)) (homology_functor A _ i),
   { apply preserves_colimit_of_iso_diagram _ E.symm, assumption },
   apply preserves_colimit_of_preserves_colimit_cocone
-    (colimit.is_colimit (discrete.functor K.obj)),
+    (colimit.is_colimit (discrete.functor (λ n, K.obj ⟨n⟩))),
   apply is_colimit_homology_map_cocone,
 end
 
@@ -704,7 +713,7 @@ def is_colimit_homotopy_category_homology_functor_map_cocone
     (colimit.is_colimit $ discrete.functor $ λ i, (K i).as)).desc ⟨S.X,
     discrete.nat_trans $ λ i, S.ι.app i⟩,
   fac' := begin
-    intros S j, dsimp,
+    rintros S ⟨j⟩, dsimp,
     erw (is_colimit_of_preserves (homology_functor A (complex_shape.up ℤ) i)
       (colimit.is_colimit (discrete.functor (λ (i : α), (K i).as)))).fac,
     refl,
@@ -713,7 +722,7 @@ def is_colimit_homotopy_category_homology_functor_map_cocone
     intros S m hm,
     apply (is_colimit_of_preserves (homology_functor A (complex_shape.up ℤ) i)
       (colimit.is_colimit (discrete.functor (λ (i : α), (K i).as)))).hom_ext,
-    intros j,
+    rintros ⟨j⟩,
     erw (is_colimit_of_preserves (homology_functor A (complex_shape.up ℤ) i)
       (colimit.is_colimit (discrete.functor (λ (i : α), (K i).as)))).fac,
     dsimp, rw ← hm, refl,
@@ -727,11 +736,12 @@ instance homotopy_category_homology_functor_preserves_coproducts
   (homotopy_category.homology_functor A (complex_shape.up ℤ) i) :=
 begin
   constructor, intros K,
-  let E : K ≅ discrete.functor K.obj := discrete.nat_iso (λ i, iso.refl _),
-  suffices : preserves_colimit (discrete.functor K.obj) (homotopy_category.homology_functor A _ i),
+  let E : K ≅ discrete.functor (λ n, K.obj ⟨n⟩) := discrete.nat_iso (λ ⟨i⟩, iso.refl _),
+  suffices : preserves_colimit (discrete.functor (λ n, K.obj ⟨n⟩))
+    (homotopy_category.homology_functor A _ i),
   { apply preserves_colimit_of_iso_diagram _ E.symm, assumption },
   apply preserves_colimit_of_preserves_colimit_cocone
-    (homotopy_category.is_colimit_cofan K.obj),
+    (homotopy_category.is_colimit_cofan (λ n, K.obj ⟨n⟩)),
   apply is_colimit_homotopy_category_homology_functor_map_cocone,
 end
 

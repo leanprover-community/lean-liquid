@@ -450,7 +450,7 @@ def termwise_split_epi_retraction_lift (f : A ⟶ B) :
 
 instance (f : A ⟶ B) (i : ℤ) : split_epi ((termwise_split_epi_desc f).f i) :=
 { section_ := (B.X_eq_to_iso $ eq_add_neg_of_add_eq rfl).hom ≫ biprod.inl ≫ biprod.inr,
-  id' := by { dsimp, simp [cone.out], dsimp, simp } }
+  id' := by { dsimp, simp [cone.out] } }
 
 end termwise_split_epi_lift
 

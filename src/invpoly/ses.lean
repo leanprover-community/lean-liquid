@@ -54,7 +54,7 @@ local notation `r` := @r p
       { exact nnnorm_int_rpow_le p _ },
       { have h2n : (2 ^ n : ℤ) = (2 ^ n : ℕ), { norm_cast, },
         simp only [h2n, ← nnreal.coe_nat_abs, int.nat_abs_of_nat],
-        rw [zpow_neg₀, ← inv_zpow₀, zpow_coe_nat],
+        rw [zpow_neg, ← inv_zpow, zpow_coe_nat],
         calc ((2 ^ n : ℕ) : ℝ≥0) ^ (p:ℝ)
             = (2 ^ (n:ℝ) : ℝ≥0) ^ (p:ℝ) : _
         ... = (2⁻¹ ^ (p:ℝ) : ℝ≥0)⁻¹ ^ (n:ℝ) : _
@@ -182,7 +182,7 @@ begin
       rw to_laurent_measures_fun_nonpos,
       congr,
       rw [← int.coe_nat_eq_coe_nat_iff, int.nat_abs_of_nonpos ha.2, neg_neg], },
-    { rw [← zpow_neg₀, ← int.nat_abs_of_nonpos ha.2, zpow_coe_nat], } },
+    { rw [← zpow_neg, ← int.nat_abs_of_nonpos ha.2, zpow_coe_nat], } },
   { rintros a b ha hb (habs : a.nat_abs = b.nat_abs),
     rw finset.mem_Icc at ha hb,
     rw [← int.coe_nat_eq_coe_nat_iff, int.nat_abs_of_nonpos ha.2,
@@ -316,7 +316,7 @@ begin
         nnreal.rpow_one, invpoly.nnnorm_def],
       refine finset.sum_le_sum _,
       rintro s -,
-      simp only [f, zpow_neg₀, zpow_coe_nat, id.def, polynomial.coeff_C],
+      simp only [f, zpow_neg, zpow_coe_nat, id.def, polynomial.coeff_C],
       rw tsum_eq_single 0,
       { rw [if_pos rfl, pow_zero, inv_one, mul_one], },
       { intros n hn, rw [if_neg hn, nnnorm_zero, zero_mul], },

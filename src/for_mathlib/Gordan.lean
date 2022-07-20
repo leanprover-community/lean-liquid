@@ -602,6 +602,7 @@ lemma finset_Gordan [module.finite ℤ Λ] [module.free ℤ Λ] (S : finset Λ) 
 begin
   classical,
   let S' : finset ((Λ →+ ℤ) →+ ℤ) := S.image add_monoid_hom.eval,
+  letI := module.free.add_monoid_hom Λ ℤ, --RB: not sure why this is needed
   have := finset_Gordan_aux S',
   convert this using 1,
   ext x,
