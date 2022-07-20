@@ -32,7 +32,7 @@ jobs:
 
   build:
     name: Build lean-liquid
-    runs-on: ubuntu-latest
+    runs-on: liquid
     env:
       # number of commits to check for olean cache
       GIT_HISTORY_DEPTH: 20
@@ -119,7 +119,7 @@ jobs:
 
   lint:
     name: Lint lean-liquid
-    runs-on: ubuntu-latest
+    runs-on: liquid
     needs: build
 
     steps:
