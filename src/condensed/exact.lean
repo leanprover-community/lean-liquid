@@ -406,7 +406,11 @@ def P1_iso {A B : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
 begin
   refine has_limit.iso_of_nat_iso (_ ≪≫ (cospan_comp_iso _ _ _).symm) ≪≫
     (limit_flip_comp_lim_iso_limit_comp_lim _).symm,
-  exact cospan_ext (preserves_limit_iso _ _) (preserves_limit_iso _ _) (preserves_limit_iso _ _)
+
+  -- This next line can be removed later if/when we generalize universe parameters in finite (co)limits
+  refine _ ≪≫ (diagram_iso_cospan _).symm,
+
+  refine cospan_ext (preserves_limit_iso _ _) (preserves_limit_iso _ _) (preserves_limit_iso _ _)
     (by { apply limit.hom_ext, intros, ext, simp, })
     (begin
       apply limit.hom_ext,
@@ -424,7 +428,11 @@ def P2_iso {B C : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
 begin
   refine has_limit.iso_of_nat_iso (_ ≪≫ (cospan_comp_iso _ _ _).symm) ≪≫
     (limit_flip_comp_lim_iso_limit_comp_lim _).symm,
-  fapply cospan_ext,
+
+  -- This next line can be removed later if/when we generalize universe parameters in finite (co)limits
+  refine _ ≪≫ (diagram_iso_cospan _).symm,
+
+  refine cospan_ext _ _ _ _ _,
   exact (preserves_limit_iso _ _),
   exact category_theory.limits.limit_const_terminal.symm,
   exact (preserves_limit_iso _ _),

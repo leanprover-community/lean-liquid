@@ -148,8 +148,9 @@ lemma shift_comm_eq_eq_to_hom (X : C) (i j : ℤ) :
   (shift_add X i j).hom ≫ (shift_comm X i j).hom ≫ (shift_add X j i).inv =
   eq_to_hom (by { congr' 2, exact add_comm i j}) :=
 begin
-  dsimp [shift_add, shift_comm, opaque_eq_to_iso],
-  simp, erw comp_id,
+  dsimp [shift_add, shift_comm],
+  simp only [eq_to_hom_map, eq_to_hom_app, assoc, μ_inv_hom_app, μ_inv_hom_app_assoc],
+  erw comp_id,
 end
 
 @[reassoc]
@@ -159,7 +160,7 @@ lemma shift_add_comp_eq_to_hom (X : C) (i j k : ℤ) (h : i + j = j + i) :
   (shift_add X (j+i) k).inv =
   eq_to_hom (by { congr' 3}) :=
 begin
-  dsimp [shift_add, opaque_eq_to_iso],
+  dsimp [shift_add],
   induction h, dsimp, simpa,
 end
 
@@ -171,7 +172,7 @@ lemma shift_add_comp_eq_to_hom' (X : C) (i j k : ℤ) (h : j + k = k + j) :
   (shift_add X i (k+j)).inv =
   eq_to_hom (by { congr' 3}) :=
 begin
-  dsimp [shift_add, opaque_eq_to_iso],
+  dsimp [shift_add],
   induction h, dsimp, simpa,
 end
 
@@ -184,7 +185,7 @@ lemma triangle_shift_functor_μ_aux (X : C) (i j : ℤ) :
   (shift_add ((shift_functor C 1).obj X) i j).inv ≫
     (shift_comm X 1 (i + j)).hom :=
 begin
-  dsimp [shift_add, shift_comm, opaque_eq_to_iso],
+  dsimp [shift_add, shift_comm],
   simp only [eq_to_hom_map, eq_to_hom_app, functor.map_comp, obj_μ_app,
     category_theory.discrete.associator_def, eq_to_iso.inv,
     obj_μ_inv_app, eq_to_iso.hom, assoc, μ_inv_hom_app_assoc],
@@ -422,9 +423,8 @@ namespace pretriangulated
 @[simp] lemma shift_comm_self (X : C) (i : ℤ) : shift_comm X i i = iso.refl _ :=
 begin
   ext,
-  dsimp [shift_comm, opaque_eq_to_iso],
-  simp only [discrete.functor_map_id, nat_trans.id_app, id_comp, μ_hom_inv_app],
-  refl,
+  dsimp [shift_comm],
+  simpa only [discrete.functor_map_id, nat_trans.id_app, id_comp, μ_hom_inv_app],
 end
 
 variables [has_zero_object C] [∀ (i : ℤ), (shift_functor C i).additive] [pretriangulated C]

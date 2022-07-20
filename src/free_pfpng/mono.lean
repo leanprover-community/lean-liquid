@@ -154,7 +154,7 @@ begin
   have key' : (t.support.image f).card ≤ t.support.card := finset.card_image_le,
   apply lt_of_le_of_ne key',
   change ¬ _,
-  rw finset.card_image_eq_iff_inj_on,
+  rw finset.card_image_iff,
   dsimp [set.inj_on],
   push_neg, use [u, hu, v, hv, hf],
 end

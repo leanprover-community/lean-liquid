@@ -213,7 +213,7 @@ instance preserves_finite_biproducts_Condensed_evaluation
   limits.preserves_finite_biproducts
   (Condensed.evaluation Ab.{u+1} S : Condensed.{u} Ab.{u+1} ⥤ Ab.{u+1}) :=
 begin
-  constructor, introsI J _ _,
+  constructor, introsI J _,
   apply preserves_biproducts_of_shape_of_preserves_products_of_shape,
 end
 

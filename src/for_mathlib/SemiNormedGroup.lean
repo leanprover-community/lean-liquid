@@ -25,7 +25,7 @@ instance SemiNormedGroup.forget₂_additive :
 { map_add' := by { intros, refl } }
 
 instance SemiNormedGroup.metric_space : metric_space V :=
-metric.of_t2_pseudo_metric_space ‹_›
+metric.of_t0_pseudo_metric_space _
 
 instance SemiNormedGroup.normed_group : normed_group V :=
 { dist_eq := semi_normed_group.dist_eq,

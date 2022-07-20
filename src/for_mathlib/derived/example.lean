@@ -200,7 +200,8 @@ lemma _root_.homological_complex.shift_equiv_unit_app (i j : ℤ) (X : cochain_c
   homological_complex.hom.f ((shift_equiv _ i).unit.app X) j = (X.X_eq_to_iso $ by simp).hom :=
 begin
   dsimp [shift_equiv, unit_of_tensor_iso_unit],
-  simp [homological_complex.X_eq_to_iso],
+  simp only [homological_complex.X_eq_to_iso, eq_to_hom_map, eq_to_hom_app, eq_to_iso.hom,
+    homological_complex.eq_to_hom_f, eq_to_hom_trans, homological_complex.shift_μ_inv_app_f],
 end
 
 @[simp]
@@ -208,8 +209,10 @@ lemma _root_.homological_complex.shift_equiv_unit_inv_app (i j : ℤ) (X : cocha
   homological_complex.hom.f ((shift_equiv _ i).unit_inv.app X) j = (X.X_eq_to_iso $ by simp).hom :=
 begin
   dsimp [shift_equiv, unit_of_tensor_iso_unit],
-  simp [homological_complex.X_eq_to_iso],
+  simp only [homological_complex.X_eq_to_iso, eq_to_hom_map, eq_to_hom_app, eq_to_iso.hom,
+    homological_complex.eq_to_hom_f, homological_complex.shift_ε_inv_app_f, eq_to_hom_trans],
 end
+
 @[simp]
 lemma _root_.category_theory.equivalence.symm_to_adjunction_unit {C D : Type*} [category C]
   [category D] (e : C ≌ D) : e.symm.to_adjunction.unit = e.counit_inv := rfl
@@ -219,7 +222,8 @@ lemma _root_.homological_complex.shift_equiv_counit_app (i j : ℤ) (X : cochain
   homological_complex.hom.f ((shift_equiv _ i).counit.app X) j = (X.X_eq_to_iso $ by simp).hom :=
 begin
   dsimp [shift_equiv, unit_of_tensor_iso_unit],
-  simpa [homological_complex.X_eq_to_iso],
+  simp only [homological_complex.X_eq_to_iso, eq_to_hom_map, eq_to_hom_app, eq_to_iso.hom,
+    homological_complex.eq_to_hom_f, homological_complex.shift_ε_inv_app_f, eq_to_hom_trans],
 end
 
 @[simp]
@@ -227,7 +231,10 @@ lemma _root_.homological_complex.shift_equiv_counit_inv_app (i j : ℤ) (X : coc
   homological_complex.hom.f ((shift_equiv _ i).counit_inv.app X) j = (X.X_eq_to_iso $ by simp).hom :=
 begin
   dsimp [shift_equiv, unit_of_tensor_iso_unit],
-  simpa [homological_complex.X_eq_to_iso],
+  simpa only [homological_complex.X_eq_to_iso, eq_to_hom_map, eq_to_hom_app, eq_to_iso.hom,
+    add_neg_equiv_counit_iso_inv, nat_trans.comp_app, homological_complex.comp_f,
+    homological_complex.shift_ε_hom_app_f, homological_complex.eq_to_hom_f,
+    homological_complex.shift_μ_inv_app_f, eq_to_hom_trans],
 end
 
 variable [enough_projectives C]
