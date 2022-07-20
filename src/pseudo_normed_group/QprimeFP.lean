@@ -156,10 +156,11 @@ end
 open category_theory.preadditive
 open_locale big_operators
 
-lemma biproduct.desc_eq_sum {𝓐 ι : Type*} [category 𝓐] [abelian 𝓐] [fintype ι] [decidable_eq ι]
+lemma biproduct.desc_eq_sum {𝓐 ι : Type*} [category 𝓐] [abelian 𝓐] [fintype ι]
   (M : ι → 𝓐) (X : 𝓐) (f : Π i, M i ⟶ X) :
   biproduct.desc f = ∑ i : ι, (biproduct.π _ _) ≫ (f i) :=
 begin
+  classical,
   ext i, simp only [biproduct.ι_desc, comp_sum],
   rw finset.sum_eq_single_of_mem i (finset.mem_univ _),
   { rw [biproduct.ι_π_assoc, dif_pos rfl, eq_to_hom_refl, category.id_comp], },
