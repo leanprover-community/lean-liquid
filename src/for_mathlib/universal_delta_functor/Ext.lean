@@ -20,6 +20,7 @@ def short_exact_sequence.unop (S : short_exact_sequence Aᵒᵖ) : short_exact_s
   epi' := infer_instance,
   exact' := S.exact'.unop }
 
+-- move me
 lemma short_exact_sequence.short_exact (S : short_exact_sequence A) :
   short_exact S.f S.g :=
 { exact := S.exact' }
