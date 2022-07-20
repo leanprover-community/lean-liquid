@@ -56,11 +56,11 @@ jobs:
           echo "$HOME/.elan/bin" >> $GITHUB_PATH
           echo "short_lean_version=$(~/.elan/bin/lean --run scripts/lean_version.lean)" >> $GITHUB_ENV
 
-      - name: install Python
-        if: ${{ ! 0 }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.9
+      # - name: install Python
+      #   if: ${{ ! 0 }}
+      #   uses: actions/setup-python@v1
+      #   with:
+      #     python-version: 3.8
 
       - name: install mathlibtools
         run: python -m pip install --upgrade pip mathlibtools
