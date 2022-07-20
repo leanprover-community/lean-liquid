@@ -166,7 +166,7 @@ end
 
 instance (X : Profinite) :
   uniform_space.{u} (locally_constant.{u u} X V) :=
-@metric_space.to_uniform_space'.{u}
+@pseudo_metric_space.to_uniform_space.{u}
   (@locally_constant.{u u} (@coe_sort.{u+2 u+2} Profinite.{u} (Type u) Profinite.has_coe_to_sort.{u} X)
      (@coe_sort.{u+2 u+2} SemiNormedGroup.{u} (Type u) SemiNormedGroup.has_coe_to_sort.{u} V)
      (Top.topological_space.{u} X.to_CompHaus.to_Top))
