@@ -80,3 +80,22 @@ def Ext_δ_functor (B : A) : Aᵒᵖ ⥤δ Ab.{v} :=
       (short_exact_sequence.short_exact $ short_exact_sequence.unop S) n).extract 2 3,
     rw exact_iff_exact_seq, exact this,
   end }
+
+.
+
+instance (B : A) : delta_functor.tohoku.effaceable (Ext_δ_functor A B) :=
+begin
+  constructor, intros X n,
+  let P := projective.over X.unop,
+  let π : P ⟶ X.unop := projective.π _,
+  constructor,
+  refine ⟨_,π.op,_⟩,
+  apply limits.is_zero.eq_of_tgt,
+  apply bounded_derived_category.Ext'_is_zero_of_projective,
+  apply_instance,
+  norm_cast,
+  exact nat.succ_pos n,
+end
+
+instance (B : A) : delta_functor.universal (Ext_δ_functor A B) :=
+delta_functor.universal_of_effacable _
