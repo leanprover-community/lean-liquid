@@ -100,4 +100,4 @@ begin
 end
 
 instance (B : A) : delta_functor.universal (Ext_δ_functor A B) :=
-delta_functor.universal_of_effacable _
+delta_functor.universal_of_effaceable _
