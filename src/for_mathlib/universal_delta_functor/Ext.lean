@@ -9,6 +9,7 @@ variables {A : Type u} [category.{v} A] [abelian A]
 
 noncomputable theory
 
+-- move me
 /-- Get an SES in `A` from a SES in `Aᵒᵖ`. -/
 def short_exact_sequence.unop (S : short_exact_sequence Aᵒᵖ) : short_exact_sequence A :=
 { fst := S.trd.unop,
