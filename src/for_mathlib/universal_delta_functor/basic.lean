@@ -447,7 +447,7 @@ end
 end tohoku
 open tohoku
 
-theorem universal_of_effacable (F : A ⥤δ B) [effaceable F] : universal F :=
+theorem universal_of_effaceable (F : A ⥤δ B) [effaceable F] : universal F :=
 begin
   constructor, intros G η0,
   use effaceable.lift_with_δ F G η0,
