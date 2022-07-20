@@ -94,7 +94,7 @@ jobs:
           exit $result_run2
 
       - name: push release to azure
-        if: always() && github.repository == 'leanprover-community/lean-liquid' && steps.build.outputs.started == 'true' && github.ref == 'refs/heads/master'
+        if: always() && github.repository == 'leanprover-community/lean-liquid' && steps.build.outputs.started == 'true'
         continue-on-error: true
         run: |
           archive_name="$(git rev-parse HEAD).tar.xz"
