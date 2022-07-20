@@ -725,7 +725,7 @@ instance [has_coproducts_of_shape (ulift.{v} ℕ) 𝓐] [has_products_of_shape (
     apply is_colimit_cofork_of_is_colimit _ hE,
   end,
   has_finite_products := begin
-    constructor, intros J _ _,
+    constructor, intros J _,
     haveI : has_finite_products 𝓐 := abelian.has_finite_products, -- WHY IS THIS NEEDED!?
     apply_instance,
   end,

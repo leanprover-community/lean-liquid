@@ -65,10 +65,9 @@ nat_iso.of_components (λ X, mk_triangle_iso (iso.refl _) (iso.refl _) (iso.refl
     category.id_comp, preadditive.comp_neg, shift_ε_inv_app, category.assoc, neg_inj,
     functor.map_comp, nat_trans.id_app, preadditive.neg_comp] })
   (by { dsimp, rw [category.comp_id, category.id_comp] })
-  (by { dsimp, simp only [shift_ε_app, discrete.functor_map_id, category.id_comp,
-    opaque_eq_to_iso_inv, category.assoc, functor.map_comp, nat_trans.id_app,
-    category_theory.functor.map_id, unit_of_tensor_iso_unit_inv_app, shift_μ_inv_app],
-    erw category.comp_id }))
+  (by { dsimp, simp only [shift_ε_app, discrete.functor_map_id, category.id_comp, category.assoc,
+    functor.map_comp, nat_trans.id_app, category_theory.functor.map_id,
+    unit_of_tensor_iso_unit_inv_app, shift_μ_inv_app], erw category.comp_id }))
   (by { intros, ext; exact (category.comp_id _).trans (category.id_comp _).symm })
 
 lemma inv_rotate_mem_distinguished_triangles (T : triangle 𝒦) (h : T ∈ distinguished_triangles V) :
