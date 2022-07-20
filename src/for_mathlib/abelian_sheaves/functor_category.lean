@@ -194,7 +194,7 @@ variables [additive_category D]
 
 instance : additive_category (C ⥤ D) :=
 { has_biproducts_of_shape := begin
-    introsI J _ _,
+    introsI J _,
     constructor,
     intros F,
     apply limits.has_biproduct.of_has_product
