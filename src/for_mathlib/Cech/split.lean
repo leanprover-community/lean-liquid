@@ -15,12 +15,12 @@ open_locale simplicial
 open category_theory.limits
 
 variables {C : Type u} [category.{v} C] (f : arrow C)
-variables [∀ n : ℕ, has_wide_pullback f.right (λ i : ulift (fin (n+1)), f.left) (λ i, f.hom)]
+variables [∀ n : ℕ, has_wide_pullback f.right (λ i : fin (n+1), f.left) (λ i, f.hom)]
 
 /-- The splittings of the Cech nerve associated to a split arrow. -/
 def cech_splitting [split f] (n : ℕ) : f.cech_nerve _[n] ⟶ f.cech_nerve _[n+1] :=
 wide_pullback.lift (wide_pullback.base _)
-(λ i, if h : i.down = 0 then wide_pullback.base _ ≫ split.σ else wide_pullback.π _ ⟨i.down.pred h⟩)
+(λ i, if h : i = 0 then wide_pullback.base _ ≫ split.σ else wide_pullback.π _ (i.pred h))
 begin
   rintro ⟨j⟩,
   split_ifs,
@@ -30,7 +30,7 @@ end
 lemma cech_splitting_face_zero [split f] (n : ℕ) :
   f.cech_splitting n ≫ f.cech_nerve.δ 0 = 𝟙 _ :=
 begin
-  ext ⟨j⟩,
+  ext j,
   dsimp [cech_splitting, simplicial_object.δ],
   simp only [category.id_comp, category.assoc, wide_pullback.lift_π],
   split_ifs,
@@ -44,8 +44,8 @@ begin
 end
 
 lemma face_π (n : ℕ) (i : fin (n+1)) (j : fin (n+2)) :
-  (f.cech_nerve.δ j : f.cech_nerve _[n+1] ⟶ _) ≫ wide_pullback.π _ ⟨i⟩ =
-  wide_pullback.π _ ⟨j.succ_above i⟩ :=
+  (f.cech_nerve.δ j : f.cech_nerve _[n+1] ⟶ _) ≫ wide_pullback.π _ i =
+  wide_pullback.π _ (j.succ_above i) :=
 begin
   change wide_pullback.lift _ _ _ ≫ _ = _,
   simpa,
@@ -55,7 +55,7 @@ lemma cech_splitting_face [split f] (n : ℕ) (j : fin (n+3)) (hj : j ≠ 0) :
   f.cech_splitting (n+1) ≫ f.cech_nerve.δ j =
   f.cech_nerve.δ (j.pred hj) ≫ f.cech_splitting n :=
 begin
-  ext ⟨k⟩,
+  ext k,
   swap,
   { dsimp [cech_splitting, simplicial_object.δ],
     simp },
@@ -90,7 +90,7 @@ open category_theory.limits opposite
 -- jmc: seems like it might! I removed them.
 variables {P : Type u} {N : Type u'} [category.{v} P] [category.{v'} N] (M : Pᵒᵖ ⥤ N)
 variables (f : arrow P)
-variables [∀ n : ℕ, has_wide_pullback f.right (λ i : ulift (fin (n+1)), f.left) (λ i, f.hom)]
+variables [∀ n : ℕ, has_wide_pullback f.right (λ i : fin (n+1), f.left) (λ i, f.hom)]
 
 /-- The augmented Cech conerve induced by applying M to `f.augmented_cech_nerve`. -/
 abbreviation conerve : cosimplicial_object.augmented N :=
@@ -148,22 +148,26 @@ begin
     simp_rw [← M.map_comp, ← M.map_id, ← op_id, ← op_comp],
     congr' 2,
     dsimp [cech_splitting],
-    ext ⟨j⟩,
+    ext j,
     { simp only [wide_pullback.lift_π, category.id_comp, category.assoc],
       split_ifs,
       { cases j,
-        dsimp at h,
         injection h with hh,
         simp only [nat.succ_ne_zero] at hh,
         cases hh },
-      { congr, } },
+      { congr, have hj : j = 0 := subsingleton.elim j 0, subst j,
+        dsimp only [simplex_category.δ],
+        simp only [simplex_category.mk_hom, simplex_category.hom.to_order_hom_mk,
+          order_embedding.to_order_hom_coe, fin.zero_succ_above, fin.succ_zero_eq_one,
+          fin.one_eq_zero_iff, nat.one_ne_zero],
+        refl, } },
     { simp only [wide_pullback.lift_base, category.assoc, category.id_comp] } },
   { dsimp [cosimplicial_object.δ],
     rw [add_assoc, neg_add_eq_zero, ← M.map_comp],
     simp only [zero_comp, category.id_comp, zero_add, functor.map_comp, ← M.map_comp, ← op_comp],
     congr' 2,
     dsimp [cech_splitting],
-    ext ⟨j⟩,
+    ext j,
     { simp only [wide_pullback.lift_π, category.assoc],
       split_ifs,
       { refl },
@@ -229,7 +233,7 @@ open category_theory.limits opposite
 
 variables {P : Type u} {N : Type u'} [category.{v} P] [category.{v'} N] (M : P ⥤ N)
 variables (f : arrow P)
-variables [∀ n : ℕ, has_wide_pullback f.right (λ i : ulift (fin (n+1)), f.left) (λ i, f.hom)]
+variables [∀ n : ℕ, has_wide_pullback f.right (λ i : fin (n+1), f.left) (λ i, f.hom)]
 
 /-- The augmented Cech nerve induced by applying M to `f.augmented_cech_nerve`. -/
 abbreviation nerve : simplicial_object.augmented N :=
@@ -279,7 +283,7 @@ begin
   { symmetry,
     convert M.map_id _,
     dsimp [arrow.cech_splitting],
-    ext ⟨⟨j,hj⟩⟩, simp,
+    ext ⟨j,hj⟩, simp,
     rw dif_neg, refl,
     dsimp [simplex_category.δ],
     have : j = 0, by simpa using hj, subst this, dec_trivial,
@@ -287,8 +291,8 @@ begin
   { rw neg_add_eq_zero,
     congr' 1,
     dsimp [cech_splitting],
-    ext ⟨⟨j,hj⟩⟩,
-    { simp only [category.assoc, wide_pullback.lift_π], dsimp,
+    ext ⟨j,hj⟩,
+    { simp only [category.assoc, wide_pullback.lift_π], dsimp [simplex_category.δ],
       rw dif_pos, have : j = 0, by simpa using hj, subst this,
       dsimp [simplex_category.δ], dec_trivial },
     { simp } }
@@ -324,7 +328,7 @@ begin
     dsimp [arrow.cech_splitting, simplicial_object.whiskering, simplicial_object.δ],
     rw ← M.map_comp, symmetry,
     convert M.map_id _,
-    ext ⟨⟨j,hj⟩⟩,
+    ext ⟨j,hj⟩,
     simp only [category.assoc, wide_pullback.lift_π],
     rw dif_neg, dsimp, simpa, dsimp [simplex_category.δ],
     intro c, apply_fun (λ e, e.1) at c, simpa using c,

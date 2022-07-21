@@ -78,7 +78,7 @@ barx.{u u} K
 
 lemma is_limit_ext {K : J ⥤ Ab.{u}} (C : limit_cone K) (x y : C.cone.X)
   (h : ∀ j : J, C.cone.π.app j x = C.cone.π.app j y) : x = y :=
-limits.concrete.is_limit_ext.{(max u u) (max u u)+1} K C.2 _ _ h
+limits.concrete.is_limit_ext K C.2 _ _ h
 
 noncomputable
 instance forget_creates_limit (J : Type u) [small_category J] (K : J ⥤ Ab.{max u v}) :
