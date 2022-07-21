@@ -5,7 +5,7 @@ namespace category_theory.limits
 open category_theory
 
 universes v u
-variables {A : Type u} [category.{v} A] [has_coproducts A]
+variables {A : Type u} [category.{v} A] [has_coproducts.{v} A]
 
 open opposite
 
