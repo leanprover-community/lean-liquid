@@ -614,7 +614,7 @@ theorem θ_ϕ_split_exact (F : ℒ S) (hF : θ F = 0) : ϕ (ψ F hF) = F :=
 begin
   ext s n,
   simp only [ϕ, ψ, sub_apply, shift_to_fun_to_fun, laurent_measures.coe_mk, nsmul_apply,
-    nsmul_eq_mul, int.nat_cast_eq_coe_nat, int.coe_nat_succ, int.coe_nat_zero, zero_add],
+    nsmul_eq_mul, int.coe_nat_succ, int.coe_nat_zero, zero_add],
   split_ifs with h1 h2,
   { rw [sum_range_succ', (by norm_num : (1 : ℤ) + 1 = 2), mul_sum],
     convert add_sub_cancel' _ _,

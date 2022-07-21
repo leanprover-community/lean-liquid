@@ -148,7 +148,7 @@ def Profinite.condensed_free_pfpng_specialize_cone (S B : Profinite.{u}) (b : B)
         ext x,
         simp only [ulift.add_down, subtype.val_eq_coe,
           finsupp.equiv_fun_on_fintype_symm_apply_to_fun, finsupp.coe_add, pi.add_apply],
-        erw strict_comphaus_filtered_pseudo_normed_group_hom.map_add,
+        erw strict_comphaus_filtered_pseudo_map_add,
         refl,
       end,
     naturality' := λ T₁ T₂ f, begin

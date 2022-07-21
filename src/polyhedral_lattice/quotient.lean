@@ -113,7 +113,7 @@ instance [H : fact L.saturated] : polyhedral_lattice (Λ ⧸ L) :=
     have key : _ := _,
     refine ⟨c, key, _⟩, swap,
     { show L.normed_mk x = _,
-      rw [H1, normed_group_hom.map_sum, fintype.sum_congr],
+      rw [H1, map_sum, fintype.sum_congr],
       intro, exact L.normed_mk.to_add_monoid_hom.map_nsmul _ _ },
     { apply le_antisymm,
       { rw key,

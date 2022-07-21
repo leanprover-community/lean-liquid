@@ -402,7 +402,7 @@ def zmod_resolution_pi :
     { ext k, dsimp [zmod_resolution_pi_f, zmod_resolution],
       simp only [zero_apply, fin.coe_zero, comp_apply, int.coe_cast_add_hom],
       simp only [chain_complex.mk'_d_1_0, add_monoid_hom.coe_smul, pi.smul_apply, id_apply,
-        nsmul_one, int.nat_cast_eq_coe_nat, int.coe_nat_bit0, int.coe_nat_succ, int.coe_nat_zero,
+        nsmul_one, int.coe_nat_bit0, int.coe_nat_succ, int.coe_nat_zero,
         zero_add, int.cast_bit0, int.cast_one],
       exact (zmod.nat_cast_self n).symm },
     { exact comp_zero.trans comp_zero.symm }

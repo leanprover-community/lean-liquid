@@ -63,7 +63,7 @@ lemma system_of_complexes.hom_apply (f : M ⟶ N) {c : ℝ≥0} {i : ℕ} (x : M
 rfl
 
 lemma system_of_complexes.map_sub (f : M ⟶ N) {c i} (m m' : M c i) : f (m-m') = f m - f m' :=
-normed_group_hom.map_sub _ _ _
+map_sub ((f.app (op c)).f i) m m'
 
 /-- `f.apply c i` is application of the natural isomorphism `f`: $f_c^i : M_c^i ≅ N_c^i$. -/
 def category_theory.iso.apply (f : M ≅ N) {c : ℝ≥0} {i : ℕ} : M c i ≅ N c i :=
@@ -201,12 +201,12 @@ lemma admissible_of_isometry {f : M ⟶ M'} (hadm : M'.admissible)
   M.admissible :=
 begin
   refine ⟨λ c i j h x, _, λ c' c i h x, _⟩,
-  { rw [← (normed_group_hom.isometry_iff_norm _).1 (hiso c i) _,
-      ← (normed_group_hom.isometry_iff_norm _).1 (hiso c j) _, ← system_of_complexes.hom_apply f,
+  { rw [← (add_monoid_hom_class.isometry_iff_norm _).1 (hiso c i) _,
+      ← (add_monoid_hom_class.isometry_iff_norm _).1 (hiso c j) _, ← system_of_complexes.hom_apply f,
       ← d_apply],
     exact hadm.d_norm_noninc _ _ _ _ _ },
-  { rw [← (normed_group_hom.isometry_iff_norm _).1 (hiso c i) _,
-      ← (normed_group_hom.isometry_iff_norm _).1 (hiso c' i) _, ← system_of_complexes.hom_apply f,
+  { rw [← (add_monoid_hom_class.isometry_iff_norm _).1 (hiso c i) _,
+      ← (add_monoid_hom_class.isometry_iff_norm _).1 (hiso c' i) _, ← system_of_complexes.hom_apply f,
       ← system_of_complexes.hom_apply f, ← res_apply],
     exact hadm.res_norm_noninc _ _ _ _ _  }
 end
@@ -276,7 +276,7 @@ begin
   calc  ∥res x - C₂.d _ _ (f.hom y)∥
       = ∥res x - f.hom (C₁.d _ _ y)∥ : by rw d_apply
   ... = ∥f.hom (f.inv (res x)) - f.hom (C₁.d _ _ y)∥ : by rw hom_apply_inv_apply
-  ... = ∥f.hom (f.inv (res x) - C₁.d _ _ y)∥ : by congr ; exact (f.hom.apply.map_sub _ _).symm
+  ... = ∥f.hom (f.inv (res x) - C₁.d _ _ y)∥ : by congr ; exact (system_of_complexes.map_sub _ _ _).symm
   ... = ∥f.inv (res x) - C₁.d _ _ y∥ : normed_group_hom.norm_eq_of_isometry (hf _ _) _
   ... = ∥res (f.inv x) - C₁.d _ _ y∥ : by rw res_apply
   ... ≤ K * ∥C₁.d _ _ (f.inv x)∥ + ε : hy
@@ -295,7 +295,7 @@ begin
   refine ⟨λ h, h.of_iso f hf, λ h, h.of_iso f.symm _⟩,
   -- TODO: factor this out into a lemma
   intros c n,
-  apply normed_group_hom.isometry_of_norm,
+  apply add_monoid_hom_class.isometry_of_norm,
   intro v,
   rw ← normed_group_hom.norm_eq_of_isometry (hf c n),
   simp only [←apply_hom_eq_hom_apply, ←apply_inv_eq_inv_apply, iso.symm_hom, iso.inv_hom_id_apply],
@@ -332,7 +332,7 @@ begin
   calc  ∥res x - C₂.d _ _ (f.hom y)∥
       = ∥res x - f.hom (C₁.d _ _ y)∥ : by rw d_apply
   ... = ∥f.hom (f.inv (res x)) - f.hom (C₁.d _ _ y)∥ : by rw hom_apply_inv_apply
-  ... = ∥f.hom (f.inv (res x) - C₁.d _ _ y)∥ : by congr ; exact (f.hom.apply.map_sub _ _).symm
+  ... = ∥f.hom (f.inv (res x) - C₁.d _ _ y)∥ : by congr ; exact (system_of_complexes.map_sub _ _ _).symm
   ... = ∥f.inv (res x) - C₁.d _ _ y∥ : normed_group_hom.norm_eq_of_isometry (hf _ _) _
   ... = ∥res (f.inv x) - C₁.d _ _ y∥ : by rw res_apply
   ... ≤ K * ∥C₁.d _ _ (f.inv x)∥ : hy

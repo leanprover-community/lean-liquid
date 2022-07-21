@@ -95,7 +95,7 @@ begin
       (limit.is_limit _)).cone_point_unique_up_to_iso hE,
     apply function.injective.no_zero_smul_divisors iso.hom (PNG₁.iso_injective _),
     any_goals { apply_instance },
-    { apply strict_pseudo_normed_group_hom.map_zero },
+    { apply strict_pseudo_map_zero },
     { intros, rw PNG₁.map_zsmul } },
   let ι : E.X →+ T.X := add_subgroup.subtype _,
   apply function.injective.no_zero_smul_divisors ι (subtype.val_injective.{u+1}) ι.map_zero,

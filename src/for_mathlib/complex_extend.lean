@@ -714,8 +714,8 @@ nat_iso.of_components
     ext ((_|i)|i);
     refine (category.comp_id _).trans (eq.trans _ (category.id_comp _).symm);
     dsimp [homological_complex.single],
-    { simp only [eq_self_iff_true, category.comp_id, category.id_comp, if_true] },
-    { rw dif_neg, swap, dec_trivial },
+    { simp only [eq_self_iff_true, category.comp_id, category.id_comp, if_true, nat.cast_zero], refl },
+    { rw dif_neg, swap, dec_trivial, refl },
     { rw dif_neg, swap, dec_trivial }
   end
 

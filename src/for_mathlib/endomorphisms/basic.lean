@@ -529,8 +529,8 @@ instance : has_zero (X ⟶ Y) := ⟨⟨0, by simp only [comp_zero, zero_comp, ho
 instance : has_add (X ⟶ Y) := ⟨λ f g, ⟨f.f + g.f, by simp only [comp_add, add_comp, hom.comm]⟩⟩
 instance : has_sub (X ⟶ Y) := ⟨λ f g, ⟨f.f - g.f, by simp only [comp_sub, sub_comp, hom.comm]⟩⟩
 instance : has_neg (X ⟶ Y) := ⟨λ f, ⟨-f.f, by simp only [comp_neg, neg_comp, hom.comm]⟩⟩
-instance has_nsmul : has_scalar ℕ (X ⟶ Y) := ⟨λ n f, ⟨n • f.f, by simp only [comp_nsmul, nsmul_comp, hom.comm]⟩⟩
-instance has_zsmul : has_scalar ℤ (X ⟶ Y) := ⟨λ n f, ⟨n • f.f, by simp only [comp_zsmul, zsmul_comp, hom.comm]⟩⟩
+instance has_nsmul : has_smul ℕ (X ⟶ Y) := ⟨λ n f, ⟨n • f.f, by simp only [comp_nsmul, nsmul_comp, hom.comm]⟩⟩
+instance has_zsmul : has_smul ℤ (X ⟶ Y) := ⟨λ n f, ⟨n • f.f, by simp only [comp_zsmul, zsmul_comp, hom.comm]⟩⟩
 
 instance : add_comm_group (X ⟶ Y) :=
 (f_injective X Y).add_comm_group _ rfl (λ _ _, rfl) (λ _, rfl) (λ _ _, rfl) (λ _ _, rfl) (λ _ _, rfl)

@@ -534,7 +534,7 @@ begin
   { rw [sum_eq_zero, zero_add, sum_const, if_pos rfl, card_sdiff (range_mono tsub_le_self),
       card_range, card_range, tsub_tsub_cancel_of_le
         (nat.le_of_add_le_left hn), nsmul_eq_mul, mul_comm,
-      ←int.sign_eq_sign, int.nat_cast_eq_coe_nat, (f b).sign_mul_nat_abs],
+      ←int.sign_eq_sign, (f b).sign_mul_nat_abs],
     refine λ i hi, ite_eq_right_iff.2 _,
     rintro rfl,
     rw [hg _ ha, sign_type.coe_zero] },

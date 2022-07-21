@@ -73,7 +73,7 @@ begin
   simp only [- add_neg_le_iff_le_add', tactic.ring.add_neg_eq_sub, smul_sub],
   rw sub_smul,
   rw [← int.coe_nat_mod, sub_le_iff_le_add, zero_add],
-  simp only [has_scalar.smul, zsmul_int_int],
+  simp only [has_smul.smul, zsmul_int_int],
   exact (mul_le_mul_of_nonneg_right (int.coe_nat_le.mpr (nat.mod_le (f z) N)) hz),
 end
 
@@ -138,14 +138,14 @@ the values of x (l i). -/
 def pos_vector (l : ι → Λ) (x : Λ →+ ℤ) : sign_vectors ι :=
 λ i, nonzero_sign (x (l i))
 
-instance smul_signs : has_scalar (sign_vectors ι) (ι → Λ) :=
+instance smul_signs : has_smul (sign_vectors ι) (ι → Λ) :=
 { smul := λ ε l i, (ε i : ℤ) • l i }
 
 lemma pos_vector_nonneg (l : ι → Λ) (x : Λ →+ ℤ) (j : ι) :
   0 ≤ x ((pos_vector l x • l) j) :=
 begin
   rw [pos_vector, nonzero_sign],
-  simp only [has_scalar.smul, add_monoid_hom.map_zsmul, zsmul_int_int],
+  simp only [has_smul.smul, add_monoid_hom.map_zsmul, zsmul_int_int],
   split_ifs,
   { convert h, simp },
   { simp, linarith }
@@ -159,7 +159,7 @@ lemma pos_vector_id_if_nonneg (l : ι → Λ) (x : Λ →+ ℤ) (i : ι) : 0 ≤
     (pos_vector l x • l) i = l i :=
 begin
   intro hx,
-  simp only [pos_vector, nonzero_sign, has_scalar.smul, id.def],
+  simp only [pos_vector, nonzero_sign, has_smul.smul, id.def],
   rw [if_pos hx],-- units.coe_one, one_zsmul],
   simp,
 end
@@ -168,7 +168,7 @@ lemma pos_vector_neg_if_neg (l : ι → Λ) (x : Λ →+ ℤ) (i : ι) : x (l i)
     ((pos_vector l x) • l) i = - l i :=
 begin
   intro hx,
-  simp only [pos_vector, nonzero_sign, has_scalar.smul, id.def],
+  simp only [pos_vector, nonzero_sign, has_smul.smul, id.def],
   rw [if_neg (not_le.mpr hx)], simp,
 end
 
@@ -286,7 +286,7 @@ begin
   nth_rewrite 0 [← int.nat_abs_of_nat a],
   rw [smul_eq_mul, ← int.nat_abs_mul, ← smul_eq_mul],
   apply congr_arg,
-  rw [algebra.id.smul_eq_mul, nsmul_eq_mul, int.nat_cast_eq_coe_nat],
+  rw [algebra.id.smul_eq_mul, nsmul_eq_mul],
 end
 
 /-- Lemma 9.7 of [Analytic]. See also the (mathematically indistinguishable) variant `lem97`. -/
