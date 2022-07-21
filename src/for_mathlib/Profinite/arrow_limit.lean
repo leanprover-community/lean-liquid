@@ -199,18 +199,22 @@ arrow_diagram F surj ⋙ simplicial_object.cech_nerve ⋙
 
 def Cech_cone_diagram_proj (n : ℕ) (S : discrete_quotient F.left) (i : fin (n+1)) :
   (Cech_cone_diagram F surj n).obj S ⟶ Profinite.of S :=
-limits.wide_pullback.π _ ⟨i⟩
+limits.wide_pullback.π _ i
 
 def Cech_cone_diagram_inclusion (n : ℕ) (S : discrete_quotient F.left) :
   (Cech_cone_diagram F surj n).obj S → fin (n+1) → S :=
 λ a i, Cech_cone_diagram_proj F surj n S i a
 
+set_option pp.universes true
 lemma Cech_cone_diagram_inclusion_injective (n : ℕ) (S : discrete_quotient F.left) :
   function.injective (Cech_cone_diagram_inclusion F surj n S) :=
 begin
   intros a b h,
+  dsimp [Cech_cone_diagram] at a b,
+  haveI : limits.preserves_limits_of_size.{0 0} (forget Profinite.{u}) :=
+    limits.preserves_limits_of_size_shrink.{0 u 0 u u u u+1 u+1} (forget.{u+1 u u} Profinite.{u}),
   apply category_theory.limits.concrete.wide_pullback_ext',
-  rintros ⟨j⟩,
+  rintros j,
   apply_fun (λ e, e j) at h,
   exact h,
 end
@@ -236,7 +240,7 @@ def swap_cone_right (n : ℕ) (S : limits.cone (Cech_cone_diagram F surj n)) :
   end } }
 
 @[simps]
-def swap_cone_left (n : ℕ) (i : ulift.{u} (fin (n+1)))
+def swap_cone_left (n : ℕ) (i : (fin (n+1)))
   (S : limits.cone (Cech_cone_diagram F surj n)) :
   limits.cone (left_arrow_diagram F surj) :=
 { X := S.X,
