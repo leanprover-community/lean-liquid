@@ -108,11 +108,11 @@ begin
     simp_rw ← image.fac f,
     rw [functor.map_comp, exact_comp_mono_iff'],
     exact abelian.exact_of_is_cokernel _ _ _ q },
-  haveI : preserves_limits_of_shape walking_parallel_pair.{v} F,
+  haveI : preserves_limits_of_shape walking_parallel_pair F,
   { apply preserves_equalizers_of_preserves_kernels },
   haveI : preserves_limit (functor.empty 𝓐) F,
   { apply preserves_terminal_object_of_preserves_zero_morphisms },
-  haveI : preserves_limits_of_shape (discrete.{v} pempty) F,
+  haveI : preserves_limits_of_shape (discrete.{0} pempty) F,
   { apply preserves_limits_of_shape_pempty_of_preserves_terminal, },
   haveI p := preserves_finite_products_of_preserves_binary_and_terminal F,
   exact @preserves_finite_limits_of_preserves_equalizers_and_finite_products
