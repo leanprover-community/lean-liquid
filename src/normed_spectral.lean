@@ -127,9 +127,9 @@ def normed_spectral_homotopy.of_iso {row₀ row₁ : system_of_complexes.{u}} {d
           (NSH.h q) (φ₀.inv (row'₀.d q (q+1) x))) +
           φ₁.hom ((row₁.d (q - 1) q) (NSH.h (q - 1) (φ₀.inv x))) : _
     ... = _ : _,
-    { apply normed_group_hom.map_add },
+    { apply normed_group_hom.map_add' },
     congr' 1,
-    { refine (normed_group_hom.map_add _ _ _).trans _,
+    { refine (normed_group_hom.map_add' _ _ _).trans _,
       simp only [← comp_apply, ← system_of_complexes.res_comp_apply], refl },
     { erw [system_of_complexes.d_apply], refl }
   end,
@@ -232,7 +232,7 @@ begin
   erw condM.htpy.hδ_apply _ _ (nat.succ_le_succ h) x,
   simp only [nat.zero_sub, d'_self_apply, add_zero, row_d,
     truncate.d_π, truncate.res_π, truncate.d'_zero_one, h_truncate_zero,
-    normed_group_hom.map_add, SemiNormedGroup.explicit_cokernel_π_apply_dom_eq_zero],
+    map_add, SemiNormedGroup.explicit_cokernel_π_apply_dom_eq_zero],
   refl
 end
 

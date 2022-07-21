@@ -88,7 +88,7 @@ begin
     rw [← (C.to_Ab.obj (op (f (j.1+1)))).d_from_comp_X_next_iso, ← category.assoc,
       kernel_subobject_arrow_comp, zero_comp],
     dsimp, refl, },
-  rw [res_res, d_res, hdx', normed_group_hom.map_zero, norm_zero, mul_zero,
+  rw [res_res, d_res, hdx', map_zero, norm_zero, mul_zero,
     ← coe_nnnorm, ← nnreal.coe_zero, nnreal.coe_le_coe, le_zero_iff,
     nnnorm_eq_zero, sub_eq_zero] at hy,
   apply category_theory.homology.π_eq_zero,

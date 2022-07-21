@@ -97,34 +97,34 @@ f₀ g₀ a₀ b₀ c₀ f₁ g₁ a₁ b₁ c₁ f₂ g₂ a₂ b₂ c₂ f₃ 
 S.sq_a₀ S.sq_b₀ S.sq_a₁ S.sq_b₁ S.sq_a₂ S.sq_b₂
 
 lemma is_snake_input : is_snake_input S.snake_diagram :=
-{ row_exact₁ := by { dsimp [snake_diagram], simpa using S.row_exact₁ },
-  row_exact₂ := by { dsimp [snake_diagram], simpa using S.row_exact₂ },
+{ row_exact₁ := by { dsimp only [snake_diagram], simpa using S.row_exact₁, },
+  row_exact₂ := by { dsimp only [snake_diagram], simpa using S.row_exact₂ },
   col_exact₁ := begin
     intros j,
-    dsimp [snake_diagram],
+    dsimp only [snake_diagram],
     fin_cases j with [0, 1, 2]; simp; rw exact_iff_exact_seq,
     exacts [S.col_exact_a.extract 0 2, S.col_exact_b.extract 0 2, S.col_exact_c.extract 0 2],
   end,
   col_exact₂ := begin
     intros j,
-    dsimp [snake_diagram],
+    dsimp only [snake_diagram],
     fin_cases j with [0, 1, 2]; simp; rw exact_iff_exact_seq,
     exacts [S.col_exact_a.extract 1 2, S.col_exact_b.extract 1 2, S.col_exact_c.extract 1 2],
   end,
   col_mono := begin
     intros j,
-    dsimp [snake_diagram],
+    dsimp only [snake_diagram],
     fin_cases j with [0, 1, 2]; simp,
     exacts [S.col_mono_a, S.col_mono_b, S.col_mono_c],
   end,
   col_epi := begin
     intros j,
-    dsimp [snake_diagram],
+    dsimp only [snake_diagram],
     fin_cases j with [0, 1, 2]; simp,
     exacts [S.col_epi_a, S.col_epi_b, S.col_epi_c],
   end,
-  row_mono := by { dsimp [snake_diagram], simp, exact S.row_mono },
-  row_epi := by { dsimp [snake_diagram], simpa using S.row_epi } }
+  row_mono := by { dsimp only [snake_diagram], simp, exact S.row_mono },
+  row_epi := by { dsimp only [snake_diagram], simpa using S.row_epi } }
 
 def snake_input : snake_input 𝒜 := ⟨S.snake_diagram, S.is_snake_input⟩
 
@@ -133,7 +133,7 @@ def δ : C₀ ⟶ A₃ := S.is_snake_input.δ
 lemma six_term_exact_seq : exact_seq 𝒜 [f₀, g₀, S.δ, f₃, g₃] :=
 begin
   have := S.is_snake_input.six_term_exact_seq,
-  dsimp [snake_diagram] at this,
+  dsimp only [snake_diagram] at this,
   simpa only [snake_diagram.mk_functor_map_f0, snake_diagram.mk_functor_map_g0,
     snake_diagram.mk_functor_map_f3, snake_diagram.mk_functor_map_g3],
 end

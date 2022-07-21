@@ -390,7 +390,8 @@ lemma eval_freeAb_iso_component_naturality (M : Condensed.{u} Ab.{u+1}) (S T : E
     ≫ (eval_freeAb_iso_component BD M S).hom :=
 begin
   ext ((_|i)|i) : 2,
-  { dsimp [eval_freeAb_iso.component_zero, package.eval'],
+  { change AddCommGroup.free.map ((category_theory.forget Ab.{u+1}).map _) ≫ AddCommGroup.free.map ((category_theory.forget Ab.{u+1}).map _) =
+      AddCommGroup.free.map ((category_theory.forget Ab.{u+1}).map _) ≫ AddCommGroup.free.map ((category_theory.forget Ab.{u+1}).map _),
     simp only [← functor.map_comp], congr' 2,
     apply biproduct.hom_ext, rintro ⟨j⟩,
     dsimp [functor.map_bicone],
@@ -402,7 +403,8 @@ begin
     refl },
   { apply is_zero.eq_of_tgt,
     apply is_zero_zero },
-  { dsimp [eval_freeAb_iso.component_neg, package.eval'],
+  { change AddCommGroup.free.map ((category_theory.forget Ab.{u+1}).map _) ≫ AddCommGroup.free.map ((category_theory.forget Ab.{u+1}).map _) =
+      AddCommGroup.free.map ((category_theory.forget Ab.{u+1}).map _) ≫ AddCommGroup.free.map ((category_theory.forget Ab.{u+1}).map _),
     simp only [← functor.map_comp], congr' 2,
     apply biproduct.hom_ext, rintro ⟨j⟩,
     dsimp [functor.map_bicone],
@@ -471,7 +473,8 @@ nat_iso.of_components
 begin
   intros X Y f,
   ext ((_|i)|i) : 2,
-  { dsimp [eval_freeAb_iso.component_zero, package.eval'],
+  { change AddCommGroup.free.map ((category_theory.forget Ab.{u+1}).map _) ≫ AddCommGroup.free.map ((category_theory.forget Ab.{u+1}).map _) =
+      AddCommGroup.free.map ((category_theory.forget Ab.{u+1}).map _) ≫ AddCommGroup.free.map ((category_theory.forget Ab.{u+1}).map _),
     simp only [← functor.map_comp], congr' 2,
     apply biproduct.hom_ext, intros j,
     dsimp [functor.map_bicone],
@@ -481,7 +484,8 @@ begin
     simp_rw [← nat_trans.comp_app, biproduct.map_π],
     refl },
   { apply is_zero.eq_of_tgt, apply is_zero_zero },
-  { dsimp [eval_freeAb_iso.component_neg, package.eval'],
+  { change AddCommGroup.free.map ((category_theory.forget Ab.{u+1}).map _) ≫ AddCommGroup.free.map ((category_theory.forget Ab.{u+1}).map _) =
+      AddCommGroup.free.map ((category_theory.forget Ab.{u+1}).map _) ≫ AddCommGroup.free.map ((category_theory.forget Ab.{u+1}).map _),
     simp only [← functor.map_comp], congr' 2,
     apply biproduct.hom_ext, intros j,
     dsimp [functor.map_bicone],
@@ -489,7 +493,7 @@ begin
     erw biproduct.lift_π_assoc,
     erw biproduct.lift_π,
     simp_rw [← nat_trans.comp_app, biproduct.map_π],
-    refl }
+    refl },
 end
 
 -- Move this.
@@ -507,52 +511,6 @@ def tensor_to_unsheafified_homology_component_applied
       (homology_functor _ _ _).map (eval_freeAb_iso_component _ _ _).inv ≫
     (((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj
       (op S.val)).homology_functor_iso _ _).inv.app _
-
-/-
-match i with
-| (int.of_nat 0) := (homotopy_category.homology_functor _ _ _).map
-    ((BD.eval (forget AddCommGroup ⋙ AddCommGroup.free)).map
-      ((AddCommGroup.adj.hom_equiv _ _).symm (point m))) ≫
-      (homology_functor _ _ _).map (eval_freeAb_iso_component _ _ _).inv ≫
-    (((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj
-      (op S.val)).homology_functor_iso _ _).inv.app _
-| (int.of_nat (i+1)) := 0
-| (int.neg_succ_of_nat i) := (homotopy_category.homology_functor _ _ _).map
-    ((BD.eval (forget AddCommGroup ⋙ AddCommGroup.free)).map
-      ((AddCommGroup.adj.hom_equiv _ _).symm (point m))) ≫
-      (homology_functor _ _ _).map (eval_freeAb_iso_component _ _ _).inv ≫
-    (((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj
-      (op S.val)).homology_functor_iso _ _).inv.app _
-end
-.
-
-lemma tensor_to_unsheafified_homology_component_applied_eq
-  (M : Condensed.{u} Ab.{u+1}) (i : ℤ) (S : ExtrDisc.{u}) (m : M.val.obj (op S.val)) :
-  tensor_to_unsheafified_homology_component_applied BD M i S m =
-  (homotopy_category.homology_functor _ _ _).map
-    ((BD.eval (forget AddCommGroup ⋙ AddCommGroup.free)).map
-      ((AddCommGroup.adj.hom_equiv _ _).symm (point m))) ≫
-      (homology_functor _ _ _).map (eval_freeAb_iso_component _ _ _).inv ≫
-    (((category_theory.evaluation Profinite.{u}ᵒᵖ Ab.{u+1}).obj
-      (op S.val)).homology_functor_iso _ _).inv.app _ :=
-begin
-  rcases i with ((_|i)|i),
-  { refl },
-  { apply is_zero.eq_of_src, apply is_zero.homology_is_zero, apply is_zero_zero, },
-  { refl },
-end
-
-
-
-lemma tensor_to_unsheafified_homology_component_applied_of_nat_succ
-  (M : Condensed.{u} Ab.{u+1}) (i : ℕ) (S : ExtrDisc.{u}) :
-  tensor_to_unsheafified_homology_component_applied BD M (i+1:ℕ) S = 0 :=
-begin
-  apply is_zero.eq_of_src,
-end
--- { apply is_zero.eq_of_src, apply is_zero.homology_is_zero, apply is_zero_zero, }
-
--/
 
 open category_theory.preadditive
 

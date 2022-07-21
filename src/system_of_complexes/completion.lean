@@ -60,13 +60,12 @@ begin
   obtain (rfl|⟨i,rfl⟩) : i = 0 ∨ ∃ i', i = i' + 1,
   { cases i, { left, refl }, { right, exact ⟨_, rfl⟩ } },
   { refine ⟨0, rfl, 0, _⟩,
-    rw [normed_group_hom.map_zero, ← norm_le_zero_iff'],
+    rw [map_zero, ← norm_le_zero_iff'],
     apply le_of_forall_pos_le_add,
     intros γ hγ,
     rw zero_add,
     obtain ⟨_, _, rfl, rfl, y, hy⟩ := hC c ⟨hc⟩ 0 (nat.zero_le m) (res x) γ hγ,
-    rwa [res_res, d_eq_zero_apply, sub_zero,
-        d_res, hx, normed_group_hom.map_zero, norm_zero, mul_zero, zero_add] at hy,
+    rwa [res_res, d_eq_zero_apply, sub_zero, d_res, hx, map_zero, norm_zero, mul_zero, zero_add] at hy,
     dec_trivial },
   -- we continue with the case `i + 1`
   have hc₀kc : k * c ≥ c₀,
@@ -96,7 +95,7 @@ begin
   { intro j,
     specialize hC (k*c) ⟨hc₀kc⟩ _ hi (res x) (ε j) (ε_pos j),
     obtain ⟨_, _, rfl, rfl, y, hy⟩ := hC,
-    simp only [d_res, res_res, normed_group_hom.map_zero, hx, norm_zero, zero_add, mul_zero] at hy,
+    simp only [d_res, res_res, map_zero, hx, norm_zero, zero_add, mul_zero] at hy,
     refine ⟨y, hy⟩ },
   choose w hw using seq,
   let δ : ℕ → ℝ := λ j, 2⁻¹*2⁻¹ ^ j,
@@ -131,7 +130,7 @@ begin
     intros j,
     have fact : ∥C.d _ (i+1) (w (j + 1) - w j)∥ ≤ 2*ε j :=
     calc ∥C.d _ (i+1) (w (j + 1) - w j)∥
-        = ∥(C.d _ _ (w (j + 1)) - res x) + (res x - C.d _ _ (w j))∥ : by {congr' 1, rw normed_group_hom.map_sub, abel}
+        = ∥(C.d _ _ (w (j + 1)) - res x) + (res x - C.d _ _ (w j))∥ : by simp only [sub_add_sub_cancel, _root_.map_sub]
     ... ≤ ∥C.d _ _ (w (j + 1)) - res x∥ + ∥res x - C.d _ _ (w j)∥ : norm_add_le _ _
     ... = ∥res x - C.d _ _ (w (j + 1))∥ + ∥res x - C.d _ _ (w j)∥ : by { rw norm_sub_rev }
     ... ≤ ε (j+1) + ε j : add_le_add (hw $ j+1) (hw j)
@@ -139,21 +138,21 @@ begin
     calc dist (y j) (y (j + 1)) = ∥y (j+1) - y j∥ : by rw dist_eq_norm'
     ... = ∥res (w (j + 1)) - res (w j) - (∑ (l : ℕ) in range (j + 1), C.d _ _ (z l)
                                 - ∑ (l : ℕ) in range j, C.d _ _ (z l))∥ : by { dsimp [y], congr' 1, abel }
-    ... = ∥res (w (j + 1) - (w j)) - C.d _ _ (z j)∥ : by simp [normed_group_hom.map_sub, sum_range_succ]
+    ... = ∥res (w (j + 1) - (w j)) - C.d _ _ (z j)∥ : by simp [_root_.map_sub, sum_range_succ]
     ... ≤ K * ∥C.d _ _ (w (j + 1) - w j)∥ + δ j : hz j
     ... ≤ K * (2* ε j) + δ j : by {apply add_le_add_right, apply mul_le_mul_of_nonneg_left fact (nnreal.coe_nonneg K)}
     ... ≤ 1 * 2⁻¹ ^ j : hεδ j },
   have hdyj : ∀ j, C.d _ _ (y j) = res (C.d _ _ $ w j),
   { intro j,
     calc C.d _ _ (y j) = C.d _ _ (res (w j) - ∑ l in range j, C.d _ i (z l)) : rfl
-    ... = C.d _ _ (res (w j)) - ∑ l in range j, C.d i (i+1) (C.d _ _ (z l)) : by rw [normed_group_hom.map_sub, normed_group_hom.map_sum]
+    ... = C.d _ _ (res (w j)) - ∑ l in range j, C.d i (i+1) (C.d _ _ (z l)) : by rw [_root_.map_sub, map_sum]
     ... = res (C.d _ _ (w j))  : by simp only [d_res, d_d, sum_const_zero, sub_zero] },
 
   have hblop : ∀ j, ∥res x - C.d _ _ (y j)∥  ≤ ε j,
   { intro j,
     calc ∥res x - C.d _ _ (y j)∥ = ∥res x - res (C.d _ _ $ w j)∥ : by rw hdyj
     ... = ∥(res (res x : C (k*c) (i+1)) - res (C.d _ _ $ w j) : C c _)∥ : by { rw  C.res_res }
-    ... = ∥res (res x - (C.d _ _ $ w j))∥ : by rw res.map_sub
+    ... = ∥res (res x - (C.d _ _ $ w j))∥ : by simp only [_root_.map_sub]
     ... ≤ ∥res x - C.d _ _ (w j)∥ : by apply hC'.res_norm_noninc
     ... ≤ ε j : hw _},
 

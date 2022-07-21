@@ -577,7 +577,7 @@ begin
     use d,
     apply_fun ((0,1) ⟶[D] (1,1)),
     swap, { rw injective_iff_mono, exact hD.col_mono _ },
-    dsimp [b'] at hc,
+    dsimp only [b'] at hc,
     rw [← hc, ← hd],
     simp_rw [← abelian.pseudoelement.comp_apply, ← D.map_comp],
     refl }
@@ -788,7 +788,7 @@ cokernel.desc _ (kernel.lift _ (kernel.ι _ ≫ (_ ⟶[D] _)) begin
   rw this, clear this,
   simp [abelian.pseudoelement.comp_apply],
 end) begin
-  dsimp [to_top_right_kernel],
+  dsimp only [to_top_right_kernel],
   ext a,
   apply_fun kernel.ι (D.map (hom (1, 2) (2, 2))),
   swap, { rw injective_iff_mono, apply_instance },
@@ -832,7 +832,7 @@ begin
       erw kernel.lift_ι,
       exact hc },
     simp [← this] },
-  dsimp [f],
+  dsimp only [f],
   simp [← abelian.pseudoelement.comp_apply, to_top_right_kernel],
   simp [abelian.pseudoelement.comp_apply, ← hc],
 end .
@@ -851,12 +851,12 @@ begin
     apply exists_of_exact this,
     rw [(show hom (1,1) (2,2) = hom (1,1) (1,2) ≫ hom (1,2) (2,2), by refl),
       D.map_comp, abelian.pseudoelement.comp_apply, hb],
-    dsimp [a'],
+    dsimp only [a'],
     simp },
   use cokernel.π hD.to_top_right_kernel c,
   apply_fun kernel.ι ((1,2) ⟶[D] (2,2)),
   swap, { rw injective_iff_mono, apply_instance },
-  dsimp [to_top_right_kernel, cokernel_to_top_right_kernel_to_right_kernel],
+  dsimp only [to_top_right_kernel, cokernel_to_top_right_kernel_to_right_kernel],
   simp [← abelian.pseudoelement.comp_apply],
   change _ = a',
   rw ← hb,
@@ -883,7 +883,7 @@ kernel.lift _ (cokernel.desc _ ((_ ⟶[D] _) ≫ cokernel.π _) begin
   rw this, clear this,
   simp [abelian.pseudoelement.comp_apply],
 end) begin
-  dsimp [bottom_left_cokernel_to],
+  dsimp only [bottom_left_cokernel_to],
   ext a,
   obtain ⟨b,rfl⟩ : ∃ b, cokernel.π ((1,0) ⟶[D] (2,0)) b = a,
   { have : function.surjective (cokernel.π ((1,0) ⟶[D] (2,0))),
@@ -938,7 +938,7 @@ is_iso_of_mono_of_epi _
 
 def δ_aux : cokernel hD.to_top_right_kernel ⟶ kernel hD.bottom_left_cokernel_to :=
 cokernel.desc _ (kernel.lift _ (kernel.ι _ ≫ (_ ⟶[D] _) ≫ cokernel.π _) begin
-  dsimp [bottom_left_cokernel_to],
+  dsimp only [bottom_left_cokernel_to],
   simp,
   rw ← D.map_comp,
   have : hom (1,1) (2,1) ≫ hom (2,1) (2,2) = hom _ _ := rfl,
@@ -946,7 +946,7 @@ cokernel.desc _ (kernel.lift _ (kernel.ι _ ≫ (_ ⟶[D] _) ≫ cokernel.π _) 
   simp [abelian.pseudoelement.comp_apply],
 end)
 begin
-  dsimp [to_top_right_kernel],
+  dsimp only [to_top_right_kernel],
   simp,
   ext,
   apply_fun kernel.ι hD.bottom_left_cokernel_to,
@@ -1034,12 +1034,12 @@ begin
     obtain ⟨w,hw⟩ : ∃ w, ((0,1) ⟶[D] (1,1)) w = z := exists_of_exact (hD.col_exact₁ _) _ h1,
     clear h1,
     use w,
-    dsimp [b'] at h2,
-    dsimp [to_δ_aux],
+    dsimp only [b'] at h2,
+    dsimp only [to_δ_aux],
     simp only [abelian.pseudoelement.comp_apply],
     apply_fun hD.cokernel_to_top_right_kernel_to_right_kernel,
     swap, { rw injective_iff_mono, apply_instance },
-    dsimp [cokernel_to_top_right_kernel_to_right_kernel],
+    dsimp only [cokernel_to_top_right_kernel_to_right_kernel],
     simp only [←abelian.pseudoelement.comp_apply, cokernel.π_desc, category.assoc],
     simp only [abelian.pseudoelement.comp_apply],
     apply_fun kernel.ι ((1,2) ⟶[D] (2,2)),
@@ -1180,11 +1180,11 @@ end
 lemma δ_spec : hD.to_kernel' ≫ hD.δ ≫ hD.cokernel_to' =
   kernel.ι _ ≫ D.map (hom (1,1) (2,1)) ≫ cokernel.π _ :=
 begin
-  dsimp [is_snake_input.δ ,is_snake_input.to_kernel', is_snake_input.cokernel_to'],
+  dsimp only [is_snake_input.δ ,is_snake_input.to_kernel', is_snake_input.cokernel_to'],
   simp only [category.assoc, is_iso.hom_inv_id_assoc, is_iso.inv_hom_id_assoc],
-  dsimp [is_snake_input.cokernel_to_top_right_kernel_to_right_kernel],
-  dsimp [is_snake_input.left_cokernel_to_kernel_bottom_left_cokernel_to],
-  dsimp [is_snake_input.δ_aux],
+  dsimp only [is_snake_input.cokernel_to_top_right_kernel_to_right_kernel],
+  dsimp only [is_snake_input.left_cokernel_to_kernel_bottom_left_cokernel_to],
+  dsimp only [is_snake_input.δ_aux],
   let t := _, change _ ≫ _ ≫ _ ≫ t = _,
   have ht : t = kernel.ι _,
   { dsimp [t],

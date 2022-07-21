@@ -154,7 +154,7 @@ begin
     specialize h (i + 1 : ℕ),
     rw [category_theory.is_zero_homology_iff_exact,
       homological_complex.d_from_eq _ (show (complex_shape.down ℤ).rel (i + 1 : ℕ) (i : ℕ), by simp),
-      exact_comp_iso, homological_complex.d_to_eq _ (show (complex_shape.down ℤ).rel (i + 2 : ℕ) (i + 1 : ℕ), by simp),
+      exact_comp_iso, homological_complex.d_to_eq _ (show (complex_shape.down ℤ).rel (i + 2 : ℕ) (i + 1 : ℕ), by simp [add_assoc]; refl),
       exact_iso_comp] at h,
     exact h, }, -- more defeq abuse
 end

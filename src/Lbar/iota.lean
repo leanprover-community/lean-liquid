@@ -73,7 +73,7 @@ lemma hι : monotone (ι r r' i) :=
 
 lemma hι'_self_le : ∀ j:ℕ, (j:ℝ≥0) ≤ ι' r r' i j
 | 0 := by { norm_cast, exact zero_le' }
-| (j+1) := by { refine (le_max_left _ _).trans (le_max_left _ _) }
+| (j+1) := by simp only [ι', le_max_iff, nat.cast_add, nat.cast_one, le_refl, true_or]
 
 lemma sufficiently_increasing_eg (s : ℝ≥0) (m : ℕ) :
   ∃ n : ℕ, s ≤ ι' r r' i n * eg.κ r r' m :=

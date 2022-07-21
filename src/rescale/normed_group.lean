@@ -56,7 +56,7 @@ def rescale (r : ℝ≥0) [hr : fact (0 < r)] : SemiNormedGroup ⥤ SemiNormedGr
 { obj := λ V, of $ rescale r V,
   map := λ V₁ V₂ f,
   { to_fun := λ v, @rescale.of r V₂ $ f ((@rescale.of r V₁).symm v),
-    map_add' := f.map_add, -- defeq abuse
+    map_add' := f.map_add', -- defeq abuse
     bound' :=
     begin
       obtain ⟨C, C_pos, hC⟩ := f.bound,
@@ -88,7 +88,7 @@ lemma rescale_map_isometry [fact (0 < r)]
   {V₁ V₂ : SemiNormedGroup} {f : V₁ ⟶ V₂} (hf : isometry f) :
   isometry ((rescale r).map f) :=
 begin
-  rw normed_group_hom.isometry_iff_norm at hf ⊢,
+  rw add_monoid_hom_class.isometry_iff_norm at hf ⊢,
   intro v,
   erw [rescale.norm_def, rescale.norm_def, hf ((@rescale.of r _).symm v)],
 end
@@ -146,7 +146,7 @@ lemma iso_rescale_isometry [fact (0 < r)] (h : r = 1) (V : SemiNormedGroup) :
 begin
   unfreezingI { cases h },
   dsimp only [nat_iso.app_hom, iso_rescale_hom],
-  apply normed_group_hom.isometry_of_norm,
+  apply add_monoid_hom_class.isometry_of_norm,
   intro v,
   erw [rescale.norm_def],
   simp only [div_one, subtype.coe_mk],

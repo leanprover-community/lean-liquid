@@ -70,8 +70,7 @@ strict_pseudo_normed_group_hom (rescale r (rescale r' M)) (rescale (r' * r) M) :
 { to_fun := λ m, (rescale.of (rescale.of.symm (rescale.of.symm m))),
   map_zero' := rfl,
   map_add' := λ _ _, rfl,
-  strict' := λ c x hx, by
-    rwa [mem_filtration', nnreal.mul_inv, ← mul_assoc, ← mem_filtration r' M, ← mem_filtration r],
+  strict' := λ c x hx, by rwa [mem_filtration', mul_inv_rev, ← mul_assoc],
 }
 
 def to_rescale_rescale_strict_pseudo_normed_group_hom [fact (0 < r)] [fact (0 < r')]:
@@ -80,9 +79,8 @@ strict_pseudo_normed_group_hom (rescale (r' * r) M) (rescale r (rescale r' M)) :
   map_zero' := rfl,
   map_add' := λ _ _, rfl,
   strict' := λ c x hx, by
-    rwa [mem_filtration' r (rescale r' M), mem_filtration' r' M, mul_assoc, ← nnreal.mul_inv,
-      ← mem_filtration (r' * r) M],
-}
+    rwa [mem_filtration' r (rescale r' M), mem_filtration', mul_assoc, ← mul_inv_rev,
+      ← mem_filtration (r' * r) M] }
 
 -- def of_to_rescale_rescale_comp_eq_id [fact (0 < r)] [fact (0 < r')] :
 --   (of_rescale_rescale_strict_pseudo_normed_group_hom r r' M).comp

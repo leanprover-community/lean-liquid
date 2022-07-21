@@ -44,7 +44,7 @@ lemma aux2 (hF : is_snake_input F) (hG : is_snake_input G) :
     end :=
 begin
   simp only [is_iso.eq_inv_comp, is_iso.comp_inv_eq, category.assoc],
-  dsimp [is_snake_input.cokernel_to_top_right_kernel_to_right_kernel],
+  dsimp only [is_snake_input.cokernel_to_top_right_kernel_to_right_kernel],
   apply equalizer.hom_ext,
   simp only [le_refl, and_true, category.assoc, nat_trans.naturality,
     kernel.condition_assoc, zero_comp, true_and,
@@ -87,13 +87,13 @@ open δ_natural_setup
 theorem δ_natural (hF : is_snake_input F) (hG : is_snake_input G) :
   η.app (0,2) ≫ hG.δ = hF.δ ≫ η.app (3,0) :=
 begin
-  dsimp [is_snake_input.δ],
+  dsimp only [is_snake_input.δ],
   simp only [category.assoc],
   rw aux1_assoc η hF hG,
   rw aux2_assoc η hF hG,
   simp_rw cancel_epi,
   apply coequalizer.hom_ext,
-  dsimp [is_snake_input.δ_aux],
+  dsimp only [is_snake_input.δ_aux],
   simp only [cokernel.π_desc_assoc, category.assoc],
   simp only [← category.assoc], let t := _, change (t ≫ _) ≫ _ = _,
   let s := _, change _ = ((s ≫ _) ≫ _) ≫ _,
@@ -102,20 +102,21 @@ begin
       simp only [category.assoc, η.naturality_assoc, cokernel.condition, comp_zero],
     end) _,
   rotate 2,
-  { dsimp [is_snake_input.bottom_left_cokernel_to], simp only [category.assoc],
+  { dsimp only [is_snake_input.bottom_left_cokernel_to], simp only [category.assoc],
     let t := _, change _ ≫ t = _,
     have ht : t = cokernel.desc ((1,0) ⟶[F] (2,1)) ((2,1) ⟶[F] (2,2)) _ ≫ η.app _,
-    { apply coequalizer.hom_ext, dsimp, simp, },
+    { apply coequalizer.hom_ext,
+      simp only [cokernel.π_desc_assoc, category.assoc, cokernel.π_desc, nat_trans.naturality], },
     rw [ht, kernel.condition_assoc, zero_comp] },
-  { dsimp [t, s],
+  { dsimp only [t, s],
     apply equalizer.hom_ext,
-    simp },
-  rw ht, clear ht, clear t, dsimp [s], clear s,
+    simp only [category.assoc, nat_trans.naturality_assoc, cokernel.π_desc, kernel.lift_ι, kernel.lift_ι_assoc] },
+  rw ht, dsimp only [s], clear ht t s,
   simp only [category.assoc], congr' 1,
   rw aux3_assoc η hF hG, congr' 1,
-  dsimp [is_snake_input.cokernel_to],
+  dsimp only [is_snake_input.cokernel_to],
   apply coequalizer.hom_ext,
-  simp,
+  simp only [cokernel.π_desc_assoc, category.assoc, cokernel.π_desc, nat_trans.naturality],
 end
 
 end snake_lemma

@@ -22,7 +22,7 @@ def ulift : SemiNormedGroup.{u} ⥤ SemiNormedGroup.{max u v} :=
 { obj := λ V, of (ulift.{v} V),
   map := λ V W f,
   { to_fun := λ v, ⟨f v.down⟩,
-    map_add' := by { rintros ⟨x⟩ ⟨y⟩, congr, apply f.map_add, },
+    map_add' := by { rintros ⟨x⟩ ⟨y⟩, congr, apply f.map_add', },
     bound' := by { obtain ⟨C, h1, h2⟩ := f.bound, refine ⟨C, _⟩, rintro ⟨x⟩, apply h2, } },
   map_id' := λ V, by { ext, refl },
   map_comp' := by { intros, ext, refl } }

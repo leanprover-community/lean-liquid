@@ -414,7 +414,7 @@ instance : has_sub (A ⟶ B) :=
     sq1' := by { rw [sub_comp, comp_sub, f.sq1, g.sq1], },
     sq2' := by { rw [sub_comp, comp_sub, f.sq2, g.sq2], } } }
 
-instance has_nsmul : has_scalar ℕ (A ⟶ B) :=
+instance has_nsmul : has_smul ℕ (A ⟶ B) :=
 { smul := λ n f,
   { fst := n • f.1,
     snd := n • f.2,
@@ -422,7 +422,7 @@ instance has_nsmul : has_scalar ℕ (A ⟶ B) :=
     sq1' := by rw [nsmul_comp, comp_nsmul, f.sq1],
     sq2' := by rw [nsmul_comp, comp_nsmul, f.sq2] } }
 
-instance has_zsmul : has_scalar ℤ (A ⟶ B) :=
+instance has_zsmul : has_smul ℤ (A ⟶ B) :=
 { smul := λ n f,
   { fst := n • f.1,
     snd := n • f.2,
