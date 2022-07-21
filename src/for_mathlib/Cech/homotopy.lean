@@ -17,7 +17,7 @@ namespace arrow
 section contravariant
 variables {P : Type u} {N : Type u'} [category.{v} P] [category.{v'} N] (M : Pᵒᵖ ⥤ N)
 variables (f : arrow P)
-variables [∀ n : ℕ, has_wide_pullback f.right (λ i : ulift (fin (n+1)), f.left) (λ i, f.hom)]
+variables [∀ n : ℕ, has_wide_pullback f.right (λ i : (fin (n+1)), f.left) (λ i, f.hom)]
 variables [arrow.split f] [preadditive N]
 
 def contracting_homotopy' : homotopy (𝟙 (f.conerve M).to_cocomplex) 0 :=
@@ -51,7 +51,7 @@ section covariant
 
 variables {P : Type u} {N : Type u'} [category.{v} P] [category.{v'} N] (M : P ⥤ N)
 variables (f : arrow P)
-variables [∀ n : ℕ, has_wide_pullback f.right (λ i : ulift (fin (n+1)), f.left) (λ i, f.hom)]
+variables [∀ n : ℕ, has_wide_pullback f.right (λ i : (fin (n+1)), f.left) (λ i, f.hom)]
 variables [arrow.split f] [preadditive N]
 
 def covariant_contracting_homotopy' : homotopy (𝟙 (f.nerve M).to_complex) 0 :=
