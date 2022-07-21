@@ -313,14 +313,13 @@ def sigma_punit_iso (X : (punit : Type u) → Profinite.{u}) :
 { hom := sigma.ι _ _,
   inv := sigma.desc _ $ λ ⟨⟩, 𝟙 _ }
 
-def sigma_walking_pair_iso (X : limits.walking_pair → Profinite.{u}) :
-  sigma (X ∘ ulift.down) ≅ (X limits.walking_pair.left).sum (X limits.walking_pair.right) :=
+def sigma_walking_pair_iso (X : ulift.{u} limits.walking_pair → Profinite.{u}) :
+  sigma X ≅ (X ⟨limits.walking_pair.left⟩).sum (X ⟨limits.walking_pair.right⟩) :=
 { hom := sigma.desc _ $ λ a,
   match a with
   | ⟨a⟩ := limits.walking_pair.rec_on a (sum.inl _ _) (sum.inr _ _)
   end,
-  inv := sum.desc _ _ (sigma.ι (X ∘ ulift.down) (ulift.up _))
-    (sigma.ι (X ∘ ulift.down) (ulift.up _)),
+  inv := sum.desc _ _ (sigma.ι X (ulift.up _)) (sigma.ι X (ulift.up _)),
   hom_inv_id' := begin
     apply sigma.hom_ext,
     rintros (⟨a⟩|⟨b⟩),
