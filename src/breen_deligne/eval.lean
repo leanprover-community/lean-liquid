@@ -346,10 +346,6 @@ begin
 end
 .
 
-@[simp] lemma _root_.ulift.up_inj {α : Type*} (a b : α) : ulift.up a = ulift.up b ↔ a = b :=
-⟨congr_arg ulift.down, congr_arg ulift.up⟩
-
-
 @[simps]
 def Pow_comp_Pow_components (m n : ℕ) (A : 𝒜) :
   (Pow n).obj ((Pow m).obj A) ≅ (Pow (m * n)).obj A :=

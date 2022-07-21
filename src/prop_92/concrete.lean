@@ -366,7 +366,7 @@ begin
     dsimp [embedding.g, embedding.h],
     change m_T (c_e ∑ i in range (N.succ + 1), H i) -
       c_φ ∑ i in range (N.succ + 1), H i = _,
-    erw [finset.sum_range_succ, normed_group_hom.map_add, normed_group_hom.map_add, normed_group_hom.map_add, ih],
+    erw [finset.sum_range_succ, map_add, map_add, map_add, ih],
     change f - c_φ (H N) + c_φ (G N) + m_T (c_e (H N.succ)) - (c_φ (G N) + c_φ (H N.succ)) =  f - comap φ (H N.succ),
     dsimp [H, embedding.h],
     rw [← (he.locally_constant_extend $ comap φ $ H N).comap_map  e T.hom he.continuous,

@@ -48,7 +48,7 @@ begin
       erw [locally_constant.map_comp, this, locally_constant.map_id, uniform_space.completion.map_id] },
     { apply normed_group_hom.uniform_continuous, },
     { apply normed_group_hom.uniform_continuous, } },
-  { intros x y, apply normed_group_hom.map_add, }
+  { intros x y, apply map_add, }
 end
 .
 

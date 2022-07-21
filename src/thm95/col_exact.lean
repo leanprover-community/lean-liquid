@@ -1145,7 +1145,7 @@ lemma col_ι_isometry :
 begin
   cases i;
   { refine SemiNormedGroup.rescale_map_isometry _ _,
-    apply normed_group_hom.isometry_of_norm,
+    apply add_monoid_hom_class.isometry_of_norm,
     intro, refl },
 end
 
@@ -1167,7 +1167,7 @@ begin
       nat.cast_bit1, nat.cast_add, nat.cast_one] },
   dsimp [system_of_complexes.rescale_functor, double_complex_aux,
     cosimplicial_object.augmented.to_cocomplex_d],
-  erw [category.comp_id, if_pos rfl, Cech_nerve'_hom_zero, zero_add],
+  erw [category.comp_id, if_pos rfl, Cech_nerve'_hom_zero, nat.cast_one],
   apply normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1,
   apply CLC.map_norm_noninc,
 end
@@ -1188,8 +1188,10 @@ begin
     cosimplicial_object.augmented.to_cocomplex_d],
   erw [category.comp_id, if_pos rfl],
   dsimp [cosimplicial_object.coboundary],
+  rw [add_assoc, show (1 : ℝ)+1=2, by norm_num] at this,
   simp only [← nat_trans.app_hom_apply, add_monoid_hom.map_sum, add_monoid_hom.map_zsmul,
-    ← homological_complex.hom.f_add_monoid_hom_apply, this],
+    ← homological_complex.hom.f_add_monoid_hom_apply, nat.cast_add, nat.cast_bit0, nat.cast_one,
+    this],
   apply norm_sum_le_of_le,
   rintro i -,
   refine le_trans (norm_zsmul_le _ _) _,
@@ -1266,7 +1268,7 @@ begin
   have key := weak_normed_snake_dual
     (double_complex.col'.{u} BD κ r r' V Λ M N n) _ _
     (double_complex.col_ι BD κ r r' V Λ M N n) T_T
-    k _ ((m + 1) + 1) _ (1 + r⁻¹) (r / (1 - r) + 1) H1 H2 (adm.scale_index_right _),
+    k _ ((m + 1) + 1) _ (1 + r⁻¹) (r / (1 - r) + 1) (by simpa using H1) H2 (adm.scale_index_right _),
   have h_isom : _ := _,
   apply (key _ _ _ h_isom).of_le _ ⟨hk'⟩ _ le_rfl ⟨le_rfl⟩,
   any_goals { clear key adm2 H1 H2 },

@@ -53,7 +53,7 @@ begin
     (hD _ hc.1) _ δ hδ _ hfdx,
   let gx' := (g _).f _ x',
   have hdfxx' : (D _).d _ (i+1) (fx - x') = 0,
-  { rw [normed_group_hom.map_sub, hdx', fdx_dfx], exact sub_self _ },
+  { rw [_root_.map_sub, hdx', fdx_dfx], exact sub_self _ },
   obtain ⟨y, hdy, -⟩ := (hD _ hc.1) _ δ hδ _ hdfxx',
   let gy := (g _).f _ y,
   let dgy := C.d _ i gy,
@@ -65,7 +65,7 @@ begin
   have hxdgy : res x - C.d _ _ gy = gx',
   { calc res x - dgy
         = (g _).f _ ((f _).f _ x) - gdy : _
-    ... = gx' : by rw [← normed_group_hom.map_sub, hdy, sub_sub_cancel],
+    ... = gx' : by rw [← _root_.map_sub, hdy, sub_sub_cancel],
     rw [gdy_dgy, ← comp_apply, ← homological_complex.comp_f, hfg _ hc.1], refl },
   rw hxdgy,
   change (∥gx'∥₊ : ℝ) ≤ ∥dx∥₊ + ε,

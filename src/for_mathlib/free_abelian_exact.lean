@@ -82,7 +82,7 @@ lemma norm_sub : (a - b).norm ≤ a.norm + b.norm := by {rw [sub_eq_add_neg, ←
 begin
   split,
   { intro h,
-    rw [← @nat.cast_eq_zero ℝ _ _ _ _, tsum_norm] at h,
+    rw [← @nat.cast_eq_zero ℝ _ _ _, tsum_norm] at h,
     have H := (has_sum_zero_iff_of_nonneg _).mp (((summable_tsum_norm a).has_sum_iff).mpr h),
     have h_cz : ∀ x : X, coeff x a = 0,
     { intro x,

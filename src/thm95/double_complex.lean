@@ -204,7 +204,7 @@ begin
     rw [mul_comm, ← mul_div_assoc, eq_comm, ← nat.cast_mul, nat.factorial_succ], apply div_self,
     norm_num [nat.factorial_ne_zero] },
   apply SemiNormedGroup.norm_rescale_map_le,
-  have : (p+1+1+1 : ℝ) = ∑ i : fin (p+1+1+1), 1,
+  have : ((p+3:ℕ) : ℝ) = ∑ i : fin (p+3), 1,
   { simp only [finset.card_fin, mul_one, finset.sum_const, nsmul_eq_mul, nat.cast_id,
       nat.cast_bit1, nat.cast_add, nat.cast_one] },
   dsimp [system_of_complexes.rescale_functor, double_complex_aux,

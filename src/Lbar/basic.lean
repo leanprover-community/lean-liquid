@@ -140,7 +140,7 @@ protected def nsmul (N : ℕ) (F : Lbar r' S) : Lbar r' S :=
   begin
     convert summable.mul_left ↑N (F.summable' s),
     ext,
-    simp only [←mul_assoc, nsmul_eq_mul, int.nat_cast_eq_coe_nat, nonneg.coe_mul, int.nat_abs_mul],
+    simp only [←mul_assoc, nsmul_eq_mul, nonneg.coe_mul, int.nat_abs_mul],
     norm_cast
   end }
 

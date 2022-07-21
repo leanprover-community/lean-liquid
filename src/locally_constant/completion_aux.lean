@@ -311,7 +311,7 @@ begin
       (set.finite.to_finset (fin ε f)) (λ x hx, (is_clopen_x ε f hx)))).2.1,
     delta s1 at hs,
     suffices : a ∈ ⋃₀ (finset_clopen ε f : set(set X)),
-    { simp only [exists_prop, set.mem_set_of_eq, finset.mem_coe] at this,
+    { simp only [set.mem_sUnion, finset.mem_coe, exists_prop] at this,
       cases this with j hj, refine ⟨j, hj.1, hj.2⟩, },
     { rw finset_clopen,
       rw ←hs,

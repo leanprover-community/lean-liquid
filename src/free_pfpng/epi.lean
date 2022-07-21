@@ -383,7 +383,7 @@ sigma.discrete_topology
 -- move this
 lemma _root_.sign_type.nnnorm_coe_int_le_one : ∀ i : sign_type, ∥(i : ℤ)∥₊ ≤ 1
 | sign_type.zero := by { erw [nnnorm_zero], exact zero_le', }
-| sign_type.neg := by { erw [nnnorm_neg], norm_num, }
+| sign_type.neg := by simp
 | sign_type.pos := by { erw [nnnorm_one], }
 
 def Profinite.pmz_to_level_component (S : Profinite.{u}) (j : nnreal) (T : discrete_quotient S)
@@ -533,8 +533,8 @@ begin
   obtain rfl | hb := hb,
   { rw [sum_eq_zero, zero_add, sum_const, if_pos rfl, card_sdiff (range_mono tsub_le_self),
       card_range, card_range, tsub_tsub_cancel_of_le
-        (nat.le_of_add_le_left hn), nsmul_eq_mul, mul_comm,
-      ←int.sign_eq_sign, int.nat_cast_eq_coe_nat, (f b).sign_mul_nat_abs],
+        (le_of_add_le_left hn), nsmul_eq_mul, mul_comm,
+      ←int.sign_eq_sign, (f b).sign_mul_nat_abs],
     refine λ i hi, ite_eq_right_iff.2 _,
     rintro rfl,
     rw [hg _ ha, sign_type.coe_zero] },

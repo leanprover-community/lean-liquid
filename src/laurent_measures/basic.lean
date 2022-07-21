@@ -176,8 +176,7 @@ instance : add_comm_monoid (ℒ S) :=
     summable' := λ s, begin
       -- aahrg, why is `n` an implicit variable here???
       have := @summable.const_smul _ _ _ _ _ _ _ _ _ n (F.nnreal_summable s),
-      simpa only [nsmul_eq_mul, int.nat_cast_eq_coe_nat, int.nnnorm_mul,
-        nat.nnnorm_coe_int, mul_assoc],
+      simpa only [nsmul_eq_mul, int.nnnorm_mul, nat.nnnorm_coe_int, mul_assoc],
     end },
   nsmul_zero' := λ F, by { ext, refl },
   nsmul_succ' := λ n F, by { ext, refl },
