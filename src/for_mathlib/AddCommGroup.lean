@@ -99,8 +99,9 @@ AddCommGroup.adj'.unit.app _ $
 
 open_locale classical
 
+set_option pp.universes true
 -- Of course this is true without the fintype assumption...
-def iso_of_basis {ι : Type u} [fintype ι] {A : AddCommGroup.{u}} (𝓑 : basis ι ℤ A) :
+def iso_of_basis {ι : Type 0} [fintype ι] {A : AddCommGroup.{u}} (𝓑 : basis ι ℤ A) :
   (∐ (λ i : ι, tunit.{u})) ≅ A :=
 begin
   -- This is very messy...
@@ -109,8 +110,10 @@ begin
       (limits.biproduct.is_bilimit _).is_colimit,
   refine e ≪≫ _,
   refine biproduct_iso_pi _ ≪≫ _,
-  refine AddCommGroup.of_iso _ ≪≫ (AddCommGroup.of_iso 𝓑.repr.to_add_equiv).symm ≪≫
+  let e : A ≃+ ulift.{u} (ι →₀ ℤ) := 𝓑.repr.to_add_equiv.trans add_equiv.ulift.symm,
+  refine AddCommGroup.of_iso _ ≪≫ (AddCommGroup.of_iso e).symm ≪≫
     ⟨add_monoid_hom.id _, add_monoid_hom.id _, by { ext, refl }, by { ext, refl }⟩,
+  refine add_equiv.trans _ add_equiv.ulift.symm,
   let q : tunit.{u} ≃+ ℤ := tunit_add_equiv,
   let e : (ι →₀ ℤ) ≃+ (ι → ℤ),
   { fconstructor,
@@ -204,7 +207,7 @@ def colimit_comparison (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A] :
   A.is_colimit_cocone
 
 lemma exists_basis_of_index (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A]
-  (I : A.index_cat) : ∃ (ι : Type u) [fintype ι]
+  (I : A.index_cat) : ∃ (ι : Type 0) [fintype ι]
   (𝓑 : basis ι ℤ (AddCommGroup.of I.1)), true :=
 begin
   obtain ⟨S,hS⟩ := I.2,
@@ -241,7 +244,7 @@ begin
 end
 
 lemma exists_sigma_iso_of_index (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A]
-  (I : A.index_cat) : ∃ (ι : Type u) [fintype ι]
+  (I : A.index_cat) : ∃ (ι : Type 0) [fintype ι]
   (e : (∐ (λ i : ι, tunit.{u})) ≅ AddCommGroup.of I.1), true :=
 begin
   obtain ⟨ι,hι,𝓑,-⟩ := exists_basis_of_index A I,
@@ -250,7 +253,7 @@ begin
 end
 
 lemma exists_biprod_iso_of_index (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A]
-  (I : A.index_cat) : ∃ (ι : Type u) [fintype ι]
+  (I : A.index_cat) : ∃ (ι : Type 0) [fintype ι]
   (e : by exactI (⨁ (λ i : ι, tunit.{u})) ≅ AddCommGroup.of I.1), true :=
 begin
   obtain ⟨ι,hι,e,-⟩ := exists_sigma_iso_of_index A I,
@@ -313,12 +316,11 @@ begin
     (limits.biproduct.is_bilimit (λ i : ι, tunit.{u}))).is_colimit.cocone_point_unique_up_to_iso
     (limits.biproduct.is_bilimit (λ i : ι, G.obj tunit)).is_colimit,
   have : η.app (A.diagram.obj I) =
-    F.map e.inv ≫ eF.hom ≫ limits.biproduct.desc
-      (λ i, η.app _ ≫ limits.biproduct.ι _ i) ≫ eG.inv ≫ G.map e.hom,
+    F.map e.inv ≫ eF.hom ≫ limits.biproduct.map (λ i, η.app _) ≫ eG.inv ≫ G.map e.hom,
   { rw [← functor.map_iso_inv, iso.eq_inv_comp, ← iso.inv_comp_eq],
     apply limits.biproduct.hom_ext', intros i,
     simp only [functor.map_iso_hom, nat_trans.naturality,
-      limits.biproduct.ι_desc_assoc, category.assoc],
+      limits.biproduct.ι_map_assoc, category.assoc],
     erw [limits.biproduct.ι_desc_assoc, limits.biproduct.ι_desc_assoc],
     dsimp, rw η.naturality_assoc },
   rw this,
