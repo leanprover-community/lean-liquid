@@ -168,7 +168,7 @@ open_locale simplicial
 @[simps]
 def cech_iso_zero {C : Type*} [category C] (F : arrow C) [limits.has_limits C]
   : F.cech_nerve _[0] ≅ F.left :=
-{ hom := limits.wide_pullback.π _ ⟨0⟩,
+{ hom := limits.wide_pullback.π _ 0,
   inv := limits.wide_pullback.lift F.hom (λ _, 𝟙 _) (by simp),
   hom_inv_id' := begin
     apply limits.wide_pullback.hom_ext,
@@ -221,7 +221,7 @@ end
 include surj
 
 lemma prop819_degree_zero_helper :
-  function.surjective (limits.wide_pullback.base (λ i : ulift (fin 1), F.hom)) :=
+  function.surjective (limits.wide_pullback.base (λ i : (fin 1), F.hom)) :=
 begin
   intro x,
   obtain ⟨x,rfl⟩ := surj x,
@@ -233,7 +233,7 @@ begin
 end
 
 lemma prop819_zero_norm_le (g : (LocallyConstant.obj M).obj (op F.right)) : ∥ g ∥ ≤
-  ∥(LocallyConstant.obj M).map (limits.wide_pullback.base (λ i : ulift (fin 1), F.hom)).op g∥ :=
+  ∥(LocallyConstant.obj M).map (limits.wide_pullback.base (λ i : (fin 1), F.hom)).op g∥ :=
 begin
   casesI is_empty_or_nonempty F.right,
   { simp only [locally_constant_norm_empty, norm_nonneg] },
