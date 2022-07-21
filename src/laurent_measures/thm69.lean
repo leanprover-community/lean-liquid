@@ -1,12 +1,12 @@
 -- import for_mathlib.short_exact_sequence
-import data.int.interval
 import data.finset.nat_antidiagonal
+import data.int.interval
 import laurent_measures.aux_lemmas
 import laurent_measures.basic
 import laurent_measures.theta
 import linear_algebra.basic
 import order.filter.at_top_bot tactic.linarith
-import for_mathlib.nnreal
+import for_mathlib.data.nnreal.basic
 
 /-!
 This file introduces the maps

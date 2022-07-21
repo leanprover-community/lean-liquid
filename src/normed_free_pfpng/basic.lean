@@ -1,7 +1,7 @@
 import data.set.intervals
-import analysis.mean_inequalities_pow
+import analysis.mewan_inequalities_pow
 
-import for_mathlib.nnreal
+import for_mathlib.data.nnreal.basic
 import for_mathlib.Profinite.extend
 import pseudo_normed_group.category
 import condensed.ab

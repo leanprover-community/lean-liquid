@@ -1,14 +1,14 @@
+import analysis.mean_inequalities_pow
+import analysis.normed_space.basic
 import analysis.special_functions.pow
 import analysis.specific_limits.basic
-import analysis.normed_space.basic
-import analysis.mean_inequalities_pow
 import category_theory.Fintype
 
 import pseudo_normed_group.basic
 import pseudo_normed_group.category
 
-import for_mathlib.nnreal
-import for_mathlib.real
+import for_mathlib.data.nnreal.basic
+import for_mathlib.data.real
 
 /-
 
@@ -284,8 +284,7 @@ def homeo_filtration_ϖ_ball (c : ℝ≥0) : filtration (ℳ p ϖ) c ≃ₜ clos
   continuous_inv_fun := begin
     simp only [equiv_filtration_ϖ_ball],
     continuity,
-  end
-}
+  end }
 
 lemma real_measures.dist_eq {c : ℝ≥0} (F G : filtration (ℳ p ϖ) c) : ∥ F.1 - G.1 ∥ ^ (p⁻¹ : ℝ) =
   | ((homeo_filtration_ϖ_ball c F) - (homeo_filtration_ϖ_ball c G) : ℝ)| :=

@@ -6,7 +6,7 @@ import breen_deligne.eg
 
 import thm95.constants.spectral_constants
 
-import for_mathlib.nnreal
+import for_mathlib.data.nnreal.basic
 
 /-!
 # Explicit formulas for the constants used in Theorem 9.5 of Analytic.pdf

@@ -1,8 +1,8 @@
-import condensed.filtered_colimits_commute_with_finite_limits
 import condensed.ab
-import condensed.short_exact
 import condensed.bd_ses_aux
-import for_mathlib.nnreal_to_nat_colimit
+import condensed.filtered_colimits_commute_with_finite_limits
+import condensed.short_exact
+import for_mathlib.data.nnreal.to_nat_colimit
 import for_mathlib.pow_functor
 
 open category_theory

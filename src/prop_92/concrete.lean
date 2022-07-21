@@ -8,7 +8,7 @@ import locally_constant.analysis
 
 import tactic.ring_exp
 
-import for_mathlib.nnreal
+import for_mathlib.data.nnreal.basic
 
 
 /-!

@@ -1,8 +1,8 @@
 import analysis.special_functions.pow
 import analysis.special_functions.log.basic
 import analysis.specific_limits.basic
-import category_theory.Fintype
 import analysis.normed_space.basic
+import category_theory.Fintype
 
 import pseudo_normed_group.basic
 import pseudo_normed_group.category
@@ -10,7 +10,7 @@ import pseudo_normed_group.category
 import laurent_measures.basic
 
 import for_mathlib.tsum
-import for_mathlib.nnreal
+import for_mathlib.data.nnreal.basic
 
 universe u
 

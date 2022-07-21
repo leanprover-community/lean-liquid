@@ -1,14 +1,9 @@
-import data.real.nnreal -- non-negative reals
-import topology.algebra.infinite_sum -- infinite sums
 import analysis.special_functions.log.basic
 import analysis.special_functions.pow
-import for_mathlib.nnreal
+import for_mathlib.data.nnreal.basic
+import topology.algebra.infinite_sum -- infinite sums
 
-open_locale nnreal -- notation for non-negative reals
-
-open_locale big_operators -- notation for infinite sums
-/-
-
+/-!
 # Binary stuff
 
 Binary expansion of `nnreal` works great. If `r : ℝ≥0` then you get a
@@ -20,18 +15,9 @@ and `binary (2 * r)` or `binary (2⁻¹ * r)`?
 
 -/
 
-/-
+open_locale big_operators nnreal
 
-## Random stuff
-
--/
-
--- move
-lemma two_mul_lt_two {r : ℝ≥0} (hr : r < 1) : 2 * r < 2 :=
-begin
-  suffices : 2 * r < 2 * 1, by simpa,
-  exact (mul_lt_mul_left (by norm_num)).mpr hr,
-end
+/-! ## Random stuff -/
 
 -- probably true in more generality than nnreal.
 lemma nnreal.tsub_lt {a b c : ℝ≥0} (hc : c ≠ 0) (h : a < b + c) : a - b < c :=
@@ -42,7 +28,7 @@ begin
   { rwa tsub_lt_iff_left hab.le },
 end
 
-lemma nnreal.inv_pos_le_iff_one_le_mul {a b : ℝ≥0} (ha : 0 < a) : (a⁻¹ ≤ b ↔ 1 ≤ b * a) :=
+lemma nnreal.inv_pos_le_iff_one_le_mul {a b : ℝ≥0} (ha : 0 < a) : a⁻¹ ≤ b ↔ 1 ≤ b * a :=
 begin
   suffices : (a : ℝ)⁻¹ ≤ b ↔ (1 : ℝ) ≤ b * a,
     assumption_mod_cast,
@@ -51,13 +37,11 @@ begin
 end
 
 
-/-
-
-# binary
+/-!
+### binary
 
 An auxiliary function which computes the digits and remainders in the binary
 expanion of a non-negative real.
-
 -/
 
 /-- An auxiliary function which computes binary expansion of a non-negative real
@@ -111,25 +95,20 @@ begin
   exact coe_nonneg r,
 end
 
-lemma zero_snd_def : (binary r 0).2 = r - (binary r 0).1 :=
-begin
-  rw zero_def,
-end
-
+lemma zero_snd_def : (binary r 0).2 = r - (binary r 0).1 := by rw zero_def
 
 lemma succ_fst_def : (binary r (n + 1)).1 = if (binary r n).2 < 2⁻¹ then 0 else 1 :=
 by rw binary.equations._eqn_2
 
-lemma succ_fst_le :
-  ((binary r (n + 1)).1 : ℝ≥0) ≤ 2 * (binary r n).2 :=
+lemma succ_fst_le : ((binary r (n + 1)).1 : ℝ≥0) ≤ 2 * (binary r n).2 :=
 begin
   rw succ_fst_def,
   split_ifs,
   { simp },
   { push_neg at h,
     norm_cast,
-    rw inv_pos_le_iff_one_le_mul at h, swap, norm_num,
-    rwa mul_comm, },
+    rwa inv_le at h,
+    norm_num }
 end
 
 lemma succ_snd_def : (binary r (n + 1)).2 = 2 * (binary r n).2 - (binary r (n + 1)).1 :=
@@ -145,10 +124,7 @@ end
 
 -- note: the zeroth digit can be any natural.
 theorem succ_fst_le_one : (binary r (n + 1)).1 ≤ 1 :=
-begin
-  rw succ_fst_def,
-  split_ifs; linarith,
-end
+by { rw succ_fst_def, split_ifs; linarith }
 
 /-- The remainder is bounded. -/
 lemma snd_bdd : (binary r n).2 < 1 :=
@@ -157,38 +133,38 @@ begin
   { simp [zero_def],
     have := nat.lt_floor_add_one r,
     have foo : (⌊r⌋₊ : ℝ≥0) ≤ r := nat.floor_le (zero_le'),
-    exact (tsub_lt_iff_left foo).mpr this, },
-  { simp only [succ_snd_def, succ_fst_def, nat.cast_ite, nat.cast_zero, nat.cast_one],
-    split_ifs with LEM,
-    { simp,
-      rw ← mul_lt_mul_left (show (0 : ℝ≥0) < 2, by norm_num) at LEM,
-      convert LEM,
-      simp },
-    { push_neg at LEM,
-      revert hd,
-      generalize hx : (binary r d).snd = x, rw hx at LEM, clear hx,
-      intro hx,
-      rw [← mul_lt_mul_left (show (0 : ℝ≥0) < 2, by norm_num), mul_one] at hx,
-      apply nnreal.tsub_lt, norm_num,
-      convert hx, }, },
+    exact (tsub_lt_iff_left foo).mpr this },
+  simp only [succ_snd_def, succ_fst_def, nat.cast_ite, nat.cast_zero, nat.cast_one],
+  split_ifs with LEM,
+  { simp,
+    rw ← mul_lt_mul_left (show (0 : ℝ≥0) < 2, by norm_num) at LEM,
+    convert LEM,
+    simp },
+  push_neg at LEM,
+  revert hd,
+  generalize hx : (binary r d).snd = x, rw hx at LEM, clear hx,
+  intro hx,
+  rw [← mul_lt_mul_left (show (0 : ℝ≥0) < 2, by norm_num), mul_one] at hx,
+  apply nnreal.tsub_lt,
+  norm_num,
+  convert hx,
 end
 
 lemma fund_thm (B : ℕ) :
-  ∑ n in finset.range B.succ, ((binary r n).1 : ℝ≥0) * 2⁻¹ ^ n +
-    (binary r B).2 * 2⁻¹ ^ B = r :=
+  ∑ n in finset.range B.succ, ((binary r n).1 : ℝ≥0) * 2⁻¹ ^ n + (binary r B).2 * 2⁻¹ ^ B = r :=
 begin
   induction B with d hd,
   { simp only [zero_snd_def, zero_fst_def, finset.range_one, finset.sum_singleton,
       pow_zero, mul_one],
     rw ← add_tsub_assoc_of_le, swap, apply nat.floor_le, apply zero_le,
-    exact add_tsub_cancel_left ↑⌊r⌋₊ r, },
+    exact add_tsub_cancel_left ↑⌊r⌋₊ r },
   { rw [finset.sum_range_succ, add_assoc],
     convert hd,
     rw [← add_mul, add_comm, succ_snd_def', nat.succ_eq_add_one, pow_add, pow_one],
     rw [mul_comm (2 : ℝ≥0), mul_assoc],
     congr',
     rw [mul_comm, mul_assoc, inv_mul_cancel, mul_one],
-    norm_num, }
+    norm_num }
 end
 
 lemma fund_thm' (B : ℕ) :
@@ -207,10 +183,10 @@ begin
     congr',
     simp,
     rw [pow_sub₀ (2 : ℝ≥0) _ hn, mul_comm],
-    norm_num, },
+    norm_num },
   { rw [mul_assoc, ← mul_pow, inv_mul_cancel],
-    { simp, },
-    { norm_num }, },
+    { simp },
+    { norm_num } }
 end
 
 end binary
@@ -224,11 +200,9 @@ variables (r : ℝ≥0) (n B : ℕ)
 
 lemma zero_def : digit r 0 = ⌊r⌋₊ := binary.zero_fst_def r
 
-lemma zero_le : (digit r 0 : ℝ≥0) ≤ r :=
-binary.zero_fst_le r
+lemma zero_le : (digit r 0 : ℝ≥0) ≤ r := binary.zero_fst_le r
 
-theorem succ_le_one : (digit r (n + 1)) ≤ 1 :=
-binary.succ_fst_le_one r n
+theorem succ_le_one : (digit r (n + 1)) ≤ 1 := binary.succ_fst_le_one r n
 
 theorem sum_le_r : ∑ n in finset.range B.succ, ((digit r n) : ℝ≥0) * 2⁻¹ ^ n ≤ r :=
 begin
@@ -241,12 +215,12 @@ theorem r_le_pow_add_sum :
   r < 2⁻¹ ^ B + ∑ n in finset.range B.succ, ((digit r n) : ℝ≥0) * 2⁻¹ ^ n :=
 begin
   conv_lhs {rw ← binary.fund_thm r B},
-      rw add_comm,
-    refine add_lt_add_right _ _,
-    rw mul_lt_iff_lt_one_left,
-    { exact binary.snd_bdd r B },
-    { apply pow_pos,
-      norm_num, },
+  rw add_comm,
+  refine add_lt_add_right _ _,
+  rw mul_lt_iff_lt_one_left,
+  { exact binary.snd_bdd r B },
+  { apply pow_pos,
+    norm_num }
 end
 
 lemma r_sub_sum_small : r - ∑ n in finset.range B.succ, ((digit r n) : ℝ≥0) * 2⁻¹ ^ n < 2⁻¹ ^ B :=
@@ -268,14 +242,14 @@ theorem summable : summable (λ (n : ℕ), (nnreal.nat.digit r n : ℝ≥0) * 2�
 begin
   have foo : ∀ n, (nnreal.nat.digit r n : ℝ≥0) ≤ max (nnreal.nat.digit r 0) 1,
   { rintro (rfl | n),
-    { apply le_max_left, },
+    { apply le_max_left },
     { refine le_trans _ (le_max_right _ _),
-      exact_mod_cast succ_le_one r n, }, },
+      exact_mod_cast succ_le_one r n } },
   have bar : ∀ n, (nnreal.nat.digit r n : ℝ≥0) * 2⁻¹ ^ n ≤ max (nnreal.nat.digit r 0) 1 * 2⁻¹ ^ n,
   { intro n,
     rw mul_le_mul_right₀, exact foo n,
     apply pow_ne_zero,
-    norm_num, },
+    norm_num },
   apply summable_of_le bar,
   apply summable.mul_left,
   apply summable_geometric,
@@ -296,7 +270,7 @@ begin
   change 0 < ε at hε,
   have foo : ∃ a : ℕ, (2⁻¹ : ℝ≥0) ^ a ≤ ⟨ε, hε.le⟩,
   { by_cases hε1 : 1 ≤ ε,
-    { use 0, simp, exact_mod_cast hε1, },
+    { use 0, simp, exact_mod_cast hε1 },
     { push_neg at hε1,
       use ⌈real.log ε / real.log 2⁻¹⌉₊,
       have := nat.le_ceil (real.log ε / real.log 2⁻¹),
@@ -309,16 +283,16 @@ begin
         assumption_mod_cast,
       -- convenient thing
       have inv_two_pos : (0 : ℝ) < 2⁻¹,
-      { rw _root_.inv_pos, apply zero_lt_two, },
+      { rw _root_.inv_pos, apply zero_lt_two },
       rw ← real.log_le_log (real.rpow_pos_of_pos inv_two_pos _) hε,
       apply le_of_eq,
       rw real.log_rpow inv_two_pos,
       rw div_mul_cancel,
       apply real.log_ne_zero_of_pos_of_ne_one inv_two_pos,
-      norm_num, } },
+      norm_num } },
   cases foo with B hB,
-  use B + 1,
-  intros m hm, cases m with m, cases hm,
+  refine ⟨B + 1, λ m hm, _⟩,
+  cases m with m, cases hm,
   rw set.mem_preimage,
   have h_le_r := sum_le_r r m,
   have h_r_lt := r_le_pow_add_sum r m,
@@ -336,16 +310,13 @@ begin
     refine le_trans _ hB',
     refine pow_le_pow_of_le_one (by norm_num) (by norm_num) _,
     change B + 1 ≤ m + 1 at hm,
-    linarith,
-  },
+    linarith },
   { rw ← nnreal.coe_le_coe at h_le_r,
     push_cast at h_le_r,
-    linarith,
-  }
+    linarith }
 end
 
-theorem tsum : ∑' n, (digit r n : ℝ≥0) * 2⁻¹ ^ n = r :=
-has_sum.tsum_eq (has_sum r)
+theorem tsum : ∑' n, (digit r n : ℝ≥0) * 2⁻¹ ^ n = r := (has_sum r).tsum_eq
 
 end digit
 

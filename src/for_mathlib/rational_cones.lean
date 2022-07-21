@@ -1,7 +1,7 @@
 import linear_algebra.dual
 import linear_algebra.free_module.basic
 
-import for_mathlib.nnrat
+import for_mathlib.data.nnrat
 
 universe u
 variables {Λ : Type u} [add_comm_group Λ]

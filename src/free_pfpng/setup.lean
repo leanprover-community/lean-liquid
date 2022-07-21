@@ -7,7 +7,7 @@ import condensed.coproducts
 import free_pfpng.lemmas
 import condensed.exact
 
-import for_mathlib.int
+import for_mathlib.data.int
 import for_mathlib.AddCommGroup_instances
 
 .

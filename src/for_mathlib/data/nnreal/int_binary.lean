@@ -1,4 +1,4 @@
-import for_mathlib.nnreal_nat_binary
+import for_mathlib.data.nnreal.nat_binary
 
 def nat.equiv_le_int (d : ℤ) : ℕ ≃ ({n : ℤ | d ≤ n} : set ℤ) :=
   { to_fun := λ m, ⟨m + d, by simp⟩,

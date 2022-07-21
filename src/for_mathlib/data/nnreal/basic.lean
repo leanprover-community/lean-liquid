@@ -1,6 +1,5 @@
-import data.real.nnreal
 import analysis.mean_inequalities_pow
-import for_mathlib.ennreal
+import for_mathlib.data.ennreal
 
 open_locale nnreal
 

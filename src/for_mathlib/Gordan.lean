@@ -3,7 +3,7 @@ import data.int.interval
 import ring_theory.finiteness
 import linear_algebra.free_module.finite.basic
 
-import for_mathlib.nnrat
+import for_mathlib.data.nnrat
 import for_mathlib.rational_cones
 
 /-!

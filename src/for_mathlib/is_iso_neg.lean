@@ -1,5 +1,5 @@
 import for_mathlib.abelian_category
-import for_mathlib.int
+import for_mathlib.data.int
 import for_mathlib.neg_one_pow
 
 universes v u

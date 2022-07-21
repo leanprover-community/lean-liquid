@@ -1,7 +1,7 @@
 import category_theory.triangulated.pretriangulated
+import for_mathlib.data.int
 import for_mathlib.homological_complex_shift
 import for_mathlib.monoidal_category
-import for_mathlib.int
 
 noncomputable theory
 

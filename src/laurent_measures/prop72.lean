@@ -1,14 +1,10 @@
-import data.real.nnreal
-import topology.algebra.infinite_sum
 import analysis.normed_space.basic
-import for_mathlib.nnreal
-import for_mathlib.nnreal_int_binary -- basic binary expansion for nnreal.
+import for_mathlib.data.nnreal.int_binary -- basic binary expansion for nnreal.
 
 open_locale nnreal
 
-/-
-
-# Two auxiliary lemmas.
+/-!
+# Two auxiliary lemmas
 
 In this file we prove two technical lemmas, needed in the proofs of parts (2) and (4)
 of Proposition 7.2 of `Analytic.pdf`.
