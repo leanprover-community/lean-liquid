@@ -702,19 +702,17 @@ begin
   ext G,
   split,
   { intros hG, dsimp [U, UU, ι] at ⊢ hG,
-    rw [set.mem_preimage, set.mem_pi],
     intros i hi, rw if_pos hi,
     simp only [mem_singleton_iff],
     symmetry,
     apply hG, exact hi.2 },
   { intros hG, dsimp [U, UU, ι] at ⊢ hG,
     rintros ⟨⟩ n hn,
-    rw [set.mem_preimage, set.mem_pi] at hG,
     symmetry,
     by_cases hn' : n < n₀,
     { erw [h₀ n G.1 G.2 hn', h₀ n F.1 F.2 hn'] },
-    have hn'' : n ∈ set.Ico n₀ B := ⟨by simpa using hn', hn⟩,
-    specialize hG n hn'', rw if_pos hn'' at hG, simpa using hG },
+    push_neg at hn',
+    specialize hG n, simpa [hn', hn] using hG },
 end
 
 end topological_generalities

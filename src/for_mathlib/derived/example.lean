@@ -158,18 +158,25 @@ begin
         apply homological_complex.d_to_eq },
       { dsimp,
         rw [category.comp_id, category.id_comp],
-        rw homological_complex.d_from_eq _ (show (complex_shape.up ℤ).rel 0 1, from rfl),
+        erw homological_complex.d_from_eq _ (show (complex_shape.up ℤ).rel 0 1, from rfl),
         exact limits.zero_comp } },
     { ext,
-      dsimp [homology.map_iso, homological_complex.homology_functor_single],
+      dsimp only [homology.map_iso, homological_complex.homology_functor_single],
       rw [← cancel_epi (limits.kernel_subobject_iso _).hom, homology.π'_eq_π_assoc],
       simp only [homology.π'_desc', category.comp_id, homological_complex.hom.sq_from_left,
         limits.kernel_subobject_arrow_assoc, homology.π_desc, homology.map_desc,
         limits.kernel_subobject_map_arrow_assoc, arrow.iso_mk_hom_left,
         limits.kernel_subobject_map_arrow],
-      dsimp [chain_complex.single₀_comp_embed_iso_single,
+      dsimp only [chain_complex.single₀_comp_embed_iso_single,
         chain_complex.single₀_comp_embed_iso_single_component],
-      simp,
+      simp only [limits.kernel_subobject_map_arrow, limits.kernel_subobject_map_arrow_assoc, homological_complex.hom.sq_from_left,
+        homological_complex.hom.iso_of_components_hom_f, functor.comp_map, homology_functor_map, nat_iso.of_components.app,
+        eq_to_iso_refl, iso.trans_refl, iso.trans_hom, functor.map_iso_hom, homology.congr_hom, homology_zero_zero_hom,
+        homology.map_desc, homology.π_map_assoc, limits.kernel_zero_iso_source_hom, limits.kernel_subobject_arrow_assoc],
+      erw [homology.π_desc, limits.kernel_subobject_map_arrow_assoc],
+      simp only [homological_complex.hom.sq_from_left, limits.kernel_subobject_map_arrow_assoc, arrow.iso_mk_hom_left],
+      dsimp only [chain_complex.single₀_comp_embed_iso_single_component],
+      erw [iso.refl_hom, iso.refl_hom, category.id_comp, category.id_comp, category.comp_id], refl,
       apply_instance },
     { apply_instance } },
   { refine limits.is_zero.is_iso _ _ _; refine exact.homology_is_zero _ _ (exact_of_zero _ _), },
@@ -391,7 +398,7 @@ example : (zmod_resolution n).X 0 = of ℤ := rfl
 
 def zmod_resolution_pi_f :
   Π (i : ℕ), (zmod_resolution n).X i ⟶ ((chain_complex.single₀ AddCommGroup).obj (of $ zmod n)).X i
-| 0     := show of ℤ ⟶ of (zmod n), from @int.cast_add_hom _ _ ⟨(1 : zmod n)⟩
+| 0     := show of ℤ ⟶ of (zmod n), from (int.cast_ring_hom (zmod n)).to_add_monoid_hom
 | (i+1) := 0
 
 def zmod_resolution_pi :
@@ -402,9 +409,9 @@ def zmod_resolution_pi :
     { ext k, dsimp [zmod_resolution_pi_f, zmod_resolution],
       simp only [zero_apply, fin.coe_zero, comp_apply, int.coe_cast_add_hom],
       simp only [chain_complex.mk'_d_1_0, add_monoid_hom.coe_smul, pi.smul_apply, id_apply,
-        nsmul_one, int.coe_nat_bit0, int.coe_nat_succ, int.coe_nat_zero,
-        zero_add, int.cast_bit0, int.cast_one],
-      exact (zmod.nat_cast_self n).symm },
+        nsmul_one, int.coe_nat_bit0, int.coe_nat_succ, int.coe_nat_zero, zero_add, int.cast_bit0,
+        int.cast_one, map_nsmul],
+      simp only [ring_hom.coe_add_monoid_hom, ring_hom.eq_int_cast, int.cast_one, nsmul_one, zmod.nat_cast_self], },
     { exact comp_zero.trans comp_zero.symm }
   end }
 
