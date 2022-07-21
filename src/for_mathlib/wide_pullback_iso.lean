@@ -8,7 +8,8 @@ namespace category_theory
 open category_theory.limits
 
 universes u
-variables {C : Type (u+1)} [category.{u} C] [has_limits C]
+variables {C : Type (u+1)} [category.{u} C] [has_wide_pullbacks.{u} C]
+-- we might be able to change this `.{u}` to `.{0}` and get rid of a whole bunch of `ulift`s.
 
 set_option pp.universes true
 
