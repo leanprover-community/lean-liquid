@@ -421,13 +421,13 @@ parameters {C : Type u'} [category.{u+1} C] [has_limits C] [has_colimits C]
 
 parameters {J : Type (u+1)} [small_category J] (K : J ⥤ ExtrSheafProd.{u} C)
 
-parameters {ι : Type u} [fintype ι] (X : ι → ExtrDisc.{u})
+parameters {ι : Type} [fintype ι] (X : ι → ExtrDisc.{u})
 
 def KC : ExtrDisc.{u}ᵒᵖ ⥤ C := colimit (K ⋙ ExtrSheafProd_to_presheaf C)
 
 def P₀ : C := ∏ (λ i,  KC.obj (op (X i)))
 def P : C := ∏ (λ i : ulift.{u+1} ι,  KC.obj (op (X i.down)))
-def S : C := ⨁ (λ i : ulift.{u+1} ι, KC.obj (op (X i.down)))
+def S : C := ⨁ (λ i : ι, KC.obj (op (X i)))
 
 def prod_iso_P : P₀ ≅ P :=
 { hom := pi.lift $ λ i, pi.π _ _,
@@ -436,9 +436,9 @@ def prod_iso_P : P₀ ≅ P :=
   inv_hom_id' := by { ext ⟨⟨j⟩⟩, simp }, }
 
 def biprod_iso_P : P ≅ S :=
-{ hom := biproduct.lift $ λ b, pi.π _ _,
+{ hom := biproduct.lift $ λ b, pi.π (λ i : ulift.{u+1} ι,  KC.obj (op (X i.down))) ⟨b⟩,
   inv := pi.lift $ λ b, biproduct.π _ _,
-  hom_inv_id' := by { ext ⟨j⟩, simp },
+  hom_inv_id' := by { ext ⟨⟨j⟩⟩, simp },
   inv_hom_id' := begin
     apply biproduct.hom_ext, -- we need to choose the correct extensionality lemma here...
     intros i,
@@ -446,8 +446,9 @@ def biprod_iso_P : P ≅ S :=
   end }
 
 def Q₀ (j : J) : C := ∏ (λ i : ι, (K.obj j).val.obj (op (X i)))
+def Q₁ (j : J) : C := ∏ (λ i : ulift.{u} ι, (K.obj j).val.obj (op (X i.down)))
 def Q (j : J) : C := ∏ (λ i : ulift.{u+1} ι, (K.obj j).val.obj (op (X i.down)))
-def T (j : J) : C := ⨁ (λ i : ulift.{u+1} ι, (K.obj j).val.obj (op (X i.down)))
+def T (j : J) : C := ⨁ (λ i : ι, (K.obj j).val.obj (op (X i)))
 
 def prod_iso_Q (j : J) : Q₀ j ≅ Q j :=
 { hom := pi.lift $ λ b, pi.π _ _,
@@ -455,22 +456,33 @@ def prod_iso_Q (j : J) : Q₀ j ≅ Q j :=
   hom_inv_id' := by { ext ⟨j⟩, simp },
   inv_hom_id' := by { ext ⟨⟨j⟩⟩, simp }, }
 
-def biprod_iso_Q (j : J) : Q j ≅ T j :=
-{ hom := biproduct.lift $ λ b, pi.π _ _,
-  inv := pi.lift $ λ b, biproduct.π _ _,
+def prod_iso_Q' (j : J) : Q₀ j ≅ Q₁ j :=
+{ hom := pi.lift $ λ b, pi.π _ _,
+  inv := pi.lift $ λ b, pi.π (λ (i : ulift ι), (K.obj j).val.obj (op (X i.down))) ⟨b⟩,
   hom_inv_id' := by { ext ⟨j⟩, simp },
+  inv_hom_id' := by { ext ⟨⟨j⟩⟩, simp }, }
+
+def biprod_iso_Q (j : J) : Q j ≅ T j :=
+{ hom := biproduct.lift $ λ b, pi.π (λ i : ulift.{u+1} ι, (K.obj j).val.obj (op (X i.down))) ⟨b⟩,
+  inv := pi.lift $ λ b, biproduct.π _ _,
+  hom_inv_id' := by { ext ⟨⟨j⟩⟩, simp },
   inv_hom_id' := begin
     apply biproduct.hom_ext, -- we need to choose the correct extensionality lemma here...
     intros i,
     simp,
   end }
 
-def KQ₀ (j) : (K.obj j).val.obj (op (ExtrDisc.sigma X)) ≅ Q₀ j :=
+def KQ₀ (j) : (K.obj j).val.obj (op (ExtrDisc.sigma (X ∘ ulift.down))) ≅ Q₀ j :=
 begin
   -- Lean is being annoying... again...
-  let t : (K.obj j).val.obj (op (ExtrDisc.sigma X)) ⟶ Q₀ K X j :=
-    pi.lift (λ (i : ι), (K.obj j).val.map (ExtrDisc.sigma.ι X i).op),
-  haveI : is_iso t := (K.obj j).cond ι X,
+  let t : (K.obj j).val.obj (op (ExtrDisc.sigma (X ∘ ulift.down))) ⟶ Q₀ K X j :=
+    pi.lift (λ (i : ι), (K.obj j).val.map (ExtrDisc.sigma.ι (X ∘ ulift.down) ⟨i⟩).op),
+  have := (K.obj j).cond (ulift ι) (X ∘ ulift.down), dsimp at this,
+  let s := _, change is_iso s at this,
+  have ht : t = s ≫ (prod_iso_Q' _ _ _).inv,
+  { dsimp [s, t, prod_iso_Q'], apply limit.hom_ext, rintros ⟨q⟩,
+    simp },
+  haveI : is_iso t := by { rw ht, resetI, apply is_iso.comp_is_iso },
   exact as_iso t,
 end
 
@@ -524,7 +536,8 @@ def T_functor : J ⥤ C :=
   end }
 
 def KQ₀_nat_iso :
-  K ⋙ ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj (op (ExtrDisc.sigma X)) ≅ Q₀_functor :=
+  K ⋙ ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj (op (ExtrDisc.sigma (X ∘ ulift.down))) ≅
+  Q₀_functor :=
 nat_iso.of_components (λ j, KQ₀ _)
 begin
   intros i j f,
@@ -555,16 +568,17 @@ def colimit_KQ₀_nat_iso :
   KC ≅ ((K ⋙ ExtrSheafProd_to_presheaf _).flip ⋙ colim) :=
 colimit_iso_flip_comp_colim (K ⋙ ExtrSheafProd_to_presheaf C)
 
-def colimit_KQ₀_nat_iso_eval : KC.obj (op (ExtrDisc.sigma X)) ≅
-  colimit (K ⋙ ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj (op (ExtrDisc.sigma X))) :=
+def colimit_KQ₀_nat_iso_eval : KC.obj (op (ExtrDisc.sigma (X ∘ ulift.down))) ≅
+  colimit (K ⋙ ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj
+  (op (ExtrDisc.sigma (X ∘ ulift.down)))) :=
 colimit_KQ₀_nat_iso.app _
 
-def CT : C := ⨁ (λ i : ulift.{u+1} ι,
-    colimit (K ⋙ ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj (op (X i.down))))
+def CT : C := ⨁ (λ i : ι,
+    colimit (K ⋙ ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj (op (X i))))
 
-def ct_iso (i : ulift.{u+1} ι) :
-  (colimit (K ⋙ ExtrSheafProd_to_presheaf _)).obj (op (X i.down)) ≅
-  colimit (K ⋙ ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj (op (X i.down))) :=
+def ct_iso (i : ι) :
+  (colimit (K ⋙ ExtrSheafProd_to_presheaf _)).obj (op (X i)) ≅
+  colimit (K ⋙ ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj (op (X i))) :=
 colimit_KQ₀_nat_iso.app _
 
 def CT_iso : CT ≅ S :=
@@ -587,7 +601,7 @@ def colimit_T_iso : colimit T_functor ≅ CT :=
 { hom := colimit.desc T_functor ⟨CT,
   { app := λ j, biproduct.map $ λ i,
       colimit.ι (K ⋙ ExtrSheafProd_to_presheaf C ⋙
-      (evaluation ExtrDiscᵒᵖ C).obj (op (X i.down))) j,
+      (evaluation ExtrDiscᵒᵖ C).obj (op (X i))) j,
     naturality' := begin
       intros a b f,
       dsimp [T_functor, map_T],
@@ -600,7 +614,7 @@ def colimit_T_iso : colimit T_functor ≅ CT :=
     end }⟩,
   inv := biproduct.desc $ λ b,
     colimit.desc (K ⋙ ExtrSheafProd_to_presheaf _ ⋙
-    (evaluation _ _).obj (op (X b.down))) ⟨colimit T_functor,
+    (evaluation _ _).obj (op (X b))) ⟨colimit T_functor,
   { app := λ j, begin
       dsimp [ExtrSheafProd_to_presheaf, T_functor, T],
       apply biproduct.ι _ b,
@@ -631,8 +645,8 @@ def colimit_T_iso : colimit T_functor ≅ CT :=
   end }
 
 -- We want this to be an isomorphism.
-def t : KC.obj (op (ExtrDisc.sigma X)) ⟶ P₀ :=
-  pi.lift $ λ i, KC.map (ExtrDisc.sigma.ι _ _).op
+def t : KC.obj (op (ExtrDisc.sigma (X ∘ ulift.down))) ⟶ P₀ :=
+  pi.lift $ λ i, KC.map (ExtrDisc.sigma.ι (X ∘ ulift.down) ⟨i⟩).op
 
 lemma key_lemma : t =
   colimit_KQ₀_nat_iso_eval.hom ≫
