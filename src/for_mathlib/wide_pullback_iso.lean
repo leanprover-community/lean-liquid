@@ -76,22 +76,22 @@ wide_pullback
     ext t : 2, dsimp, apply wide_pullback.hom_ext, rintros ⟨j⟩,
     { simp only [wide_pullback.lift_π],
       have := types_comp_apply
-        (wide_pullback.lift.{u+1 u+2} (ulift_functor.{u+1 u}.map
-          ((yoneda.{u u+1}.map (wide_pullback.base.{u u+1} (λ (_x : ulift.{u 0} (fin i)), f))).app
+        (wide_pullback.lift.{u+1 _ u+2} (ulift_functor.{u+1 u}.map
+          ((yoneda.{u u+1}.map (wide_pullback.base.{u u u+1} (λ (_x : ulift.{u 0} (fin i)), f))).app
           (op.{u+2} T))) (λ (q : ulift.{u+1 0} (fin i)), ulift_functor.{u+1 u}.map
-          ((yoneda.{u u+1}.map (wide_pullback.π.{u u+1} (λ (_x : ulift.{u 0} (fin i)), f)
+          ((yoneda.{u u+1}.map (wide_pullback.π.{u _ u+1} (λ (_x : ulift.{u 0} (fin i)), f)
           {down := q.down})).app (op.{u+2} T))) _)
-        (wide_pullback.π.{u+1 u+2} (λ (_x : ulift.{u+1 0} (fin i)), ulift_functor.{u+1 u}.map
+        (wide_pullback.π.{u+1 _ u+2} (λ (_x : ulift.{u+1 0} (fin i)), ulift_functor.{u+1 u}.map
           ((yoneda.{u u+1}.map f).app (op.{u+2} T))) _) t,
       rw [← this, wide_pullback.lift_π], refl },
     { simp only [wide_pullback.lift_base],
       have := types_comp_apply
-        (wide_pullback.lift.{u+1 u+2} (ulift_functor.{u+1 u}.map
-          ((yoneda.{u u+1}.map (wide_pullback.base.{u u+1} (λ (_x : ulift.{u 0} (fin i)), f))).app
+        (wide_pullback.lift.{u+1 _ u+2} (ulift_functor.{u+1 u}.map
+          ((yoneda.{u u+1}.map (wide_pullback.base.{u _ u+1} (λ (_x : ulift.{u 0} (fin i)), f))).app
           (op.{u+2} T))) (λ (q : ulift.{u+1 0} (fin i)), ulift_functor.{u+1 u}.map
-          ((yoneda.{u u+1}.map (wide_pullback.π.{u u+1} (λ (_x : ulift.{u 0} (fin i)), f)
+          ((yoneda.{u u+1}.map (wide_pullback.π.{u _ u+1} (λ (_x : ulift.{u 0} (fin i)), f)
           {down := q.down})).app (op.{u+2} T))) _)
-        (wide_pullback.base.{u+1 u+2} (λ (_x : ulift.{u+1 0} (fin i)),
+        (wide_pullback.base.{u+1 _ u+2} (λ (_x : ulift.{u+1 0} (fin i)),
           ulift_functor.{u+1 u}.map ((yoneda.{u u+1}.map f).app (op.{u+2} T)))) t,
       rw [← this, limits.wide_pullback.lift_base], refl }
   end,
