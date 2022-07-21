@@ -404,14 +404,14 @@ noncomputable
 def replacement_homology_map (i : ℕ) :
   homology _ _ ((category.assoc _ _ _).trans (replacement_aux_comp_eq_zero X a H (i+1))) ⟶
   homology _ _ (X.d_comp_d (a-(i+1 : ℕ) - 1) (a-(i+1 : ℕ)) (a-i)) :=
-homology.map _ _
-  (arrow.hom_mk $ (begin
-    have := (replacement_aux_snd_comm X a H (i+1)).symm.trans (category.assoc _ _ _).symm,
-    rw [← X.X_eq_to_iso_d (show a - ↑(i + 2) = a - ↑(i + 1) - 1, by norm_num [sub_sub]),
-      ← category.assoc] at this,
-    exact this,
-  end))
-  (arrow.hom_mk (replacement_aux_snd_comm X a H i).symm) rfl
+begin
+  refine homology.map _ _ _ (arrow.hom_mk (replacement_aux_snd_comm X a H i).symm) _,
+  { have := (replacement_aux_snd_comm X a H (i+1)).symm.trans (category.assoc _ _ _).symm,
+    have hai : a - ↑(i + 2) = a - ↑(i + 1) - 1, { push_cast, ring },
+    rw [← X.X_eq_to_iso_d hai, ← category.assoc] at this,
+    exact arrow.hom_mk this, },
+  { apply_instance }, { refl }
+end
 
 instance (i : ℕ) : mono (replacement_homology_map X a H i) :=
 begin
@@ -481,15 +481,15 @@ lemma replacement_aux_snd_congr (i j : ℕ) (e : i = j) :
   (replacement_aux X a H i).2 == (replacement_aux X a H j).2 :=
 by { subst e }
 
-def replacement_homology_eq (i : ℕ) :
+lemma replacement_homology_eq (i : ℕ) :
   homology _ _ ((replacement X a H).d_comp_d (a - ↑(i + 1) - 1) (a - ↑(i + 1)) (a - i)) =
     homology _ _ (replacement_homology_map._proof_4 X a H i) :=
 begin
-  dsimp [replacement],
+  dsimp only [replacement],
   have e₁ : a - (↑i + 1) - 1 + 1 = a - (↑i + 1) := by norm_num [sub_add],
-  have e₂ :a - (↑i + 1) + 1 = a - ↑i := by norm_num [sub_add],
-  have e₃ : ¬ a - (↑i + 1) - 1 > a :=
-    by { simp only [gt_iff_lt, tsub_le_iff_right, not_lt], linarith },
+  have e₂ : a - (↑i + 1) + 1 = a - ↑i := by norm_num [sub_add],
+  have e₃ : ¬ a < a - (↑i + 1) - 1 :=
+    by { simp only [tsub_le_iff_right, not_lt], linarith },
   have e₄ : ¬a - (↑i + 1) > a := by { simp only [gt_iff_lt, tsub_le_iff_right, not_lt], linarith },
   have e₅ : ¬a - i > a := by { simp only [gt_iff_lt, tsub_le_iff_right, not_lt], linarith },
   have e₆ : (a - (a - (↑i + 1))).nat_abs = i + 1,
@@ -497,13 +497,15 @@ begin
   have e₇ : (a - (a - (↑i + 1) - 1)).nat_abs = i + 1 + 1,
   { rw [sub_sub, ← sub_add, sub_self, zero_add], exact int.nat_abs_of_nat_core _ },
   have e₈ : (a - (a - i)).nat_abs = i := by norm_num,
+  simp only [nat.cast_add, nat.cast_one, sub_add_cancel, eq_self_iff_true, gt_iff_lt, dif_pos,
+    not_lt, sub_le_self_iff, nat.cast_nonneg, dif_neg, eq_to_hom_refl, category.comp_id],
   simp only [dif_pos e₁, dif_pos e₂, dif_neg e₄, dif_neg e₅],
   congr' 1,
-  { rw if_neg e₃, apply replacement_aux_eq_of_eq, rw e₇ },
-  { rw if_neg e₄, apply replacement_aux_eq_of_eq, rw e₆ },
-  { rw if_neg e₅, { congr, { ext, congr, exact e₈ }, { exact e₈ } } },
-  { rw [eq_to_hom_comp_heq_iff, comp_eq_to_hom_heq_iff, category.comp_id, e₆] },
-  { rw [eq_to_hom_comp_heq_iff, comp_eq_to_hom_heq_iff, e₈] },
+  { erw if_neg e₃, apply replacement_aux_eq_of_eq, erw e₇ },
+  { erw if_neg e₄, apply replacement_aux_eq_of_eq, erw e₆ },
+  { erw if_neg e₅, { congr, { ext, congr, exact e₈ }, { exact e₈ } } },
+  { erw [eq_to_hom_comp_heq_iff, comp_eq_to_hom_heq_iff, e₆] },
+  { erw [eq_to_hom_comp_heq_iff, comp_eq_to_hom_heq_iff, e₈] },
 end
 
 lemma replacement_hom_homology_iso (i : ℕ) :
@@ -626,7 +628,7 @@ def _root_.cochain_complex.as_nat_chain_complex (X : cochain_complex V ℤ) (a :
 { X := λ i, X.X (a - i),
   d := λ i j, X.d _ _,
   shape' := λ i j r, by { refine X.shape _ _ (λ e, r _), dsimp at e ⊢,
-    apply int.coe_nat_inj, dsimp, linarith },
+    apply int.coe_nat_inj, push_cast, linarith },
   d_comp_d' := λ i j k _ _, X.d_comp_d _ _ _ }
 
 @[simps]
@@ -656,7 +658,7 @@ begin
   have h₄ : ∀ i, a ≤ i → f.f i = 0,
   { intros i e, apply (h₂ i e).eq_of_src },
   fapply homotopy.mk_inductive _ 0,
-  { dsimp, rw zero_comp, apply h₄, linarith },
+  { dsimp, rw zero_comp, apply h₄, push_cast, linarith },
   all_goals { dsimp },
   { have := f.comm (a - (0 + 1)) a,
     rw [h₄ _ (le_of_eq rfl), comp_zero] at this,
@@ -668,12 +670,12 @@ begin
         is_zero_of_iso_of_zero (h₃ (a - (0 + 1))) (homology_iso _ _ _ _ _ _)⟩,
       all_goals { dsimp, abel } } },
   { rw comp_zero, conv_rhs { rw [zero_add] },
-    slice_rhs 2 3 { rw ← kernel.lift_ι _ _ (Y.d_comp_d (a - (0 + 1 + 1)) (a - (0 + 1)) a) },
-    rw [← category.assoc, projective.factor_thru_comp, kernel.lift_ι] },
+    slice_rhs 2 3 { erw ← kernel.lift_ι _ _ (Y.d_comp_d (a - (0 + 1 + 1)) (a - (0 + 1)) a) },
+    erw [← category.assoc, projective.factor_thru_comp, kernel.lift_ι], refl },
   { rintros n ⟨g₁, g₂, e⟩, dsimp only,
     have : X.d (a - (n + 1 + 1)) (a - (n + 1)) ≫
       (f.f (a - (↑n + 1)) - g₂ ≫ Y.d (a - (↑n + 1 + 1)) (a - (↑n + 1))) = 0,
-    { rw ← sub_eq_iff_eq_add at e, rw [e, X.d_comp_d_assoc, zero_comp] },
+    { rw ← sub_eq_iff_eq_add at e, erw [e, X.d_comp_d_assoc, zero_comp] },
     rw [preadditive.comp_sub, ← f.comm, ← category.assoc, ← preadditive.sub_comp] at this,
     fsplit,
     { refine projective.factor_thru (kernel.lift _ _ this) _,
@@ -681,10 +683,10 @@ begin
       apply_with kernel.lift.epi { instances := ff },
       rw preadditive.exact_iff_homology_is_zero,
       refine ⟨Y.d_comp_d _ _ _, is_zero_of_iso_of_zero (h₃ _) (homology_iso _ _ _ _ _ _)⟩,
-      all_goals { dsimp, abel } },
+      all_goals { dsimp, push_cast, abel } },
     { rw ← sub_eq_iff_eq_add',
-      slice_rhs 2 3 { rw ← kernel.lift_ι (Y.d (a-(n+1+1)) (a-(n+1))) _ (Y.d_comp_d _ _ _) },
-      rw [← category.assoc, projective.factor_thru_comp, kernel.lift_ι] } }
+      slice_rhs 2 3 { erw ← kernel.lift_ι (Y.d (a-(n+1+1)) (a-(n+1))) _ (Y.d_comp_d _ _ _) },
+      erw [← category.assoc, projective.factor_thru_comp, kernel.lift_ι], refl } }
 end
 
 noncomputable
