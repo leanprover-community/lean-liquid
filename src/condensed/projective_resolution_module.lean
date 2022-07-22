@@ -201,8 +201,8 @@ begin
         (@preadditive.preadditive_has_zero_morphisms.{u+1 u+2} (@Module.{u+1 u+1} R _)
           (@Module.Module_category.{u+1 u+1} R _)
           (@Module.category_theory.preadditive.{u+1 u+1} R _)) _ _,
-    apply_with (is_colimit_of_reflects.{0 0 (u+1) (u+1) (u+2) (u+2)} FF) {instances:=ff},
-    swap, { sorry },
+    haveI := reflects_colimits_of_size_shrink.{0 u+1 0 u+1} FF,
+    apply (is_colimit_of_reflects.{0 0 (u+1) (u+1) (u+2) (u+2)} FF),
     apply evaluation_jointly_reflects_colimits,
     intros S,
     have := is_colimit_empty_cocone_equiv (Module R)

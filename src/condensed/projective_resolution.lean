@@ -177,8 +177,8 @@ begin
       λ S, is_zero.iso (h S) is_zero_initial,
     symmetry,
     apply (colimit.is_colimit _).cocone_point_unique_up_to_iso (_ : is_colimit (as_empty_cocone _)),
-    apply_with (is_colimit_of_reflects.{0 0 (u+1) (u+1) (u+2) (u+2)} FF) {instances:=ff},
-    swap, { sorry },
+    haveI := reflects_colimits_of_size_shrink.{0 u+1 0 u+1} FF,
+    apply (is_colimit_of_reflects.{0 0 (u+1) (u+1) (u+2) (u+2)} FF),
     apply evaluation_jointly_reflects_colimits,
     intros S,
     have := is_colimit_empty_cocone_equiv Ab (as_empty_cocone (A.val.obj (op S.unop.val)))
