@@ -681,13 +681,105 @@ end finite_product_colimit_setup
 variables {C : Type u'} [category.{u+1} C] [has_limits C] [has_colimits C]
   [has_zero_morphisms C] [has_finite_biproducts C]
 
+attribute [reassoc] ExtrDisc.sigma.ι_desc
+
+lemma ExtrDisc.sigma.eq_to_hom_ι_eq_ι
+  {α : Type u} [fintype α] (X : α → ExtrDisc.{u})
+  (a b : α) (h : a = b) :
+  eq_to_hom (by rw h) ≫ ExtrDisc.sigma.ι X a = ExtrDisc.sigma.ι X b :=
+begin
+  induction h, simp,
+end
+
+def ExtrDisc.sigma_iso_of_equiv {α β : Type u} [fintype α] [fintype β] (X : α → ExtrDisc.{u})
+  (e : β ≃ α) :
+  ExtrDisc.sigma (X ∘ e) ≅ ExtrDisc.sigma X :=
+{ hom := ExtrDisc.sigma.desc _ $ λ b, ExtrDisc.sigma.ι _ _,
+  inv := ExtrDisc.sigma.desc _ $ λ a, eq_to_hom begin
+    dsimp,
+    refine congr_arg _ _,
+    exact (e.apply_symm_apply _).symm,
+  end ≫ ExtrDisc.sigma.ι _ (e.symm a),
+  hom_inv_id' := begin
+    apply ExtrDisc.sigma.hom_ext, intros b,
+    simp [ExtrDisc.sigma.ι_desc_assoc, ExtrDisc.sigma.ι_desc],
+    apply ExtrDisc.sigma.eq_to_hom_ι_eq_ι (X ∘ e),
+    simp,
+  end,
+  inv_hom_id' := begin
+    apply ExtrDisc.sigma.hom_ext, intros b,
+    simp [ExtrDisc.sigma.ι_desc_assoc, ExtrDisc.sigma.ι_desc],
+    apply ExtrDisc.sigma.eq_to_hom_ι_eq_ι X,
+    simp,
+  end }
+
+lemma pi_π_comp_eq_to_hom {α : Type} [fintype α] (X : α → C) (a b : α) (h : a = b) :
+  pi.π X a ≫ eq_to_hom (by rw h) = pi.π X b :=
+by { induction h, simp }
+
+lemma pi_π_comp_eq_to_hom' {α : Type u} [fintype α] (X : α → C) (a b : α) (h : a = b) :
+  pi.π X a ≫ eq_to_hom (by rw h) = pi.π X b :=
+by { induction h, simp }
+
 lemma finite_product_condition_holds_for_colimit
   {J : Type (u+1)} [small_category J] (K : J ⥤ ExtrSheafProd.{u} C) [has_colimits C] :
   ExtrDisc.finite_product_condition (colimit (K ⋙ ExtrSheafProd_to_presheaf C)) :=
 begin
   introsI ι _ X,
+  let e : ι ≃ fin _ := fintype.equiv_fin _,
+  let X' := X ∘ e.symm,
   dsimp,
-  apply finite_product_colimit_setup.main,
+  let E : ExtrDisc.sigma (X' ∘ ulift.down) ≅ ExtrDisc.sigma X :=
+    ExtrDisc.sigma_iso_of_equiv X (equiv.ulift.trans e.symm),
+  have := finite_product_colimit_setup.main K X',
+  let eL : (colimit (K ⋙ ExtrSheafProd_to_presheaf C)).obj (op (ExtrDisc.sigma X)) ≅
+    (colimit (K ⋙ ExtrSheafProd_to_presheaf C)).obj (op (ExtrDisc.sigma (X' ∘ ulift.down))) :=
+    functor.map_iso _ E.op,
+  let E' : finite_product_colimit_setup.P₀ K X' ≅
+    ∏ λ (i : ι), (colimit (K ⋙ ExtrSheafProd_to_presheaf C)).obj (op (X i)) :=
+    ⟨limits.pi.lift _, limits.pi.lift _,_,_⟩,
+  rotate,
+  { intros i,
+    dsimp [finite_product_colimit_setup.P₀],
+    refine pi.π _ (e i) ≫ _,
+    refine category_theory.functor.map _ _,
+    refine quiver.hom.op _,
+    refine eq_to_hom _,
+    refine congr_arg X _,
+    exact (e.symm_apply_apply _).symm },
+  { intros i,
+    refine pi.π _ (e.symm i) },
+  { apply limits.limit.hom_ext,
+    rintro ⟨j⟩, dsimp,
+    simp only [eq_to_hom_op, category.assoc, limit.lift_π, fan.mk_π_app, category.id_comp],
+    rw category_theory.eq_to_hom_map,
+    apply pi_π_comp_eq_to_hom, simp },
+  { apply limits.limit.hom_ext,
+    rintro ⟨j⟩, dsimp,
+    simp only [eq_to_hom_op, category.assoc, limit.lift_π, fan.mk_π_app,
+      category.id_comp],
+    rw category_theory.eq_to_hom_map,
+    rw limit.lift_π_assoc, dsimp,
+    change _ = pi.π _ _,
+    apply pi_π_comp_eq_to_hom'
+      (λ (i : ι), (colimit (K ⋙ ExtrSheafProd_to_presheaf C)).obj (op (X i))), simp },
+  let t := _, change is_iso t, let s := _, change is_iso s at this,
+  have ht : t = eL.hom ≫ s ≫ E'.hom,
+  { dsimp [t, eL, s, E', E],
+    apply limit.hom_ext, rintros ⟨j⟩,
+    simp only [category.assoc, limit.lift_π],
+    dsimp,
+    rw category_theory.eq_to_hom_op,
+    rw category_theory.eq_to_hom_map,
+    dsimp [finite_product_colimit_setup.t],
+    simp only [limit.lift_π_assoc],
+    dsimp [finite_product_colimit_setup.KC],
+    simp only [← category.assoc, ← functor.map_comp, ← op_comp],
+    erw ExtrDisc.sigma.ι_desc,
+    dsimp,
+    rw ← ExtrDisc.sigma.eq_to_hom_ι_eq_ι X (e.symm (e j)) j (by simp),
+    simp [category_theory.eq_to_hom_map] },
+  rw ht, resetI, apply_instance,
 end
 
 instance ExtrSheafProd_to_presheaf_creates_colimit
