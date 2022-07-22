@@ -4,6 +4,7 @@ import algebra.category.Group.adjunctions
 import algebra.category.Group.filtered_colimits
 import algebra.category.Group.biproducts
 import algebra.category.Group.abelian
+import algebra.category.Group.Z_Module_equivalence
 import category_theory.limits.preserves.shapes.products
 import category_theory.limits.preserves.filtered
 import category_theory.limits.shapes.terminal
@@ -13,7 +14,7 @@ import algebra.group.ulift
 
 open category_theory
 
-universes u
+universes v u
 
 namespace AddCommGroup
 
@@ -99,38 +100,68 @@ AddCommGroup.adj'.unit.app _ $
 
 open_locale classical
 
-set_option pp.universes true
+def coproduct_cocone_of_basis {ι : Type v} {A : AddCommGroup.{u}} (𝓑 : basis ι ℤ A) :
+  limits.cofan (λ i : ι, tunit.{u}) :=
+limits.cofan.mk A (λ i, AddCommGroup.of_hom
+  ((zmultiples_add_hom A.α (𝓑 i)).comp tunit_add_equiv.to_add_monoid_hom))
+
+def coproduct_cocone_of_basis_is_colimit {ι : Type v} {A : AddCommGroup.{u}}
+  (𝓑 : basis ι ℤ A) : limits.is_colimit (coproduct_cocone_of_basis 𝓑) :=
+{ desc := λ s, AddCommGroup.of_hom
+    ((finsupp.total ι s.X.α ℤ (λ i, s.ι.app ⟨i⟩ (tunit_add_equiv.symm 1))).comp
+      𝓑.repr.to_linear_map).to_add_monoid_hom,
+  fac' := begin
+    rintros s ⟨j⟩,
+    apply finsupp.add_hom_ext,
+    intros x y,
+    dsimp [coproduct_cocone_of_basis],
+    simp [← map_zsmul],
+  end,
+  uniq' := begin
+    intros s m e,
+    apply (add_monoid_hom_lequiv_int ℤ).injective,
+    swap, { apply_instance },
+    apply 𝓑.ext,
+    intro i,
+    convert concrete_category.congr_hom (e ⟨i⟩) (tunit_add_equiv.symm 1) using 1,
+   { dsimp [coproduct_cocone_of_basis], simp },
+    { dsimp, simp }
+  end }
+.
+-- set_option pp.universes true
 -- Of course this is true without the fintype assumption...
-def iso_of_basis {ι : Type 0} [fintype ι] {A : AddCommGroup.{u}} (𝓑 : basis ι ℤ A) :
+def iso_of_basis {ι : Type v} [limits.has_coproduct (λ (i : ι), tunit.{u})]
+  {A : AddCommGroup.{u}} (𝓑 : basis ι ℤ A) :
   (∐ (λ i : ι, tunit.{u})) ≅ A :=
-begin
-  -- This is very messy...
-  let e : (∐ (λ i : ι, tunit.{u})) ≅ (⨁ (λ i, tunit.{u})) :=
-    (limits.colimit.is_colimit _).cocone_point_unique_up_to_iso
-      (limits.biproduct.is_bilimit _).is_colimit,
-  refine e ≪≫ _,
-  refine biproduct_iso_pi _ ≪≫ _,
-  let e : A ≃+ ulift.{u} (ι →₀ ℤ) := 𝓑.repr.to_add_equiv.trans add_equiv.ulift.symm,
-  refine AddCommGroup.of_iso _ ≪≫ (AddCommGroup.of_iso e).symm ≪≫
-    ⟨add_monoid_hom.id _, add_monoid_hom.id _, by { ext, refl }, by { ext, refl }⟩,
-  refine add_equiv.trans _ add_equiv.ulift.symm,
-  let q : tunit.{u} ≃+ ℤ := tunit_add_equiv,
-  let e : (ι →₀ ℤ) ≃+ (ι → ℤ),
-  { fconstructor,
-    exact finsupp.equiv_fun_on_fintype,
-    exact finsupp.equiv_fun_on_fintype.symm,
-    exact finsupp.equiv_fun_on_fintype.left_inverse_symm,
-    exact finsupp.equiv_fun_on_fintype.right_inverse_symm,
-    intros x y, refl },
-  refine add_equiv.trans _ e.symm,
-  fconstructor,
-  { intros f i, exact q (f i) },
-  { intros f i, exact q.symm (f i) },
-  { intros f, ext, dsimp, simp },
-  { intros f, ext, dsimp, simp },
-  { intros f g, ext i, simp, },
-end
---as_iso (hom_of_basis 𝓑)
+limits.is_colimit.cocone_point_unique_up_to_iso (limits.coproduct_is_coproduct _)
+  (coproduct_cocone_of_basis_is_colimit 𝓑)
+-- begin
+--   -- This is very messy...
+--   let e : (∐ (λ i : ι, tunit.{u})) ≅ (⨁ (λ i, tunit.{u})) :=
+--     (limits.colimit.is_colimit _).cocone_point_unique_up_to_iso
+--       (limits.biproduct.is_bilimit _).is_colimit,
+--   refine e ≪≫ _,
+--   refine biproduct_iso_pi _ ≪≫ _,
+--   let e : A ≃+ ulift.{u} (ι →₀ ℤ) := 𝓑.repr.to_add_equiv.trans add_equiv.ulift.symm,
+--   refine AddCommGroup.of_iso _ ≪≫ (AddCommGroup.of_iso e).symm ≪≫
+--     ⟨add_monoid_hom.id _, add_monoid_hom.id _, by { ext, refl }, by { ext, refl }⟩,
+--   refine add_equiv.trans _ add_equiv.ulift.symm,
+--   let q : tunit.{u} ≃+ ℤ := tunit_add_equiv,
+--   let e : (ι →₀ ℤ) ≃+ (ι → ℤ),
+--   { fconstructor,
+--     exact finsupp.equiv_fun_on_fintype,
+--     exact finsupp.equiv_fun_on_fintype.symm,
+--     exact finsupp.equiv_fun_on_fintype.left_inverse_symm,
+--     exact finsupp.equiv_fun_on_fintype.right_inverse_symm,
+--     intros x y, refl },
+--   refine add_equiv.trans _ e.symm,
+--   fconstructor,
+--   { intros f i, exact q (f i) },
+--   { intros f i, exact q.symm (f i) },
+--   { intros f, ext, dsimp, simp },
+--   { intros f, ext, dsimp, simp },
+--   { intros f g, ext i, simp, },
+-- end
 
 @[derive partial_order]
 def index_cat (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A] : Type u :=
@@ -207,7 +238,7 @@ def colimit_comparison (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A] :
   A.is_colimit_cocone
 
 lemma exists_basis_of_index (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A]
-  (I : A.index_cat) : ∃ (ι : Type 0) [fintype ι]
+  (I : A.index_cat) : ∃ (ι : Type v) [fintype ι]
   (𝓑 : basis ι ℤ (AddCommGroup.of I.1)), true :=
 begin
   obtain ⟨S,hS⟩ := I.2,
@@ -242,18 +273,31 @@ begin
     { rintros ⟨t,⟨t,rfl⟩,rfl⟩, exact t.2 },
     { intros ht, refine ⟨⟨t, _⟩, ⟨⟨t, ht⟩, rfl⟩, rfl⟩ } },
 end
+.
 
-lemma exists_sigma_iso_of_index (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A]
-  (I : A.index_cat) : ∃ (ι : Type 0) [fintype ι]
-  (e : (∐ (λ i : ι, tunit.{u})) ≅ AddCommGroup.of I.1), true :=
+lemma exists_sigma_iso_of_index (A : AddCommGroup.{u})
+  [no_zero_smul_divisors ℤ A]
+  (I : A.index_cat) : ∃ (ι : Type v) [fintype ι]
+  (e : by exactI (∐ (λ i : ι, tunit.{u})) ≅ AddCommGroup.of I.1), true :=
 begin
-  obtain ⟨ι,hι,𝓑,-⟩ := exists_basis_of_index A I,
+  obtain ⟨ι,hι,𝓑,-⟩ := exists_basis_of_index.{v} A I,
   resetI,
-  use [ι, hι, iso_of_basis 𝓑],
+  exact ⟨ι, hι, iso_of_basis 𝓑, trivial⟩,
 end
 
-lemma exists_biprod_iso_of_index (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A]
-  (I : A.index_cat) : ∃ (ι : Type 0) [fintype ι]
+instance {C J : Type*} [fintype J] [category C] [limits.has_zero_morphisms C]
+  [limits.has_finite_biproducts C] : limits.has_biproducts_of_shape J C :=
+⟨λ F, begin
+  have : F = (F ∘ (fintype.equiv_fin J).inv_fun) ∘ (fintype.equiv_fin J).to_fun,
+  { ext, dsimp, rw equiv.symm_apply_apply },
+  rw this,
+  exact ⟨⟨⟨_, (limits.bicone.whisker_is_bilimit_iff _ (fintype.equiv_fin J)).symm
+  (limits.biproduct.is_bilimit $ F ∘ (fintype.equiv_fin J).inv_fun)⟩⟩⟩
+end⟩
+
+lemma exists_biprod_iso_of_index
+  (A : AddCommGroup.{u}) [no_zero_smul_divisors ℤ A]
+  (I : A.index_cat) : ∃ (ι : Type v) [fintype ι]
   (e : by exactI (⨁ (λ i : ι, tunit.{u})) ≅ AddCommGroup.of I.1), true :=
 begin
   obtain ⟨ι,hι,e,-⟩ := exists_sigma_iso_of_index A I,
@@ -304,7 +348,7 @@ begin
       erw [hT.fac_assoc, hS.fac, category.comp_id] }
   }, --^ general colimit nonsense..., but I can't find applicable lemmas :-(
   intros I,
-  obtain ⟨ι,hι,e,-⟩ := A.exists_biprod_iso_of_index I,
+  obtain ⟨ι : Type,hι,e,-⟩ := A.exists_biprod_iso_of_index.{0} I,
   -- now use the fact that the functors are additive and that there exists some iso with a biproduct
   resetI,
   let eF : F.obj (⨁ λ (i : ι), tunit.{u}) ≅ ⨁ λ (i : ι), F.obj tunit :=
