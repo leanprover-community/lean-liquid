@@ -416,6 +416,8 @@ begin
 end
 .
 
+set_option pp.universes true
+
 lemma surjective (c : ℝ≥0) (i : simplex_categoryᵒᵖ) :
   function.surjective ⇑((Cech_nerve_level_hom r' Λ M N n c).left.app i) :=
 begin
@@ -423,7 +425,9 @@ begin
   intro y,
   refine ⟨Cech_nerve_level_hom.s y, _⟩,
   { apply limits.concrete.wide_pullback_ext'.{0} (λ i, F.hom),
-    rotate, { apply_instance }, { sorry },
+    rotate, { apply_instance },
+    { haveI := limits.preserves_limits_of_size_shrink.{0 u 0 u} (forget.{u+1} Profinite.{u}),
+      apply_instance, },
     intro j,
     erw [← augmented_cech_nerve.left_map_comp_obj_zero_iso _ _ j, ← comp_apply,
       ← category.assoc, ← (Cech_nerve_level_hom r' Λ M N n c).left.naturality,
