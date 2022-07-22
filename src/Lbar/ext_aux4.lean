@@ -28,7 +28,7 @@ variables (ι : ulift.{u+1} ℕ → ℝ≥0) (hι : monotone ι)
 set_option pp.universes true
 
 lemma homotopy_category.colimit_cofan_bdd {A : Type u} [category.{v} A] [abelian A]
-[has_coproducts A] {α : Type v} (X : α → bounded_homotopy_category A)
+[has_coproducts.{v} A] {α : Type v} (X : α → bounded_homotopy_category A)
   [uniformly_bounded X] : homotopy_category.is_bounded_above
   (homotopy_category.colimit_cofan $ λ a : α, (X a).val).X :=
 begin
@@ -80,7 +80,7 @@ end
 
 @[reassoc]
 lemma Ext_coproduct_iso_π
-  (A : Type u) [category.{v} A] [abelian A] [enough_projectives A] [has_coproducts A] [AB4 A]
+  (A : Type u) [category.{v} A] [abelian A] [enough_projectives A] [has_coproducts.{v} A] [AB4 A]
   (X : ulift.{v} ℕ → bounded_homotopy_category A) [uniformly_bounded X] (i : ℤ) (Y) (k) :
   (Ext_coproduct_iso X i Y).hom ≫ pi.π _ k =
   ((Ext i).map $ quiver.hom.op $ sigma.ι _ _).app Y :=

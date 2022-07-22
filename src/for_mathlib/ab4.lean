@@ -11,14 +11,14 @@ open category_theory.limits
 
 universes v u
 
-class AB4 (A : Type u) [category.{v} A] [has_coproducts A] : Prop :=
+class AB4 (A : Type u) [category.{v} A] [has_coproducts.{v} A] : Prop :=
 (cond : ∀ {α : Type v} (X Y : α → A) (f : Π a, X a ⟶ Y a)
   (hf : ∀ a, mono (f a)), mono (sigma.desc $ λ a, f a ≫ sigma.ι Y a))
 
 variables {A : Type u} [category.{v} A]
 
 instance AB4_mono
-  [has_coproducts A] [AB4 A]
+  [has_coproducts.{v} A] [AB4 A]
   {α : Type v} (X Y : α → A) (f : Π a, X a ⟶ Y a)
   [∀ a, mono (f a)] : mono (sigma.desc $ λ a, f a ≫ sigma.ι Y a) :=
 begin
@@ -28,7 +28,7 @@ end
 variable (A)
 noncomputable
 def sigma_functor
-  [has_coproducts A]
+  [has_coproducts.{v} A]
   (α : Type v) : (α → A) ⥤ A :=
 { obj := λ X, sigma_obj X,
   map := λ X Y f, sigma.desc $ λ a, f a ≫ sigma.ι _ a,
@@ -38,14 +38,14 @@ def sigma_functor
 variable {A}
 
 instance sigma_functor_preserves_mono
-  [has_coproducts A] [AB4 A]
+  [has_coproducts.{v} A] [AB4 A]
   (α : Type v)
   {X Y : α → A} (f : X ⟶ Y) [∀ a, mono (f a)] :
   mono ((sigma_functor A α).map f) :=
 category_theory.AB4_mono X Y f
 
 instance sigma_functor_preserves_epi
-  [has_coproducts A]
+  [has_coproducts.{v} A]
   (α : Type v)
   {X Y : α → A} (f : X ⟶ Y) [∀ a, epi (f a)] :
   epi ((sigma_functor A α).map f) :=
@@ -59,10 +59,12 @@ begin
   rwa cancel_epi at h,
 end
 
+set_option pp.universes true
+
 lemma AB4_of_preserves_colimits_of_reflects_limits_of_AB4
   {A B : Type u} [category.{v} A] [category.{v} B]
-  [has_coproducts A]
-  [has_coproducts B]
+  [has_coproducts.{v} A]
+  [has_coproducts.{v} B]
   (F : A ⥤ B)
   [preserves_colimits F]
   [creates_limits F]
@@ -72,7 +74,9 @@ begin
   constructor, introsI a X Y f hf,
   let t := _, change mono t,
   suffices : mono (F.map t),
-  { resetI, apply reflects_mono F },
+  { resetI,
+    haveI := reflects_limits_of_size_shrink.{0 v 0 v} F,
+    apply reflects_mono F },
   let eX : F.obj (∐ λ (a : a), X a) ≅ (∐ λ a, F.obj (X a)) :=
     (is_colimit_of_preserves F (colimit.is_colimit _)).cocone_point_unique_up_to_iso
       (colimit.is_colimit _) ≪≫ has_colimit.iso_of_nat_iso
@@ -115,7 +119,7 @@ example {X Y Z : A} [abelian A]
 
 noncomputable
 def coproduct_kernel_comparison (M : Type*) (S : complex_shape M) (α : Type v)
-  [abelian A] [has_coproducts A] (i : M) (X : α → homological_complex A S) :
+  [abelian A] [has_coproducts.{v} A] (i : M) (X : α → homological_complex A S) :
   (∐ λ (a : α), kernel ((X a).d_from i)) ⟶ kernel ((∐ X).d_from i) :=
 sigma.desc $ λ a, kernel.lift _ (kernel.ι _ ≫ (sigma.ι _ a : X a ⟶ ∐ X).f i)
 begin
@@ -125,7 +129,7 @@ end
 
 -- This should follow from the AB4 assumption
 instance mono_coproduct_kernel_comparison (M : Type*) (S : complex_shape M) (α : Type v)
-  [abelian A] [has_coproducts A] [AB4 A] (i : M) (X : α → homological_complex A S) :
+  [abelian A] [has_coproducts.{v} A] [AB4 A] (i : M) (X : α → homological_complex A S) :
 mono (coproduct_kernel_comparison M S α i X) :=
 begin
   let ι : kernel ((∐ X).d_from i) ⟶ _ := kernel.ι _,
@@ -184,7 +188,7 @@ open_locale zero_object
 noncomputable
 def preserves_colimits_of_shape_const_zero_aux
   (α : Type v) (M : Type*) (S : complex_shape M)
-  [abelian A] [has_coproducts A]
+  [abelian A] [has_coproducts.{v} A]
   (K : discrete α ⥤ homological_complex A S) :
   is_colimit (((functor.const _).obj (0 : A)).map_cocone (colimit.cocone K)) :=
 { desc := λ S, 0,
@@ -193,7 +197,7 @@ def preserves_colimits_of_shape_const_zero_aux
 
 noncomputable
 instance preserves_colimits_of_shape_const_zero
-  (α : Type v) (M : Type*) (S : complex_shape M) [abelian A] [has_coproducts A] :
+  (α : Type v) (M : Type*) (S : complex_shape M) [abelian A] [has_coproducts.{v} A] :
   preserves_colimits_of_shape (discrete α)
   ((functor.const _).obj 0 : homological_complex A S ⥤ A) :=
 begin
@@ -232,7 +236,7 @@ end
 
 noncomputable
 instance eval_next_preserves_coproducts (α : Type v)
-  (M : Type*) (S : complex_shape M) [abelian A] [has_coproducts A] (i : M) :
+  (M : Type*) (S : complex_shape M) [abelian A] [has_coproducts.{v} A] (i : M) :
   preserves_colimits_of_shape (discrete α) (eval_next A S i) :=
 begin
   rcases h : S.next i with _ | ⟨j,w⟩,
@@ -303,7 +307,7 @@ end
 
 noncomputable
 instance eval_prev_preserves_coproducts (α : Type v)
-  (M : Type*) (S : complex_shape M) [abelian A] [has_coproducts A] (i : M) :
+  (M : Type*) (S : complex_shape M) [abelian A] [has_coproducts.{v} A] (i : M) :
   preserves_colimits_of_shape (discrete α) (eval_prev A S i) :=
 begin
   rcases h : S.prev i with _ | ⟨j,w⟩,
@@ -362,7 +366,7 @@ begin
 end
 
 noncomputable
-def sigma_cokernel_cofork [abelian A] [has_coproducts A] [AB4 A]
+def sigma_cokernel_cofork [abelian A] [has_coproducts.{v} A] [AB4 A]
   {α : Type v} (X Y : α → A) (f : X ⟶ Y) :
   cokernel_cofork ((sigma_functor A α).map f) :=
 cokernel_cofork.of_π
@@ -377,7 +381,7 @@ begin
 end
 
 noncomputable
-def is_colimit_sigma_cokernel_cofork [abelian A] [has_coproducts A] [AB4 A]
+def is_colimit_sigma_cokernel_cofork [abelian A] [has_coproducts.{v} A] [AB4 A]
   {α : Type v} (X Y : α → A) (f : X ⟶ Y) :
   is_colimit (sigma_cokernel_cofork X Y f) :=
 is_colimit_aux _
@@ -410,7 +414,7 @@ begin
   simp only [colimit.ι_desc, cofan.mk_ι_app],
 end
 
-lemma exact_coproduct [abelian A] [has_coproducts A] [AB4 A]
+lemma exact_coproduct [abelian A] [has_coproducts.{v} A] [AB4 A]
   {α : Type v} (X Y Z : α → A) (f : X ⟶ Y) (g : Y ⟶ Z)
   (w : ∀ i, exact (f i) (g i)) :
   exact ((sigma_functor A α).map f) ((sigma_functor A α).map g) :=
@@ -457,9 +461,9 @@ end
 
 section
 open_locale pseudoelement
-instance epi_coproduct_kernel_comparison [has_coproducts A] [AB4 A]
+instance epi_coproduct_kernel_comparison [has_coproducts.{v} A] [AB4 A]
   (M : Type*) (S : complex_shape M) (α : Type v)
-  [abelian A] [has_coproducts A] (i : M) (X : α → homological_complex A S) :
+  [abelian A] [has_coproducts.{v} A] (i : M) (X : α → homological_complex A S) :
   epi (coproduct_kernel_comparison M S α i X) :=
 begin
   /-
@@ -535,19 +539,19 @@ end
 end
 
 instance is_iso_coproduct_kernel_comparison (M : Type*) (S : complex_shape M) (α : Type v)
-  [abelian A] [has_coproducts A] [AB4 A] (i : M) (X : α → homological_complex A S) :
+  [abelian A] [has_coproducts.{v} A] [AB4 A] (i : M) (X : α → homological_complex A S) :
 is_iso (coproduct_kernel_comparison M S α i X) :=
 is_iso_of_mono_of_epi _
 
 noncomputable
 def coproduct_homology_comparison (M : Type*) (S : complex_shape M) (α : Type v)
-  [abelian A] [has_coproducts A] (i : M) (X : α → homological_complex A S) :
+  [abelian A] [has_coproducts.{v} A] (i : M) (X : α → homological_complex A S) :
   (∐ λ a : α, (X a).homology i) ⟶ (∐ X).homology i :=
 sigma.desc $ λ b, (homology_functor _ _ _).map $ sigma.ι _ _
 
 noncomputable
 def coproduct_homology_comparison_inv (M : Type*) (S : complex_shape M) (α : Type v)
-  [abelian A] [has_coproducts A] [AB4 A] (i : M) (X : α → homological_complex A S) :
+  [abelian A] [has_coproducts.{v} A] [AB4 A] (i : M) (X : α → homological_complex A S) :
   (∐ X).homology i ⟶ (∐ λ a : α, (X a).homology i) :=
 homology.desc' _ _ _ (inv (coproduct_kernel_comparison M S α i X) ≫
   sigma.desc (λ b, homology.π' ((X b).d_to _) ((X b).d_from i)
@@ -593,7 +597,7 @@ end
 noncomputable
 def coproduct_homology_iso
   (M : Type*) (S : complex_shape M) (α : Type v)
-  [abelian A] [has_coproducts A] [AB4 A] (i : M) (X : α → homological_complex A S) :
+  [abelian A] [has_coproducts.{v} A] [AB4 A] (i : M) (X : α → homological_complex A S) :
   (∐ λ a : α, (X a).homology i) ≅ (∐ X).homology i :=
 { hom := coproduct_homology_comparison _ _ _ _ _,
   inv := coproduct_homology_comparison_inv _ _ _ _ _,
@@ -644,7 +648,7 @@ def coproduct_homology_iso
 
 noncomputable
 def is_colimit_homology_map_cocone  (M : Type*) (S : complex_shape M) (α : Type v)
-  [abelian A] [has_coproducts A] [AB4 A] (i : M) (X : α → homological_complex A S) :
+  [abelian A] [has_coproducts.{v} A] [AB4 A] (i : M) (X : α → homological_complex A S) :
   is_colimit ((homology_functor A S i).map_cocone (colimit.cocone (discrete.functor X))) :=
 { desc := λ E, (coproduct_homology_iso _ _ _ _ _).inv ≫ sigma.desc (λ a, E.ι.app ⟨_⟩),
   fac' := begin
@@ -688,7 +692,7 @@ def is_colimit_homology_map_cocone  (M : Type*) (S : complex_shape M) (α : Type
 noncomputable
 instance homology_functor_preserves_coproducts
   (M : Type*) (S : complex_shape M) (α : Type v)
-  [abelian A] [has_coproducts A] [AB4 A] (i) :
+  [abelian A] [has_coproducts.{v} A] [AB4 A] (i) :
   preserves_colimits_of_shape (discrete α)
   (homology_functor A S i) :=
 begin
@@ -703,7 +707,7 @@ end
 
 noncomputable
 def is_colimit_homotopy_category_homology_functor_map_cocone
-  {α : Type v} [abelian A] [has_coproducts A] [AB4 A] (i)
+  {α : Type v} [abelian A] [has_coproducts.{v} A] [AB4 A] (i)
   (K : α → homotopy_category A (complex_shape.up ℤ)) :
   is_colimit
   ((homotopy_category.homology_functor A (complex_shape.up ℤ) i).map_cocone
@@ -731,7 +735,7 @@ def is_colimit_homotopy_category_homology_functor_map_cocone
 noncomputable
 instance homotopy_category_homology_functor_preserves_coproducts
   (α : Type v)
-  [abelian A] [has_coproducts A] [AB4 A] (i) :
+  [abelian A] [has_coproducts.{v} A] [AB4 A] (i) :
   preserves_colimits_of_shape (discrete α)
   (homotopy_category.homology_functor A (complex_shape.up ℤ) i) :=
 begin

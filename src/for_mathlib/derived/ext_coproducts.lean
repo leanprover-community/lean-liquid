@@ -7,7 +7,7 @@ open category_theory
 open category_theory.limits
 
 universes v u
-variables {A : Type u} [category.{v} A] [abelian A] [has_coproducts A]
+variables {A : Type u} [category.{v} A] [abelian A] [has_coproducts.{v} A]
 
 open_locale zero_object
 

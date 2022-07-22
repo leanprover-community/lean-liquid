@@ -21,6 +21,8 @@ open category_theory category_theory.limits opposite
 open homotopy_category (hiding single)
 open bounded_homotopy_category
 
+universes v v' u u'
+
 -- main proof in this file is inspired by https://math.stackexchange.com/a/2118042
 
 section
@@ -122,7 +124,7 @@ begin
 end
 
 instance category_theory.limits.preserves_binary_biproduct_of_additive
-  {𝓐 𝓑 : Type*} [category 𝓐] [category 𝓑] [abelian 𝓐] [abelian 𝓑]
+  {𝓐 𝓑 : Type*} [category.{v} 𝓐] [category.{v} 𝓑] [abelian 𝓐] [abelian 𝓑]
   (F : 𝓐 ⥤ 𝓑) [functor.additive F] (X Y : 𝓐) :
   preserves_binary_biproduct X Y F :=
 preserves_binary_biproduct_of_preserves_biproduct _ _ _

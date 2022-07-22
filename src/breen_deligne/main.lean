@@ -317,7 +317,7 @@ end
 
 include hT1
 
-variables [has_coproducts 𝓐] [AB4 𝓐]
+variables [has_coproducts.{v} 𝓐] [AB4 𝓐]
 
 lemma bdd_step₆_free₁
   (IH : ∀ i ≤ j, is_zero $ ((Ext' i).obj (op A)).obj B)
