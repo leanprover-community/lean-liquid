@@ -168,7 +168,7 @@ begin
     apply is_zero_of_preserves (Condensed.evaluation Ab.{u+1} S.val),
     assumption },
   { intro h,
-    let FF := ((Sheaf_to_presheaf _ _ : Condensed Ab ⥤ _) ⋙
+    let FF := ((Sheaf_to_presheaf _ _ : Condensed.{u} Ab.{u+1} ⥤ _) ⋙
       (whiskering_left _ _ _).obj (ExtrDisc_to_Profinite.op)),
     haveI : creates_colimits FF :=
       by apply Condensed_to_ExtrDisc_presheaf_creates_colimits,
@@ -177,7 +177,8 @@ begin
       λ S, is_zero.iso (h S) is_zero_initial,
     symmetry,
     apply (colimit.is_colimit _).cocone_point_unique_up_to_iso (_ : is_colimit (as_empty_cocone _)),
-    apply is_colimit_of_reflects FF,
+    apply_with (is_colimit_of_reflects.{0 0 (u+1) (u+1) (u+2) (u+2)} FF) {instances:=ff},
+    swap, { sorry },
     apply evaluation_jointly_reflects_colimits,
     intros S,
     have := is_colimit_empty_cocone_equiv Ab (as_empty_cocone (A.val.obj (op S.unop.val)))
