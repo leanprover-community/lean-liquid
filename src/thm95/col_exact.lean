@@ -280,9 +280,9 @@ equivalence_left_to_right _ _ $ Cech_nerve_level_hom' _ _ _ _ _ _
 
 lemma Cech_nerve_level_hom_injective' (c : ℝ≥0) (i : simplex_categoryᵒᵖ)
   (x y: ((((Cech_nerve_level r' Λ M N n).obj c).left.obj i)))
-  (h : ∀ (j : ulift (fin ((unop i).len + 1))),
-    (((Cech_nerve_level r' Λ M N n).obj c).left.map ((unop i).const j.down).op) x =
-    (((Cech_nerve_level r' Λ M N n).obj c).left.map ((unop i).const j.down).op) y) : x = y :=
+  (h : ∀ (j : (fin ((unop i).len + 1))),
+    (((Cech_nerve_level r' Λ M N n).obj c).left.map ((unop i).const j).op) x =
+    (((Cech_nerve_level r' Λ M N n).obj c).left.map ((unop i).const j).op) y) : x = y :=
 begin
   ext j : 2,
   let π := (polyhedral_lattice.conerve.π
@@ -290,7 +290,7 @@ begin
   have hπ : function.surjective π := polyhedral_lattice.conerve.π_surjective _ _,
   rw ← add_monoid_hom.cancel_right hπ, -- Bingo!
   apply finsupp.add_hom_ext',
-  intro k, specialize h ⟨k⟩,
+  intro k, specialize h k,
   rw subtype.ext_iff at h,
   replace h := congr_fun h j,
   rw add_monoid_hom.ext_iff at h ⊢,
@@ -380,12 +380,12 @@ begin
   refine λ k,
     cosimplicial_lift Λ N _
       ((z₀ y).1 k)
-      (λ j, add_monoid_hom.comp ((z y ⟨j⟩).1 k)
+      (λ j, add_monoid_hom.comp ((z y j).1 k)
         (Cech_conerve.obj_zero_iso (Λ.diagonal_embedding N)).inv.to_add_monoid_hom) _,
   intros j l,
   dsimp only [add_monoid_hom.comp_apply, subtype.coe_mk,
     polyhedral_lattice_hom.coe_to_add_monoid_hom],
-  rw [← hz y ⟨j⟩],
+  rw [← hz y j],
   dsimp only [augmented.to_arrow_obj_hom],
   rw [Cech_nerve_level_hom_app],
   dsimp only [Filtration_obj_map_to_fun, Cech_augmentation_map,
@@ -409,7 +409,7 @@ begin
   apply cosimplicial_lift_mem_filtration,
   intros j c' l hl,
   dsimp only [add_monoid_hom.comp_apply, polyhedral_lattice_hom.coe_to_add_monoid_hom],
-  apply (z y ⟨j⟩).property,
+  apply (z y j).property,
   rw [semi_normed_group.mem_filtration_iff] at hl ⊢,
   refine le_trans _ hl,
   exact (Cech_conerve.obj_zero_iso (Λ.diagonal_embedding N)).inv.strict l
@@ -422,8 +422,8 @@ begin
   let F := FLC_complex_arrow (aug_map r' Λ M N n) _ c,
   intro y,
   refine ⟨Cech_nerve_level_hom.s y, _⟩,
-  { apply limits.concrete.wide_pullback_ext' (λ i, F.hom),
-    rotate, { apply_instance }, { apply_instance },
+  { apply limits.concrete.wide_pullback_ext'.{0} (λ i, F.hom),
+    rotate, { apply_instance }, { sorry },
     intro j,
     erw [← augmented_cech_nerve.left_map_comp_obj_zero_iso _ _ j, ← comp_apply,
       ← category.assoc, ← (Cech_nerve_level_hom r' Λ M N n c).left.naturality,
@@ -432,7 +432,7 @@ begin
     erw [equivalence_left_to_right_left_app_zero_comp_π, Cech_nerve_level_hom'_left,
       category.comp_id],
     apply subtype.ext, apply funext, rintro k, -- ext k : 2
-    have := Cech_nerve_level_left_map' r' Λ M N n c i _ (i.unop.const j.down).op,
+    have := Cech_nerve_level_left_map' r' Λ M N n c i _ (i.unop.const j).op,
     simp only [subtype.val_eq_coe] at this,
     erw this _ k, clear this,
     apply add_monoid_hom.ext, rintro l', -- ext1 l'
