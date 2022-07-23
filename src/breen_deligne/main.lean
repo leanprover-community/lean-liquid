@@ -813,7 +813,12 @@ instance endo_T_preserves_finite_colimits {𝓐 : Type u} [category.{v} 𝓐]
   preserves_finite_colimits ((endo_T T).obj A) :=
 begin
   constructor, introsI J hJ1 hJ2,
-  haveI : reflects_colimits_of_shape J (endomorphisms.forget 𝓐) := sorry,
+  -- Move this
+  haveI : reflects_colimits_of_shape J (endomorphisms.forget 𝓐),
+  { let E : J ≌ as_small.{v} J := as_small.equiv,
+    suffices : reflects_colimits_of_shape (as_small.{v} J) (endomorphisms.forget 𝓐),
+    { resetI, apply reflects_colimits_of_shape_of_equiv E.symm, },
+    constructor },
   haveI : preserves_colimits_of_shape J ((endo_T T).obj A ⋙ endomorphisms.forget 𝓐),
   { apply preserves_colimits_of_shape_of_nat_iso (endo_T_comp_forget T A).symm,
     apply_instance, },
