@@ -41,6 +41,12 @@ variables (S : Profinite.{0}) (V : SemiNormedGroup.{0})
 variables [complete_space V] [separated_space V]
 variables (r')
 
+-- TODO(!): TC loop? using "by apply_instance" causes a maximum TC error
+instance (X : Profinite.{0}) :
+  preserves_limits_of_shape.{0 0 0 0 1 1}
+  (discrete_quotient.{0} ↥X) (PFPNGT₁_to_CHFPNG₁ₑₗ.{0} r') := {}
+
+set_option pp.universes true
 def condensify_iso_extend :
   condensify (Fintype_Lbar.{0 0} r' ⋙ PFPNGT₁_to_CHFPNG₁ₑₗ r') ≅
   (Profinite.extend (Fintype_Lbar.{0 0} r')) ⋙
