@@ -293,7 +293,7 @@ begin
   erw [comp_apply, comp_apply],
   dsimp only [Filtration_obj_map_apply, Pow_Pow_X_hom_apply, continuous_map.coe_mk,
     comphaus_filtered_pseudo_normed_group_with_Tinv_hom.level_coe, subtype.coe_mk,
-    Filtration.cast_le_to_fun, pseudo_normed_group.coe_cast_le,
+    Filtration.cast_le_apply, pseudo_normed_group.coe_cast_le,
     basic_universal_map.eval_FP, basic_universal_map.eval_png₀,
     ProFiltPseuNormGrpWithTinv.Pow_map,
     profinitely_filtered_pseudo_normed_group_with_Tinv.pi_map_to_fun],

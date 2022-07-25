@@ -166,7 +166,7 @@ begin
   rw [chain_complex.of_d],
   dsimp [FreeAb.eval, functor.map_FreeAb, functor.right_op_map, FPsystem.d,
     universal_map.eval_FP2, universal_map.eval_CLCFP, universal_map.eval_LCFP],
-  simp only [nat_trans.app_sum, map_sum, ← normed_group_hom_completion_hom_apply,
+  simp only [nat_trans.app_sum, map_sum, ← normed_add_group_hom_completion_hom_apply,
     category_theory.unop_sum],
   congr' 1,
   refine finset.sum_congr rfl _,
