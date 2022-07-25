@@ -16,10 +16,8 @@ variables (𝓐 : Type u) [category.{v} 𝓐] [abelian 𝓐] [has_coproducts.{v}
   [has_products_of_shape (ulift.{v} ℕ) 𝓐]
 
 -- move me
-instance forget_reflects_monomorphisms : (endomorphisms.forget 𝓐).reflects_monomorphisms :=
-begin
-  sorry
-end
+instance forget_faithful : faithful (endomorphisms.forget 𝓐) :=
+{ map_injective' := by { intros X Y f g h, ext, exact h } }
 
 instance : AB4 (endomorphisms 𝓐) :=
 begin
@@ -49,8 +47,7 @@ begin
   rw this,
   apply_with mono_comp { instances := ff }, apply_instance,
   apply_with mono_comp { instances := ff }, swap, apply_instance,
-  apply AB4.cond, intros a,
-  apply category_theory.preserves_mono (endomorphisms.forget _),
+  apply AB4.cond, intros a, apply_instance,
 end
 
 end endomorphisms
