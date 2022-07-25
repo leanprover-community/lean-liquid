@@ -678,10 +678,23 @@ end
 end
 end finite_product_colimit_setup
 
-variables {C : Type u'} [category.{u+1} C] [has_limits C] [has_colimits C]
+variables {C : Type u'} [category.{u+1} C]
   [has_zero_morphisms C] [has_finite_biproducts C]
 
+-- move me
+lemma pi_π_comp_eq_to_hom {α : Type} [fintype α] (X : α → C) (a b : α) (h : a = b) :
+  pi.π X a ≫ eq_to_hom (by rw h) = pi.π X b :=
+by { induction h, simp }
+
+-- move me
+lemma pi_π_comp_eq_to_hom' {α : Type u} [fintype α] (X : α → C) (a b : α) (h : a = b) :
+  pi.π X a ≫ eq_to_hom (by rw h) = pi.π X b :=
+by { induction h, simp }
+
+-- move me
 attribute [reassoc] ExtrDisc.sigma.ι_desc
+
+variables [has_limits C] [has_colimits C]
 
 lemma ExtrDisc.sigma.eq_to_hom_ι_eq_ι
   {α : Type u} [fintype α] (X : α → ExtrDisc.{u})
@@ -712,14 +725,6 @@ def ExtrDisc.sigma_iso_of_equiv {α β : Type u} [fintype α] [fintype β] (X : 
     apply ExtrDisc.sigma.eq_to_hom_ι_eq_ι X,
     simp,
   end }
-
-lemma pi_π_comp_eq_to_hom {α : Type} [fintype α] (X : α → C) (a b : α) (h : a = b) :
-  pi.π X a ≫ eq_to_hom (by rw h) = pi.π X b :=
-by { induction h, simp }
-
-lemma pi_π_comp_eq_to_hom' {α : Type u} [fintype α] (X : α → C) (a b : α) (h : a = b) :
-  pi.π X a ≫ eq_to_hom (by rw h) = pi.π X b :=
-by { induction h, simp }
 
 lemma finite_product_condition_holds_for_colimit
   {J : Type (u+1)} [small_category J] (K : J ⥤ ExtrSheafProd.{u} C) [has_colimits C] :

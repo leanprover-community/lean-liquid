@@ -47,7 +47,7 @@ section kernels
 --variables [limits.has_zero_morphisms A]
 -- TODO: Add some instances that derive the following from `[has_kernels A]`.
 --variables [limits.has_limits_of_shape limits.walking_parallel_pair A]
-variables [limits.has_zero_morphisms A] [limits.has_finite_limits A]
+variables [limits.has_finite_limits A]
 
 instance has_finite_limits : limits.has_finite_limits (Sheaf J A) :=
 begin
@@ -62,6 +62,8 @@ begin
   introsI K _ _,
   apply_instance,
 end
+
+variables [limits.has_zero_morphisms A]
 
 def kernel_iso {F G : Sheaf J A} (η : F ⟶ G) :
   (Sheaf_to_presheaf J A).obj (limits.kernel η) ≅
@@ -133,7 +135,7 @@ section cokernels
 --variables [limits.has_zero_morphisms A]
 -- TODO: Add some instances that derive the following from `[has_cokernels A]`.
 --variables [limits.has_colimits_of_shape.{_ (max v u)} limits.walking_parallel_pair A]
-variables [limits.has_zero_morphisms A] [limits.has_finite_colimits A]
+variables [limits.has_finite_colimits A]
 
 -- We will need to sheafify....
 variables [concrete_category.{max v u} A]
@@ -149,6 +151,8 @@ begin
   introsI K _ _,
   apply_instance,
 end
+
+variables [limits.has_zero_morphisms A]
 
 def cokernel_sheaf {F G : Sheaf J A} (η : F ⟶ G) : Sheaf J A :=
 { val := J.sheafify (limits.cokernel ((Sheaf_to_presheaf J A).map η)), -- ;-)

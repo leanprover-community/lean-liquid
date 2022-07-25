@@ -285,6 +285,7 @@ begin
   exact ⟨ι, hι, iso_of_basis 𝓑, trivial⟩,
 end
 
+@[priority 100]
 instance {C J : Type*} [fintype J] [category C] [limits.has_zero_morphisms C]
   [limits.has_finite_biproducts C] : limits.has_biproducts_of_shape J C :=
 ⟨λ F, begin
