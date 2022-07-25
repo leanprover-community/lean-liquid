@@ -311,7 +311,7 @@ def QprimeFP_incl (c : ℝ≥0) :
     dsimp only [function.comp, yoneda_map_app, yoneda_obj_obj, chain_complex.of_X,
       Profinite.coe_comp_apply, continuous_map.coe_mk, QprimeFP_incl_aux''],
     ext f s, clear y x,
-    dsimp only [subtype.coe_mk, Filtration_obj_map_to_fun, add_monoid_hom.mk'_apply,
+    dsimp only [subtype.coe_mk, Filtration_obj_map_apply, add_monoid_hom.mk'_apply,
       comphaus_filtered_pseudo_normed_group_with_Tinv_hom.level, pseudo_normed_group.level,
       profinitely_filtered_pseudo_normed_group_with_Tinv.pi_proj,
       comphaus_filtered_pseudo_normed_group_with_Tinv_hom.coe_mk,

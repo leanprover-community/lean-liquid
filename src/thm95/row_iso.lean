@@ -262,7 +262,7 @@ lemma mul_rescale_iso_row_one_strict
   (x : (((data.mul N).obj BD).system (rescale_constants κ N') r V r').obj (op (Hom Λ M)) c i) :
   ∥(mul_rescale_iso_row_one BD κ r V N N' h Λ M).hom x∥ = ∥x∥ :=
 begin
-  apply normed_group_hom.norm_eq_of_isometry,
+  apply normed_add_group_hom.norm_eq_of_isometry,
   refine isometry.comp (isometry.comp _ _) _,
   { apply data.system_map_iso_isometry, },
   { dsimp only, apply CLCTinv.map_iso_isometry, },
@@ -291,9 +291,9 @@ begin
     Pow_obj, ProFiltPseuNormGrpWithTinv.coe_of, Filtration_map_app],
   ext x i : 3,
   erw [comp_apply, comp_apply],
-  dsimp only [Filtration_obj_map_to_fun, Pow_Pow_X_hom_to_fun, continuous_map.coe_mk,
+  dsimp only [Filtration_obj_map_apply, Pow_Pow_X_hom_apply, continuous_map.coe_mk,
     comphaus_filtered_pseudo_normed_group_with_Tinv_hom.level_coe, subtype.coe_mk,
-    Filtration.cast_le_to_fun, pseudo_normed_group.coe_cast_le,
+    Filtration.cast_le_apply, pseudo_normed_group.coe_cast_le,
     basic_universal_map.eval_FP, basic_universal_map.eval_png₀,
     ProFiltPseuNormGrpWithTinv.Pow_map,
     profinitely_filtered_pseudo_normed_group_with_Tinv.pi_map_to_fun],

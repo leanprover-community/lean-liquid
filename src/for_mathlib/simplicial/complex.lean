@@ -2,10 +2,9 @@ import data.fintype.card
 import algebra.module.hom
 import algebra.big_operators.fin
 import algebraic_topology.simplicial_object
+import category_theory.preadditive.opposite
 
 import algebra.homology.homological_complex
-
-import for_mathlib.unop
 
 namespace category_theory
 

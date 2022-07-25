@@ -1,4 +1,4 @@
-# normed_group
+# normed_add_comm_group
 
 This directory contains a development of the theory of normed abelian (additive) groups.
 

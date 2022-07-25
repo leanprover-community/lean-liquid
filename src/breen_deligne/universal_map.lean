@@ -412,7 +412,7 @@ begin
   classical,
   revert h,
   apply finset.induction_on s; clear s,
-  { simp only [finset.not_mem_empty, forall_false_left, finset.sum_empty,
+  { simp only [finset.not_mem_empty, is_empty.forall_iff, finset.sum_empty,
       implies_true_iff, forall_true_left],
     exact zero_bound_by_zero },
   { intros i s his IH h,

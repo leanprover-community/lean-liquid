@@ -4,7 +4,7 @@ universe variables u
 
 noncomputable theory
 open_locale nnreal
-open category_theory opposite normed_group_hom system_of_complexes
+open category_theory opposite normed_add_group_hom system_of_complexes
 
 variables (M M' N : system_of_complexes.{u}) (f : M ⟶ M') (g : M' ⟶ N)
 

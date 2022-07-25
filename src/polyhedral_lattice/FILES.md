@@ -22,7 +22,7 @@ on what is (or should be) in mathlib:
 - `topology.lean` : right now an empty file (and it might remain that way).
 
 The last two files need some of the theory of normed groups and pseudo-normed groups,
-defined in `normed_group` and `pseudo_normed_group`.
+defined in `normed_add_comm_group` and `pseudo_normed_group`.
 
 - `pseudo_normed_group.lean` : If M is a pseudo-normed group with T⁻¹ then so is Hom(Λ, M).
 - `Hom.lean` : A category-theoretic version: Hom(Λ, -) is a functor (and it's isomorphic

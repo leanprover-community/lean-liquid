@@ -30,7 +30,7 @@ def sheafification_adjunction_types :
   (presheaf_to_SheafOfTypes J) ⊣ SheafOfTypes_to_presheaf J :=
 show presheaf_to_Sheaf J _ ⋙ (Sheaf_equiv_SheafOfTypes J).functor ⊣
   (Sheaf_equiv_SheafOfTypes J).inverse ⋙ Sheaf_to_presheaf J _,
-from adjunction.comp _ _ (sheafification_adjunction _ _) $
+from adjunction.comp (sheafification_adjunction _ _) $
   (Sheaf_equiv_SheafOfTypes J).to_adjunction
 
 @[simp]

@@ -290,7 +290,7 @@ def pi_lift {N : Type*} [profinitely_filtered_pseudo_normed_group_with_Tinv r' N
   continuous' :=
   begin
     intros c,
-    apply continuous_induced_rng,
+    rw continuous_induced_rng,
     apply continuous_pi,
     intro i,
     exact (f i).continuous' c,

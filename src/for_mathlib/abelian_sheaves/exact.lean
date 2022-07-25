@@ -84,7 +84,7 @@ lemma map_presheaf_to_Sheaf_homology_zero_of_homology_zero
 begin
   rw ← chain_complex.epi_and_exact_iff_zero_homology' at *,
   split,
-  { haveI := h.1, apply category_theory.preserves_epi },
+  { haveI := h.1, apply preserves_epi_of_preserves_colimit },
   { intros i,
     apply exact_of_exact,
     apply h.2 },

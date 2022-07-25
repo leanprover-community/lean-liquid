@@ -74,9 +74,8 @@ begin
   constructor, introsI a X Y f hf,
   let t := _, change mono t,
   suffices : mono (F.map t),
-  { resetI,
-    haveI := reflects_limits_of_size_shrink.{0 v 0 v} F,
-    apply reflects_mono F },
+  { haveI := reflects_limits_of_size_shrink.{0 v 0 v} F,
+    apply F.mono_of_mono_map this, },
   let eX : F.obj (∐ λ (a : a), X a) ≅ (∐ λ a, F.obj (X a)) :=
     (is_colimit_of_preserves F (colimit.is_colimit _)).cocone_point_unique_up_to_iso
       (colimit.is_colimit _) ≪≫ has_colimit.iso_of_nat_iso
@@ -90,8 +89,7 @@ begin
   let tt : (∐ λ a, F.obj (X a)) ⟶ (∐ λ a, F.obj (Y a)) :=
     sigma.desc (λ a, F.map (f a) ≫ sigma.ι _ a),
   haveI : mono tt,
-  { apply AB4.cond, intros a,
-    apply category_theory.preserves_mono F },
+  { apply AB4.cond, intros a, apply_instance },
   suffices : F.map t = eX.hom ≫ tt ≫ eY.inv,
   { rw this, apply mono_comp },
   apply (is_colimit_of_preserves F (colimit.is_colimit _)).hom_ext,

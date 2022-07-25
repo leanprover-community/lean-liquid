@@ -6,15 +6,15 @@ import normed_group.normed_with_aut
 
 universes v u
 
-namespace semi_normed_group
+namespace seminormed_add_comm_group
 
-variables (V : Type u) [semi_normed_group V]
+variables (V : Type u) [seminormed_add_comm_group V]
 
-instance : semi_normed_group (ulift.{v} V) :=
-@semi_normed_group.induced V _ (ulift.{v} V) _ $
+instance : seminormed_add_comm_group (ulift.{v} V) :=
+@seminormed_add_comm_group.induced V _ (ulift.{v} V) _ $
   add_equiv.to_add_monoid_hom add_equiv.ulift
 
-end semi_normed_group
+end seminormed_add_comm_group
 
 namespace SemiNormedGroup
 

@@ -48,7 +48,7 @@ begin
   { intros hf c' l hl,
     rw mul_assoc,
     refine hf _,
-    simp only [semi_normed_group.mem_filtration_iff],
+    simp only [seminormed_add_comm_group.mem_filtration_iff],
     erw [rescale.nnnorm_def, mul_comm, div_eq_mul_inv],
     refine mul_le_mul' _ le_rfl,
     exact hl },
@@ -56,7 +56,7 @@ begin
     apply pseudo_normed_group.filtration_mono (le_of_eq _),
     convert hf _,
     { exact ↑N * c' },
-    { simp only [semi_normed_group.mem_filtration_iff] at hl ⊢,
+    { simp only [seminormed_add_comm_group.mem_filtration_iff] at hl ⊢,
       erw [rescale.nnnorm_def, div_eq_mul_inv] at hl,
       rwa [← inv_inv (N : ℝ≥0), ← nnreal.mul_le_iff_le_inv, mul_comm],
       apply ne_of_gt,
@@ -141,13 +141,13 @@ begin
   split,
   { intros hf i c' l hl,
     refine hf _,
-    rw [semi_normed_group.mem_filtration_iff, finsupp.nnnorm_def, finsupp.sum_single_index],
+    rw [seminormed_add_comm_group.mem_filtration_iff, finsupp.nnnorm_def, finsupp.sum_single_index],
     { exact hl },
     { exact nnnorm_zero } },
   { intros hf c' l hl,
     let g := (Λ.Hom_finsupp_equiv N r' M) f,
     have hg : (Λ.Hom_finsupp_equiv N r' M).symm g = f := add_equiv.symm_apply_apply _ _,
-    rw [semi_normed_group.mem_filtration_iff, finsupp.nnnorm_def, finsupp.sum_fintype] at hl,
+    rw [seminormed_add_comm_group.mem_filtration_iff, finsupp.nnnorm_def, finsupp.sum_fintype] at hl,
     swap, { intro, exact nnnorm_zero },
     rw [← hg, Hom_finsupp_equiv_symm_apply, add_monoid_hom.coe_mk, finsupp.sum_fintype],
     swap, { intro, exact add_monoid_hom.map_zero _ },
@@ -156,14 +156,14 @@ begin
     apply sum_mem_filtration,
     rintro i hi,
     apply hf _,
-    exact (semi_normed_group.mem_filtration_iff _ _).mpr rfl.le }
+    exact (seminormed_add_comm_group.mem_filtration_iff _ _).mpr rfl.le }
 end
 
 lemma Hom_finsupp_equiv_ctu [fact (0 < r')] (c : ℝ≥0) :
   continuous (level (Λ.Hom_finsupp_equiv N r' M)
     (λ c x, (Hom_finsupp_equiv_strict Λ N r' M c x).1) c) :=
 begin
-  apply continuous_induced_rng,
+  rw continuous_induced_rng,
   rw continuous_pi_iff,
   intro i,
   dsimp only [function.comp],

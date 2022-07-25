@@ -33,11 +33,11 @@ structure has_p_norm (V : Type*) (p : ℝ)
 
 variables (V : Type*) (p : ℝ) [add_comm_group V] [module ℝ V] [uniform_space V]
 
-def has_p_norm.semi_normed_group [fact (0 < p)] (h : has_p_norm V p) : semi_normed_group V :=
+def has_p_norm.seminormed_add_comm_group [fact (0 < p)] (h : has_p_norm V p) : seminormed_add_comm_group V :=
 { to_uniform_space := by apply_instance,
   uniformity_dist := h.uniformity,
   to_add_comm_group := by apply_instance,
-  .. @semi_normed_group.of_core V _ h.to_has_norm $
+  .. @seminormed_add_comm_group.of_core V _ h.to_has_norm $
     have hp0 : p ≠ 0 := (fact.out _ : 0 < p).ne',
     { norm_zero := by simpa only [zero_smul, abs_zero, real.zero_rpow hp0] using h.norm_smul 0 0,
       triangle := h.triangle,
@@ -77,18 +77,18 @@ instance : _root_.separated_space V := V.p_banach'.separated
 variables {p}
 
 /-- Highly non-canonical! -/
-def choose_semi_normed_group [fact (0 < p)] : semi_normed_group V :=
-(classical.choice V.p_banach'.exists_p_norm).semi_normed_group V p
+def choose_seminormed_add_comm_group [fact (0 < p)] : seminormed_add_comm_group V :=
+(classical.choice V.p_banach'.exists_p_norm).seminormed_add_comm_group V p
 
 @[simps] def smul_normed_hom [fact (0 < p)] (x : ℝ) :
-  @normed_group_hom V V V.choose_semi_normed_group V.choose_semi_normed_group :=
+  @normed_add_group_hom V V V.choose_seminormed_add_comm_group V.choose_seminormed_add_comm_group :=
 { to_fun := λ v, x • v,
   map_add' := λ v₁ v₂, smul_add _ _ _,
   bound' := ⟨|x|^p, λ v, by rw [has_p_norm.norm_smul, smul_eq_mul]⟩ }
 
 /-- Highly non-canonical! -/
 def choose_normed_with_aut [fact (0 < p)] (x : ℝ≥0) [fact (0 < x)] :
-  normed_with_aut (x ^ p) ⟨V, choose_semi_normed_group V⟩ :=
+  normed_with_aut (x ^ p) ⟨V, choose_seminormed_add_comm_group V⟩ :=
 { T :=
   { hom := smul_normed_hom V x,
     inv := smul_normed_hom V (x⁻¹),
@@ -101,12 +101,12 @@ def choose_normed_with_aut [fact (0 < p)] (x : ℝ≥0) [fact (0 < x)] :
 
 @[simp]
 lemma choose_normed_with_aut_T_hom [fact (0 < p)] (x : ℝ≥0) [fact (0 < x)] (v : V) :
-  (@normed_with_aut.T (x ^ p) ⟨V, choose_semi_normed_group V⟩ (V.choose_normed_with_aut x)).hom v =
+  (@normed_with_aut.T (x ^ p) ⟨V, choose_seminormed_add_comm_group V⟩ (V.choose_normed_with_aut x)).hom v =
   x • v := rfl
 
 @[simp]
 lemma choose_normed_with_aut_T_inv [fact (0 < p)] (x : ℝ≥0) [fact (0 < x)] (v : V) :
-  (@normed_with_aut.T (x ^ p) ⟨V, choose_semi_normed_group V⟩ (V.choose_normed_with_aut x)).inv v =
+  (@normed_with_aut.T (x ^ p) ⟨V, choose_seminormed_add_comm_group V⟩ (V.choose_normed_with_aut x)).inv v =
   x⁻¹ • v := rfl
 
 end pBanach
@@ -153,12 +153,12 @@ set_option extends_priority 920
 equality `∥c • x∥ = ∥c∥ ∥x∥`. We require only `∥c • x∥ ≤ ∥c∥ ∥x∥` in the definition, then prove
 `∥c • x∥ = ∥c∥ ∥x∥` in `norm_smul`. -/
 class normed_space' (𝕜 : Type*) (p : out_param ℝ) (V : Type*)
-  [normed_field 𝕜] [normed_group V] [module 𝕜 V] :=
+  [normed_field 𝕜] [normed_add_comm_group V] [module 𝕜 V] :=
 (norm_smul : ∀ (c:𝕜) (v:V), ∥c • v∥ = ∥c∥^p * ∥v∥)
 
 @[priority 100]
 instance normed_space.normed_space'
-  (𝕜 : Type*) (V : Type*) [normed_field 𝕜] [normed_group V] [normed_space 𝕜 V] :
+  (𝕜 : Type*) (V : Type*) [normed_field 𝕜] [normed_add_comm_group V] [normed_space 𝕜 V] :
   normed_space' 𝕜 1 V :=
 { norm_smul := λ c k, by simp only [real.rpow_one, norm_smul] }
 
@@ -202,9 +202,9 @@ lemma norm_def {V : Type*} [has_norm V] (p' p : ℝ) (v : as_normed_space' p' V)
 
 /-- The natural `p'`-normed group structure on `as_normed_space' p' V`
 induced by a `p`-normed group structure on `V` -/
-protected def normed_group (V : Type*) [normed_group V] (p' p : ℝ) [fact (0 < p')] [fact (p' ≤ p)] :
-  normed_group (as_normed_space' p' V) :=
-@normed_group.of_core _ _ (as_normed_space'.has_norm p' p V) $
+protected def normed_add_comm_group (V : Type*) [normed_add_comm_group V] (p' p : ℝ) [fact (0 < p')] [fact (p' ≤ p)] :
+  normed_add_comm_group (as_normed_space' p' V) :=
+@normed_add_comm_group.of_core _ _ (as_normed_space'.has_norm p' p V) $
 have hp' : 0 < p'   := fact.out _,
 have hp  : 0 < p    := lt_of_lt_of_le hp' (fact.out _),
 have H   : 0 < p'/p := div_pos hp' hp,
@@ -223,9 +223,9 @@ have H   : 0 < p'/p := div_pos hp' hp,
   end,
   norm_neg := λ v, show ∥(-v).down∥^(p'/p) = ∥v.down∥^(p'/p), by rw [down_neg, norm_neg] }
 
-local attribute [instance] as_normed_space'.normed_group
+local attribute [instance] as_normed_space'.normed_add_comm_group
 
-instance (𝕜 : Type*) (V : Type*) [normed_field 𝕜] [normed_group V] [module 𝕜 V]
+instance (𝕜 : Type*) (V : Type*) [normed_field 𝕜] [normed_add_comm_group V] [module 𝕜 V]
   (p' p : ℝ) [fact (0 < p')] [fact (p' ≤ p)] [normed_space' 𝕜 p V] :
   normed_space' 𝕜 p' (as_normed_space' p' V) :=
 { norm_smul := λ c v,

@@ -39,7 +39,7 @@ theorem presheaf_to_Condensed_Ab_map_mono_of_exists
   mono (((sheafification_adjunction
     proetale_topology Ab.{u+1}).hom_equiv _ G).symm η) :=
 begin
-  apply faithful_reflects_mono (Sheaf_to_presheaf proetale_topology Ab.{u+1}),
+  apply (Sheaf_to_presheaf proetale_topology Ab.{u+1}).mono_of_mono_map,
   dsimp [sheafification_adjunction],
   apply Condensed_Ab_sheafify_lift_mono_of_exists,
   exact h

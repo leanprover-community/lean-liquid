@@ -304,7 +304,7 @@ begin
     cosimplicial_object.augmented.drop_obj, cosimplicial_object.augmented.drop_map,
     augmented_cosimplicial, augmented_Cech_conerve,
     cosimplicial_object.augment_right, Cech_conerve_map,
-    Filtration_obj_map_to_fun, ProFiltPseuNormGrpWithTinv.Pow_map,
+    Filtration_obj_map_apply, ProFiltPseuNormGrpWithTinv.Pow_map,
     Hom_obj, Hom_map_to_fun, polyhedral_lattice.Hom,
     comphaus_filtered_pseudo_normed_group_with_Tinv_hom.level,
     profinitely_filtered_pseudo_normed_group_with_Tinv.pi_map_to_fun,
@@ -388,7 +388,7 @@ begin
   rw [← hz y j],
   dsimp only [augmented.to_arrow_obj_hom],
   rw [Cech_nerve_level_hom_app],
-  dsimp only [Filtration_obj_map_to_fun, Cech_augmentation_map,
+  dsimp only [Filtration_obj_map_apply, Cech_augmentation_map,
     comphaus_filtered_pseudo_normed_group_with_Tinv_hom.level,
     pseudo_normed_group.level,
     ProFiltPseuNormGrpWithTinv.Pow_map,
@@ -410,7 +410,7 @@ begin
   intros j c' l hl,
   dsimp only [add_monoid_hom.comp_apply, polyhedral_lattice_hom.coe_to_add_monoid_hom],
   apply (z y j).property,
-  rw [semi_normed_group.mem_filtration_iff] at hl ⊢,
+  rw [seminormed_add_comm_group.mem_filtration_iff] at hl ⊢,
   refine le_trans _ hl,
   exact (Cech_conerve.obj_zero_iso (Λ.diagonal_embedding N)).inv.strict l
 end
@@ -570,7 +570,7 @@ begin
     ← ((Filtration r').obj c).map_comp, category.assoc, ← (Pow r' n).map_comp,
     Cech_augmentation_map_eq_Hom_sum],
   dsimp only [FLC_complex_arrow, arrow.mk_hom,
-    Filtration_obj_map_to_fun, comp_apply,
+    Filtration_obj_map_apply, comp_apply,
     continuous_map.coe_mk, pseudo_normed_group.level, subtype.coe_mk,
     comphaus_filtered_pseudo_normed_group_with_Tinv_hom.to_comphaus_filtered_pseudo_normed_group_hom,
     comphaus_filtered_pseudo_normed_group_hom.mk_of_strict,
@@ -1162,8 +1162,8 @@ variables [fact (0 < r')] [fact (r' ≤ 1)]
 lemma d_zero_norm_noninc (c : ℝ≥0) :
   (@system_of_complexes.d (col_complex_rescaled r' V Λ M N n) c 0 1).norm_noninc :=
 begin
-  apply normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.2,
-  refine normed_group_hom.norm_comp_le_of_le' (1:ℕ) _ 1 _ (SemiNormedGroup.norm_scale_le _ _ _) _,
+  apply normed_add_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.2,
+  refine normed_add_group_hom.norm_comp_le_of_le' (1:ℕ) _ 1 _ (SemiNormedGroup.norm_scale_le _ _ _) _,
   { simp only [mul_one, nat.factorial_zero, nat.factorial_one, nat.cast_one, div_one, nnreal.coe_one]},
   apply SemiNormedGroup.norm_rescale_map_le,
   have : (1 : ℝ) = ∑ i : fin 1, 1,
@@ -1172,15 +1172,15 @@ begin
   dsimp [system_of_complexes.rescale_functor, double_complex_aux,
     cosimplicial_object.augmented.to_cocomplex_d],
   erw [category.comp_id, if_pos rfl, Cech_nerve'_hom_zero, nat.cast_one],
-  apply normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1,
+  apply normed_add_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1,
   apply CLC.map_norm_noninc,
 end
 
 lemma d_succ_norm_noninc (c : ℝ≥0) (p : ℕ) :
   (@system_of_complexes.d (col_complex_rescaled r' V Λ M N n) c (p+1) (p+2)).norm_noninc :=
 begin
-  apply normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.2,
-  refine normed_group_hom.norm_comp_le_of_le' (p+2:ℕ) _ 1 _ (SemiNormedGroup.norm_scale_le _ _ _) _,
+  apply normed_add_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.2,
+  refine normed_add_group_hom.norm_comp_le_of_le' (p+2:ℕ) _ 1 _ (SemiNormedGroup.norm_scale_le _ _ _) _,
   { norm_cast,
     rw [mul_comm, ← mul_div_assoc, eq_comm, ← nat.cast_mul, nat.factorial_succ], apply div_self,
     norm_num [nat.factorial_ne_zero] },
@@ -1201,7 +1201,7 @@ begin
   refine le_trans (norm_zsmul_le _ _) _,
   rw [← int.norm_cast_real, int.cast_pow, norm_pow, int.cast_neg, int.cast_one, norm_neg, norm_one,
     one_pow, one_mul],
-  apply normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1,
+  apply normed_add_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1,
   apply CLC.map_norm_noninc
 end
 
@@ -1215,10 +1215,10 @@ lemma admissible : (col_complex_rescaled r' V Λ M N n).admissible :=
   res_norm_noninc :=
   begin
     intros c₁ c₂ i h,
-    apply normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.2,
+    apply normed_add_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.2,
     cases i;
     { apply SemiNormedGroup.norm_rescale_map_le,
-      apply normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1,
+      apply normed_add_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1,
       apply CLC.map_norm_noninc, },
   end }
 
@@ -1232,7 +1232,7 @@ lemma col_exact'_aux1 [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
 begin
   intro x,
   cases i;
-  { apply normed_group_hom.le_of_op_norm_le,
+  { apply normed_add_group_hom.le_of_op_norm_le,
     refine @SemiNormedGroup.norm_rescale_map_le _ _ _ _ _ (1 + r⁻¹) _,
     exact CLCFP.norm_T_inv_sub_Tinv_le _ _ _ _ _ _ _ }
 end

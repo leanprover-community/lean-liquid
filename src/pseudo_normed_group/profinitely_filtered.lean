@@ -975,7 +975,7 @@ def pi_lift {N : Type*} [comphaus_filtered_pseudo_normed_group N]
   continuous' :=
   begin
     intros c₁ c₂ f₀ hf₀,
-    apply continuous_induced_rng,
+    rw continuous_induced_rng,
     apply continuous_pi,
     intro i,
     let g := function.eval i ∘ filtration_pi_homeo M c₂ ∘ f₀,

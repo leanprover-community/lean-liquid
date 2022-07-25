@@ -40,7 +40,7 @@ open category_theory.abelian
 def is_limit_of_is_limit_comp {X Y Z : 𝓐} {f : X ⟶ Y} {g : Y ⟶ Z}
   {c : kernel_fork (f ≫ g)} (hc : is_limit c) (h : c.ι ≫ f = 0) :
   is_limit (kernel_fork.of_ι c.ι h) :=
-is_limit.of_ι _ _
+kernel_fork.is_limit.of_ι _ _
   (λ T l hl, hc.lift (kernel_fork.of_ι l (by rw [reassoc_of hl, zero_comp])))
   (λ T l hl, hc.fac _ _)
   (λ T l hl m hm, fork.is_limit.hom_ext hc (by { erw [hm, hc.fac], refl }))
@@ -48,7 +48,7 @@ is_limit.of_ι _ _
 def is_colimit_of_is_colimit_comp {X Y Z : 𝓐} {f : X ⟶ Y} {g : Y ⟶ Z}
   {c : cokernel_cofork (f ≫ g)} (hc : is_colimit c) (h : g ≫ c.π = 0) :
   is_colimit (cokernel_cofork.of_π c.π h) :=
-is_colimit.of_π _ _
+cokernel_cofork.is_colimit.of_π _ _
   (λ T l hl, hc.desc (cokernel_cofork.of_π l (by rw [category.assoc, hl, comp_zero])))
   (λ T l hl, hc.fac _ _)
   (λ T l hl m hm, cofork.is_colimit.hom_ext hc (by { erw [hm, hc.fac], refl }))

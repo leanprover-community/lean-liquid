@@ -11,13 +11,13 @@ induced on completions by a normed group hom.
 -/
 noncomputable theory
 
-open filter set function normed_group uniform_space normed_group_hom finset
+open filter set function normed_add_comm_group uniform_space normed_add_group_hom finset
 open_locale topological_space big_operators
 
-lemma controlled_exactness {M M₁ M₂ : Type*} [semi_normed_group M] [semi_normed_group M₁]
-  [semi_normed_group M₂]
-  {f : normed_group_hom M₁ M} {C : ℝ} (hC : 0 < C) {D : ℝ}
-  {g : normed_group_hom M M₂}
+lemma controlled_exactness {M M₁ M₂ : Type*} [seminormed_add_comm_group M] [seminormed_add_comm_group M₁]
+  [seminormed_add_comm_group M₂]
+  {f : normed_add_group_hom M₁ M} {C : ℝ} (hC : 0 < C) {D : ℝ}
+  {g : normed_add_group_hom M M₂}
   (h : f.surjective_on_with g.ker C)
   (h' : g.surjective_on_with g.range D) :
   ∀ ε > 0, f.completion.surjective_on_with g.completion.ker (C + ε) :=
@@ -34,7 +34,7 @@ begin
     erw [norm_to_compl, norm_incl] },
 
   have hatm_in : hatm ∈ closure ((to_compl.comp i).range : set $ completion M),
-    by rwa ← normed_group_hom.ker_completion h',
+    by rwa ← normed_add_group_hom.ker_completion h',
 
   have : ∀ k : g.ker, ∃ m' : completion M₁, hatf m' = (to_compl.comp i) k ∧ ∥m'∥ ≤ C * ∥k∥,
   { rintros ⟨k, k_in⟩,

@@ -173,8 +173,8 @@ lemma double_complex.row_admissible :
 lemma double_complex.d_one_norm_noninc (c : ℝ≥0) (q : ℕ) :
   (@system_of_double_complexes.d (double_complex BD κ r r' V Λ M N) c 1 2 q).norm_noninc :=
 begin
-  apply normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.2,
-  refine normed_group_hom.norm_comp_le_of_le' 2 _ 1 _ (SemiNormedGroup.norm_to_rescale_le _ _) _,
+  apply normed_add_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.2,
+  refine normed_add_group_hom.norm_comp_le_of_le' 2 _ 1 _ (SemiNormedGroup.norm_to_rescale_le _ _) _,
   { norm_num },
   have : (2 : ℝ) = ∑ i : fin 2, 1,
   { simp only [finset.card_fin, mul_one, nat.cast_bit0, finset.sum_const, nsmul_eq_mul, nat.cast_one] },
@@ -189,7 +189,7 @@ begin
   refine le_trans (norm_zsmul_le _ _) _,
   rw [← int.norm_cast_real, int.cast_pow, norm_pow, int.cast_neg, int.cast_one, norm_neg, norm_one,
     one_pow, one_mul],
-  apply normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1,
+  apply normed_add_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1,
   apply breen_deligne.data.complex.map_norm_noninc
 end
 .
@@ -197,8 +197,8 @@ end
 lemma double_complex.d_two_norm_noninc (c : ℝ≥0) (p q : ℕ) :
   (@system_of_double_complexes.d (double_complex BD κ r r' V Λ M N) c (p+2) (p+3) q).norm_noninc :=
 begin
-  apply normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.2,
-  refine normed_group_hom.norm_comp_le_of_le' (p+3:ℕ) _ 1 _ (SemiNormedGroup.norm_scale_le _ _ _) _,
+  apply normed_add_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.2,
+  refine normed_add_group_hom.norm_comp_le_of_le' (p+3:ℕ) _ 1 _ (SemiNormedGroup.norm_scale_le _ _ _) _,
   { simp only [add_zero, nat.add_def, ← nat.cast_succ],
     norm_cast,
     rw [mul_comm, ← mul_div_assoc, eq_comm, ← nat.cast_mul, nat.factorial_succ], apply div_self,
@@ -218,7 +218,7 @@ begin
   refine le_trans (norm_zsmul_le _ _) _,
   rw [← int.norm_cast_real, int.cast_pow, norm_pow, int.cast_neg, int.cast_one, norm_neg, norm_one,
     one_pow, one_mul],
-  apply normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1,
+  apply normed_add_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1,
   apply breen_deligne.data.complex.map_norm_noninc
 end
 

@@ -80,6 +80,9 @@ protected def forget (C : Type u) [category.{v} C] : endomorphisms C ⥤ C :=
   map_id' := λ X, rfl,
   map_comp' := λ X Y Z f g, rfl }
 
+instance forget_faithful : faithful (endomorphisms.forget C) :=
+{ map_injective' := by { intros X Y f g h, ext, exact h } }
+
 lemma epi_of_epi_f {X Y : endomorphisms C} (f : X ⟶ Y) [epi f.f] : epi f :=
 { left_cancellation := λ Z g h w, begin
     ext, rw [← cancel_epi f.f, ← comp_f, w, comp_f],

@@ -160,7 +160,7 @@ begin
 end
 
 -- TODO remove this; it's a redundant alias
-@[simps obj_obj obj_map_to_fun map_app {fully_applied := ff}]
+@[simps obj_obj obj_map_apply map_app {fully_applied := ff}]
 def Filtration : ℝ≥0 ⥤ CompHausFiltPseuNormGrp₁.{u} ⥤ CompHaus.{u} :=
 CompHausFiltPseuNormGrp₁.level
 

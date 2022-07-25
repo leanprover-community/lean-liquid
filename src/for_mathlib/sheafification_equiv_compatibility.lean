@@ -37,8 +37,8 @@ let A1 : (whiskering_left _ _ A).obj G.op ⊣ _ := Ran.adjunction _ _,
     A2 : presheaf_to_Sheaf J A ⊣ _ := sheafification_adjunction _ _,
     B1 : presheaf_to_Sheaf K A ⊣ _ := sheafification_adjunction _ _,
     B2 : sites.pullback A Hc Hp ⊣ _ := sites.pullback_copullback_adjunction _ _ Hl _,
-    A12 := A1.comp _ _ A2,
-    B12 := B1.comp _ _ B2 in
+    A12 := A1.comp A2,
+    B12 := B1.comp B2 in
 A12.left_adjoint_uniq B12
 
 lemma to_sheafify_pullback_sheafification_compatibility

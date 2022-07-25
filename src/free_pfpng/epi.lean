@@ -1,5 +1,4 @@
 import free_pfpng.setup
-import for_mathlib.logic
 
 noncomputable theory
 
@@ -854,7 +853,7 @@ end Profinite.epi_free'_to_condensed_setup
 instance Profinite.epi_free'_to_condensed_free_pfpng_of_nonempty
   (S : Profinite.{u}) [nonempty S] : epi S.free'_to_condensed_free_pfpng :=
 begin
-  apply faithful_reflects_epi (Condensed_Ab_to_CondensedSet),
+  apply functor.epi_of_epi_map (Condensed_Ab_to_CondensedSet),
   let E := CompHausFiltPseuNormGrp.level_Condensed_diagram_cocone
     (CHFPNG₁_to_CHFPNGₑₗ.obj
     ((PFPNG₁_to_CHFPNG₁ₑₗ.obj S.free_pfpng))),

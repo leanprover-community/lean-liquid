@@ -385,7 +385,7 @@ end
 instance [mono f] (i : ι) : mono (f.f i) :=
 begin
   change mono ((eval V c i).map f),
-  exact category_theory.preserves_mono _ f,
+  apply_instance
 end
 
 lemma mono_of_eval [∀ i, mono (f.f i)] : mono f :=
@@ -403,7 +403,7 @@ lemma mono_iff_eval : mono f ↔ ∀ i, mono (f.f i) :=
 instance [epi f] (i : ι) : epi (f.f i) :=
 begin
   change epi ((eval V c i).map f),
-  exact category_theory.preserves_epi _ f,
+  apply_instance
 end
 
 lemma epi_of_eval [∀ i, epi (f.f i)] : epi f :=

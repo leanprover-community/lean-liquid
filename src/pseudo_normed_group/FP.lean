@@ -41,7 +41,7 @@ by { ext, refl }
 
 end Filtration
 
-@[simps obj_obj obj_map_to_fun map_app {fully_applied := ff}]
+@[simps obj_obj obj_map_apply map_app {fully_applied := ff}]
 def Filtration (r' : ℝ≥0) : ℝ≥0 ⥤ ProFiltPseuNormGrpWithTinv.{u} r' ⥤ Profinite.{u} :=
 { obj := λ c,
   { obj := λ M, pseudo_normed_group.filtration_obj M c,
@@ -192,7 +192,7 @@ def eval_FP [ϕ.suitable c₁ c₂] : FiltrationPow.{u} r' c₁ m ⟶ Filtration
     change ϕ.eval_png₀ M₂ c₁ c₂ ((FiltrationPow r' c₁ m).map f x) =
       (FiltrationPow r' c₂ n).map f (ϕ.eval_png₀ M₁ c₁ c₂ x),
     ext j,
-    dsimp only [FiltrationPow_map, Filtration_obj_map_to_fun,basic_universal_map.eval_png₀_coe,
+    dsimp only [FiltrationPow_map, Filtration_obj_map_apply, basic_universal_map.eval_png₀_coe,
       comphaus_filtered_pseudo_normed_group_with_Tinv_hom.level_coe,
       comp_to_fun, coe_to_add_monoid_hom],
     simp only [basic_universal_map.eval_png_apply, pi_map_to_fun, f.map_sum, f.map_zsmul],
