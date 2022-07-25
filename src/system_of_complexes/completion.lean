@@ -161,7 +161,7 @@ begin
   refine sub_eq_zero.1 (norm_le_zero_iff'.1 _),
   have lim_norm : tendsto (λ j, ∥res x - C.d _ _ (y j)∥) at_top (𝓝 ∥res x - C.d _ _ y₀∥),
   { have cont : continuous (λ y : C c i, ∥res x - C.d _ _ y∥),
-      from continuous_norm.comp (continuous_const.sub $ normed_group_hom.continuous _),
+      from continuous_norm.comp (continuous_const.sub $ normed_add_group_hom.continuous _),
     exact (cont.tendsto y₀).comp hy₀ },
   have lim_ε : tendsto ε at_top (𝓝 0),
   { rw show (0 : ℝ) = (2⁻¹*0)/K'/2, by norm_num,

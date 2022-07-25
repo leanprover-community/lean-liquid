@@ -40,7 +40,7 @@ and subsequently mildly modified.
 -/
 
 variables (X : Type*) [topological_space X]
-variables (A : Type*) [normed_group A]
+variables (A : Type*) [normed_add_comm_group A]
 
 variable {X}
 variables [compact_space X]
@@ -79,7 +79,7 @@ lemma is_clopen_sUnion {H : Type*} [topological_space H]
 lemma clopen_finite_Union {H : Type*} [topological_space H]
   (s : finset(set H)) (hs : ∀ x ∈ s, is_clopen x) :
   is_clopen ⋃₀ (s : set(set H)) :=
-  by { rw set.sUnion_eq_bUnion, apply is_clopen_bUnion hs, }
+  by { rw set.sUnion_eq_bUnion, apply is_clopen_bUnion s.finite_to_set hs, }
 
 /-- Given a finite set of clopens, one can find a finite disjoint set of clopens contained in
   it. -/
@@ -93,8 +93,8 @@ lemma clopen_Union_disjoint {H : Type*} [topological_space H]
 begin
   classical,
   apply finset.induction_on' s,
-  { use ∅, simp only [finset.not_mem_empty, forall_false_left, set.mem_empty_eq, forall_const,
-      finset.coe_empty, eq_self_iff_true, and_self], },
+  { use ∅, simp only [finset.not_mem_empty, set.mem_empty_eq, forall_const,
+      finset.coe_empty, eq_self_iff_true, and_self, is_empty.forall_iff] },
   { rintros a S h's hS aS ⟨t, clo, union, sub, disj⟩,
     set b := a \ ⋃₀ S with hb,
     refine ⟨insert b t, _, _, ⟨λ x hx, _, λ x y hx hy ne, _⟩⟩,
@@ -128,11 +128,11 @@ namespace locally_constant.density
 variables (ε : ℝ)
 
 /-- Takes an element of `A` to an `ε/4`-ball centered around it. -/
-abbreviation h {A : Type*} [normed_group A] : A → set A :=
+abbreviation h {A : Type*} [normed_add_comm_group A] : A → set A :=
   λ (x : A), metric.ball x (ε / 4)
 
 /-- The set of (ε/4)-balls. -/
-abbreviation S {A : Type*} [normed_group A] : set (set A) := set.range (h ε)
+abbreviation S {A : Type*} [normed_add_comm_group A] : set (set A) := set.range (h ε)
 
 variables {A} (f : C(X, A))
 
@@ -254,7 +254,7 @@ abbreviation s1 := λ (x : s' ε f), (x.1 : set X)
 
 /-- The range of `s1` is finite. -/
 lemma fin : (set.range (s1 ε f)).finite :=
-by { apply set.finite_range _, exact plift.fintype (s' ε f), }
+by { apply set.finite_range _, exact finite.of_fintype ↥(s' ε f), }
 
 /-- Any element in the range of `s1` is clopen. -/
 lemma is_clopen_x {x : set X} (hx : x ∈ (fin ε f).to_finset) : is_clopen x :=

@@ -24,8 +24,8 @@ variables (V : SemiNormedGroup.{u})
 lemma QprimeFP_map (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) :
   (QprimeFP r' BD κ M).map h = of'_hom ((QprimeFP_int r' BD κ _).map h) := rfl
 
-instance aaahrg (X : Profinite) : semi_normed_group (locally_constant X V) :=
-locally_constant.semi_normed_group
+instance aaahrg (X : Profinite) : seminormed_add_comm_group (locally_constant X V) :=
+locally_constant.seminormed_add_comm_group
 
 def V_T_inv (r : ℝ≥0) (V : SemiNormedGroup.{u}) [normed_with_aut r V] : V ⟶ V :=
 normed_with_aut.T.{u}.inv
@@ -58,7 +58,7 @@ lemma final_boss_aux₃ [normed_with_aut r V] (X : Profinite) :
   (((uniform_space.completion.cpkg.{u}.compare_equiv (locally_constant.pkg.{u} X ↥V)).symm) x)) :=
 begin
   dsimp [abstract_completion.compare_equiv],
-  refine (normed_group_hom.continuous _).comp _,
+  refine (normed_add_group_hom.continuous _).comp _,
   refine ((locally_constant.pkg X V).uniform_continuous_compare _).continuous,
 end
 
@@ -112,7 +112,7 @@ begin
     continuous_to_fun := _},
   swap,
   { apply continuous.comp,
-    apply normed_group_hom.continuous,
+    apply normed_add_group_hom.continuous,
     refine ((locally_constant.pkg.{u} X ↥V).coe x).2 },
   have hq : q = (locally_constant.pkg X V).coe
     ((locally_constant.map_hom.{u u u} (V_T_inv.{u} r V)) x),
@@ -126,7 +126,7 @@ begin
 
   refl,
 
-  apply normed_group_hom.uniform_continuous,
+  apply normed_add_group_hom.uniform_continuous,
 end
 
 end
@@ -154,8 +154,8 @@ lemma add_equiv.mk_symm_apply {A B : Type*} [add_comm_group A] [add_comm_group B
 lemma locally_constant.comap_hom_map_hom {X Y V W : Type*}
   [topological_space X] [compact_space X]
   [topological_space Y] [compact_space Y]
-  [semi_normed_group V] [semi_normed_group W]
-  (f : X → Y) (hf : continuous f) (g : normed_group_hom V W) (φ : locally_constant Y V) :
+  [seminormed_add_comm_group V] [seminormed_add_comm_group W]
+  (f : X → Y) (hf : continuous f) (g : normed_add_group_hom V W) (φ : locally_constant Y V) :
   locally_constant.comap_hom f hf (locally_constant.map_hom g φ) =
   ((locally_constant.map_hom g) ∘ (locally_constant.comap_hom f hf)) φ :=
 begin
@@ -170,11 +170,11 @@ instance (X : Profinite) :
   (@locally_constant.{u u} (@coe_sort.{u+2 u+2} Profinite.{u} (Type u) Profinite.has_coe_to_sort.{u} X)
      (@coe_sort.{u+2 u+2} SemiNormedGroup.{u} (Type u) SemiNormedGroup.has_coe_to_sort.{u} V)
      (Top.topological_space.{u} X.to_CompHaus.to_Top))
-  (@semi_normed_group.to_pseudo_metric_space.{u}
+  (@seminormed_add_comm_group.to_pseudo_metric_space.{u}
      (@locally_constant.{u u} (@coe_sort.{u+2 u+2} Profinite.{u} (Type u) Profinite.has_coe_to_sort.{u} X)
         (@coe_sort.{u+2 u+2} SemiNormedGroup.{u} (Type u) SemiNormedGroup.has_coe_to_sort.{u} V)
         (Top.topological_space.{u} X.to_CompHaus.to_Top))
-     locally_constant.semi_normed_group)
+     locally_constant.seminormed_add_comm_group)
 
 instance (X : Profinite) : topological_space ↥(V.to_Cond.val.obj (op X)) :=
 @ulift.topological_space _ (continuous_map.compact_open.{u u})
@@ -217,11 +217,11 @@ begin
       uniform_space.completion.map],
     rw [abstract_completion.map_coe],
     swap,
-    { letI : semi_normed_group (locally_constant ↥(X.to_CompHaus.to_Top) ↥V),
-      { exact locally_constant.semi_normed_group },
-      letI : semi_normed_group (locally_constant ↥(Y.to_CompHaus.to_Top) ↥V),
-      { exact locally_constant.semi_normed_group },
-      exact normed_group_hom.uniform_continuous _, },
+    { letI : seminormed_add_comm_group (locally_constant ↥(X.to_CompHaus.to_Top) ↥V),
+      { exact locally_constant.seminormed_add_comm_group },
+      letI : seminormed_add_comm_group (locally_constant ↥(Y.to_CompHaus.to_Top) ↥V),
+      { exact locally_constant.seminormed_add_comm_group },
+      exact normed_add_group_hom.uniform_continuous _, },
     have : (continuous_map.comp_right_continuous_map ↥V f) ((locally_constant.pkg Y V).coe φ) =
       (locally_constant.pkg X V).coe _ := _,
     rw [this, abstract_completion.compare_coe],
@@ -254,12 +254,12 @@ begin
   dsimp only [ExtQprime_iso_aux_system_obj_aux', LCC_iso_Cond_of_top_ab,
     LCC_iso_Cond_of_top_ab_add_equiv, LCC_iso_Cond_of_top_ab_equiv, CLC, LC, functor.comp_map,
     Condensed.of_top_ab],
-  simp only [add_equiv.to_fun_eq_coe, normed_group_hom.completion_coe_to_fun,
+  simp only [add_equiv.to_fun_eq_coe, normed_add_group_hom.completion_coe_to_fun,
     add_equiv.to_AddCommGroup_iso_hom, add_equiv.coe_to_add_monoid_hom, add_equiv.trans_apply,
     add_equiv.ulift_apply, equiv.to_fun_as_coe, equiv.ulift_apply_2,
     Ab.ulift_map_apply_down, add_equiv.coe_mk, nat_iso.of_components.inv_app,
     add_equiv.to_AddCommGroup_iso, add_equiv.mk_symm,
-    SemiNormedGroup.forget₂_Ab_map, normed_group_hom.coe_to_add_monoid_hom],
+    SemiNormedGroup.forget₂_Ab_map, normed_add_group_hom.coe_to_add_monoid_hom],
   let F := SemiNormedGroup.Completion.{u+1}.map ((SemiNormedGroup.LocallyConstant.{u+1 u}.obj
     (SemiNormedGroup.ulift.{u+1 u}.obj V)).map f.op),
   let g := _,
@@ -268,17 +268,17 @@ begin
   change (F ∘ uniform_space.completion.map g) Z = _,
   erw [uniform_space.completion.map_comp],
   rotate,
-  { apply normed_group_hom.uniform_continuous, },
-  { apply normed_group_hom.uniform_continuous, },
+  { apply normed_add_group_hom.uniform_continuous, },
+  { apply normed_add_group_hom.uniform_continuous, },
   conv_lhs
-  { dsimp only [function.comp, normed_group_hom.coe_to_add_monoid_hom, g,
+  { dsimp only [function.comp, normed_add_group_hom.coe_to_add_monoid_hom, g,
       SemiNormedGroup.LocallyConstant_obj_map], },
   simp only [locally_constant.comap_hom_map_hom],
   letI : uniform_space.{u} (locally_constant.{u u} ↥(unop.{u+2} (op.{u+2} X)) ↥V) := _,
   erw [← uniform_space.completion.map_comp],
   rotate,
-  { apply normed_group_hom.uniform_continuous, },
-  { apply normed_group_hom.uniform_continuous, },
+  { apply normed_add_group_hom.uniform_continuous, },
+  { apply normed_add_group_hom.uniform_continuous, },
   dsimp only [function.comp, Z, quiver.hom.unop_op],
   congr' 1, clear Z g F,
   exact massive_aux₂ V X Y f x,
@@ -371,8 +371,8 @@ end
 
 
 def to_Cond_T_inv (r : ℝ≥0) (V : SemiNormedGroup.{u}) [normed_with_aut r V] : V.to_Cond ⟶ V.to_Cond :=
-(Condensed.of_top_ab_map.{u} (normed_group_hom.to_add_monoid_hom.{u u} normed_with_aut.T.{u}.inv)
-  (normed_group_hom.continuous _))
+(Condensed.of_top_ab_map.{u} (normed_add_group_hom.to_add_monoid_hom.{u u} normed_with_aut.T.{u}.inv)
+  (normed_add_group_hom.continuous _))
 
 lemma uniform_space.completion.map_comp'
   {α β γ : Type*} [uniform_space α] [uniform_space β] [uniform_space γ]
@@ -406,17 +406,17 @@ begin
   dsimp only [ExtQprime_iso_aux_system_obj_aux', add_equiv.to_AddCommGroup_iso,
     add_equiv.coe_to_add_monoid_hom, add_equiv.trans_apply],
   simp only [add_equiv.to_fun_eq_coe, SemiNormedGroup.LocallyConstant_map_app, SemiNormedGroup.Completion_map,
-  normed_group_hom.completion_coe_to_fun, add_equiv.ulift_apply, equiv.to_fun_as_coe, equiv.ulift_apply_2,
+  normed_add_group_hom.completion_coe_to_fun, add_equiv.ulift_apply, equiv.to_fun_as_coe, equiv.ulift_apply_2,
   add_equiv.coe_mk, Ab.ulift_map_apply_down, SemiNormedGroup.forget₂_Ab_map,
-    normed_group_hom.coe_to_add_monoid_hom],
+    normed_add_group_hom.coe_to_add_monoid_hom],
   rw uniform_space.completion.map_comp',
   rotate,
-  { apply normed_group_hom.uniform_continuous },
-  { apply normed_group_hom.uniform_continuous },
+  { apply normed_add_group_hom.uniform_continuous },
+  { apply normed_add_group_hom.uniform_continuous },
   rw uniform_space.completion.map_comp',
   rotate,
-  { apply normed_group_hom.uniform_continuous },
-  { apply normed_group_hom.uniform_continuous },
+  { apply normed_add_group_hom.uniform_continuous },
+  { apply normed_add_group_hom.uniform_continuous },
   refl
 end
 
@@ -807,7 +807,7 @@ def ExtQprime.T_inv [normed_with_aut r V]
   (QprimeFP r' BD κ₂ M).op ⋙ (Ext n).flip.obj ((single _ 0).obj V.to_Cond) :=
 whisker_right (nat_trans.op $ QprimeFP.ι BD _ _ M) _ ≫ whisker_left _ ((Ext n).flip.map $ (single _ _).map $
   (Condensed.of_top_ab_map (normed_with_aut.T.inv).to_add_monoid_hom
-  (normed_group_hom.continuous _)))
+  (normed_add_group_hom.continuous _)))
 
 def ExtQprime.Tinv2 [normed_with_aut r V]
   [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]
@@ -910,7 +910,7 @@ end
 --   ((aux_system.res.{u u+1} r' BD ⟨M⟩ (SemiNormedGroup.ulift.{u+1 u}.obj V) κ₂ κ).app c) =
 --   ((Ext.{u+1 u+2} ↑n).flip.map
 --       ((single.{u+1 u+2} (Condensed.{u u+1 u+2} Ab.{u+1}) 0).map
---           (Condensed.of_top_ab_map.{u} (normed_group_hom.to_add_monoid_hom.{u u} normed_with_aut.T.{u}.inv) _))).app
+--           (Condensed.of_top_ab_map.{u} (normed_add_group_hom.to_add_monoid_hom.{u u} normed_with_aut.T.{u}.inv) _))).app
 --       ((QprimeFP.{u} r' BD κ₂ M).op.obj c) ≫
 --     (ExtQprime_iso_aux_system_obj.{u} r' BD κ₂ M V (unop.{1} c) n).hom :=
 -- by admit
@@ -932,8 +932,8 @@ def hom_complex_map_T_inv (c : (ℝ≥0)ᵒᵖ) :
     refine nat_trans.app _ _,
     refine nat_trans.map_homological_complex _ _,
     refine preadditive_yoneda.map _,
-    refine Condensed.of_top_ab_map.{u} (normed_group_hom.to_add_monoid_hom.{u u}
-      normed_with_aut.T.{u}.inv) (normed_group_hom.continuous _)
+    refine Condensed.of_top_ab_map.{u} (normed_add_group_hom.to_add_monoid_hom.{u u}
+      normed_with_aut.T.{u}.inv) (normed_add_group_hom.continuous _)
   end ≫
   (category_theory.functor.map _
       (homological_complex.op_functor.map (quiver.hom.op $
@@ -1002,8 +1002,8 @@ lemma aux₂ (c : (ℝ≥0)ᵒᵖ) :
           ((QprimeFP_int.{u} r' BD κ M).obj (unop.{1} c)))
        ((nat_trans.map_homological_complex.{u+1 u+2 0 u+2 u+1}
            (nat_trans.right_op.{u+1 u+1 u+2 u+2} (preadditive_yoneda.{u+1 u+2}.map
-           (Condensed.of_top_ab_map.{u} (normed_group_hom.to_add_monoid_hom.{u u}
-        normed_with_aut.T.{u}.inv) (normed_group_hom.continuous _))))
+           (Condensed.of_top_ab_map.{u} (normed_add_group_hom.to_add_monoid_hom.{u u}
+        normed_with_aut.T.{u}.inv) (normed_add_group_hom.continuous _))))
            (complex_shape.up.{0} ℤ)).app
           ((QprimeFP_int.{u} r' BD κ M).obj (unop.{1} c))) ≫
      (homological_complex.unop_functor.{u+2 u+1 0}.right_op.map
@@ -1187,8 +1187,8 @@ begin
   simp only [category.assoc], clear this η,
 
   let t : Condensed.of_top_ab V ⟶ _ :=
-    Condensed.of_top_ab_map.{u} (normed_group_hom.to_add_monoid_hom.{u u}
-      normed_with_aut.T.{u}.inv) (normed_group_hom.continuous _),
+    Condensed.of_top_ab_map.{u} (normed_add_group_hom.to_add_monoid_hom.{u u}
+      normed_with_aut.T.{u}.inv) (normed_add_group_hom.continuous _),
   have := Ext_compute_with_acyclic_naturality_snd_var
     ((QprimeFP_int r' BD κ M).obj c.unop) t _ _ n,
   rotate,

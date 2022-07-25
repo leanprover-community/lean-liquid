@@ -22,9 +22,9 @@ variables (ι Λ : Type*)
 
 namespace finsupp
 
-section normed_group
+section normed_add_comm_group
 
-variables [normed_group Λ]
+variables [normed_add_comm_group Λ]
 
 instance : has_norm (ι →₀ Λ) := ⟨λ x, x.sum $ λ _, norm⟩
 
@@ -37,8 +37,8 @@ by simp only [norm_def, sum_single_index, norm_zero]
 
 variables (ι Λ)
 
-instance [fintype ι] : normed_group (ι →₀ Λ) :=
-normed_group.of_core _ $
+instance [fintype ι] : normed_add_comm_group (ι →₀ Λ) :=
+normed_add_comm_group.of_core _ $
 { norm_eq_zero_iff := λ x,
   begin
     simp only [norm_def, sum, ← coe_nnnorm, ← nnreal.coe_sum, nnreal.coe_eq_zero, coe_zero,
@@ -67,7 +67,7 @@ begin
   simpa only [coe_nnnorm, finsupp.sum, nnreal.coe_sum] using norm_def x,
 end
 
-end normed_group
+end normed_add_comm_group
 
 end finsupp
 

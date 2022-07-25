@@ -31,9 +31,8 @@ def sum.inr (X Y : Profinite.{u}) : Y ⟶ sum X Y :=
 def sum.desc {Z} (X Y : Profinite.{u}) (f : X ⟶ Z) (g : Y ⟶ Z) : sum X Y ⟶ Z :=
 { to_fun := λ x, _root_.sum.rec_on x f g,
   continuous_to_fun := begin
-    apply continuous_sup_dom,
-    { apply continuous_coinduced_dom, exact f.continuous },
-    { apply continuous_coinduced_dom, exact g.continuous }
+    simp only [continuous_sup_dom, continuous_coinduced_dom],
+    exact ⟨f.continuous, g.continuous⟩
   end }
 
 @[simp, reassoc]
@@ -73,10 +72,10 @@ by { rcases t with ⟨a,t⟩, exact ⟨a,t,rfl⟩ }
 def sigma.desc {Y} (f : Π a, X a ⟶ Y) : sigma X ⟶ Y :=
 { to_fun := λ ⟨a,t⟩, f a t,
   continuous_to_fun := begin
-    apply continuous_Sup_dom,
+    rw continuous_Sup_dom,
     rintros _ ⟨a,rfl⟩,
     resetI,
-    apply continuous_coinduced_dom,
+    rw continuous_coinduced_dom,
     exact (f a).continuous
   end }
 

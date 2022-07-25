@@ -129,10 +129,6 @@ instance category_theory.limits.preserves_binary_biproduct_of_additive
   preserves_binary_biproduct X Y F :=
 preserves_binary_biproduct_of_preserves_biproduct _ _ _
 
--- move me
-@[simp] lemma category_theory.op_neg {𝓐 : Type*} [category 𝓐] [preadditive 𝓐]
-  {X Y : 𝓐} (f : X ⟶ Y) : (-f).op = - f.op := rfl
-
 lemma acyclic_left_of_short_exact (B : 𝓐) {X Y Z : 𝓐} (f : X ⟶ Y) (g : Y ⟶ Z) (hfg : short_exact f g)
   (hY : ∀ i > 0, is_zero (((Ext' i).obj (op $ Y)).obj B))
   (hZ : ∀ i > 0, is_zero (((Ext' i).obj (op $ Z)).obj B)) :

@@ -76,7 +76,7 @@ begin
   suffices : mono (F.map t),
   { resetI,
     haveI := reflects_limits_of_size_shrink.{0 v 0 v} F,
-    apply reflects_mono F },
+    apply F.mono_of_mono_map infer_instance },
   let eX : F.obj (∐ λ (a : a), X a) ≅ (∐ λ a, F.obj (X a)) :=
     (is_colimit_of_preserves F (colimit.is_colimit _)).cocone_point_unique_up_to_iso
       (colimit.is_colimit _) ≪≫ has_colimit.iso_of_nat_iso

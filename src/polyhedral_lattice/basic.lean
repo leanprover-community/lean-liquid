@@ -21,7 +21,7 @@ open_locale big_operators classical nnreal
 
 section generates_norm
 
-variables {Λ ι : Type*} [semi_normed_group Λ] [fintype ι]
+variables {Λ ι : Type*} [seminormed_add_comm_group Λ] [fintype ι]
 
 /-- A finite family `x : ι → Λ` generates the norm on `Λ`
 if for every `l : Λ` there exist coefficients `c : ι → ℕ`
@@ -50,7 +50,7 @@ lemma generates_norm_of_generates_nnnorm {x : ι → Λ}
 
 end generates_norm
 
-class polyhedral_lattice (Λ : Type*) extends normed_group Λ :=
+class polyhedral_lattice (Λ : Type*) extends normed_add_comm_group Λ :=
 [finite [] : module.finite ℤ Λ]
 [free   [] : module.free ℤ Λ]
 (polyhedral' [] : ∃ (ι : Type) [fintype ι] (l : ι → Λ), generates_norm l)
@@ -188,7 +188,7 @@ lemma strict (l : Λ₁) : ∥f l∥ ≤ ∥l∥ := f.strict' l
 lemma strict_nnnorm (l : Λ₁) : ∥f l∥₊ ≤ ∥l∥₊ := f.strict' l
 
 @[simps]
-def to_normed_group_hom : normed_group_hom Λ₁ Λ₂ :=
+def to_normed_group_hom : normed_add_group_hom Λ₁ Λ₂ :=
 { bound' := ⟨1, by simpa only [one_mul] using f.strict⟩, .. f }
 
 /-- The identity as a polyhedral lattice hom. -/

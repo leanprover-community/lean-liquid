@@ -17,12 +17,12 @@ open_locale nnreal
 
 variables (S : Profinite.{u})
 variables (V : SemiNormedGroup.{u}) [complete_space V] [separated_space V]
-variables (V' : Type u) [normed_group V'] [complete_space V']
+variables (V' : Type u) [normed_add_comm_group V'] [complete_space V']
 
 def LCC : Profinite.{u}ᵒᵖ ⥤ Ab.{u} :=
 SemiNormedGroup.LCC.obj V ⋙ forget₂ _ _
 
-local attribute [instance] locally_constant.semi_normed_group locally_constant.pseudo_metric_space
+local attribute [instance] locally_constant.seminormed_add_comm_group locally_constant.pseudo_metric_space
 
 open uniform_space
 
@@ -31,7 +31,7 @@ lemma continuous_map.bdd_above_range_norm (f : C(S, V')) :
 (is_compact_range $ continuous_norm.comp f.continuous).bdd_above
 
 def Condensed.of_top_ab_map_normed_group_hom {S T : Profinite.{u}ᵒᵖ} (f : S ⟶ T) :
-  normed_group_hom C(_, V') C(_, V') :=
+  normed_add_group_hom C(_, V') C(_, V') :=
 { to_fun := (Condensed.of_top_ab.presheaf.{u} V').map f,
   map_add' := λ _ _, add_monoid_hom.map_add _ _ _,
   bound' := begin

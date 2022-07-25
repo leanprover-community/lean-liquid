@@ -9,9 +9,9 @@ This file contains the construction of a pseudo-normed group from a seminormed g
 -/
 open_locale nnreal
 
-namespace semi_normed_group
+namespace seminormed_add_comm_group
 
-instance (V : Type*) [semi_normed_group V] : pseudo_normed_group V :=
+instance (V : Type*) [seminormed_add_comm_group V] : pseudo_normed_group V :=
 { filtration := λ c, {v | ∥v∥₊ ≤ c},
   filtration_mono := λ c₁ c₂ h v (hv : ∥v∥ ≤ c₁), le_trans hv h,
   zero_mem_filtration := λ c, by simp only [set.mem_set_of_eq, nnnorm_zero, zero_le],
@@ -21,7 +21,7 @@ instance (V : Type*) [semi_normed_group V] : pseudo_normed_group V :=
         ≤ ∥v₁∥ + ∥v₂∥ : norm_add_le _ _
     ... ≤ c₁ + c₂ : add_le_add hv₁ hv₂ }
 
-variables {V : Type*} [semi_normed_group V]
+variables {V : Type*} [seminormed_add_comm_group V]
 
 open pseudo_normed_group
 
@@ -31,4 +31,4 @@ show ∥v∥₊ ≤ ∥v∥₊, from le_rfl
 @[simp] lemma mem_filtration_iff (v : V) (c : ℝ≥0) :
   v ∈ filtration V c ↔ ∥v∥₊ ≤ c := iff.rfl
 
-end semi_normed_group
+end seminormed_add_comm_group

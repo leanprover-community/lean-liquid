@@ -277,14 +277,14 @@ begin
       = ∥res x - f.hom (C₁.d _ _ y)∥ : by rw d_apply
   ... = ∥f.hom (f.inv (res x)) - f.hom (C₁.d _ _ y)∥ : by rw hom_apply_inv_apply
   ... = ∥f.hom (f.inv (res x) - C₁.d _ _ y)∥ : by congr ; exact (system_of_complexes.map_sub _ _ _).symm
-  ... = ∥f.inv (res x) - C₁.d _ _ y∥ : normed_group_hom.norm_eq_of_isometry (hf _ _) _
+  ... = ∥f.inv (res x) - C₁.d _ _ y∥ : normed_add_group_hom.norm_eq_of_isometry (hf _ _) _
   ... = ∥res (f.inv x) - C₁.d _ _ y∥ : by rw res_apply
   ... ≤ K * ∥C₁.d _ _ (f.inv x)∥ + ε : hy
   ... = K * ∥C₂.d _ _ x∥ + ε : _,
   congr' 2,
   calc  ∥C₁.d i j (f.inv x)∥
       = ∥f.inv (C₂.d i j x)∥ : by rw d_apply
-  ... = ∥f.hom (f.inv (C₂.d _ _ x))∥ : (normed_group_hom.norm_eq_of_isometry (hf _ _) _).symm
+  ... = ∥f.hom (f.inv (C₂.d _ _ x))∥ : (normed_add_group_hom.norm_eq_of_isometry (hf _ _) _).symm
   ... = ∥C₂.d _ _ x∥ : by rw hom_apply_inv_apply
 end
 
@@ -297,7 +297,7 @@ begin
   intros c n,
   apply add_monoid_hom_class.isometry_of_norm,
   intro v,
-  rw ← normed_group_hom.norm_eq_of_isometry (hf c n),
+  rw ← normed_add_group_hom.norm_eq_of_isometry (hf c n),
   simp only [←apply_hom_eq_hom_apply, ←apply_inv_eq_inv_apply, iso.symm_hom, iso.inv_hom_id_apply],
 end
 
@@ -333,13 +333,13 @@ begin
       = ∥res x - f.hom (C₁.d _ _ y)∥ : by rw d_apply
   ... = ∥f.hom (f.inv (res x)) - f.hom (C₁.d _ _ y)∥ : by rw hom_apply_inv_apply
   ... = ∥f.hom (f.inv (res x) - C₁.d _ _ y)∥ : by congr ; exact (system_of_complexes.map_sub _ _ _).symm
-  ... = ∥f.inv (res x) - C₁.d _ _ y∥ : normed_group_hom.norm_eq_of_isometry (hf _ _) _
+  ... = ∥f.inv (res x) - C₁.d _ _ y∥ : normed_add_group_hom.norm_eq_of_isometry (hf _ _) _
   ... = ∥res (f.inv x) - C₁.d _ _ y∥ : by rw res_apply
   ... ≤ K * ∥C₁.d _ _ (f.inv x)∥ : hy
   ... = K * ∥C₂.d _ _ x∥ : congr_arg _ _,
   calc  ∥C₁.d i j (f.inv x)∥
       = ∥f.inv (C₂.d i j x)∥ : by rw d_apply
-  ... = ∥f.hom (f.inv (C₂.d _ _ x))∥ : (normed_group_hom.norm_eq_of_isometry (hf _ _) _).symm
+  ... = ∥f.hom (f.inv (C₂.d _ _ x))∥ : (normed_add_group_hom.norm_eq_of_isometry (hf _ _) _).symm
   ... = ∥C₂.d _ _ x∥ : by rw hom_apply_inv_apply
 end
 
@@ -372,7 +372,7 @@ end
 end is_weak_bounded_exact
 section quotient
 
-open normed_group_hom
+open normed_add_group_hom
 
 variables {M M'}
 
@@ -380,7 +380,7 @@ variables {M M'}
 def is_quotient (f : M ⟶ M') : Prop :=
 ∀ c i, (f.apply : M c i ⟶ M' c i).is_quotient
 
--- The next three lemmas restate lemmas about normed_group_hom.is_quotient in terms of the coercion
+-- The next three lemmas restate lemmas about normed_add_group_hom.is_quotient in terms of the coercion
 -- of `M ⟶ M'` to functions.
 
 lemma is_quotient.surjective {f : M ⟶ M'} (h : is_quotient f) {c i} (m' : M' c i) :

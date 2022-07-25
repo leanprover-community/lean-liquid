@@ -177,7 +177,7 @@ open profinitely_filtered_pseudo_normed_group
 { to_fun := λ x, ⟨⟨level f hf c₁ x, Filtration.cast_le M₁ c₁ c₂ x⟩, rfl⟩,
   continuous_to_fun :=
   begin
-    apply continuous_induced_rng,
+    rw continuous_induced_rng,
     refine continuous.prod_mk (f.continuous _ (λ _, rfl)) (Filtration.cast_le M₁ c₁ c₂).continuous,
   end }
 
@@ -241,7 +241,7 @@ begin
     suffices : function.surjective ((unop (op (fstₐ (sum_hom M N) _ c (k * c)))).hom),
     { intros i ε hε x hx, cases i,
       { simp only [nat.one_ne_zero, homological_complex.shape, complex_shape.up_rel,
-          exists_and_distrib_left, not_false_iff, normed_group_hom.zero_apply],
+          exists_and_distrib_left, not_false_iff, normed_add_group_hom.zero_apply],
         refine ⟨(prop819_degree_zero _ this _ x hx).symm, 0, _⟩,
         simp only [nnnorm_zero, zero_le'] },
       exact prop819 _ this _ ε hε x hx },

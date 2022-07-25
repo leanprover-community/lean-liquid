@@ -9,7 +9,7 @@ space into a normed group (with the sup norm).
 
 ## Main construction
 
-* The instance `locally_constant.normed_group`
+* The instance `locally_constant.normed_add_comm_group`
 * `locally_constant.map_hom`: push-forward of locally constant maps as a normed group hom
 * `locally_constant.comap_hom`: pull-back of locally constant maps as a normed group hom
 -/
@@ -177,29 +177,29 @@ protected def metric_space [metric_space Y] : metric_space (locally_constant X Y
 /--
 The seminormed group of locally constant functions from a compact space to a seminormed group.
 -/
-protected def semi_normed_group {G : Type*} [semi_normed_group G] :
-  semi_normed_group (locally_constant X G) :=
+protected def seminormed_add_comm_group {G : Type*} [seminormed_add_comm_group G] :
+  seminormed_add_comm_group (locally_constant X G) :=
 { dist_eq := λ f g, show Sup _ = Sup _,
-  by simp only [semi_normed_group.dist_eq, locally_constant.sub_apply],
+  by simp only [seminormed_add_comm_group.dist_eq, locally_constant.sub_apply],
   .. locally_constant.has_norm, .. locally_constant.add_comm_group,
   .. locally_constant.pseudo_metric_space }
 
 /-- The normed group of locally constant functions from a compact space to a normed group. -/
-protected def normed_group {G : Type*} [normed_group G] : normed_group (locally_constant X G) :=
-{ .. locally_constant.semi_normed_group,
+protected def normed_add_comm_group {G : Type*} [normed_add_comm_group G] : normed_add_comm_group (locally_constant X G) :=
+{ .. locally_constant.seminormed_add_comm_group,
   .. locally_constant.metric_space }
 
-local attribute [instance] locally_constant.semi_normed_group
+local attribute [instance] locally_constant.seminormed_add_comm_group
 
 section map_hom
 
-variables [semi_normed_group V] [semi_normed_group V₁] [semi_normed_group V₂] [semi_normed_group V₃]
+variables [seminormed_add_comm_group V] [seminormed_add_comm_group V₁] [seminormed_add_comm_group V₂] [seminormed_add_comm_group V₃]
 
 /-- Push-forward of locally constant maps under a normed group hom, as a normed
 group hom between types of locally constant functions. -/
 @[simps]
-def map_hom (f : normed_group_hom V₁ V₂) :
-  normed_group_hom (locally_constant X V₁) (locally_constant X V₂) :=
+def map_hom (f : normed_add_group_hom V₁ V₂) :
+  normed_add_group_hom (locally_constant X V₁) (locally_constant X V₂) :=
 { to_fun := locally_constant.map f,
   map_add' := by { intros x y, ext s, apply f.map_add' },
   bound' :=
@@ -228,10 +228,10 @@ def map_hom (f : normed_group_hom V₁ V₂) :
   end }
 
 @[simp] lemma map_hom_id :
-  @map_hom X _ _ _ _ _ _ (@normed_group_hom.id V _) = normed_group_hom.id _ :=
+  @map_hom X _ _ _ _ _ _ (@normed_add_group_hom.id V _) = normed_add_group_hom.id _ :=
 by { ext, refl }
 
-@[simp] lemma map_hom_comp (g : normed_group_hom V₂ V₃) (f : normed_group_hom V₁ V₂) :
+@[simp] lemma map_hom_comp (g : normed_add_group_hom V₂ V₃) (f : normed_add_group_hom V₁ V₂) :
   (@map_hom X _ _ _ _ _ _ g).comp (map_hom f) = map_hom (g.comp f) :=
 by { ext, refl }
 
@@ -239,18 +239,18 @@ end map_hom
 
 section comap_hom
 /-!
-### comapping as normed_group_hom
+### comapping as normed_add_group_hom
 -/
 
 variables [topological_space Y] [compact_space Y] [topological_space Z] [compact_space Z]
-variables [semi_normed_group V]
+variables [seminormed_add_comm_group V]
 
 /-- Pull-back of locally constant maps under a normed group hom, as a normed
 group hom between types of locally constant functions. -/
 @[simps]
 def comap_hom (f : X → Y) (hf : continuous f) :
-  normed_group_hom (locally_constant Y V) (locally_constant X V) :=
-add_monoid_hom.mk_normed_group_hom
+  normed_add_group_hom (locally_constant Y V) (locally_constant X V) :=
+add_monoid_hom.mk_normed_add_group_hom
   (add_monoid_hom.mk'
     (locally_constant.comap f)
     (by { intros, ext, simp only [hf, add_apply, function.comp_app, coe_comap] }))
@@ -282,10 +282,10 @@ add_monoid_hom.mk_normed_group_hom
       { exact set.mem_range_self _ } },
   end
 
-@[simp] lemma comap_hom_id : @comap_hom X X V _ _ _ _ _ id continuous_id = normed_group_hom.id _ :=
+@[simp] lemma comap_hom_id : @comap_hom X X V _ _ _ _ _ id continuous_id = normed_add_group_hom.id _ :=
 begin
   ext,
-  simp only [comap_id, comap_hom_apply, id.def, normed_group_hom.id_apply,
+  simp only [comap_id, comap_hom_apply, id.def, normed_add_group_hom.id_apply,
     add_monoid_hom.to_fun_eq_coe, add_monoid_hom.id_apply]
 end
 
@@ -301,8 +301,8 @@ end
 
 lemma comap_hom_norm_noninc (f : X → Y) (hf : continuous f) :
   (@comap_hom _ _ V _ _ _ _ _ f hf).norm_noninc :=
-normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.2 $
-  normed_group_hom.mk_normed_group_hom_norm_le _ (zero_le_one) _
+normed_add_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.2 $
+  normed_add_group_hom.mk_normed_add_group_hom_norm_le _ (zero_le_one) _
 
 end comap_hom
 

@@ -43,7 +43,7 @@ begin
   exact div_le_div zero_le_one (sub_le_self _ (pow_nonneg hr n)) (sub_pos.mpr hr') rfl.le,
 end
 
-lemma norm_sum_le_of_le_geom {α : Type*} [semi_normed_group α] {r C : ℝ} (hC : 0 ≤ C)
+lemma norm_sum_le_of_le_geom {α : Type*} [seminormed_add_comm_group α] {r C : ℝ} (hC : 0 ≤ C)
   (hr₀ : 0 ≤ r) (hr₁ : r < 1) {f : ℕ → α} (h : ∀ n, ∥f n∥ ≤ C*r^n) {n : ℕ} :
   ∥∑ k in range n, f k∥ ≤ C/(1-r) :=
 begin
@@ -123,7 +123,7 @@ begin
   simp,
 end
 
-instance semi_normed_group.inhabited (G : Type*) [semi_normed_group G] : inhabited G := ⟨0⟩
+instance seminormed_add_comm_group.inhabited (G : Type*) [seminormed_add_comm_group G] : inhabited G := ⟨0⟩
 
 section general_completion_stuff
 open filter uniform_space
@@ -131,8 +131,8 @@ open_locale topological_space
 
 -- Now we want an abstract machine where we can plug the sequence g from the previous section.
 
-variables {M₁ : Type*} [semi_normed_group M₁] {M₂ : Type*} [semi_normed_group M₂]
-          (f : normed_group_hom M₁ M₂)
+variables {M₁ : Type*} [seminormed_add_comm_group M₁] {M₂ : Type*} [seminormed_add_comm_group M₂]
+          (f : normed_add_group_hom M₁ M₂)
 
 -- PR very close to the definition of cauchy_seq
 lemma cauchy_seq.map {β : Type*} [semilattice_sup β]
@@ -146,18 +146,18 @@ begin
 end
 
 -- actually not used here, but should go somewhere
-lemma normed_group_hom.coe_range : (f.range : set M₂) = set.range f :=
+lemma normed_add_group_hom.coe_range : (f.range : set M₂) = set.range f :=
 by { erw add_monoid_hom.coe_range, refl }
 
-open normed_group
+open normed_add_comm_group
 
 lemma bar {C ε : ℝ} (hC : 0 < C) (hε : 0 < ε)
   (h : ∀ m₂ : M₂, ∃ g : ℕ → M₁, cauchy_seq g ∧ tendsto (f ∘ g) at_top (𝓝 m₂) ∧ ∀ n, ∥g n∥ ≤ C*∥m₂∥) :
   ∀ hatm₂ : completion M₂, ∃ m₁, f.completion m₁ = hatm₂ ∧ ∥m₁∥ ≤ (C+ε)*∥hatm₂∥ :=
 begin
   intro hatm₂,
-  refine controlled_closure_range_of_complete normed_group.norm_to_compl hC hε _ _
-    (normed_group.dense_range_to_compl _),
+  refine controlled_closure_range_of_complete normed_add_comm_group.norm_to_compl hC hε _ _
+    (normed_add_comm_group.dense_range_to_compl _),
   intro m₂,
   rcases h m₂ with ⟨g, cauchy_g, lim_g, bound_g⟩,
   have : cauchy_seq (to_compl ∘ g),
@@ -172,7 +172,7 @@ begin
     exact tendsto_nhds_unique lim this },
   { refine le_of_tendsto' (tendsto_norm.comp hy) (_ : ∀ n, ∥to_compl (g n)∥ ≤ C * ∥m₂∥),
     intro n,
-    rw normed_group.norm_to_compl,
+    rw normed_add_comm_group.norm_to_compl,
     apply bound_g }
 end
 
@@ -182,7 +182,7 @@ section locally_constant_stuff
 open topological_space normed_with_aut set
 open_locale nnreal big_operators
 
-local attribute [instance] locally_constant.semi_normed_group
+local attribute [instance] locally_constant.seminormed_add_comm_group
 
 /- Comment below indicate how this will be applied to Prop 9.2 -/
 variables
@@ -193,7 +193,7 @@ variables
   /- This will be inclusion -/
   {e : X → Y} (he : embedding e)
   /- This is used only for premilinary lemma not need the T action on V -/
-  {G : Type*} [semi_normed_group G]
+  {G : Type*} [seminormed_add_comm_group G]
 
 
 @[simp]
@@ -356,9 +356,9 @@ begin
     simp only [embedding.h, finset.sum_singleton, sub_left_inj],
     ext x,
     simp [he.continuous, he.locally_constant_extend_extends] },
-  { set c_φ : normed_group_hom (locally_constant Y V) (locally_constant X V) := comap_hom φ hφ,
-    set c_e : normed_group_hom (locally_constant Y V) (locally_constant X V) := comap_hom e he.continuous,
-    set m_T : normed_group_hom (locally_constant X V) (locally_constant X V) := map_hom T.inv,
+  { set c_φ : normed_add_group_hom (locally_constant Y V) (locally_constant X V) := comap_hom φ hφ,
+    set c_e : normed_add_group_hom (locally_constant Y V) (locally_constant X V) := comap_hom e he.continuous,
+    set m_T : normed_add_group_hom (locally_constant X V) (locally_constant X V) := map_hom T.inv,
     set G := he.g hφ f,
     set H := he.h hφ f,
     change m_T _ - _ = _,

@@ -163,7 +163,7 @@ lemma Tinv2_iso_of_bicartesian_aux [normed_with_aut r V]
   (of_hom (QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD.data κ M)))
   (auux $ commsq_shift_sub_id_Tinv _ _ _ _ _ _)
   (auux $ commsq_shift_sub_id_ι _ _ _ _ _ _)
-  ((single _ 0).map (Condensed.of_top_ab_map (normed_group_hom.to_add_monoid_hom (normed_with_aut.T.inv : V ⟶ V)) (normed_group_hom.continuous _)))
+  ((single _ 0).map (Condensed.of_top_ab_map (normed_add_group_hom.to_add_monoid_hom (normed_with_aut.T.inv : V ⟶ V)) (normed_add_group_hom.continuous _)))
   i).bicartesian :=
 begin
   have h1 := _, have h2 := _, have h3 := _,
@@ -221,7 +221,7 @@ lemma Tinv2_iso_of_bicartesian [normed_with_aut r V]
     ((Ext (i+1)).obj ((BD.eval freeCond').op.obj (op (M.to_Condensed)))).map
       ((single (Condensed Ab) 0).map
         (Condensed.of_top_ab_map
-          (normed_group_hom.to_add_monoid_hom normed_with_aut.T.inv) (normed_group_hom.continuous _)))) :=
+          (normed_add_group_hom.to_add_monoid_hom normed_with_aut.T.inv) (normed_add_group_hom.continuous _)))) :=
 begin
   let Vc := (single (Condensed Ab) 0).obj V.to_Cond,
   have SES₁ := QprimeFP.short_exact BD κ₂ M ι hι hκ₂,
@@ -237,7 +237,7 @@ begin
     (commsq_shift_sub_id_ι BD.data _ _ M ι hι)
     (commsq_sigma_proj_ι BD _ _ M ι)
     Vc ((single _ _).map $ Condensed.of_top_ab_map
-      (normed_group_hom.to_add_monoid_hom normed_with_aut.T.inv) (normed_group_hom.continuous _))
+      (normed_add_group_hom.to_add_monoid_hom normed_with_aut.T.inv) (normed_add_group_hom.continuous _))
     _
     (Tinv2_iso_of_bicartesian_aux _ _ _ _ _ _ _ _ _ H1)
     (Tinv2_iso_of_bicartesian_aux _ _ _ _ _ _ _ _ _ H2),
@@ -258,7 +258,7 @@ lemma Tinv2_iso_of_bicartesian' [normed_with_aut r V]
     ((Ext i).obj ((BD.eval freeCond').op.obj (op (M.to_Condensed)))).map
       ((single (Condensed Ab) 0).map
         (Condensed.of_top_ab_map
-          (normed_group_hom.to_add_monoid_hom normed_with_aut.T.inv) (normed_group_hom.continuous _)))) :=
+          (normed_add_group_hom.to_add_monoid_hom normed_with_aut.T.inv) (normed_add_group_hom.continuous _)))) :=
 begin
   obtain ⟨i, rfl⟩ : ∃ k, k+1 = i := ⟨i-1, sub_add_cancel _ _⟩,
   obtain ⟨ι, hι, hκ, hκ₂, H1, H2⟩ := H i,

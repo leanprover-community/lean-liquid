@@ -28,7 +28,7 @@ lemma cosimplicial_lift_mem_filtration (c : ℝ≥0)
   cosimplicial_lift Λ N m g₀ g hg ∈ filtration (obj (Λ.diagonal_embedding N) (m + 1) →+ M) c :=
 begin
   intros c' l' hl',
-  rw [semi_normed_group.mem_filtration_iff] at hl',
+  rw [seminormed_add_comm_group.mem_filtration_iff] at hl',
   obtain ⟨l, rfl, hl⟩ := polyhedral_lattice.norm_lift _ l',
   erw cosimplicial_lift_mk,
   rw [finsupp.lift_add_hom_apply, finsupp.sum_fintype],
@@ -43,7 +43,7 @@ begin
   apply sum_mem_filtration,
   rintro i -,
   apply H,
-  exact semi_normed_group.mem_filtration_nnnorm (l i),
+  exact seminormed_add_comm_group.mem_filtration_nnnorm (l i),
 end
 
 end PolyhedralLattice

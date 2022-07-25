@@ -346,7 +346,7 @@ instance {C D : Type*} [category C] [category D] {F : C ⥤ D}
   {G : D ⥤ C} (adj : F ⊣ G) [faithful G] (X : D) : epi (adj.counit.app X) :=
 begin
   haveI : split_epi (G.map (adj.counit.app X)) := ⟨_, adj.right_triangle_components⟩,
-  exact faithful_reflects_epi G infer_instance
+  exact G.epi_of_epi_map infer_instance
 end
 
 lemma enough_projectives_of_adjoint {C D : Type*} [category C] [category.{v} D] {F : C ⥤ D}

@@ -21,12 +21,12 @@ begin
   rw [T_inv_sub_Tinv, sub_eq_neg_add],
   refine le_trans (norm_add_le _ _) (add_le_add _ _),
   { rw [category_theory.nat_trans.app_neg, norm_neg],
-    refine le_trans (normed_group_hom.norm_completion _).le _,
-    exact normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1
+    refine le_trans (normed_add_group_hom.norm_completion _).le _,
+    exact normed_add_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1
       (SemiNormedGroup.LocallyConstant_obj_map_norm_noninc _ _ _ _) },
-  { refine normed_group_hom.norm_comp_le_of_le' 1 r⁻¹ r⁻¹ (mul_one _).symm _ _,
+  { refine normed_add_group_hom.norm_comp_le_of_le' 1 r⁻¹ r⁻¹ (mul_one _).symm _ _,
     { exact CLC.norm_T_inv_le r V _ },
-    { exact normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1
+    { exact normed_add_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1
       (res_norm_noninc V r' c₁ c₂ n M) } },
 end
 
@@ -49,9 +49,9 @@ begin
   rw ← hg1, clear hg1,
   dsimp only [T_inv_sub_Tinv, CLC, T_inv, CLC.T_inv, Tinv, CLCFP.res,
     whisker_left_app, nat_trans.app_sub, nat_trans.comp_app, whisker_right_app,
-    normed_group_hom.sub_apply, whisker_right_app, functor.comp_map],
+    normed_add_group_hom.sub_apply, whisker_right_app, functor.comp_map],
   rw [← SemiNormedGroup.Completion.map_comp,
-      ← normed_group_hom.sub_apply, ← functor.map_sub],
+      ← normed_add_group_hom.sub_apply, ← functor.map_sub],
   refl
 end
 

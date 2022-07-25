@@ -1,7 +1,6 @@
 import for_mathlib.homological_complex_op
 import for_mathlib.split_exact
 import for_mathlib.AddCommGroup.exact
-import for_mathlib.unop
 
 import pseudo_normed_group.FP2
 import pseudo_normed_group.system_of_complexes
@@ -66,7 +65,7 @@ def T_inv [normed_with_aut r V]
   (κ : ℝ≥0 → ℕ → ℝ≥0) [∀ c, BD.suitable (κ c)] [∀ (n : ℕ), fact (monotone (function.swap κ n))] :
   aux_system r' BD M V κ ⟶ aux_system r' BD M V κ :=
 { app := λ c,
-  { f := λ i, normed_group_hom.completion $ (SemiNormedGroup.LocallyConstant.map $ normed_with_aut.T.inv).app _,
+  { f := λ i, normed_add_group_hom.completion $ (SemiNormedGroup.LocallyConstant.map $ normed_with_aut.T.inv).app _,
     comm' := begin
       rintro i j (rfl : i + 1 = j),
       dsimp only [aux_system, functor.comp_obj, homological_complex.unop_functor,

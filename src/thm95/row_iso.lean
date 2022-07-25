@@ -262,7 +262,7 @@ lemma mul_rescale_iso_row_one_strict
   (x : (((data.mul N).obj BD).system (rescale_constants κ N') r V r').obj (op (Hom Λ M)) c i) :
   ∥(mul_rescale_iso_row_one BD κ r V N N' h Λ M).hom x∥ = ∥x∥ :=
 begin
-  apply normed_group_hom.norm_eq_of_isometry,
+  apply normed_add_group_hom.norm_eq_of_isometry,
   refine isometry.comp (isometry.comp _ _) _,
   { apply data.system_map_iso_isometry, },
   { dsimp only, apply CLCTinv.map_iso_isometry, },

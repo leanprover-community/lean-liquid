@@ -28,8 +28,8 @@ strictly positive degree.
 
 ##  Warning/Formalization note
 We use the `nnnorm_add_class` instance on `S → (ℕ →₀ ℤ)` to prove that the standard filtration
-determined a `pseudo_normed_group (S → (ℕ →₀ ℤ))`.  Note that the `semi_normed_group` instance on
-the same type is *not* the same: the norm on finitely indexed finsupps for the `semi_normed_group`
+determined a `pseudo_normed_group (S → (ℕ →₀ ℤ))`.  Note that the `seminormed_add_comm_group` instance on
+the same type is *not* the same: the norm on finitely indexed finsupps for the `seminormed_add_comm_group`
 is the `sup`norm and not the `sum_nnnorm`.
 -/
 

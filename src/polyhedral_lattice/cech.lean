@@ -120,10 +120,10 @@ end
 
 def obj := (fin m →₀ Λ') ⧸ (L f m)
 
-instance : normed_group (obj f m) :=
-add_subgroup.normed_group_quotient _
+instance : normed_add_comm_group (obj f m) :=
+add_subgroup.normed_add_comm_group_quotient _
 
-def π : normed_group_hom (fin m →₀ Λ') (obj f m) :=
+def π : normed_add_group_hom (fin m →₀ Λ') (obj f m) :=
 (L f m).normed_mk
 
 lemma π_apply_eq_zero_iff (x : fin m →₀ Λ') : π f m x = 0 ↔ x ∈ L f m :=
@@ -141,7 +141,7 @@ begin
 end
 
 lemma π_is_quotient : (π f m).is_quotient :=
-normed_group_hom.is_quotient_quotient _
+normed_add_group_hom.is_quotient_quotient _
 
 instance [fact f.to_add_monoid_hom.range.saturated] : polyhedral_lattice (obj f m) :=
 by { delta obj, apply_instance }

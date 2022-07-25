@@ -34,7 +34,7 @@ begin
   haveI : fact (0 < (p:ℝ)) := ⟨lt_trans (fact.out _ : 0 < p') (fact.out _)⟩,
   haveI : fact (p' < 1) := ⟨lt_of_lt_of_le (fact.out _ : p' < p) (fact.out _)⟩,
   erw is_zero_iff_epi_and_is_iso _ _ (V : Condensed.{0 1 2} Ab) (laurent_measures.short_exact p' S),
-  let := pBanach.choose_semi_normed_group V,
+  let := pBanach.choose_seminormed_add_comm_group V,
   let := pBanach.choose_normed_with_aut V 2⁻¹,
   haveI : fact (0 < (2⁻¹ : ℝ≥0) ^ (p : ℝ)) := r_pos',
   convert laurent_measures.epi_and_is_iso p' p S ⟨V⟩ _ using 1,

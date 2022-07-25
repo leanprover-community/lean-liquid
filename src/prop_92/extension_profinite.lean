@@ -55,7 +55,7 @@ begin
   obtain ⟨I, hI⟩ : ∃ I : finset ι, f '' U ⊆ ⋃ i ∈ I, Z i,
     from hfU.elim_finite_subcover _ (λ i, (hZ i).1) this,
   refine ⟨⋃ i ∈ I, Z i, _, _⟩,
-  { apply is_clopen_bUnion,
+  { apply is_clopen_bUnion, apply finset.finite_to_set,
     tauto },
   { apply subset.antisymm,
     exact image_subset_iff.mp hI,

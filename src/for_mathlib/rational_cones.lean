@@ -348,14 +348,15 @@ end
 lemma coe_min' (s : finset (ℚ≥0)) (hs : s.nonempty) :
   (coe (s.min' hs) : ℚ) = (s.image coe).min' (hs.image _) :=
 begin
-  revert hs,
-  apply finset.induction_on s,
-  { simp },
-  { intros x s hx ih t,
-    rcases finset.eq_empty_or_nonempty s with (rfl | hs),
-    { simp },
-    simp_rw [finset.image_insert, finset.min'_insert x s hs, nnrat.coe_min, ih hs,
-      ← finset.min'_insert] }
+  induction s using finset.induction_on with x s hx ih t generalizing hs,
+  { revert hs, simp only [finset.not_nonempty_empty, is_empty.forall_iff] },
+  { rcases finset.eq_empty_or_nonempty s with (rfl | hs'),
+    { simp only [insert_emptyc_eq, finset.min'_singleton, finset.image_singleton] },
+    have aux := finset.min'_insert x s hs',
+    apply_fun (coe : ℚ≥0 → ℚ) at aux,
+    convert aux using 1, { congr },
+    simp only [finset.image_insert, ih hs', nnrat.coe_min],
+    simp only [← finset.min'_insert] }
 end
 
 def extended_half_spaces_index {ι : Type*} (s : ι → Λ →ₗ[ℚ] ℚ) (x : Λ) : Type* :=

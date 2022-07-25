@@ -20,14 +20,14 @@ variables {Λ : Type*} [polyhedral_lattice Λ] (L : add_subgroup Λ)
 instance : is_closed (L : set Λ) :=
 is_closed_discrete _
 
-instance : normed_group (Λ ⧸ L) :=
-add_subgroup.normed_group_quotient _
+instance : normed_add_comm_group (Λ ⧸ L) :=
+add_subgroup.normed_add_comm_group_quotient _
 
 lemma π_apply_eq_zero_iff (x) : L.normed_mk x = 0 ↔ x ∈ L :=
 quotient_add_group.eq_zero_iff _
 
 lemma π_is_quotient : L.normed_mk.is_quotient :=
-normed_group_hom.is_quotient_quotient _
+normed_add_group_hom.is_quotient_quotient _
 
 instance [H : fact L.saturated] : no_zero_smul_divisors ℤ (Λ ⧸ L) :=
 { eq_zero_or_eq_zero_of_smul_eq_zero :=
@@ -61,13 +61,13 @@ open pseudo_normed_group
 lemma norm_lift (y : Λ ⧸ L) :
   ∃ x, L.normed_mk x = y ∧ ∥x∥ = ∥y∥ :=
 begin
-  have hq : L.normed_mk.is_quotient := normed_group_hom.is_quotient_quotient _,
+  have hq : L.normed_mk.is_quotient := normed_add_group_hom.is_quotient_quotient _,
   let s := λ ε, {x | L.normed_mk x = y ∧ ∥x∥₊ ≤ ∥y∥₊ + ε },
   have hs : ∀ ε, (s ε).finite,
   { intro ε,
     apply (filtration_finite Λ (∥y∥₊ + ε)).subset,
     rintro x ⟨h1, h2⟩,
-    simpa only [semi_normed_group.mem_filtration_iff] using h2 },
+    simpa only [seminormed_add_comm_group.mem_filtration_iff] using h2 },
   let t := λ ε, (hs ε).to_finset,
   have ht : ∀ ε, 0 < ε → (t ε).nonempty,
   { intros ε hε,
@@ -121,7 +121,7 @@ instance [H : fact L.saturated] : polyhedral_lattice (Λ ⧸ L) :=
       { simp only [← hx, H2],
         apply finset.sum_le_sum,
         rintro i -,
-        have hq : L.normed_mk.is_quotient := normed_group_hom.is_quotient_quotient _,
+        have hq : L.normed_mk.is_quotient := normed_add_group_hom.is_quotient_quotient _,
         exact mul_le_mul le_rfl (hq.norm_le _) (norm_nonneg _) (nat.cast_nonneg _) } },
   end }
 

@@ -114,7 +114,7 @@ begin
   haveI : preserves_limit (functor.empty.{0} 𝓐) F,
   { apply preserves_terminal_object_of_preserves_zero_morphisms },
   haveI : preserves_limits_of_shape (discrete.{0} pempty) F,
-  { apply preserves_limits_of_shape_pempty_of_preserves_terminal, },
+  { apply limits.preserves_limits_of_shape_pempty_of_preserves_terminal, },
   haveI p := preserves_finite_products_of_preserves_binary_and_terminal F,
   exact @preserves_finite_limits_of_preserves_equalizers_and_finite_products
     _ _ _ _ _ _ _ _ p,
