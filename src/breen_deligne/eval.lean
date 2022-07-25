@@ -527,7 +527,7 @@ begin
   rw [biproduct.matrix_π, biproduct.matrix_π, biproduct.ι_desc, biproduct.ι_desc],
   dsimp only [basic_universal_map.proj, basic_universal_map.proj_aux,
     matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.minor,
-    matrix.kronecker_map],
+    matrix.kronecker_map, matrix.of_apply],
   simp only [ite_mul, ite_smul, one_mul, one_smul, zero_mul, zero_smul, matrix.one_apply],
   rw [← ite_and],
   congr' 1,

@@ -316,8 +316,7 @@ begin
       (discrete.mk walking_pair.left), dsimp at this,
   slice_rhs 2 3 { rw this }, clear this,
   simp only [limit.cone_π, category.assoc, limit.lift_π_assoc,
-    cones.postcompose_obj_π, nat_trans.comp_app,
-    binary_fan.mk_π_app_left, nat_iso.of_components.hom_app],
+    cones.postcompose_obj_π, nat_trans.comp_app, nat_iso.of_components.hom_app],
   have := (is_colimit_of_preserves ((evaluation _ C).obj (discrete.mk walking_pair.left))
     (colimit.is_colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip)).fac _ j,
   dsimp at this, slice_rhs 3 4 { rw this }, clear this,
@@ -355,8 +354,7 @@ begin
       (discrete.mk walking_pair.right), dsimp at this,
   slice_rhs 2 3 { rw this }, clear this,
   simp only [limit.cone_π, category.assoc, limit.lift_π_assoc,
-    cones.postcompose_obj_π, nat_trans.comp_app,
-    binary_fan.mk_π_app_left, nat_iso.of_components.hom_app],
+    cones.postcompose_obj_π, nat_trans.comp_app, nat_iso.of_components.hom_app],
   have := (is_colimit_of_preserves ((evaluation _ C).obj (discrete.mk walking_pair.right))
     (colimit.is_colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip)).fac _ j,
   dsimp at this, slice_rhs 3 4 { rw this }, clear this,

@@ -15,12 +15,18 @@ namespace endomorphisms
 variables (𝓐 : Type u) [category.{v} 𝓐] [abelian 𝓐] [has_coproducts.{v} 𝓐] [AB4 𝓐]
   [has_products_of_shape (ulift.{v} ℕ) 𝓐]
 
+-- move me
+instance forget_reflects_monomorphisms : (endomorphisms.forget 𝓐).reflects_monomorphisms :=
+begin
+  sorry
+end
+
 instance : AB4 (endomorphisms 𝓐) :=
 begin
   constructor, introsI α X Y f hf,
   let t := _, change mono t,
   suffices : mono ((endomorphisms.forget _).map t),
-  { resetI, apply (endomorphisms.forget _).mono_of_mono_map infer_instance },
+  { refine (endomorphisms.forget _).mono_of_mono_map this, },
   let e₁ : (endomorphisms.forget 𝓐).obj (∐ λ (a : α), X a) ≅
     ∐ (λ a : α, (endomorphisms.forget _).obj (X a)) :=
     preserves_colimit_iso _ _ ≪≫ has_colimit.iso_of_nat_iso (discrete.nat_iso $ λ _, iso.refl _),
