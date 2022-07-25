@@ -361,7 +361,7 @@ begin
       { have aux1 : p' ∘ sum.inl = cast_le ∘ f', by ext; refl,
         have aux2 : p' ∘ sum.inr = cast_le ∘ g', by ext; refl,
         simp only [continuous_sup_dom, continuous_coinduced_dom, aux1, aux2],
-        exact ⟨continuous_cast_le.comp hf', continuous_cast_le.comp hg'⟩, },
+        exact ⟨(continuous_cast_le _ _).comp hf', (continuous_cast_le _ _).comp hg'⟩, },
       have hh : p = coe ∘ p',
       { ext (a|a),
         { apply_fun (λ u, u a) at hf, exact hf },
