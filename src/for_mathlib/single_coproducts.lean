@@ -7,7 +7,7 @@ open category_theory
 open category_theory.limits
 
 universes v u
-variables {A : Type u} [category.{v} A] [abelian A] [has_coproducts A]
+variables {A : Type u} [category.{v} A] [abelian A] [has_coproducts.{v} A]
 
 namespace homological_complex
 
@@ -172,7 +172,7 @@ has_colimit.iso_of_nat_iso E ≪≫
 
 noncomputable
 instance preserves_coproducts_single {α : Type v}
-  [has_coproducts A]
+  [has_coproducts.{v} A]
   (i : ℤ) :
   preserves_colimits_of_shape (discrete α) (single A i) :=
 preserves_coproducts_aux _

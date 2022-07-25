@@ -313,18 +313,23 @@ def sigma_punit_iso (X : (punit : Type u) → Profinite.{u}) :
 { hom := sigma.ι _ _,
   inv := sigma.desc _ $ λ ⟨⟩, 𝟙 _ }
 
-def sigma_walking_pair_iso (X : limits.walking_pair.{u} → Profinite.{u}) :
-  sigma X ≅ (X limits.walking_pair.left).sum (X limits.walking_pair.right) :=
-{ hom := sigma.desc _ $ λ a, limits.walking_pair.rec_on a (sum.inl _ _) (sum.inr _ _),
-  inv := sum.desc _ _ (sigma.ι _ _) (sigma.ι _ _),
+def sigma_walking_pair_iso (X : ulift.{u} limits.walking_pair → Profinite.{u}) :
+  sigma X ≅ (X ⟨limits.walking_pair.left⟩).sum (X ⟨limits.walking_pair.right⟩) :=
+{ hom := sigma.desc _ $ λ a,
+  match a with
+  | ⟨a⟩ := limits.walking_pair.rec_on a (sum.inl _ _) (sum.inr _ _)
+  end,
+  inv := sum.desc _ _ (sigma.ι X (ulift.up _)) (sigma.ι X (ulift.up _)),
   hom_inv_id' := begin
     apply sigma.hom_ext,
-    rintros (a|b),
-    all_goals { dsimp, simp }
+    rintros (⟨a⟩|⟨b⟩),
+    all_goals { dsimp, simp only [sigma.ι_desc_assoc, category.comp_id],
+      dsimp [sigma_walking_pair_iso._match_1],
+      simp only [sum.inl_desc, sum.inr_desc] },
   end,
   inv_hom_id' := begin
     apply sum.hom_ext,
-    all_goals { dsimp, simp }
+    all_goals { dsimp, simpa only [sum.inl_desc_assoc, sigma.ι_desc, category.comp_id] },
   end }
 
 --TODO: Finish off the api for the explicit pullback

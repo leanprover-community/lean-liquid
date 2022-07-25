@@ -12,7 +12,7 @@ namespace category_theory
 
 namespace endomorphisms
 
-variables (𝓐 : Type u) [category.{v} 𝓐] [abelian 𝓐] [has_coproducts 𝓐] [AB4 𝓐]
+variables (𝓐 : Type u) [category.{v} 𝓐] [abelian 𝓐] [has_coproducts.{v} 𝓐] [AB4 𝓐]
   [has_products_of_shape (ulift.{v} ℕ) 𝓐]
 
 instance : AB4 (endomorphisms 𝓐) :=

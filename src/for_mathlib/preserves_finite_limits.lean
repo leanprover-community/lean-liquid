@@ -14,12 +14,12 @@ variables {𝓐 : Type u₁} {𝓑 : Type u₂} [category.{v} 𝓐] [category.{v
 variables [abelian 𝓐] [abelian 𝓑]
 
 def preserves_limits_of_shape_pempty_of_preserves_terminal
-  [preserves_limit (functor.empty.{v} 𝓐) F] : preserves_limits_of_shape (discrete pempty) F :=
+  [preserves_limit (functor.empty.{0} 𝓐) F] : preserves_limits_of_shape (discrete pempty) F :=
 { preserves_limit := λ K,
-    preserves_limit_of_iso_diagram.{v v} F (functor.empty_ext (functor.empty 𝓐) _) }
+    preserves_limit_of_iso_diagram.{0 0} F (functor.empty_ext (functor.empty 𝓐) _) }
 
 def preserves_terminal_object_of_preserves_zero_morphisms
-  [functor.preserves_zero_morphisms F] : preserves_limit (functor.empty 𝓐) F :=
+  [functor.preserves_zero_morphisms F] : preserves_limit (functor.empty.{0} 𝓐) F :=
 preserves_terminal_of_iso F $
   (F.map_iso has_zero_object.zero_iso_terminal.symm).trans $
   (functor.map_zero_object F).trans $
@@ -68,6 +68,7 @@ end
 
 end
 
+set_option pp.universes true
 lemma preserves_finite_limits_of_preserves_mono_preserves_finite_colimits
   {𝓐 : Type u₁} {𝓑 : Type u₂} [category.{v} 𝓐] [category.{v} 𝓑] [abelian 𝓐] [abelian 𝓑]
   (F : 𝓐 ⥤ 𝓑) (h1 : ∀ ⦃X Y : 𝓐⦄ (f : X ⟶ Y), mono f → mono (F.map f))
@@ -108,11 +109,11 @@ begin
     simp_rw ← image.fac f,
     rw [functor.map_comp, exact_comp_mono_iff'],
     exact abelian.exact_of_is_cokernel _ _ _ q },
-  haveI : preserves_limits_of_shape walking_parallel_pair.{v} F,
+  haveI : preserves_limits_of_shape walking_parallel_pair F,
   { apply preserves_equalizers_of_preserves_kernels },
-  haveI : preserves_limit (functor.empty 𝓐) F,
+  haveI : preserves_limit (functor.empty.{0} 𝓐) F,
   { apply preserves_terminal_object_of_preserves_zero_morphisms },
-  haveI : preserves_limits_of_shape (discrete.{v} pempty) F,
+  haveI : preserves_limits_of_shape (discrete.{0} pempty) F,
   { apply preserves_limits_of_shape_pempty_of_preserves_terminal, },
   haveI p := preserves_finite_products_of_preserves_binary_and_terminal F,
   exact @preserves_finite_limits_of_preserves_equalizers_and_finite_products

@@ -38,20 +38,21 @@ lemma reorder {M : Type*} [add_comm_monoid M] (a b c d : M) :
 by { simp only [add_assoc, add_left_comm b c d], }
 
 def eval_free_π (A : AddCommGroup.{u}) (i : fin 2) : (preadditive.Pow 2).obj A ⟶ (preadditive.Pow 1).obj A :=
-biproduct.π _ (ulift.up i) ≫ biproduct.ι (λ _, A) (ulift.up 0)
+biproduct.π _ i ≫ biproduct.ι (λ _, A) 0
 
 lemma eval_free_π_eq (A : AddCommGroup.{u}) (k : fin 2) :
   eval_free_π A k = biproduct.matrix
-    (λ (i : ulift (fin 2)) (j : ulift (fin 1)), basic_universal_map.proj 1 k j.down i.down • 𝟙 A) :=
+    (λ (i : (fin 2)) (j : (fin 1)), basic_universal_map.proj 1 k j i • 𝟙 A) :=
 begin
-  apply biproduct.hom_ext, rintro ⟨j⟩, fin_cases j,
+  apply biproduct.hom_ext, rintro j, fin_cases j,
   rw [biproduct.matrix_π, eval_free_π, category.assoc, biproduct.ι_π, dif_pos rfl, eq_to_hom_refl,
     category.comp_id],
-  apply biproduct.hom_ext', rintro ⟨i⟩, rw [biproduct.ι_desc],
+  apply biproduct.hom_ext', rintro i, rw [biproduct.ι_desc],
   suffices : basic_universal_map.proj 1 k 0 i = if i = k then 1 else 0,
   { rw [this, biproduct.ι_π], dsimp, obtain (rfl|hik) := eq_or_ne i k,
     { rw [if_pos rfl, if_pos rfl, one_smul], },
-    { rw [if_neg, if_neg hik, zero_smul], intro H, apply hik, apply equiv.ulift.symm.injective, exact H } },
+    { rw [if_neg, if_neg hik, zero_smul],
+      intro H, apply hik, exact H } },
   { dsimp [basic_universal_map.proj, basic_universal_map.proj_aux], dec_trivial! },
 end
 
@@ -74,26 +75,26 @@ begin
   { rw eval_free_π_eq, refl, },
   { rw eval_free_π_eq, refl, },
   { rw [eval_free_σ, eval_free_π_eq, eval_free_π_eq],
-    apply biproduct.hom_ext, rintro ⟨j⟩, fin_cases j, simp only [add_comp, biproduct.matrix_π],
+    apply biproduct.hom_ext, rintro j, fin_cases j, simp only [add_comp, biproduct.matrix_π],
     erw [biproduct.matrix_π, biproduct.matrix_π],
-    apply biproduct.hom_ext', rintro ⟨i⟩, simp only [comp_add, biproduct.ι_desc, ← add_smul],
+    apply biproduct.hom_ext', rintro i, simp only [comp_add, biproduct.ι_desc, ← add_smul],
     refl }
 end
 
 def Pow_1_iso (A : AddCommGroup.{u}) : (preadditive.Pow 1).obj A ≅ A :=
-{ hom := biproduct.π (λ _, A) (ulift.up 0),
-  inv := biproduct.ι (λ _, A) (ulift.up 0),
+{ hom := biproduct.π (λ _, A) 0,
+  inv := biproduct.ι (λ _, A) 0,
   hom_inv_id' := begin
-    erw [← biproduct.total, ← equiv.ulift.symm.sum_comp, fin.sum_univ_one], refl,
+    erw [← biproduct.total, fin.sum_univ_one],
   end,
   inv_hom_id' := by simp only [biproduct.ι_π, dif_pos rfl, eq_to_hom_refl] }
 
 def Pow_2_iso (A : AddCommGroup.{u}) : (preadditive.Pow 2).obj A ≅ AddCommGroup.of (A × A) :=
-{ hom := add_monoid_hom.prod (biproduct.π (λ _, A) (ulift.up 0)) (biproduct.π (λ _, A) (ulift.up 1)),
-  inv := add_monoid_hom.coprod (biproduct.ι (λ _, A) (ulift.up 0)) (biproduct.ι (λ _, A) (ulift.up 1)),
+{ hom := add_monoid_hom.prod (biproduct.π (λ _, A) 0) (biproduct.π (λ _, A) 1),
+  inv := add_monoid_hom.coprod (biproduct.ι (λ _, A) 0) (biproduct.ι (λ _, A) 1),
   hom_inv_id' := begin
-    ext x, erw [← biproduct.total, ← equiv.ulift.symm.sum_comp, comp_apply],
-    swap, apply_instance,
+    ext x, erw [← biproduct.total, comp_apply],
+    --swap, apply_instance,
     dsimp only [add_monoid_hom.coprod_apply, add_monoid_hom.prod_apply],
     simp only [← comp_apply, fin.sum_univ_two], refl,
   end,
@@ -213,12 +214,12 @@ def nat_trans_eval_free :
       dsimp [eg, eg.BD, eg.rank],
       linarith,
     end⟩,
-    rw finset.sum_eq_single (ulift.up z), rotate,
+    rw finset.sum_eq_single z, rotate,
     { intros b hb₁ hb₂,
       exfalso,
       apply hb₂,
-      cases b,
-      simp only [ulift.up_inj],
+      --cases b,
+      --simp only [ulift.up_inj],
       rw fin.eq_mk_iff_coe_eq,
       have hb₃ := b.is_lt,
       dsimp [eg, eg.BD, eg.rank] at hb₃,
@@ -346,7 +347,7 @@ instance : has_coproducts_of_shape (ulift.{u+1} ℕ) (endomorphisms $ Condensed.
 endomorphisms.has_colimits_of_shape
 
 -- `by apply_instance` takes for ever, so we provide this shortcut
-instance : has_products_of_shape (ulift ℕ) (endomorphisms $ Condensed.{u} Ab.{u+1}) :=
+instance : has_products_of_shape (ulift.{u+1} ℕ) (endomorphisms $ Condensed.{u} Ab.{u+1}) :=
 endomorphisms.has_limits_of_shape
 
 -- `by apply_instance` takes for ever, so we provide this shortcut

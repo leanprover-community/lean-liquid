@@ -1,9 +1,10 @@
 import category_theory.abelian.projective
+import category_theory.limits.preserves.finite
 import for_mathlib.abelian_category
 
 noncomputable theory
 
-universes v u
+universes v v' u
 
 open category_theory category_theory.limits
 
@@ -95,7 +96,7 @@ end category
 section limits
 
 variables {C : Type u} [category.{v} C]
-variables {J : Type v} [small_category J]
+variables {J : Type v'} [small_category J]
 
 @[simps]
 def twist_cone {K : J ⥤ endomorphisms C}
@@ -211,7 +212,10 @@ instance preserves_limits_of_shape [has_limits_of_shape J C] :
 instance preserves_limits [has_limits C] : preserves_limits (endomorphisms.forget C) := ⟨⟩
 
 instance [has_finite_limits C] : preserves_finite_limits (endomorphisms.forget C) :=
-by { constructor, introsI J hJ1 hJ2, apply_instance }
+begin
+  apply preserves_finite_limits_of_preserves_finite_limits_of_size.{v},
+  introsI J hJ1 hJ2, apply_instance,
+end
 
 end limits
 
@@ -334,7 +338,10 @@ instance preserves_colimits_of_shape [has_colimits_of_shape J C] :
 instance preserves_colimits [has_colimits C] : preserves_colimits (endomorphisms.forget C) := ⟨⟩
 
 instance [has_finite_colimits C] : preserves_finite_colimits (endomorphisms.forget C) :=
-by { constructor, introsI J hJ1 hJ2, apply_instance }
+begin
+  apply preserves_finite_colimits_of_preserves_finite_colimits_of_size.{v},
+  introsI J hJ1 hJ2, apply_instance,
+end
 
 end colimits
 
@@ -727,7 +734,7 @@ instance [has_coproducts_of_shape (ulift.{v} ℕ) 𝓐] [has_products_of_shape (
   has_finite_products := begin
     constructor, intros J _,
     haveI : has_finite_products 𝓐 := abelian.has_finite_products, -- WHY IS THIS NEEDED!?
-    apply_instance,
+    constructor,
   end,
   .. (_ : preadditive (endomorphisms 𝓐)) }
 

@@ -4,6 +4,8 @@ run_cmd tactic.skip
 -- Lbar/ext.lean
 apply_nolint Lbar.Tinv_sub unused_arguments
 apply_nolint Lbar.condensify_iso_extend unused_arguments
+apply_nolint Lbar.PFPNGT₁_to_CHFPNG₁ₑₗ.category_theory.limits.preserves_limits_of_shape unused_arguments
+apply_nolint Lbar.PFPNGT₁_to_CHFPNG₁ₑₗ.category_theory.limits.preserves_limits_of_shape fails_quickly
 
 -- Lbar/ext_aux1.lean
 apply_nolint ExtQprime_iso_aux_system_obj_aux' unused_arguments
@@ -104,6 +106,7 @@ apply_nolint finite_product_colimit_setup.CT unused_arguments
 apply_nolint finite_product_colimit_setup.KC unused_arguments
 apply_nolint finite_product_colimit_setup.Q unused_arguments
 apply_nolint finite_product_colimit_setup.Q₀ unused_arguments
+apply_nolint finite_product_colimit_setup.Q₁ unused_arguments
 apply_nolint finite_product_colimit_setup.T unused_arguments
 apply_nolint finite_product_colimit_setup.ct_iso unused_arguments
 apply_nolint finite_product_condition_holds_for_colimit unused_arguments

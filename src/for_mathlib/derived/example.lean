@@ -332,7 +332,7 @@ namespace AddCommGroup
 
 -- We only need `G` to preserve epimorphisms, but we don't have such a class.
 lemma preserves_projectives {C D : Type*} [category C] [category.{v} D] {F : C ⥤ D} {G : D ⥤ C}
-  (adj : F ⊣ G) [preserves_colimits_of_shape walking_span.{v} G] (P : C) [projective P] :
+  (adj : F ⊣ G) [preserves_colimits_of_shape walking_span G] (P : C) [projective P] :
     projective (F.obj P) :=
 begin
   constructor,
@@ -350,7 +350,7 @@ begin
 end
 
 lemma enough_projectives_of_adjoint {C D : Type*} [category C] [category.{v} D] {F : C ⥤ D}
-  {G : D ⥤ C} (adj : F ⊣ G) [preserves_colimits_of_shape walking_span.{v} G] [faithful G]
+  {G : D ⥤ C} (adj : F ⊣ G) [preserves_colimits_of_shape walking_span G] [faithful G]
   [enough_projectives C] : enough_projectives D :=
 begin
   haveI : is_left_adjoint F := ⟨_, adj⟩,
@@ -414,6 +414,8 @@ def zmod_resolution_pi :
       simp only [ring_hom.coe_add_monoid_hom, ring_hom.eq_int_cast, int.cast_one, nsmul_one, zmod.nat_cast_self], },
     { exact comp_zero.trans comp_zero.symm }
   end }
+
+local attribute [-instance] limits.has_smallest_colimits_of_has_colimits
 
 instance : projective (AddCommGroup.of ℤ) :=
 preserves_projectives (functor.as_equivalence (forget₂ (Module ℤ) AddCommGroup)).to_adjunction

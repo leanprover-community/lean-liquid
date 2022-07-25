@@ -85,8 +85,8 @@ by constructor
 
 def whiskering_Cech_comp_iso
   {C : Type*} [category C] {𝓐 : Type*} [category 𝓐] [abelian 𝓐] {𝓑 : Type*} [category 𝓑] [abelian 𝓑]
-  (f : arrow C) [∀ (n : ℕ),
-    has_wide_pullback f.right (λ (i : ulift (fin (n + 1))), f.left) (λ (i : ulift (fin (n + 1))), f.hom)]
+  (f : arrow C)
+  [∀ (n : ℕ), has_wide_pullback f.right (λ (i : fin (n + 1)), f.left) (λ (i : fin (n + 1)), f.hom)]
   (F : C ⥤ 𝓐) (G : 𝓐 ⥤ 𝓑) (H : C ⥤ 𝓑) (E : F ⋙ G ≅ H) [G.additive] :
   (G.map_homological_complex _).obj ((((simplicial_object.augmented.whiskering _ _).obj F).obj
     f.augmented_cech_nerve).to_complex) ≅
@@ -151,8 +151,8 @@ category_theory.Sheaf.presheaf_to_Sheaf_additive
 
 def acyclic_of_exact.induction_step_ex₂_aux
   {C : Type*} [category C] {𝓐 : Type*} [category 𝓐] [abelian 𝓐] {𝓑 : Type*} [category 𝓑] [abelian 𝓑]
-  (f : arrow C) [∀ (n : ℕ),
-    has_wide_pullback f.right (λ (i : ulift (fin (n + 1))), f.left) (λ (i : ulift (fin (n + 1))), f.hom)]
+  (f : arrow C)
+  [∀ (n : ℕ), has_wide_pullback f.right (λ (i : fin (n + 1)), f.left) (λ (i : fin (n + 1)), f.hom)]
   (F : C ⥤ 𝓐) (G : 𝓐ᵒᵖ ⥤ 𝓑) [G.additive] :
   (G.map_homological_complex _).obj ((((simplicial_object.augmented.whiskering _ _).obj F).obj
     f.augmented_cech_nerve).to_complex).op ≅
@@ -291,12 +291,12 @@ begin
     dsimp [ulift_wide_pullback_iso, ulift_wide_pullback_iso_hom_aux,
       Profinite_to_ExtrDisc_presheaf_Ab], congr' 1,
     have := types_comp_apply
-      (wide_pullback.lift.{u+1 u+2} (ulift_functor.{u+1 u}.map ((yoneda.{u u+1}.map
-        (wide_pullback.base.{u u+1} (λ (_x : ulift.{u 0} (fin (0 + 0 + 1))), F.hom))).app
-        (op.{u+2} X.val))) (λ (q : ulift.{u+1 0} (fin (0 + 0 + 1))), ulift_functor.{u+1 u}.map
-        ((yoneda.{u u+1}.map (wide_pullback.π.{u u+1} (λ (_x : ulift.{u 0} (fin (0 + 0 + 1))),
-        F.hom) {down := q.down})).app (op.{u+2} X.val))) _)
-      (wide_pullback.base.{u+1 u+2} (λ (i : ulift.{u+1 0} (fin (0 + 0 + 1))),
+      (wide_pullback.lift (ulift_functor.{u+1 u}.map ((yoneda.{u u+1}.map
+        (wide_pullback.base (λ (_x : fin (0 + 0 + 1)), F.hom))).app
+        (op.{u+2} X.val))) (λ (q : fin (0 + 0 + 1)), ulift_functor.{u+1 u}.map
+        ((yoneda.{u u+1}.map (wide_pullback.π (λ (_x : fin (0 + 0 + 1)),
+        F.hom) q)).app (op.{u+2} X.val))) _)
+      (wide_pullback.base (λ (i : fin (0 + 0 + 1)),
         (Profinite_to_ExtrDisc_presheaf.{u}.map F.hom).app (op.{u+2} X)))
       (ulift.up t),
     rw ← this, clear this, rw wide_pullback.lift_base, refl },
@@ -317,30 +317,30 @@ begin
     dsimp [AddCommGroup.free, Profinite_to_ExtrDisc_presheaf_Ab], congr' 1,
     dsimp [ulift_wide_pullback_iso, ulift_wide_pullback_iso_hom_aux],
 
-    let f1 := wide_pullback.lift.{u+1 u+2} (wide_pullback.base.{u+1 u+2} (λ (i : ulift.{u+1 0}
-      (fin (j + 1 + 1))), (Profinite_to_ExtrDisc_presheaf.{u}.map F.hom).app (op.{u+2} X)))
-      (λ (i_1 : ulift.{u+1 0} (fin (j + 1))), wide_pullback.π.{u+1 u+2} (λ (i : ulift.{u+1 0}
-      (fin (j + 1 + 1))), (Profinite_to_ExtrDisc_presheaf.{u}.map F.hom).app (op.{u+2} X))
-      {down := (simplex_category.hom.to_order_hom (simplex_category.δ i)) i_1.down}) _,
+    let f1 := wide_pullback.lift (wide_pullback.base
+      (λ (i : fin (j + 1 + 1)), (Profinite_to_ExtrDisc_presheaf.{u}.map F.hom).app (op.{u+2} X)))
+      (λ (k : fin (j + 1)), wide_pullback.π
+      (λ (i : fin (j + 1 + 1)), (Profinite_to_ExtrDisc_presheaf.{u}.map F.hom).app (op.{u+2} X))
+      ((simplex_category.hom.to_order_hom (simplex_category.δ i)) k)) _,
 
-    let f2 := wide_pullback.lift.{u+1 u+2} (ulift_functor.{u+1 u}.map ((yoneda.{u u+1}.map
-      (wide_pullback.base.{u u+1} (λ (_x : ulift.{u 0} (fin (j.succ + 0 + 1))), F.hom))).app
-      (op.{u+2} X.val))) (λ (q : ulift.{u+1 0} (fin (j.succ + 0 + 1))), ulift_functor.{u+1 u}.map
-      ((yoneda.{u u+1}.map (wide_pullback.π.{u u+1} (λ (_x : ulift.{u 0} (fin (j.succ + 0 + 1))),
-      F.hom) {down := q.down})).app (op.{u+2} X.val))) _,
+    let f2 := wide_pullback.lift (ulift_functor.{u+1 u}.map ((yoneda.{u u+1}.map
+      (wide_pullback.base (λ (_x : fin (j.succ + 0 + 1)), F.hom))).app (op.{u+2} X.val)))
+      (λ (q : fin (j.succ + 0 + 1)), ulift_functor.{u+1 u}.map
+      ((yoneda.{u u+1}.map (wide_pullback.π
+      (λ (_x : fin (j.succ + 0 + 1)), F.hom) q)).app (op.{u+2} X.val))) _,
 
-    let f3 := wide_pullback.lift.{u+1 u+2} (ulift_functor.{u+1 u}.map ((yoneda.{u u+1}.map
-      (wide_pullback.base.{u u+1} (λ (_x : ulift.{u 0} (fin (j + 0 + 1))), F.hom))).app
-      (op.{u+2} X.val))) (λ (q : ulift.{u+1 0} (fin (j + 0 + 1))), ulift_functor.{u+1 u}.map
-      ((yoneda.{u u+1}.map (wide_pullback.π.{u u+1} (λ (_x : ulift.{u 0} (fin (j + 0 + 1))),
-      F.hom) {down := q.down})).app (op.{u+2} X.val))) _,
+    let f3 := wide_pullback.lift (ulift_functor.{u+1 u}.map ((yoneda.{u u+1}.map
+      (wide_pullback.base (λ (_x : fin (j + 0 + 1)), F.hom))).app (op.{u+2} X.val)))
+      (λ (q : fin (j + 0 + 1)), ulift_functor.{u+1 u}.map
+      ((yoneda.{u u+1}.map (wide_pullback.π
+      (λ (_x : fin (j + 0 + 1)), F.hom) q)).app (op.{u+2} X.val))) _,
 
     change (f2 ≫ f1) _ = f3 _,
 
-    let f4 := wide_pullback.lift.{u u+1} (wide_pullback.base.{u u+1} (λ (i : ulift.{u 0}
-      (fin (j + 1 + 1))), F.hom)) (λ (i_1 : ulift.{u 0} (fin (j + 1))), wide_pullback.π.{u u+1}
-      (λ (i : ulift.{u 0} (fin (j + 1 + 1))), F.hom) {down := (simplex_category.hom.to_order_hom
-      (simplex_category.δ i)) i_1.down}) _,
+    let f4 := wide_pullback.lift (wide_pullback.base (λ (i : fin (j + 1 + 1)), F.hom))
+      (λ (k : fin (j + 1)), wide_pullback.π
+      (λ (i : fin (j + 1 + 1)), F.hom) ((simplex_category.hom.to_order_hom
+      (simplex_category.δ i)) k)) _,
 
     suffices : f2 ≫ f1 = ((yoneda'.map f4).app (op X.val) ≫ f3),
     { rw this, refl },

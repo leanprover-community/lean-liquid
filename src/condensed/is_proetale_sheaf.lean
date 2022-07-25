@@ -140,40 +140,48 @@ begin
 end
 
 lemma finite_product_condition_of_pair_iff_product_condition :
-  P.finite_product_condition_of ⟨limits.walking_pair⟩ ↔ P.product_condition :=
+  P.finite_product_condition_of ⟨ulift limits.walking_pair⟩ ↔ P.product_condition :=
 begin
   split,
   { intros h A B,
     let f := _, show function.bijective f,
     let X : limits.walking_pair → Profinite.{w} :=
       λ i, limits.walking_pair.rec_on i A B,
-    specialize h X,
+    specialize h (X ∘ ulift.down),
     let g := _, change function.bijective g at h,
-    let e : P.obj (op (A.sum B)) ≃ P.obj (op (Profinite.sigma X)) :=
-      (P.map_iso (Profinite.sigma_walking_pair_iso X).op).to_equiv,
+    let e : P.obj (op (A.sum B)) ≃ P.obj (op (Profinite.sigma (X ∘ ulift.down))) :=
+      (P.map_iso (Profinite.sigma_walking_pair_iso (X ∘ ulift.down)).op).to_equiv,
     let q : (Π (a : limits.walking_pair), P.obj (op (X a))) ≃
       P.obj (op A) × P.obj (op B) :=
       ⟨λ f, ⟨f limits.walking_pair.left, f limits.walking_pair.right⟩,
         λ x a, limits.walking_pair.rec_on a x.1 x.2, _, _⟩,
     rotate, { intros a, ext ⟨x|x⟩, refl, refl }, { rintros ⟨a,b⟩, ext ⟨x|x⟩, refl, refl },
-    have : f = q ∘ g ∘ e,
+    let g' :
+      (Π (a : Fintype.of (ulift.{w} limits.walking_pair)), P.obj (opposite.op (X a.down))) ≃
+      (Π (a : limits.walking_pair), P.obj (opposite.op (X a))) :=
+      ⟨λ f a, f ⟨a⟩, λ f a, f a.down,  _, _⟩,
+    rotate,
+    { intros f, ext ⟨a⟩, refl },
+    { intros f, ext a, refl },
+    have : f = q ∘ g' ∘ g ∘ e,
     { ext a,
       all_goals
       { dsimp [f,q,g,e],
         simp_rw [← functor_to_types.map_comp_apply, ← op_comp],
         refl } },
     rw this,
-    exact q.bijective.comp (h.comp e.bijective) },
+    refine q.bijective.comp _,
+    refine g'.bijective.comp (h.comp e.bijective) },
   { intros h X,
     let f := _, show function.bijective f,
-    specialize h (X limits.walking_pair.left) (X limits.walking_pair.right),
+    specialize h (X ⟨limits.walking_pair.left⟩) (X ⟨limits.walking_pair.right⟩),
     let g := _, change function.bijective g at h,
     let e : P.obj (op (Profinite.sigma X)) ≃ P.obj (op (Profinite.sum _ _)) :=
       (P.map_iso (Profinite.sigma_walking_pair_iso X).op).symm.to_equiv,
-    let q : P.obj (op (X limits.walking_pair.left)) × P.obj (op (X limits.walking_pair.right)) ≃
-      (Π a : limits.walking_pair, P.obj (op (X a))) :=
-        ⟨λ x a, limits.walking_pair.rec_on a x.1 x.2,
-          λ f, ⟨f limits.walking_pair.left, f limits.walking_pair.right⟩, _, _⟩,
+    let q : P.obj (op (X ⟨limits.walking_pair.left⟩)) × P.obj (op (X ⟨limits.walking_pair.right⟩)) ≃
+      (Π a : ulift.{w} limits.walking_pair, P.obj (op (X a))) :=
+      ⟨λ x ⟨a⟩, limits.walking_pair.rec_on a x.1 x.2,
+        λ f, (f ⟨limits.walking_pair.left⟩, f ⟨limits.walking_pair.right⟩), _, _⟩,
     rotate,
     { rintros ⟨a,b⟩, ext ⟨x|x⟩, refl, refl },
     { intros a, ext ⟨x|x⟩, refl, refl },

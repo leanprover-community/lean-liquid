@@ -382,20 +382,9 @@ begin
 end
 .
 
--- move this
-lemma has_pullback_of_size (C : Type u) [category.{v} C] [has_pullbacks C] :
-  has_limits_of_shape walking_cospan.{w} C :=
-has_limits_of_shape_of_equivalence walking_cospan_equiv.{v}
-
--- move this
-lemma has_pushout_of_size (C : Type u) [category.{v} C] [has_pushouts C] :
-  has_colimits_of_shape walking_span.{w} C :=
-has_colimits_of_shape_of_equivalence walking_span_equiv.{v}
-
 instance [mono f] (i : ι) : mono (f.f i) :=
 begin
   change mono ((eval V c i).map f),
-  haveI := has_pullback_of_size.{max u' v} V,
   exact category_theory.preserves_mono _ f,
 end
 
@@ -414,7 +403,6 @@ lemma mono_iff_eval : mono f ↔ ∀ i, mono (f.f i) :=
 instance [epi f] (i : ι) : epi (f.f i) :=
 begin
   change epi ((eval V c i).map f),
-  haveI := has_pushout_of_size.{max u' v} V,
   exact category_theory.preserves_epi _ f,
 end
 

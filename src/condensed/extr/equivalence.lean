@@ -421,13 +421,13 @@ parameters {C : Type u'} [category.{u+1} C] [has_limits C] [has_colimits C]
 
 parameters {J : Type (u+1)} [small_category J] (K : J ⥤ ExtrSheafProd.{u} C)
 
-parameters {ι : Type u} [fintype ι] (X : ι → ExtrDisc.{u})
+parameters {ι : Type} [fintype ι] (X : ι → ExtrDisc.{u})
 
 def KC : ExtrDisc.{u}ᵒᵖ ⥤ C := colimit (K ⋙ ExtrSheafProd_to_presheaf C)
 
 def P₀ : C := ∏ (λ i,  KC.obj (op (X i)))
 def P : C := ∏ (λ i : ulift.{u+1} ι,  KC.obj (op (X i.down)))
-def S : C := ⨁ (λ i : ulift.{u+1} ι, KC.obj (op (X i.down)))
+def S : C := ⨁ (λ i : ι, KC.obj (op (X i)))
 
 def prod_iso_P : P₀ ≅ P :=
 { hom := pi.lift $ λ i, pi.π _ _,
@@ -436,9 +436,9 @@ def prod_iso_P : P₀ ≅ P :=
   inv_hom_id' := by { ext ⟨⟨j⟩⟩, simp }, }
 
 def biprod_iso_P : P ≅ S :=
-{ hom := biproduct.lift $ λ b, pi.π _ _,
+{ hom := biproduct.lift $ λ b, pi.π (λ i : ulift.{u+1} ι,  KC.obj (op (X i.down))) ⟨b⟩,
   inv := pi.lift $ λ b, biproduct.π _ _,
-  hom_inv_id' := by { ext ⟨j⟩, simp },
+  hom_inv_id' := by { ext ⟨⟨j⟩⟩, simp },
   inv_hom_id' := begin
     apply biproduct.hom_ext, -- we need to choose the correct extensionality lemma here...
     intros i,
@@ -446,8 +446,9 @@ def biprod_iso_P : P ≅ S :=
   end }
 
 def Q₀ (j : J) : C := ∏ (λ i : ι, (K.obj j).val.obj (op (X i)))
+def Q₁ (j : J) : C := ∏ (λ i : ulift.{u} ι, (K.obj j).val.obj (op (X i.down)))
 def Q (j : J) : C := ∏ (λ i : ulift.{u+1} ι, (K.obj j).val.obj (op (X i.down)))
-def T (j : J) : C := ⨁ (λ i : ulift.{u+1} ι, (K.obj j).val.obj (op (X i.down)))
+def T (j : J) : C := ⨁ (λ i : ι, (K.obj j).val.obj (op (X i)))
 
 def prod_iso_Q (j : J) : Q₀ j ≅ Q j :=
 { hom := pi.lift $ λ b, pi.π _ _,
@@ -455,22 +456,33 @@ def prod_iso_Q (j : J) : Q₀ j ≅ Q j :=
   hom_inv_id' := by { ext ⟨j⟩, simp },
   inv_hom_id' := by { ext ⟨⟨j⟩⟩, simp }, }
 
-def biprod_iso_Q (j : J) : Q j ≅ T j :=
-{ hom := biproduct.lift $ λ b, pi.π _ _,
-  inv := pi.lift $ λ b, biproduct.π _ _,
+def prod_iso_Q' (j : J) : Q₀ j ≅ Q₁ j :=
+{ hom := pi.lift $ λ b, pi.π _ _,
+  inv := pi.lift $ λ b, pi.π (λ (i : ulift ι), (K.obj j).val.obj (op (X i.down))) ⟨b⟩,
   hom_inv_id' := by { ext ⟨j⟩, simp },
+  inv_hom_id' := by { ext ⟨⟨j⟩⟩, simp }, }
+
+def biprod_iso_Q (j : J) : Q j ≅ T j :=
+{ hom := biproduct.lift $ λ b, pi.π (λ i : ulift.{u+1} ι, (K.obj j).val.obj (op (X i.down))) ⟨b⟩,
+  inv := pi.lift $ λ b, biproduct.π _ _,
+  hom_inv_id' := by { ext ⟨⟨j⟩⟩, simp },
   inv_hom_id' := begin
     apply biproduct.hom_ext, -- we need to choose the correct extensionality lemma here...
     intros i,
     simp,
   end }
 
-def KQ₀ (j) : (K.obj j).val.obj (op (ExtrDisc.sigma X)) ≅ Q₀ j :=
+def KQ₀ (j) : (K.obj j).val.obj (op (ExtrDisc.sigma (X ∘ ulift.down))) ≅ Q₀ j :=
 begin
   -- Lean is being annoying... again...
-  let t : (K.obj j).val.obj (op (ExtrDisc.sigma X)) ⟶ Q₀ K X j :=
-    pi.lift (λ (i : ι), (K.obj j).val.map (ExtrDisc.sigma.ι X i).op),
-  haveI : is_iso t := (K.obj j).cond ι X,
+  let t : (K.obj j).val.obj (op (ExtrDisc.sigma (X ∘ ulift.down))) ⟶ Q₀ K X j :=
+    pi.lift (λ (i : ι), (K.obj j).val.map (ExtrDisc.sigma.ι (X ∘ ulift.down) ⟨i⟩).op),
+  have := (K.obj j).cond (ulift ι) (X ∘ ulift.down), dsimp at this,
+  let s := _, change is_iso s at this,
+  have ht : t = s ≫ (prod_iso_Q' _ _ _).inv,
+  { dsimp [s, t, prod_iso_Q'], apply limit.hom_ext, rintros ⟨q⟩,
+    simp },
+  haveI : is_iso t := by { rw ht, resetI, apply is_iso.comp_is_iso },
   exact as_iso t,
 end
 
@@ -524,7 +536,8 @@ def T_functor : J ⥤ C :=
   end }
 
 def KQ₀_nat_iso :
-  K ⋙ ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj (op (ExtrDisc.sigma X)) ≅ Q₀_functor :=
+  K ⋙ ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj (op (ExtrDisc.sigma (X ∘ ulift.down))) ≅
+  Q₀_functor :=
 nat_iso.of_components (λ j, KQ₀ _)
 begin
   intros i j f,
@@ -555,16 +568,17 @@ def colimit_KQ₀_nat_iso :
   KC ≅ ((K ⋙ ExtrSheafProd_to_presheaf _).flip ⋙ colim) :=
 colimit_iso_flip_comp_colim (K ⋙ ExtrSheafProd_to_presheaf C)
 
-def colimit_KQ₀_nat_iso_eval : KC.obj (op (ExtrDisc.sigma X)) ≅
-  colimit (K ⋙ ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj (op (ExtrDisc.sigma X))) :=
+def colimit_KQ₀_nat_iso_eval : KC.obj (op (ExtrDisc.sigma (X ∘ ulift.down))) ≅
+  colimit (K ⋙ ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj
+  (op (ExtrDisc.sigma (X ∘ ulift.down)))) :=
 colimit_KQ₀_nat_iso.app _
 
-def CT : C := ⨁ (λ i : ulift.{u+1} ι,
-    colimit (K ⋙ ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj (op (X i.down))))
+def CT : C := ⨁ (λ i : ι,
+    colimit (K ⋙ ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj (op (X i))))
 
-def ct_iso (i : ulift.{u+1} ι) :
-  (colimit (K ⋙ ExtrSheafProd_to_presheaf _)).obj (op (X i.down)) ≅
-  colimit (K ⋙ ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj (op (X i.down))) :=
+def ct_iso (i : ι) :
+  (colimit (K ⋙ ExtrSheafProd_to_presheaf _)).obj (op (X i)) ≅
+  colimit (K ⋙ ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj (op (X i))) :=
 colimit_KQ₀_nat_iso.app _
 
 def CT_iso : CT ≅ S :=
@@ -587,7 +601,7 @@ def colimit_T_iso : colimit T_functor ≅ CT :=
 { hom := colimit.desc T_functor ⟨CT,
   { app := λ j, biproduct.map $ λ i,
       colimit.ι (K ⋙ ExtrSheafProd_to_presheaf C ⋙
-      (evaluation ExtrDiscᵒᵖ C).obj (op (X i.down))) j,
+      (evaluation ExtrDiscᵒᵖ C).obj (op (X i))) j,
     naturality' := begin
       intros a b f,
       dsimp [T_functor, map_T],
@@ -600,7 +614,7 @@ def colimit_T_iso : colimit T_functor ≅ CT :=
     end }⟩,
   inv := biproduct.desc $ λ b,
     colimit.desc (K ⋙ ExtrSheafProd_to_presheaf _ ⋙
-    (evaluation _ _).obj (op (X b.down))) ⟨colimit T_functor,
+    (evaluation _ _).obj (op (X b))) ⟨colimit T_functor,
   { app := λ j, begin
       dsimp [ExtrSheafProd_to_presheaf, T_functor, T],
       apply biproduct.ι _ b,
@@ -631,8 +645,8 @@ def colimit_T_iso : colimit T_functor ≅ CT :=
   end }
 
 -- We want this to be an isomorphism.
-def t : KC.obj (op (ExtrDisc.sigma X)) ⟶ P₀ :=
-  pi.lift $ λ i, KC.map (ExtrDisc.sigma.ι _ _).op
+def t : KC.obj (op (ExtrDisc.sigma (X ∘ ulift.down))) ⟶ P₀ :=
+  pi.lift $ λ i, KC.map (ExtrDisc.sigma.ι (X ∘ ulift.down) ⟨i⟩).op
 
 lemma key_lemma : t =
   colimit_KQ₀_nat_iso_eval.hom ≫
@@ -664,16 +678,113 @@ end
 end
 end finite_product_colimit_setup
 
-variables {C : Type u'} [category.{u+1} C] [has_limits C] [has_colimits C]
+variables {C : Type u'} [category.{u+1} C]
   [has_zero_morphisms C] [has_finite_biproducts C]
+
+-- move me
+lemma pi_π_comp_eq_to_hom {α : Type} [fintype α] (X : α → C) (a b : α) (h : a = b) :
+  pi.π X a ≫ eq_to_hom (by rw h) = pi.π X b :=
+by { induction h, simp }
+
+-- move me
+lemma pi_π_comp_eq_to_hom' {α : Type u} [fintype α] (X : α → C) (a b : α) (h : a = b) :
+  pi.π X a ≫ eq_to_hom (by rw h) = pi.π X b :=
+by { induction h, simp }
+
+-- move me
+attribute [reassoc] ExtrDisc.sigma.ι_desc
+
+variables [has_limits C] [has_colimits C]
+
+lemma ExtrDisc.sigma.eq_to_hom_ι_eq_ι
+  {α : Type u} [fintype α] (X : α → ExtrDisc.{u})
+  (a b : α) (h : a = b) :
+  eq_to_hom (by rw h) ≫ ExtrDisc.sigma.ι X a = ExtrDisc.sigma.ι X b :=
+begin
+  induction h, simp,
+end
+
+def ExtrDisc.sigma_iso_of_equiv {α β : Type u} [fintype α] [fintype β] (X : α → ExtrDisc.{u})
+  (e : β ≃ α) :
+  ExtrDisc.sigma (X ∘ e) ≅ ExtrDisc.sigma X :=
+{ hom := ExtrDisc.sigma.desc _ $ λ b, ExtrDisc.sigma.ι _ _,
+  inv := ExtrDisc.sigma.desc _ $ λ a, eq_to_hom begin
+    dsimp,
+    refine congr_arg _ _,
+    exact (e.apply_symm_apply _).symm,
+  end ≫ ExtrDisc.sigma.ι _ (e.symm a),
+  hom_inv_id' := begin
+    apply ExtrDisc.sigma.hom_ext, intros b,
+    simp [ExtrDisc.sigma.ι_desc_assoc, ExtrDisc.sigma.ι_desc],
+    apply ExtrDisc.sigma.eq_to_hom_ι_eq_ι (X ∘ e),
+    simp,
+  end,
+  inv_hom_id' := begin
+    apply ExtrDisc.sigma.hom_ext, intros b,
+    simp [ExtrDisc.sigma.ι_desc_assoc, ExtrDisc.sigma.ι_desc],
+    apply ExtrDisc.sigma.eq_to_hom_ι_eq_ι X,
+    simp,
+  end }
 
 lemma finite_product_condition_holds_for_colimit
   {J : Type (u+1)} [small_category J] (K : J ⥤ ExtrSheafProd.{u} C) [has_colimits C] :
   ExtrDisc.finite_product_condition (colimit (K ⋙ ExtrSheafProd_to_presheaf C)) :=
 begin
   introsI ι _ X,
+  let e : ι ≃ fin _ := fintype.equiv_fin _,
+  let X' := X ∘ e.symm,
   dsimp,
-  apply finite_product_colimit_setup.main,
+  let E : ExtrDisc.sigma (X' ∘ ulift.down) ≅ ExtrDisc.sigma X :=
+    ExtrDisc.sigma_iso_of_equiv X (equiv.ulift.trans e.symm),
+  have := finite_product_colimit_setup.main K X',
+  let eL : (colimit (K ⋙ ExtrSheafProd_to_presheaf C)).obj (op (ExtrDisc.sigma X)) ≅
+    (colimit (K ⋙ ExtrSheafProd_to_presheaf C)).obj (op (ExtrDisc.sigma (X' ∘ ulift.down))) :=
+    functor.map_iso _ E.op,
+  let E' : finite_product_colimit_setup.P₀ K X' ≅
+    ∏ λ (i : ι), (colimit (K ⋙ ExtrSheafProd_to_presheaf C)).obj (op (X i)) :=
+    ⟨limits.pi.lift _, limits.pi.lift _,_,_⟩,
+  rotate,
+  { intros i,
+    dsimp [finite_product_colimit_setup.P₀],
+    refine pi.π _ (e i) ≫ _,
+    refine category_theory.functor.map _ _,
+    refine quiver.hom.op _,
+    refine eq_to_hom _,
+    refine congr_arg X _,
+    exact (e.symm_apply_apply _).symm },
+  { intros i,
+    refine pi.π _ (e.symm i) },
+  { apply limits.limit.hom_ext,
+    rintro ⟨j⟩, dsimp,
+    simp only [eq_to_hom_op, category.assoc, limit.lift_π, fan.mk_π_app, category.id_comp],
+    rw category_theory.eq_to_hom_map,
+    apply pi_π_comp_eq_to_hom, simp },
+  { apply limits.limit.hom_ext,
+    rintro ⟨j⟩, dsimp,
+    simp only [eq_to_hom_op, category.assoc, limit.lift_π, fan.mk_π_app,
+      category.id_comp],
+    rw category_theory.eq_to_hom_map,
+    rw limit.lift_π_assoc, dsimp,
+    change _ = pi.π _ _,
+    apply pi_π_comp_eq_to_hom'
+      (λ (i : ι), (colimit (K ⋙ ExtrSheafProd_to_presheaf C)).obj (op (X i))), simp },
+  let t := _, change is_iso t, let s := _, change is_iso s at this,
+  have ht : t = eL.hom ≫ s ≫ E'.hom,
+  { dsimp [t, eL, s, E', E],
+    apply limit.hom_ext, rintros ⟨j⟩,
+    simp only [category.assoc, limit.lift_π],
+    dsimp,
+    rw category_theory.eq_to_hom_op,
+    rw category_theory.eq_to_hom_map,
+    dsimp [finite_product_colimit_setup.t],
+    simp only [limit.lift_π_assoc],
+    dsimp [finite_product_colimit_setup.KC],
+    simp only [← category.assoc, ← functor.map_comp, ← op_comp],
+    erw ExtrDisc.sigma.ι_desc,
+    dsimp,
+    rw ← ExtrDisc.sigma.eq_to_hom_ι_eq_ι X (e.symm (e j)) j (by simp),
+    simp [category_theory.eq_to_hom_map] },
+  rw ht, resetI, apply_instance,
 end
 
 instance ExtrSheafProd_to_presheaf_creates_colimit
