@@ -200,7 +200,7 @@ begin
   intros y,
   dsimp at y,
   obtain ⟨x, hx1, hx2⟩ := exists_sum N d _ _ y.2,
-  simp only [fst_to_fun, function.comp_app],
+  simp only [fst_apply, function.comp_app],
   refine ⟨⟨⟨y, ⟨x, _⟩⟩, _⟩, rfl⟩,
   { erw rescale.mem_filtration, refine filtration_mono h hx2 },
   { simp only [pseudo_normed_group.level, sum_hom_apply, subtype.coe_mk, ← hx1], refl },
