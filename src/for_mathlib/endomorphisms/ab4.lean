@@ -15,10 +15,6 @@ namespace endomorphisms
 variables (𝓐 : Type u) [category.{v} 𝓐] [abelian 𝓐] [has_coproducts.{v} 𝓐] [AB4 𝓐]
   [has_products_of_shape (ulift.{v} ℕ) 𝓐]
 
--- move me
-instance forget_faithful : faithful (endomorphisms.forget 𝓐) :=
-{ map_injective' := by { intros X Y f g h, ext, exact h } }
-
 instance : AB4 (endomorphisms 𝓐) :=
 begin
   constructor, introsI α X Y f hf,
