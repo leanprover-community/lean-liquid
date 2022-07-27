@@ -19,7 +19,6 @@ open liquid_tensor_experiment category_theory category_theory.limits opposite
 
 example : conditionally_complete_linear_order ℝ := infer_instance
 example : linear_ordered_field ℝ := infer_instance
-example : conditionally_complete_linear_ordered_field ℝ := infer_instance
 
 example : ℝ≥0 = {r : ℝ // r ≥ 0} := rfl
 
@@ -28,5 +27,4 @@ example {R : Type*} [conditionally_complete_linear_ordered_field R] : R ≃+*o �
 
 -- The isomorphism above is unique
 example {R : Type*} [conditionally_complete_linear_ordered_field R] (e₁ e₂ : R ≃+*o ℝ) :
-  e₁ = e₂ :=
-(eq_iff_true_of_subsingleton _ _).mpr trivial
+  e₁ = e₂ := subsingleton.elim _ _
