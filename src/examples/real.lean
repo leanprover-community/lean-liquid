@@ -17,8 +17,7 @@ noncomputable theory
 open_locale liquid_tensor_experiment nnreal zero_object
 open liquid_tensor_experiment category_theory category_theory.limits opposite
 
-example : conditionally_complete_linear_order ℝ := infer_instance
-example : linear_ordered_field ℝ := infer_instance
+example : conditionally_complete_linear_ordered_field ℝ := infer_instance
 
 example : ℝ≥0 = {r : ℝ // r ≥ 0} := rfl
 
