@@ -35,7 +35,9 @@ def signed_Radon_measure.comparison :
   map_add' := λ f g, rfl,
   map_smul' := λ a f, rfl,
   cont := begin
-    dsimp only, sorry
+    apply weak_dual.continuous_of_continuous_eval,
+    intro f,
+    apply weak_dual.eval_continuous (lc_to_c X f),
   end }
 
 local attribute [instance] abstract_completion.uniform_struct
@@ -49,7 +51,7 @@ def signed_Radon_measure.inverse :
   C(weak_dual ℝ (locally_constant X ℝ), signed_Radon_measure X) :=
 { to_fun := λ f,
   { to_fun := (locally_constant.pkg X ℝ).extend f,
-    map_add' := begin
+    map_add' := by sorry; begin
       letI : add_group (locally_constant.pkg X ℝ).space :=
         continuous_map.add_group,
       letI : topological_add_group (locally_constant.pkg X ℝ).space :=
@@ -68,7 +70,7 @@ def signed_Radon_measure.inverse :
         erw [(locally_constant.pkg X ℝ).extend_coe hf, (locally_constant.pkg X ℝ).extend_coe hf,
           (locally_constant.pkg X ℝ).extend_coe hf, map_add], }
     end,
-    map_smul' := begin
+    map_smul' := by sorry; begin
       letI : add_group (locally_constant.pkg X ℝ).space :=
         continuous_map.add_group,
       letI : topological_add_group (locally_constant.pkg X ℝ).space :=
@@ -90,7 +92,15 @@ def signed_Radon_measure.inverse :
         refl }
     end,
     cont := (locally_constant.pkg X ℝ).continuous_extend },
-  continuous_to_fun := sorry }
+  continuous_to_fun := begin
+    apply weak_dual.continuous_of_continuous_eval,
+    intro f,
+    dsimp,
+    sorry
+    -- apply (locally_constant.pkg X ℝ).induction_on f; clear f,
+    -- { sorry, },
+    -- { sorry }
+  end }
 
 def signed_Radon_measure.equiv :
    signed_Radon_measure X ≃L[ℝ] weak_dual ℝ (locally_constant X ℝ) :=
@@ -100,8 +110,8 @@ def signed_Radon_measure.equiv :
     change (locally_constant.pkg X ℝ).extend (μ ∘ (lc_to_c X)) f = μ f,
     apply (locally_constant.pkg X ℝ).induction_on f; clear f,
     { apply is_closed_eq,
-      sorry,
-      sorry },
+      { exact (locally_constant.pkg X ℝ).continuous_extend },
+      { exact continuous_linear_map.continuous μ } },
     { intro f,
       have aux : uniform_continuous (μ ∘ (lc_to_c X)) :=
         (continuous_linear_map.uniform_continuous μ).comp (lc_to_c X).uniform_continuous,
