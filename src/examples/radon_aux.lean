@@ -49,7 +49,7 @@ def signed_Radon_measure.inverse :
   C(weak_dual ℝ (locally_constant X ℝ), signed_Radon_measure X) :=
 { to_fun := λ f,
   { to_fun := (locally_constant.pkg X ℝ).extend f,
-    map_add' := by sorry; begin
+    map_add' := begin
       letI : add_group (locally_constant.pkg X ℝ).space :=
         continuous_map.add_group,
       letI : topological_add_group (locally_constant.pkg X ℝ).space :=
@@ -63,14 +63,31 @@ def signed_Radon_measure.inverse :
           exact continuous_fst,
           exact continuous_snd } },
       { rintro ⟨φ, ψ⟩, dsimp only,
-        have hf : uniform_continuous f := continuous_linear_map.uniform_continuous f,
+        have hf := continuous_linear_map.uniform_continuous f,
         rw [← (lc_to_c X).map_add],
         erw [(locally_constant.pkg X ℝ).extend_coe hf, (locally_constant.pkg X ℝ).extend_coe hf,
           (locally_constant.pkg X ℝ).extend_coe hf, map_add], }
     end,
     map_smul' := begin
+      letI : add_group (locally_constant.pkg X ℝ).space :=
+        continuous_map.add_group,
+      letI : topological_add_group (locally_constant.pkg X ℝ).space :=
+        continuous_map.topological_add_group,
+      letI : has_smul ℝ (locally_constant.pkg X ℝ).space :=
+        continuous_map.has_smul,
+      letI : has_continuous_smul ℝ (locally_constant.pkg X ℝ).space :=
+        continuous_map.has_continuous_smul,
       intros r φ,
-      sorry
+      apply (locally_constant.pkg X ℝ).induction_on φ; clear φ,
+      { apply is_closed_eq,
+        { refine (locally_constant.pkg X ℝ).continuous_extend.comp
+            (continuous_const.smul continuous_id), },
+        { refine continuous_const.smul (locally_constant.pkg X ℝ).continuous_extend } },
+      { intro φ,
+        have hf := continuous_linear_map.uniform_continuous f,
+        erw [← (lc_to_c X).map_smul, (locally_constant.pkg X ℝ).extend_coe hf,
+          (locally_constant.pkg X ℝ).extend_coe hf, map_smul],
+        refl }
     end,
     cont := (locally_constant.pkg X ℝ).continuous_extend },
   continuous_to_fun := sorry }
