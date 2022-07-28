@@ -95,8 +95,25 @@ def signed_Radon_measure.inverse :
 def signed_Radon_measure.equiv :
    signed_Radon_measure X ≃L[ℝ] weak_dual ℝ (locally_constant X ℝ) :=
 { inv_fun := signed_Radon_measure.inverse _,
-  left_inv := sorry,
-  right_inv := sorry,
+  left_inv := begin
+    intro μ, ext1 f,
+    change (locally_constant.pkg X ℝ).extend (μ ∘ (lc_to_c X)) f = μ f,
+    apply (locally_constant.pkg X ℝ).induction_on f; clear f,
+    { apply is_closed_eq,
+      sorry,
+      sorry },
+    { intro f,
+      have aux : uniform_continuous (μ ∘ (lc_to_c X)) :=
+        (continuous_linear_map.uniform_continuous μ).comp (lc_to_c X).uniform_continuous,
+      rw [(locally_constant.pkg X ℝ).extend_coe aux],
+      refl }
+  end,
+  right_inv := begin
+    intro μ, ext1 f,
+    show (locally_constant.pkg X ℝ).extend μ (lc_to_c X f) = μ f,
+    have hμ := continuous_linear_map.uniform_continuous μ,
+    erw [(locally_constant.pkg X ℝ).extend_coe hμ],
+  end,
   continuous_to_fun := (signed_Radon_measure.comparison X).cont,
   continuous_inv_fun := (signed_Radon_measure.inverse X).continuous,
   ..(signed_Radon_measure.comparison X) }
