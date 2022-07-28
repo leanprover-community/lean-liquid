@@ -34,18 +34,46 @@ def signed_Radon_measure.comparison :
 { to_fun := λ f, f.comp (lc_to_c _),
   map_add' := λ f g, rfl,
   map_smul' := λ a f, rfl,
-  cont := sorry }
+  cont := begin
+    dsimp only, sorry
+  end }
+
+local attribute [instance] abstract_completion.uniform_struct
+
+-- generalize this to arbitrary abstract completions:
+lemma dense_range_coe₂ :
+  dense_range (λ p : locally_constant X ℝ × locally_constant X ℝ, (lc_to_c X p.1, lc_to_c X p.2)) :=
+(locally_constant.pkg X ℝ).dense.prod_map (locally_constant.pkg X ℝ).dense
 
 def signed_Radon_measure.inverse :
-  weak_dual ℝ (locally_constant X ℝ) →L[ℝ] signed_Radon_measure X :=
+  C(weak_dual ℝ (locally_constant X ℝ), signed_Radon_measure X) :=
 { to_fun := λ f,
   { to_fun := (locally_constant.pkg X ℝ).extend f,
-    map_add' := sorry,
-    map_smul' := sorry,
+    map_add' := by sorry; begin
+      letI : add_group (locally_constant.pkg X ℝ).space :=
+        continuous_map.add_group,
+      letI : topological_add_group (locally_constant.pkg X ℝ).space :=
+        continuous_map.topological_add_group,
+      rw ← prod.forall',
+      refine is_closed_property (dense_range_coe₂ X) _ _,
+      { apply is_closed_eq,
+        { refine (locally_constant.pkg X ℝ).continuous_extend.comp continuous_add },
+        { refine continuous.add _ _;
+          refine (locally_constant.pkg X ℝ).continuous_extend.comp _,
+          exact continuous_fst,
+          exact continuous_snd } },
+      { rintro ⟨φ, ψ⟩, dsimp only,
+        have hf : uniform_continuous f := continuous_linear_map.uniform_continuous f,
+        rw [← (lc_to_c X).map_add],
+        erw [(locally_constant.pkg X ℝ).extend_coe hf, (locally_constant.pkg X ℝ).extend_coe hf,
+          (locally_constant.pkg X ℝ).extend_coe hf, map_add], }
+    end,
+    map_smul' := begin
+      intros r φ,
+      sorry
+    end,
     cont := (locally_constant.pkg X ℝ).continuous_extend },
-  map_add' := sorry,
-  map_smul' := sorry,
-  cont := sorry }
+  continuous_to_fun := sorry }
 
 def signed_Radon_measure.equiv :
    signed_Radon_measure X ≃L[ℝ] weak_dual ℝ (locally_constant X ℝ) :=
@@ -53,5 +81,5 @@ def signed_Radon_measure.equiv :
   left_inv := sorry,
   right_inv := sorry,
   continuous_to_fun := (signed_Radon_measure.comparison X).cont,
-  continuous_inv_fun := (signed_Radon_measure.inverse X).cont,
+  continuous_inv_fun := (signed_Radon_measure.inverse X).continuous,
   ..(signed_Radon_measure.comparison X) }
