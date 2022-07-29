@@ -240,7 +240,11 @@ def signed_Radon_measure_equiv_of_Fintype (X : Fintype.{0}) :
       by simp only [continuous_map.coe_add, pi.add_apply, mul_add, finset.sum_add_distrib],
     map_smul' := λ r f,
       by simp only [continuous_map.coe_smul, pi.smul_apply, mul_smul_comm, finset.smul_sum, ring_hom.id_apply],
-    cont := sorry },
+    cont := begin
+      apply continuous_finset_sum,
+      rintro i -,
+      refine continuous_const.mul (continuous_map.continuous_eval_const i)
+    end },
   left_inv := λ μ, begin
     ext f,
     change ∑ (x : X), μ (topological_space.clopens.indicator {x}) * f x = μ f,
