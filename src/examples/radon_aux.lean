@@ -284,8 +284,24 @@ begin
     ∥μ U.indicator∥₊^(p:ℝ) ≤ ∑ x in (finset.univ : finset X).filter (λ x, x ∈ U),
       ∥μ (topological_space.clopens.indicator {x})∥₊^(p:ℝ),
   { sorry },
-  refine le_trans (finset.sum_le_sum $ λ U hU, this U) _,
-  sorry
+  refine le_trans (finset.sum_le_sum $ λ U hU, this U) (le_of_eq _),
+  rw finset.sum_sigma',
+  apply finset.sum_bij,
+  swap 5, { intros a ha, exact {a.2} },
+  { intros,
+    simp only [topological_space.clopens.discrete_finpartition, finset.mem_map, finset.mem_univ,
+      function.embedding.coe_fn_mk, exists_true_left, exists_apply_eq_apply], },
+  { intros x hx, refl },
+  { rintro x y hx hy h, ext1,
+    { sorry },
+    { rw set_like.ext_iff at h, specialize h x.2,
+      simp only [topological_space.clopens.mem_singleton_iff, eq_self_iff_true, true_iff] at h,
+      exact heq_of_eq h } },
+  { intros U hU,
+    simp only [topological_space.clopens.discrete_finpartition, finset.mem_map, finset.mem_univ,
+      function.embedding.coe_fn_mk, exists_true_left] at hU,
+    obtain ⟨x, rfl⟩ := hU,
+    sorry }
 end
 
 lemma signed_Radon_measure_pnorm_eq (X : Fintype.{0})
