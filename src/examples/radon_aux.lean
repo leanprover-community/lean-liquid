@@ -183,8 +183,8 @@ def signed_Radon_measure.equiv :
 variables {X}
 open topological_space (clopens)
 
--- def signed_Radon_measure.is_p_bdd (μ : signed_Radon_measure X) (p : ℝ≥0) (c : ℝ≥0) : Prop :=
--- ∀ 𝓤 : finpartition (⊤ : clopens X), ∑ U in 𝓤.parts, (μ _)^(p:ℝ) ≤ c
+def signed_Radon_measure.is_p_bdd (μ : signed_Radon_measure X) (p : ℝ≥0) (c : ℝ≥0) : Prop :=
+∀ 𝓤 : finpartition (⊤ : clopens X), ∑ U in 𝓤.parts, (μ U.indicator)^(p:ℝ) ≤ c
 
 end
 
@@ -194,8 +194,7 @@ open topological_space (clopens)
 
 variables (p : ℝ≥0) (c : ℝ≥0) (X : Profinite.{0})
 
-
--- def signed_Radon_p_measure_bdd (p : ℝ≥0) (c : ℝ≥0) (X : Profinite.{0}) :=
--- {μ : signed_Radon_measure X | ∀ (𝓤 : finpartition (clopens X)), ∑ U in 𝓤, (μ _)^(p:ℝ) ≤ c }
+def signed_Radon_p_measure_bdd (p : ℝ≥0) (c : ℝ≥0) (X : Profinite.{0}) :=
+{μ : signed_Radon_measure X | μ.is_p_bdd p c }
 
 end bdd
