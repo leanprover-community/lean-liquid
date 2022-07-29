@@ -344,8 +344,20 @@ begin
   exact continuous_subtype_coe,
 end
 
+instance t2_space_signed_Radon_measure (X : Profinite.{0}) :
+  t2_space (signed_Radon_measure X) :=
+let e : signed_Radon_measure X → C(X,ℝ) → ℝ := λ μ, μ in
+t2_space.mk $ λ x y h,
+  @separated_by_continuous _ _ _ (Pi.topological_space)
+  begin
+    convert Pi.t2_space,
+    intros t,
+    exact t3_space.t2_space ℝ,
+  end e continuous_induced_dom _ _ (λ c, h $ continuous_linear_map.ext $ λ f, congr_fun c f)
+
 instance t2_space_signed_Radon_p_measure_bdd (X : Fintype.{0}) :
-  t2_space (signed_Radon_p_measure_bdd p c (Fintype.to_Profinite.obj X)) := sorry
+  t2_space (signed_Radon_p_measure_bdd p c (Fintype.to_Profinite.obj X)) :=
+subtype.t2_space
 
 def signed_Radon_p_measure_bdd_homeo (X : Fintype.{0}) [fact (0 < p)] [fact (p ≤ 1)] :
   signed_Radon_p_measure_bdd p c (Fintype.to_Profinite.obj X) ≃ₜ
