@@ -51,8 +51,34 @@ begin
 end
 
 -- generalize
+@[simps]
 def indicator (U : clopens X) : C(X,ℝ) :=
 ⟨set.indicator (U : set X) 1, U.indicator_continuous _ $ @continuous_const _ _ _ _ 1⟩
+
+instance [discrete_topology X] : has_singleton X (clopens X) :=
+{ singleton := λ x, ⟨{x}, is_clopen_discrete _⟩ }
+
+@[simp] lemma mem_singleton_iff [discrete_topology X] (x y : X) :
+  x ∈ ({y} : clopens X) ↔ x = y :=
+set.mem_singleton_iff
+
+def discrete_finpartition [discrete_topology X] [fintype X] : finpartition (⊤ : clopens X) :=
+{ parts := finset.univ.map ⟨λ x : X, {x}, λ x y, by simp only [set_like.ext_iff, mem_singleton_iff, eq_iff_eq_cancel_left, imp_self]⟩,
+  sup_indep := begin
+    sorry
+  end,
+  sup_parts := begin
+    rw [eq_top_iff],
+    rintro x -,
+    simp only [finset.sup_map, function.embedding.coe_fn_mk, function.comp.left_id],
+    sorry
+  end,
+  not_bot_mem := begin
+    simp only [finset.mem_map, finset.mem_univ, function.embedding.coe_fn_mk, exists_true_left, not_exists, set_like.ext_iff, mem_singleton_iff, not_forall],
+    intro x, use x,
+    simp only [eq_self_iff_true, true_iff],
+    exact not_false
+  end }
 
 end clopens
 end topological_space
@@ -183,8 +209,12 @@ def signed_Radon_measure.equiv :
 variables {X}
 open topological_space (clopens)
 
+def signed_Radon_measure.pnorm_rel_partition (p : ℝ≥0)
+  (𝓤 : finpartition (⊤ : clopens X)) (μ : signed_Radon_measure X) :=
+∑ U in 𝓤.parts, ∥μ U.indicator∥₊^(p:ℝ)
+
 def signed_Radon_measure.is_p_bdd (μ : signed_Radon_measure X) (p : ℝ≥0) (c : ℝ≥0) : Prop :=
-∀ 𝓤 : finpartition (⊤ : clopens X), ∑ U in 𝓤.parts, (μ U.indicator)^(p:ℝ) ≤ c
+∀ 𝓤 : finpartition (⊤ : clopens X), μ.pnorm_rel_partition p 𝓤 ≤ c
 
 end
 
@@ -196,5 +226,77 @@ variables (p : ℝ≥0) (c : ℝ≥0) (X : Profinite.{0})
 
 def signed_Radon_p_measure_bdd (p : ℝ≥0) (c : ℝ≥0) (X : Profinite.{0}) :=
 {μ : signed_Radon_measure X | μ.is_p_bdd p c }
+
+def signed_Radon_measure_equiv_of_Fintype (X : Fintype.{0}) :
+  signed_Radon_measure (Fintype.to_Profinite.obj X) ≃ real_measures p X :=
+{ to_fun := λ μ x, μ (topological_space.clopens.indicator {x}),
+  inv_fun := λ μ,
+  { to_fun := λ f, ∑ x : X, μ x * f x,
+    map_add' := λ f g,
+      by simp only [continuous_map.coe_add, pi.add_apply, mul_add, finset.sum_add_distrib],
+    map_smul' := λ r f,
+      by simp only [continuous_map.coe_smul, pi.smul_apply, mul_smul_comm, finset.smul_sum, ring_hom.id_apply],
+    cont := sorry },
+  left_inv := λ μ, begin
+    ext f,
+    change ∑ (x : X), μ (topological_space.clopens.indicator {x}) * f x = μ f,
+    suffices : f = ∑ x : X, f x • (topological_space.clopens.indicator {x}),
+    { conv_rhs { rw [this, map_sum] },
+      refine finset.sum_congr rfl _,
+      rintro x -,
+      rw [map_smul, smul_eq_mul, mul_comm], },
+    ext x,
+    simp only [continuous_map.coe_sum, continuous_map.coe_smul, fintype.sum_apply, pi.smul_apply, algebra.id.smul_eq_mul],
+    rw finset.sum_eq_single_of_mem, swap 4, { exact x }, swap 2, { exact finset.mem_univ _ }, swap,
+    { rintro y - hy,
+      simp only [hy.symm, topological_space.clopens.indicator_apply, set.indicator_of_not_mem,
+        set_like.mem_coe, topological_space.clopens.mem_singleton_iff, not_false_iff, mul_zero], },
+    { simp only [topological_space.clopens.indicator_apply, set.indicator_of_mem, set_like.mem_coe,
+        topological_space.clopens.mem_singleton_iff, pi.one_apply, mul_one], }
+  end,
+  right_inv := λ μ, begin
+    ext x,
+    change ∑ (y : ↥X), μ y * _ = μ x,
+    rw finset.sum_eq_single_of_mem, swap 4, { exact x }, swap 2, { exact finset.mem_univ _ }, swap,
+    { rintro y - hy,
+      simp only [hy, topological_space.clopens.indicator_apply, set.indicator_of_not_mem,
+        set_like.mem_coe, topological_space.clopens.mem_singleton_iff, not_false_iff, mul_zero], },
+    { simp only [topological_space.clopens.indicator_apply, set.indicator_of_mem, set_like.mem_coe,
+        topological_space.clopens.mem_singleton_iff, pi.one_apply, mul_one], }
+  end }
+
+lemma signed_Radon_measure_pnorm_le (X : Fintype.{0})
+  (𝓤 : finpartition (⊤ : clopens (Fintype.to_Profinite.obj X)))
+  (μ : signed_Radon_measure (Fintype.to_Profinite.obj X)) :
+  μ.pnorm_rel_partition p 𝓤 ≤ μ.pnorm_rel_partition p
+    (@topological_space.clopens.discrete_finpartition _ _ _ X.2) :=
+begin
+  sorry
+end
+
+lemma signed_Radon_measure_pnorm_eq (X : Fintype.{0})
+  (μ : signed_Radon_measure (Fintype.to_Profinite.obj X)) :
+  μ.pnorm_rel_partition p (@topological_space.clopens.discrete_finpartition _ _ _ X.2) =
+  ∑ (s : ↥X), ∥(signed_Radon_measure_equiv_of_Fintype p X) μ s∥₊ ^ (p:ℝ) :=
+begin
+  sorry
+end
+
+lemma signed_Radon_p_measure_bdd_iff [fact (0 < p)] [fact (p ≤ 1)]
+  (X : Fintype.{0}) (μ : signed_Radon_measure (Fintype.to_Profinite.obj X)) :
+  μ.is_p_bdd p c ↔
+  signed_Radon_measure_equiv_of_Fintype p X μ ∈ pseudo_normed_group.filtration (real_measures p X) c :=
+begin
+  rw [real_measures.mem_filtration_iff, real_measures.nnnorm_def],
+  simp only [signed_Radon_measure.is_p_bdd, ← signed_Radon_measure_pnorm_eq],
+  split,
+  { intro h, apply h, },
+  { intros h 𝓤, apply (signed_Radon_measure_pnorm_le _ _ _ _).trans h },
+end
+
+def signed_Radon_p_measure_bdd_homeo (X : Fintype.{0}) [fact (0 < p)] [fact (p ≤ 1)] :
+  signed_Radon_p_measure_bdd p c (Fintype.to_Profinite.obj X) ≃ₜ
+  pseudo_normed_group.filtration (real_measures p X) c :=
+sorry
 
 end bdd
