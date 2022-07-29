@@ -279,6 +279,12 @@ lemma signed_Radon_measure_pnorm_le (X : Fintype.{0})
   μ.pnorm_rel_partition p 𝓤 ≤ μ.pnorm_rel_partition p
     (@topological_space.clopens.discrete_finpartition _ _ _ X.2) :=
 begin
+  set X' := Fintype.to_Profinite.obj X, classical,
+  have : ∀ U : clopens X',
+    ∥μ U.indicator∥₊^(p:ℝ) ≤ ∑ x in (finset.univ : finset X).filter (λ x, x ∈ U),
+      ∥μ (topological_space.clopens.indicator {x})∥₊^(p:ℝ),
+  { sorry },
+  refine le_trans (finset.sum_le_sum $ λ U hU, this U) _,
   sorry
 end
 
