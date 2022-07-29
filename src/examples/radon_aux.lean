@@ -125,11 +125,13 @@ lemma dense_range_coe₂ :
   dense_range (λ p : locally_constant X ℝ × locally_constant X ℝ, (lc_to_c X p.1, lc_to_c X p.2)) :=
 (locally_constant.pkg X ℝ).dense.prod_map (locally_constant.pkg X ℝ).dense
 
+/-
+
 def signed_Radon_measure.inverse :
   C(weak_dual ℝ (locally_constant X ℝ), signed_Radon_measure X) :=
 { to_fun := λ f,
   { to_fun := (locally_constant.pkg X ℝ).extend f,
-    map_add' := by sorry; begin
+    map_add' := by admit; begin
       letI : add_group (locally_constant.pkg X ℝ).space :=
         continuous_map.add_group,
       letI : topological_add_group (locally_constant.pkg X ℝ).space :=
@@ -148,7 +150,7 @@ def signed_Radon_measure.inverse :
         erw [(locally_constant.pkg X ℝ).extend_coe hf, (locally_constant.pkg X ℝ).extend_coe hf,
           (locally_constant.pkg X ℝ).extend_coe hf, map_add], }
     end,
-    map_smul' := by sorry; begin
+    map_smul' := by admit; begin
       letI : add_group (locally_constant.pkg X ℝ).space :=
         continuous_map.add_group,
       letI : topological_add_group (locally_constant.pkg X ℝ).space :=
@@ -174,10 +176,10 @@ def signed_Radon_measure.inverse :
     apply weak_dual.continuous_of_continuous_eval,
     intro f,
     dsimp,
-    sorry
+    admit
     -- apply (locally_constant.pkg X ℝ).induction_on f; clear f,
-    -- { sorry, },
-    -- { sorry }
+    -- { admit, },
+    -- { admit }
   end }
 
 def signed_Radon_measure.equiv :
@@ -205,6 +207,8 @@ def signed_Radon_measure.equiv :
   continuous_to_fun := (signed_Radon_measure.comparison X).cont,
   continuous_inv_fun := (signed_Radon_measure.inverse X).continuous,
   ..(signed_Radon_measure.comparison X) }
+
+-/
 
 variables {X}
 open topological_space (clopens)
