@@ -273,7 +273,7 @@ def signed_Radon_measure_equiv_of_Fintype (X : Fintype.{0}) :
         topological_space.clopens.mem_singleton_iff, pi.one_apply, mul_one], }
   end }
 
-lemma signed_Radon_measure_pnorm_le (X : Fintype.{0})
+lemma signed_Radon_measure_pnorm_le [fact (0 < p)] [fact (p ≤ 1)] (X : Fintype.{0})
   (𝓤 : finpartition (⊤ : clopens (Fintype.to_Profinite.obj X)))
   (μ : signed_Radon_measure (Fintype.to_Profinite.obj X)) :
   μ.pnorm_rel_partition p 𝓤 ≤ μ.pnorm_rel_partition p
@@ -283,7 +283,12 @@ begin
   have : ∀ U : clopens X',
     ∥μ U.indicator∥₊^(p:ℝ) ≤ ∑ x in (finset.univ : finset X).filter (λ x, x ∈ U),
       ∥μ (topological_space.clopens.indicator {x})∥₊^(p:ℝ),
-  { sorry },
+  { intro U,
+    have h0p : 0 < p := fact.out _,
+    have hp1 : p ≤ 1 := fact.out _,
+    refine le_trans _ (nnreal.rpow_sum_le_sum_rpow _ _ h0p hp1),
+    refine nnreal.rpow_le_rpow _ h0p.le,
+    sorry },
   refine le_trans (finset.sum_le_sum $ λ U hU, this U) (le_of_eq _),
   rw finset.sum_sigma',
   apply finset.sum_bij,
