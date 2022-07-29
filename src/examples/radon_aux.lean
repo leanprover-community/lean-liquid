@@ -1,13 +1,65 @@
 import challenge
 import topology.algebra.module.weak_dual
+import topology.sets.closeds
 
-variables (X : Profinite.{0})
 
 noncomputable theory
 
 local attribute [instance]
   locally_constant.seminormed_add_comm_group
   locally_constant.pseudo_metric_space
+
+open_locale nnreal big_operators
+
+-- move me
+lemma ite_mem {α : Type*} (s : set α) (p : Prop) {_ : decidable p} (x y : α) :
+  ((if p then x else y) ∈ s) ↔ ((p ∧ x ∈ s) ∨ (¬p ∧ y ∈ s)) :=
+begin
+  split_ifs with h,
+  { simp only [h, true_and, not_true, false_and, or_false] },
+  { simp only [h, false_and, not_false_iff, true_and, false_or] }
+end
+
+namespace topological_space
+namespace clopens
+
+variables {X Y : Type*} [topological_space X] [topological_space Y] [has_zero Y]
+
+def indicator_continuous (U : clopens X) (f : X → Y) (hf : continuous f) :
+  continuous (set.indicator (U : set X) f) :=
+begin
+  constructor, intros V hV,
+  set W : set X := (U : set X).indicator f ⁻¹' V,
+  by_cases h0 : (0:Y) ∈ V,
+  { suffices : W = f ⁻¹' V ∪ Uᶜ,
+    { rw this, exact (hV.preimage hf).union U.clopen.compl.is_open },
+    classical, ext x,
+    simp only [set.mem_preimage, set.mem_union_eq, set.mem_compl_eq, set_like.mem_coe,
+      set.indicator_apply],
+    split_ifs with hxU,
+    { simp only [hxU, not_true, or_false] },
+    { simp only [h0, hxU, true_iff, not_false_iff, or_true], }, },
+  { suffices : W = f ⁻¹' V ∩ U,
+    { rw this, exact (hV.preimage hf).inter U.clopen.is_open },
+    classical, ext x,
+    simp only [set.mem_preimage, set.mem_union_eq, set.mem_compl_eq, set_like.mem_coe,
+      set.indicator_apply],
+    split_ifs with hxU,
+    { simp only [hxU, set.mem_inter_eq, set.mem_preimage, set_like.mem_coe, and_true] },
+    { simp only [h0, false_iff, set.mem_inter_eq, set.mem_preimage, set_like.mem_coe, not_and],
+      intro, assumption, } }
+end
+
+-- generalize
+def indicator (U : clopens X) : C(X,ℝ) :=
+⟨set.indicator (U : set X) 1, U.indicator_continuous _ $ @continuous_const _ _ _ _ 1⟩
+
+end clopens
+end topological_space
+
+section
+
+variables (X : Profinite.{0})
 
 -- The abstract completion package exhibiting `C(X,ℝ)` as the completion of `LC(X,ℝ)`.
 example : abstract_completion (locally_constant X ℝ) := locally_constant.pkg X ℝ
@@ -127,3 +179,23 @@ def signed_Radon_measure.equiv :
   continuous_to_fun := (signed_Radon_measure.comparison X).cont,
   continuous_inv_fun := (signed_Radon_measure.inverse X).continuous,
   ..(signed_Radon_measure.comparison X) }
+
+variables {X}
+open topological_space (clopens)
+
+-- def signed_Radon_measure.is_p_bdd (μ : signed_Radon_measure X) (p : ℝ≥0) (c : ℝ≥0) : Prop :=
+-- ∀ 𝓤 : finpartition (⊤ : clopens X), ∑ U in 𝓤.parts, (μ _)^(p:ℝ) ≤ c
+
+end
+
+section bdd
+
+open topological_space (clopens)
+
+variables (p : ℝ≥0) (c : ℝ≥0) (X : Profinite.{0})
+
+
+-- def signed_Radon_p_measure_bdd (p : ℝ≥0) (c : ℝ≥0) (X : Profinite.{0}) :=
+-- {μ : signed_Radon_measure X | ∀ (𝓤 : finpartition (clopens X)), ∑ U in 𝓤, (μ _)^(p:ℝ) ≤ c }
+
+end bdd
