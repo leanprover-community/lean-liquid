@@ -307,9 +307,58 @@ begin
   { intros h 𝓤, apply (signed_Radon_measure_pnorm_le _ _ _ _).trans h },
 end
 
+def signed_Radon_p_measure_bdd_equiv (X : Fintype.{0}) [fact (0 < p)] [fact (p ≤ 1)] :
+  signed_Radon_p_measure_bdd p c (Fintype.to_Profinite.obj X) ≃
+  pseudo_normed_group.filtration (real_measures p X) c :=
+{ to_fun := λ μ, ⟨signed_Radon_measure_equiv_of_Fintype p X μ, begin
+    rw ← signed_Radon_p_measure_bdd_iff, exact μ.2
+  end⟩,
+  inv_fun := λ μ, ⟨(signed_Radon_measure_equiv_of_Fintype p X).symm μ, begin
+    dsimp [signed_Radon_p_measure_bdd],
+    rw signed_Radon_p_measure_bdd_iff, simpa only [equiv.apply_symm_apply] using μ.2
+  end⟩,
+  left_inv := λ μ, subtype.ext $ (signed_Radon_measure_equiv_of_Fintype p X).symm_apply_apply _,
+  right_inv := λ μ, subtype.ext $ (signed_Radon_measure_equiv_of_Fintype p X).apply_symm_apply _ }
+
+lemma continuous_signed_Radon_p_measure_bdd_equiv_symm
+  (X : Fintype.{0}) [fact (0 < p)] [fact (p ≤ 1)] :
+  continuous (signed_Radon_p_measure_bdd_equiv p c X).symm :=
+begin
+  apply continuous_subtype_mk,
+  apply weak_dual.continuous_of_continuous_eval, intros t,
+  dsimp [signed_Radon_measure_equiv_of_Fintype],
+  let e : X → (pseudo_normed_group.filtration (real_measures p X) c) → ℝ :=
+    λ x μ, (μ : real_measures p X) x * t x,
+  suffices : ∀ x, continuous (e x),
+  { apply continuous_finset_sum, rintros x -, exact this x },
+  intros x,
+  let e' : (pseudo_normed_group.filtration (real_measures p X) c) → ℝ :=
+    λ μ, (μ : real_measures p X) x,
+  have he : e x = t x • e',
+  { ext, dsimp, rw mul_comm, },
+  rw he, refine continuous.smul (continuous_const : continuous (λ _, t x)) (_ : continuous e'),
+  dsimp [e'],
+  change continuous ((λ μ : X → ℝ, μ x) ∘
+    (λ μ : (pseudo_normed_group.filtration (real_measures p X) c), (μ : real_measures p X))),
+  refine continuous.comp (continuous_apply x) _,
+  exact continuous_subtype_coe,
+end
+
+instance t2_space_signed_Radon_p_measure_bdd (X : Fintype.{0}) :
+  t2_space (signed_Radon_p_measure_bdd p c (Fintype.to_Profinite.obj X)) := sorry
+
 def signed_Radon_p_measure_bdd_homeo (X : Fintype.{0}) [fact (0 < p)] [fact (p ≤ 1)] :
   signed_Radon_p_measure_bdd p c (Fintype.to_Profinite.obj X) ≃ₜ
   pseudo_normed_group.filtration (real_measures p X) c :=
-sorry
+{ continuous_to_fun := begin
+    rw continuous_iff_is_closed, intros S hS,
+    dsimp [-Fintype.to_Profinite_obj],
+    erw ← (signed_Radon_p_measure_bdd_equiv _ _ _).symm.image_eq_preimage,
+    apply is_compact.is_closed,
+    apply hS.is_compact.image,
+    apply continuous_signed_Radon_p_measure_bdd_equiv_symm,
+  end,
+  continuous_inv_fun := continuous_signed_Radon_p_measure_bdd_equiv_symm _ _ _,
+  ..(signed_Radon_p_measure_bdd_equiv _ _ _) }
 
 end bdd
