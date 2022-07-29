@@ -322,13 +322,20 @@ begin
     specialize h x,
     simp only [topological_space.clopens.mem_singleton_iff, eq_self_iff_true, true_iff] at h,
     subst y,
-    simp only [heq_iff_eq, eq_self_iff_true, and_true],
-    sorry },
+    suffices : U = V,
+    { simp only [this, heq_iff_eq, eq_self_iff_true, and_true, iff_self, implies_true_iff] },
+    by_contra hUV,
+    exact 𝓤.disjoint hx.1 hy.1 hUV ⟨hx.2, hy.2⟩, },
   { intros U hU,
     simp only [topological_space.clopens.discrete_finpartition, finset.mem_map, finset.mem_univ,
       function.embedding.coe_fn_mk, exists_true_left] at hU,
     obtain ⟨x, rfl⟩ := hU,
-    sorry }
+    obtain ⟨U, hU⟩ : ∃ U, U ∈ 𝓤.parts ∧ x ∈ U,
+    { have aux := 𝓤.sup_parts, rw eq_top_iff at aux,
+      specialize aux _, { exact x }, { trivial },
+      sorry },
+    refine ⟨⟨U, x⟩, _, rfl⟩,
+    simpa only [finset.mem_sigma, finset.mem_filter, finset.mem_univ, true_and] using hU, }
 end
 
 lemma signed_Radon_measure_pnorm_eq (X : Fintype.{0})
