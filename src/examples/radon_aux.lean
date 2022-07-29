@@ -279,7 +279,20 @@ lemma signed_Radon_measure_pnorm_eq (X : Fintype.{0})
   μ.pnorm_rel_partition p (@topological_space.clopens.discrete_finpartition _ _ _ X.2) =
   ∑ (s : ↥X), ∥(signed_Radon_measure_equiv_of_Fintype p X) μ s∥₊ ^ (p:ℝ) :=
 begin
-  sorry
+  symmetry,
+  apply finset.sum_bij,
+  swap 5, { intros x hx, exact {x} },
+  { intros x hx,
+    simp only [topological_space.clopens.discrete_finpartition, finset.mem_map, finset.mem_univ,
+      function.embedding.coe_fn_mk, exists_true_left, exists_apply_eq_apply], },
+  { intros x hx, refl },
+  { rintro x y hx hy h, rw set_like.ext_iff at h, specialize h x,
+    simpa only [topological_space.clopens.mem_singleton_iff, eq_self_iff_true, true_iff] using h, },
+  { intros U hU,
+    simp only [topological_space.clopens.discrete_finpartition, finset.mem_map, finset.mem_univ,
+      function.embedding.coe_fn_mk, exists_true_left] at hU,
+    obtain ⟨x, rfl⟩ := hU,
+    refine ⟨x, finset.mem_univ _, rfl⟩, }
 end
 
 lemma signed_Radon_p_measure_bdd_iff [fact (0 < p)] [fact (p ≤ 1)]
