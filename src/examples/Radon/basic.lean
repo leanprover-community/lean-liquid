@@ -3,7 +3,15 @@ import topology.algebra.module.weak_dual
 import topology.sets.closeds
 
 open_locale nnreal big_operators
+
+open category_theory
+open category_theory.limits
+
 namespace Profinite
+
+local attribute [instance]
+  locally_constant.seminormed_add_comm_group
+  locally_constant.pseudo_metric_space
 
 variable (X : Profinite.{0})
 
@@ -73,7 +81,69 @@ def real_measures_iso (p c : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] :
   real_measures.functor p ⋙ CompHausFiltPseuNormGrp₁.level.obj c ⋙ CompHaus_to_Top ≅
   Fintype.to_Profinite ⋙ Radon_functor p c := sorry
 
--- Key calculation 2: Radon_functor should commute with the limit given by `X.as_limit`,
--- which is the construction that exhibits `X` as a limit of its discrete quotients.
+def LC_to_C (X : Profinite.{0}) : locally_constant X ℝ →L[ℝ] C(X,ℝ) :=
+{ to_fun := locally_constant.to_continuous_map,
+  map_add' := λ f g, rfl,
+  map_smul' := λ f g, rfl,
+  cont := (locally_constant.pkg X ℝ).continuous_coe }
+
+def pre_Radon_comparison (X : Profinite.{0}) :
+  X.pre_Radon →L[ℝ] weak_dual ℝ (locally_constant X ℝ) :=
+{ to_fun := λ μ, μ.comp X.LC_to_C,
+  map_add' := λ f g, rfl,
+  map_smul' := λ f g, rfl,
+  cont := begin
+    apply weak_dual.continuous_of_continuous_eval, intros ff,
+    apply weak_dual.eval_continuous,
+  end }
+
+def pre_Radon_comparison_inverse (X : Profinite.{0}) :
+  weak_dual ℝ (locally_constant X ℝ) →L[ℝ] X.pre_Radon :=
+{ to_fun := λ μ,
+  { to_fun := λ f, (locally_constant.pkg X ℝ).extend μ f,
+    map_add' := sorry,
+    map_smul' := sorry,
+    cont := sorry },
+  map_add' := sorry,
+  map_smul' := sorry,
+  cont := sorry }
+
+def pre_Radon_equiv (X : Profinite.{0}) :
+  X.pre_Radon ≃L[ℝ] weak_dual ℝ (locally_constant X ℝ) :=
+{ inv_fun := X.pre_Radon_comparison_inverse,
+  left_inv := sorry,
+  right_inv := sorry,
+  continuous_to_fun := X.pre_Radon_comparison.cont,
+  continuous_inv_fun := X.pre_Radon_comparison_inverse.cont,
+  ..X.pre_Radon_comparison }
+
+
+def Radon_cone (p c : ℝ≥0) (X : Profinite.{0}) : cone (X.diagram ⋙ Radon_functor p c) :=
+(Radon_functor p c).map_cone X.as_limit_cone
+
+def Radon_comparison (X : Profinite.{0}) (p c : ℝ≥0) :
+  X.Radon p c ⟶ (Top.limit_cone (X.diagram ⋙ Radon_functor p c)).X :=
+(Top.limit_cone_is_limit _).lift (X.Radon_cone p c)
+
+instance is_iso_Radon_comparison (X : Profinite.{0}) (p c : ℝ≥0) :
+  is_iso (X.Radon_comparison p c) :=
+sorry
+
+-- Key calculation 2: Radon_functor should commute with the limit given by `X.as_limit`.
+def is_limit_Radon_cone (p c : ℝ≥0) (X : Profinite.{0}) : is_limit (X.Radon_cone p c) :=
+{ lift := λ S, (Top.limit_cone_is_limit _).lift S ≫ inv (X.Radon_comparison p c),
+  fac' := begin
+    intros S T, rw category.assoc,
+    have : inv (X.Radon_comparison p c) ≫ (Radon_cone p c X).π.app T =
+      (Top.limit_cone _).π.app _,
+    { rw is_iso.inv_comp_eq, erw (Top.limit_cone_is_limit _).fac },
+    rw [this, is_limit.fac],
+  end,
+  uniq' := begin
+    intros S m hm,
+    rw is_iso.eq_comp_inv,
+    apply (Top.limit_cone_is_limit _).uniq,
+    exact hm,
+  end }
 
 end Profinite
