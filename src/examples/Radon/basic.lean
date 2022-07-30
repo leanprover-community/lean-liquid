@@ -257,7 +257,33 @@ begin
 end
 
 instance is_iso_pre_Radon_comparison (X : Profinite.{0}) :
-  is_iso X.pre_Radon_limit_comparison := sorry
+  is_iso X.pre_Radon_limit_comparison :=
+begin
+  let E : limit (X.diagram ⋙ pre_Radon_functor) ≅
+    limit (X.diagram ⋙ pre_Radon_LC_functor) :=
+    has_limit.iso_of_nat_iso (iso_whisker_left _ pre_Radon_functor_iso),
+  let e₁ : (Top.limit_cone (X.diagram ⋙ pre_Radon_functor)).X ≅
+    limit (X.diagram ⋙ pre_Radon_functor) :=
+    (Top.limit_cone_is_limit _).cone_point_unique_up_to_iso (limit.is_limit _),
+  let e₂ : (Top.limit_cone (X.diagram ⋙ pre_Radon_LC_functor)).X ≅
+    limit (X.diagram ⋙ pre_Radon_LC_functor) :=
+    (Top.limit_cone_is_limit _).cone_point_unique_up_to_iso (limit.is_limit _),
+  suffices : X.pre_Radon_limit_comparison =
+    (pre_Radon_functor_iso.app _).hom ≫
+    X.pre_Radon_LC_limit_comparison ≫ e₂.hom ≫ E.inv ≫ e₁.inv,
+  { rw this, apply_instance },
+  simp only [← category.assoc], simp_rw iso.eq_comp_inv,
+  apply limit.hom_ext, intros T,
+  dsimp only [e₁, e₂, E, pre_Radon_limit_comparison, pre_Radon_LC_limit_comparison,
+    is_limit.cone_point_unique_up_to_iso, cones.forget, functor.map_iso,
+    is_limit.unique_up_to_iso, is_limit.lift_cone_morphism, limit.is_limit_lift,
+    has_limit.iso_of_nat_iso, is_limit.cone_points_iso_of_nat_iso, is_limit.map,
+    cones.postcompose, iso_whisker_left],
+  simp only [category.assoc, limit.lift_π, is_limit.fac],
+  erw [limit.lift_π_assoc, is_limit.fac_assoc],
+  dsimp [pre_Radon_cone, pre_Radon_LC_cone],
+  simpa only [nat_trans.naturality],
+end
 
 def is_limit_pre_Radon_cone (X : Profinite.{0}) :
   is_limit X.pre_Radon_cone :=
