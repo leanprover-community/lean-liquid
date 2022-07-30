@@ -51,6 +51,12 @@ def map_pre_Radon {X Y : Profinite.{0}} (f : X ⟶ Y) :
     apply weak_dual.eval_continuous
   end }
 
+def pre_Radon_functor : Profinite.{0} ⥤ Top.{0} :=
+{ obj := λ X, Top.of X.pre_Radon,
+  map := λ X Y f, ⟨map_pre_Radon f, continuous_linear_map.continuous _⟩,
+  map_id' := λ X, by { ext, dsimp [map_pre_Radon], congr, ext, refl },
+  map_comp' := λ X Y Z f g, by { ext, refl } }
+
 lemma pre_Radon.is_bdd_map {X Y : Profinite.{0}} (f : X ⟶ Y)
   (p c : ℝ≥0) (μ : X.pre_Radon) (hμ : μ.is_bdd p c) :
   (map_pre_Radon f μ).is_bdd p c :=
@@ -87,7 +93,7 @@ def LC_to_C (X : Profinite.{0}) : locally_constant X ℝ →L[ℝ] C(X,ℝ) :=
   map_smul' := λ f g, rfl,
   cont := (locally_constant.pkg X ℝ).continuous_coe }
 
-def pre_Radon_comparison (X : Profinite.{0}) :
+def pre_Radon_LC_comparison (X : Profinite.{0}) :
   X.pre_Radon →L[ℝ] weak_dual ℝ (locally_constant X ℝ) :=
 { to_fun := λ μ, μ.comp X.LC_to_C,
   map_add' := λ f g, rfl,
@@ -97,7 +103,7 @@ def pre_Radon_comparison (X : Profinite.{0}) :
     apply weak_dual.eval_continuous,
   end }
 
-def pre_Radon_comparison_inverse (X : Profinite.{0}) :
+def pre_Radon_LC_comparison_inverse (X : Profinite.{0}) :
   weak_dual ℝ (locally_constant X ℝ) →L[ℝ] X.pre_Radon :=
 { to_fun := λ μ,
   { to_fun := λ f, (locally_constant.pkg X ℝ).extend μ f,
@@ -108,16 +114,41 @@ def pre_Radon_comparison_inverse (X : Profinite.{0}) :
   map_smul' := sorry,
   cont := sorry }
 
-def pre_Radon_equiv (X : Profinite.{0}) :
+def pre_Radon_LC_equiv (X : Profinite.{0}) :
   X.pre_Radon ≃L[ℝ] weak_dual ℝ (locally_constant X ℝ) :=
-{ inv_fun := X.pre_Radon_comparison_inverse,
+{ inv_fun := X.pre_Radon_LC_comparison_inverse,
   left_inv := sorry,
   right_inv := sorry,
-  continuous_to_fun := X.pre_Radon_comparison.cont,
-  continuous_inv_fun := X.pre_Radon_comparison_inverse.cont,
-  ..X.pre_Radon_comparison }
+  continuous_to_fun := X.pre_Radon_LC_comparison.cont,
+  continuous_inv_fun := X.pre_Radon_LC_comparison_inverse.cont,
+  ..X.pre_Radon_LC_comparison }
 
+def pre_Radon_cone (X : Profinite.{0}) : cone (X.diagram ⋙ pre_Radon_functor) :=
+pre_Radon_functor.map_cone X.as_limit_cone
 
+def pre_Radon_comparison (X : Profinite.{0}) :
+  Top.of X.pre_Radon ⟶ (Top.limit_cone (X.diagram ⋙ pre_Radon_functor)).X :=
+(Top.limit_cone_is_limit _).lift X.pre_Radon_cone
+
+instance is_iso_pre_Radon_comparison (X : Profinite.{0}) :
+  is_iso X.pre_Radon_comparison := sorry
+
+def is_limit_pre_Radon_cone (X : Profinite.{0}) :
+  is_limit X.pre_Radon_cone :=
+{ lift := λ S, (Top.limit_cone_is_limit _).lift S ≫ inv X.pre_Radon_comparison,
+  fac' := begin
+    intros S T, rw category.assoc,
+    have : inv X.pre_Radon_comparison ≫ (pre_Radon_cone X).π.app T =
+      (Top.limit_cone _).π.app _,
+    { rw is_iso.inv_comp_eq, erw (Top.limit_cone_is_limit _).fac },
+    rw [this, is_limit.fac],
+  end,
+  uniq' := begin
+    intros S m hm,
+    rw is_iso.eq_comp_inv,
+    apply (Top.limit_cone_is_limit _).uniq,
+    exact hm,
+  end }
 def Radon_cone (p c : ℝ≥0) (X : Profinite.{0}) : cone (X.diagram ⋙ Radon_functor p c) :=
 (Radon_functor p c).map_cone X.as_limit_cone
 
