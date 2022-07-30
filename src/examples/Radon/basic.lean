@@ -308,9 +308,51 @@ def Radon_comparison (X : Profinite.{0}) (p c : ℝ≥0) :
   X.Radon p c ⟶ (Top.limit_cone (X.diagram ⋙ Radon_functor p c)).X :=
 (Top.limit_cone_is_limit _).lift (X.Radon_cone p c)
 
+def Radon_inverse (X : Profinite.{0}) (p c : ℝ≥0) :
+  (Top.limit_cone (X.diagram ⋙ Radon_functor p c)).X ⟶ X.Radon p c :=
+{ to_fun := λ f, ⟨inv X.pre_Radon_limit_comparison ⟨λ j, (f.1 j).1,
+    λ i j e, congr_arg subtype.val (f.2 e)⟩, begin
+      intros T,
+      convert (f.1 T).2 ⊥ using 1,
+      sorry,
+    end⟩,
+  continuous_to_fun := begin
+    apply continuous_subtype_mk,
+    refine continuous.comp (inv X.pre_Radon_limit_comparison).2 _,
+    apply continuous_subtype_mk,
+    let f := _, change continuous f,
+    have : f =
+      (λ g j, _) ∘
+      (λ e : (Top.limit_cone (X.diagram ⋙ Radon_functor p c)).X, e.val),
+    rotate 2, exact (g j).1,
+    refl, rw this, clear this f,
+    refine continuous.comp _ continuous_subtype_coe,
+    apply continuous_pi, intros j,
+    let f := _, change continuous f,
+    have : f = subtype.val ∘ (λ e, e j) := rfl, rw this, clear this f,
+    exact continuous_subtype_coe.comp (continuous_apply j),
+  end }
+
 instance is_iso_Radon_comparison (X : Profinite.{0}) (p c : ℝ≥0) :
   is_iso (X.Radon_comparison p c) :=
-sorry
+begin
+  use X.Radon_inverse p c,
+  split,
+  { ext t : 2, dsimp [Radon_inverse],
+    apply_fun X.pre_Radon_limit_comparison, rw ← comp_apply,
+    rw is_iso.inv_hom_id, refl,
+    { intros u v h,
+      apply_fun (inv X.pre_Radon_limit_comparison) at h,
+      simpa only [← comp_apply, is_iso.hom_inv_id] using h } },
+  { ext ⟨t,ht⟩ j : 4, dsimp [Radon_inverse, Radon_comparison,
+      Top.limit_cone_is_limit, Radon_cone, Radon_functor, map_Radon],
+    change (inv X.pre_Radon_limit_comparison ≫
+      pre_Radon_functor.map (X.as_limit_cone.π.app j)) _ = _,
+    have : inv X.pre_Radon_limit_comparison ≫
+      pre_Radon_functor.map (X.as_limit_cone.π.app j) =
+      (Top.limit_cone _).π.app j, by { rw is_iso.inv_comp_eq, ext, refl },
+    rw this, refl }
+end
 
 -- Key calculation 2: Radon_functor should commute with the limit given by `X.as_limit`.
 def is_limit_Radon_cone (p c : ℝ≥0) (X : Profinite.{0}) : is_limit (X.Radon_cone p c) :=
