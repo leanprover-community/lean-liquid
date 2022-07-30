@@ -180,6 +180,12 @@ def pre_Radon_equiv (X : Profinite.{0}) :
   continuous_inv_fun := X.pre_Radon_comparison_inverse.cont,
   ..X.pre_Radon_comparison }
 
+def pre_Radon_functor_iso :
+  pre_Radon_functor ≅ pre_Radon_LC_functor :=
+nat_iso.of_components
+(λ X, Top.iso_of_homeo X.pre_Radon_equiv.to_homeomorph)
+sorry
+
 def pre_Radon_cone (X : Profinite.{0}) : cone (X.diagram ⋙ pre_Radon_functor) :=
 pre_Radon_functor.map_cone X.as_limit_cone
 
@@ -194,8 +200,61 @@ def pre_Radon_LC_limit_comparison (X : Profinite.{0}) :
   Top.of X.pre_Radon_LC ⟶ (Top.limit_cone (X.diagram ⋙ pre_Radon_LC_functor)).X :=
 (Top.limit_cone_is_limit _).lift X.pre_Radon_LC_cone
 
+def pre_Radon_LC_limit_inverse (X : Profinite.{0}) :
+  (Top.limit_cone (X.diagram ⋙ pre_Radon_LC_functor)).X ⟶ Top.of X.pre_Radon_LC :=
+{ to_fun := λ f,
+  { to_fun := λ e,
+      let ff := f.1 e.discrete_quotient in
+      begin
+        dsimp [pre_Radon_LC_functor] at ff,
+        exact ff e.locally_constant_lift,
+      end,
+    map_add' := sorry,
+    map_smul' := sorry,
+    cont := sorry },
+  continuous_to_fun := sorry }
+
+-- TODO: This can be converted into an actual isomoprhism, if needed.
 instance is_iso_pre_Radon_LC_limit_comparison (X : Profinite.{0}) :
-  is_iso X.pre_Radon_LC_limit_comparison := sorry
+  is_iso X.pre_Radon_LC_limit_comparison :=
+begin
+  refine ⟨⟨pre_Radon_LC_limit_inverse X, _, _⟩⟩,
+  { ext μ e,
+    dsimp [pre_Radon_LC_limit_comparison, pre_Radon_LC_limit_inverse,
+      Top.limit_cone_is_limit, pre_Radon_LC_cone, pre_Radon_LC_functor,
+      map_pre_Radon_LC, map_LC, as_limit_cone],
+    congr' 1, ext a, dsimp [locally_constant.comap],
+    rw dif_pos, refl, apply discrete_quotient.proj_continuous },
+  { ext μ T e,
+    dsimp only [pre_Radon_LC_limit_comparison, pre_Radon_LC_limit_inverse,
+      Top.limit_cone_is_limit, pre_Radon_LC_cone, pre_Radon_LC_functor,
+      map_pre_Radon_LC, map_LC, as_limit_cone],
+    simp only [comp_apply, id_apply],
+    dsimp only [continuous_map.coe_mk, functor.map_cone, cones.functoriality,
+      subtype.coe_mk],
+    dsimp,
+    let S := (locally_constant.comap T.proj e).discrete_quotient,
+    let W := S ⊓ T,
+    let π₁ : W ⟶ S := hom_of_le inf_le_left,
+    let π₂ : W ⟶ T := hom_of_le inf_le_right,
+    have h1 := μ.2 π₁, have h2 := μ.2 π₂, dsimp only [subtype.val_eq_coe, S] at h1 h2,
+    rw [← h1, ← h2], clear h1 h2,
+    dsimp [pre_Radon_LC_functor, map_pre_Radon_LC, map_LC, as_limit_cone],
+    congr' 1, ext a,
+    rw locally_constant.coe_comap,
+    rw locally_constant.coe_comap,
+    obtain ⟨a,rfl⟩ := discrete_quotient.proj_surjective _ a,
+    dsimp only [locally_constant.locally_constant_lift, function.comp_apply,
+      locally_constant.coe_mk, Fintype.to_Profinite, fintype_diagram,
+      continuous_map.coe_mk],
+    rw [discrete_quotient.of_le_proj_apply],
+    change ((locally_constant.lift _) ∘ (discrete_quotient.proj _)) _ = _,
+    erw [locally_constant.factors],
+    rw locally_constant.coe_comap, refl,
+    { exact discrete_quotient.proj_continuous _ },
+    { exact continuous_bot },
+    { exact continuous_bot } },
+end
 
 instance is_iso_pre_Radon_comparison (X : Profinite.{0}) :
   is_iso X.pre_Radon_limit_comparison := sorry
