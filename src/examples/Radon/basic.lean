@@ -4,8 +4,19 @@ import topology.sets.closeds
 
 open_locale nnreal big_operators
 
+noncomputable theory
+
 open category_theory
 open category_theory.limits
+
+namespace discrete_quotient
+
+def equiv_bot (X : Type*) [topological_space X] [discrete_topology X] :
+  X ≃ (⊥ : discrete_quotient X) :=
+equiv.of_bijective (discrete_quotient.proj _)
+⟨λ x y h, quotient.exact' h, quot.mk_surjective _⟩
+
+end discrete_quotient
 
 namespace Profinite
 
@@ -20,11 +31,25 @@ abbreviation pre_Radon_LC := weak_dual ℝ (locally_constant X ℝ)
 
 variable {X}
 
-noncomputable theory
-
-def indicator {X : Profinite.{0}} {T : discrete_quotient X} (t : T) : C(X,ℝ) :=
+def indicator {X : Type*} [topological_space X]
+  {T : discrete_quotient X} (t : T) : C(X,ℝ) :=
 { to_fun := set.indicator (T.proj ⁻¹' {t}) 1,
   continuous_to_fun := sorry }
+
+lemma indicator_factors {X : Profinite.{0}} {T : discrete_quotient X} (t : T) :
+  indicator t = continuous_map.comp
+  (indicator $ discrete_quotient.equiv_bot _ t) (X.as_limit_cone.π.app T) :=
+begin
+  ext a,
+  dsimp [indicator, set.indicator],
+  split_ifs with h1 h2 h2,
+  any_goals { refl },
+  { refine false.elim (h2 _),
+    rw ← h1, refl },
+  { refine false.elim (h1 _),
+    obtain ⟨t,rfl⟩ := discrete_quotient.proj_surjective _ t,
+    exact quotient.exact' h2 }
+end
 
 def indicator_LC {X : Profinite.{0}} {T : discrete_quotient X} (t : T) : locally_constant X ℝ :=
 { to_fun := set.indicator (T.proj ⁻¹' {t}) 1,
@@ -72,6 +97,10 @@ def map_pre_Radon {X Y : Profinite.{0}} (f : X ⟶ Y) :
     apply weak_dual.eval_continuous
   end }
 
+lemma map_pre_Radon_apply {X Y : Profinite.{0}} (f : X ⟶ Y)
+  (g : C(Y,ℝ)) (μ : X.pre_Radon) :
+  map_pre_Radon f μ g = μ (g.comp f) := rfl
+
 def map_pre_Radon_LC {X Y : Profinite.{0}} (f : X ⟶ Y) :
   X.pre_Radon_LC →L[ℝ] Y.pre_Radon_LC :=
 { to_fun := λ g, g.comp (map_LC f),
@@ -82,6 +111,7 @@ def map_pre_Radon_LC {X Y : Profinite.{0}} (f : X ⟶ Y) :
     apply weak_dual.eval_continuous
   end }
 
+@[simps]
 def pre_Radon_functor : Profinite.{0} ⥤ Top.{0} :=
 { obj := λ X, Top.of X.pre_Radon,
   map := λ X Y f, ⟨map_pre_Radon f, continuous_linear_map.continuous _⟩,
@@ -314,7 +344,24 @@ def Radon_inverse (X : Profinite.{0}) (p c : ℝ≥0) :
     λ i j e, congr_arg subtype.val (f.2 e)⟩, begin
       intros T,
       convert (f.1 T).2 ⊥ using 1,
-      sorry,
+      fapply finset.sum_bij',
+      { intros a _, exact discrete_quotient.equiv_bot _ a, },
+      { intros, exact finset.mem_univ _ },
+      { intros a _, congr' 2, dsimp,
+        rw [indicator_factors],
+        rw ← map_pre_Radon_apply (X.as_limit_cone.π.app T)
+          (indicator ((discrete_quotient.equiv_bot T) a)),
+        rw [← pre_Radon_functor_map_apply, ← comp_apply],
+        have : inv X.pre_Radon_limit_comparison ≫
+          pre_Radon_functor.map (X.as_limit_cone.π.app T) =
+          (Top.limit_cone _).π.app T,
+        { rw is_iso.inv_comp_eq,
+          erw (Top.limit_cone_is_limit _).fac, refl },
+        rw this, refl },
+      { intros a _, exact (discrete_quotient.equiv_bot _).symm a },
+      { intros, exact finset.mem_univ _ },
+      { intros a _, exact (discrete_quotient.equiv_bot _).symm_apply_apply _ },
+      { intros a _, exact (discrete_quotient.equiv_bot _).apply_symm_apply _ },
     end⟩,
   continuous_to_fun := begin
     apply continuous_subtype_mk,
@@ -333,6 +380,7 @@ def Radon_inverse (X : Profinite.{0}) (p c : ℝ≥0) :
     exact continuous_subtype_coe.comp (continuous_apply j),
   end }
 
+-- Again, we can give an isomorphism instead of just an `is_iso` instance.
 instance is_iso_Radon_comparison (X : Profinite.{0}) (p c : ℝ≥0) :
   is_iso (X.Radon_comparison p c) :=
 begin
