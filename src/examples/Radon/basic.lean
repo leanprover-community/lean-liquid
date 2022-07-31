@@ -9,6 +9,15 @@ noncomputable theory
 open category_theory
 open category_theory.limits
 
+namespace locally_constant
+
+def comap' {α β γ : Type*} [topological_space α] [topological_space β]
+  (f : locally_constant β γ) (g : C(α,β)) : locally_constant α γ :=
+{ to_fun := f ∘ g,
+  is_locally_constant := sorry }
+
+end locally_constant
+
 namespace discrete_quotient
 
 def equiv_bot (X : Type*) [topological_space X] [discrete_topology X] :
@@ -82,10 +91,46 @@ def map_C {X Y : Profinite.{0}} (f : X ⟶ Y) :
 
 def map_LC {X Y : Profinite.{0}} (f : X ⟶ Y) :
   locally_constant Y ℝ →L[ℝ] locally_constant X ℝ :=
-{ to_fun := λ g, g.comap f,
+{ to_fun := λ g, g.comap' f,
   map_add' := sorry,
   map_smul' := sorry,
   cont := sorry }
+
+def LC_functor : Profinite.{0}ᵒᵖ ⥤ Top.{0} :=
+{ obj := λ X, Top.of $ locally_constant X.unop ℝ,
+  map := λ X Y f, ⟨map_LC f.unop, continuous_linear_map.continuous _⟩,
+  map_id' := sorry,
+  map_comp' := sorry }
+
+def LC_cocone (X : Profinite.{0}) : cocone (X.diagram.op ⋙ LC_functor) :=
+LC_functor.map_cocone X.as_limit_cone.op
+
+def is_colimit_LC_cocone (X : Profinite.{0}) : is_colimit X.LC_cocone :=
+sorry
+
+lemma LC_continuous_iff (X : Profinite.{0}) (Y : Type) [topological_space Y]
+  (f : locally_constant X ℝ → Y) :
+  continuous f ↔ ∀ T : discrete_quotient X,
+  continuous (f ∘ map_LC (X.as_limit_cone.π.app T)) :=
+begin
+  split,
+  { intros hf T,
+    refine continuous.comp hf (continuous_linear_map.continuous _) },
+  { intros hf,
+    let E : cocone (X.diagram.op ⋙ LC_functor) := ⟨Top.of Y, λ T, ⟨_,hf T.unop⟩, _⟩,
+    convert ((is_colimit_LC_cocone X).desc E).continuous,
+    let h0 : preserves_colimits (forget Top.{0}) := infer_instance,
+    letI : preserves_colimit (X.diagram.op ⋙ LC_functor) (forget Top),
+    { let h1 := h0.preserves_colimits_of_shape, dsimp at h1,
+      let h2 := h1.preserves_colimit,
+      exact @h2 (X.diagram.op ⋙ LC_functor) }, -- Why!?!?!?
+    apply (is_colimit_of_preserves (forget _) (is_colimit_LC_cocone X)).hom_ext,
+    intros T,
+    rw ← forget_map_eq_coe,
+    erw [← (forget Top.{0}).map_comp, is_colimit.fac], refl,
+    { intros T₁ T₂ e,
+      ext a, refl, } }
+end
 
 def map_pre_Radon {X Y : Profinite.{0}} (f : X ⟶ Y) :
   X.pre_Radon →L[ℝ] Y.pre_Radon :=
@@ -205,61 +250,80 @@ def pre_Radon_LC_limit_comparison (X : Profinite.{0}) :
   Top.of X.pre_Radon_LC ⟶ (Top.limit_cone (X.diagram ⋙ pre_Radon_LC_functor)).X :=
 (Top.limit_cone_is_limit _).lift X.pre_Radon_LC_cone
 
+def pre_Radon_LC_limit_inverse_to_fun_to_fun (X : Profinite.{0})
+  (f : ((Top.limit_cone (X.diagram ⋙ pre_Radon_LC_functor)).X)) :
+  locally_constant X ℝ → ℝ := λ e,
+let ff := f.1 e.discrete_quotient in
+begin
+  dsimp [pre_Radon_LC_functor] at ff,
+  exact ff e.locally_constant_lift,
+end
+
+lemma pre_Radon_LC_limit_inverse_to_fun_to_fun_map_add
+  (X : Profinite.{0})
+  (f : ((Top.limit_cone (X.diagram ⋙ pre_Radon_LC_functor)).X))
+  (a b : locally_constant X ℝ) :
+  pre_Radon_LC_limit_inverse_to_fun_to_fun X f (a + b) =
+  pre_Radon_LC_limit_inverse_to_fun_to_fun X f a +
+  pre_Radon_LC_limit_inverse_to_fun_to_fun X f b :=
+begin
+  dsimp only [pre_Radon_LC_limit_inverse_to_fun_to_fun],
+  let Wa := a.discrete_quotient,
+  let Wb := b.discrete_quotient,
+  let Wab := (a+b).discrete_quotient,
+  let W := Wa ⊓ Wb ⊓ Wab,
+  let ea : W ⟶ Wa := hom_of_le (le_trans inf_le_left inf_le_left),
+  let eb : W ⟶ Wb := hom_of_le (le_trans inf_le_left inf_le_right),
+  let eab : W ⟶ Wab := hom_of_le inf_le_right,
+  rw [← f.2 ea, ← f.2 eb, ← f.2 eab],
+  dsimp [pre_Radon_LC_functor, map_pre_Radon_LC],
+  rw ← continuous_linear_map.map_add, congr' 1,
+  ext ⟨t⟩, refl,
+end
+lemma pre_Radon_LC_limit_inverse_to_fun_to_fun_map_smul
+  (X : Profinite.{0})
+  (f : ((Top.limit_cone (X.diagram ⋙ pre_Radon_LC_functor)).X))
+  (a : ℝ)
+  (b : locally_constant X ℝ) :
+  pre_Radon_LC_limit_inverse_to_fun_to_fun X f (a • b) =
+  a • pre_Radon_LC_limit_inverse_to_fun_to_fun X f b :=
+begin
+  dsimp only [id, pre_Radon_LC_limit_inverse_to_fun_to_fun],
+  let Wab := (a • b).discrete_quotient,
+  let Wb :=  b.discrete_quotient,
+  let W := Wab ⊓ Wb,
+  let eab : W ⟶ Wab := hom_of_le inf_le_left,
+  let eb : W ⟶ Wb := hom_of_le inf_le_right,
+  rw [← f.2 eab, ← f.2 eb],
+  dsimp [pre_Radon_LC_functor, map_pre_Radon_LC],
+  rw ← smul_eq_mul ℝ,
+  erw ← continuous_linear_map.map_smul, congr' 1,
+  ext ⟨t⟩, refl,
+end
+
 def pre_Radon_LC_limit_inverse (X : Profinite.{0}) :
   (Top.limit_cone (X.diagram ⋙ pre_Radon_LC_functor)).X ⟶ Top.of X.pre_Radon_LC :=
 { to_fun := λ f,
-  { to_fun := λ e,
-      let ff := f.1 e.discrete_quotient in
-      begin
-        dsimp [pre_Radon_LC_functor] at ff,
-        exact ff e.locally_constant_lift,
-      end,
-    map_add' := by sorry ; begin
-      intros a b, dsimp only [id],
-      let Wa := a.discrete_quotient,
-      let Wb := b.discrete_quotient,
-      let Wab := (a+b).discrete_quotient,
-      let W := Wa ⊓ Wb ⊓ Wab,
-      let ea : W ⟶ Wa := hom_of_le (le_trans inf_le_left inf_le_left),
-      let eb : W ⟶ Wb := hom_of_le (le_trans inf_le_left inf_le_right),
-      let eab : W ⟶ Wab := hom_of_le inf_le_right,
-      rw [← f.2 ea, ← f.2 eb, ← f.2 eab],
-      dsimp [pre_Radon_LC_functor, map_pre_Radon_LC],
-      rw ← continuous_linear_map.map_add, congr' 1,
-      ext ⟨t⟩, dsimp [map_LC],
-      rw locally_constant.coe_comap,
-      rw locally_constant.coe_comap,
-      rw locally_constant.coe_comap,
-      refl,
-      all_goals { exact continuous_bot }
-    end,
-    map_smul' := by sorry ; begin
-      intros a b, dsimp only [id],
-      let Wab := (a • b).discrete_quotient,
-      let Wb :=  b.discrete_quotient,
-      let W := Wab ⊓ Wb,
-      let eab : W ⟶ Wab := hom_of_le inf_le_left,
-      let eb : W ⟶ Wb := hom_of_le inf_le_right,
-      rw [← f.2 eab, ← f.2 eb],
-      dsimp [pre_Radon_LC_functor, map_pre_Radon_LC],
-      rw ← smul_eq_mul ℝ,
-      erw ← continuous_linear_map.map_smul, congr' 1,
-      ext ⟨t⟩, dsimp [map_LC],
-      -- `locally_constant.comap` is really annoying....
-      -- Why can we not just compose with `continuous_map` instead of this
-      -- dite nonsense. I think having good defeqs for evaluation of
-      -- `locally_constant.comap` is worthwhile!
-      rw locally_constant.coe_comap,
-      rw locally_constant.coe_comap,
-      refl,
-      all_goals { exact continuous_bot }
-    end,
+  { to_fun := pre_Radon_LC_limit_inverse_to_fun_to_fun X f,
+    map_add' := pre_Radon_LC_limit_inverse_to_fun_to_fun_map_add X f,
+    map_smul' := pre_Radon_LC_limit_inverse_to_fun_to_fun_map_smul X f,
     cont := begin
-      dsimp only [id],
-      sorry, -- this might be hard...
+      dsimp only [id, pre_Radon_LC_limit_inverse_to_fun_to_fun],
+      rw LC_continuous_iff, intros T,
+      convert (f.1 T).continuous using 1,
+      ext t,
+      dsimp only [function.comp_apply],
+      let E := ((map_LC (X.as_limit_cone.π.app T)) t).discrete_quotient ⊓ T,
+      let π₁ : E ⟶ ((map_LC (X.as_limit_cone.π.app T)) t).discrete_quotient :=
+        hom_of_le inf_le_left,
+      let π₂ : E ⟶ T :=
+        hom_of_le inf_le_right,
+      rw [← f.2 π₁, ← f.2 π₂],
+      dsimp [map_LC, pre_Radon_LC_functor, map_pre_Radon_LC],
+      congr' 1, ext ⟨x⟩, refl,
     end },
   continuous_to_fun := begin
-    dsimp only [id],
+    dsimp only [id, pre_Radon_LC_limit_inverse_to_fun_to_fun],
     apply weak_dual.continuous_of_continuous_eval, intros ff,
     dsimp,
     let F := _, change continuous F,
@@ -279,38 +343,24 @@ begin
   { ext μ e,
     dsimp [pre_Radon_LC_limit_comparison, pre_Radon_LC_limit_inverse,
       Top.limit_cone_is_limit, pre_Radon_LC_cone, pre_Radon_LC_functor,
-      map_pre_Radon_LC, map_LC, as_limit_cone],
-    congr' 1, ext a, dsimp [locally_constant.comap],
-    rw dif_pos, refl, apply discrete_quotient.proj_continuous },
+      map_pre_Radon_LC, map_LC, as_limit_cone, pre_Radon_LC_limit_inverse_to_fun_to_fun],
+    congr' 1, ext a, refl },
   { ext μ T e,
     dsimp only [pre_Radon_LC_limit_comparison, pre_Radon_LC_limit_inverse,
       Top.limit_cone_is_limit, pre_Radon_LC_cone, pre_Radon_LC_functor,
-      map_pre_Radon_LC, map_LC, as_limit_cone],
+      map_pre_Radon_LC, map_LC, as_limit_cone, pre_Radon_LC_limit_inverse_to_fun_to_fun],
     simp only [comp_apply, id_apply],
     dsimp only [continuous_map.coe_mk, functor.map_cone, cones.functoriality,
       subtype.coe_mk],
     dsimp,
-    let S := (locally_constant.comap T.proj e).discrete_quotient,
+    let S := (locally_constant.comap' e ⟨T.proj, T.proj_continuous⟩).discrete_quotient,
     let W := S ⊓ T,
     let π₁ : W ⟶ S := hom_of_le inf_le_left,
     let π₂ : W ⟶ T := hom_of_le inf_le_right,
     have h1 := μ.2 π₁, have h2 := μ.2 π₂, dsimp only [subtype.val_eq_coe, S] at h1 h2,
     rw [← h1, ← h2], clear h1 h2,
     dsimp [pre_Radon_LC_functor, map_pre_Radon_LC, map_LC, as_limit_cone],
-    congr' 1, ext a,
-    rw locally_constant.coe_comap,
-    rw locally_constant.coe_comap,
-    obtain ⟨a,rfl⟩ := discrete_quotient.proj_surjective _ a,
-    dsimp only [locally_constant.locally_constant_lift, function.comp_apply,
-      locally_constant.coe_mk, Fintype.to_Profinite, fintype_diagram,
-      continuous_map.coe_mk],
-    rw [discrete_quotient.of_le_proj_apply],
-    change ((locally_constant.lift _) ∘ (discrete_quotient.proj _)) _ = _,
-    erw [locally_constant.factors],
-    rw locally_constant.coe_comap, refl,
-    { exact discrete_quotient.proj_continuous _ },
-    { exact continuous_bot },
-    { exact continuous_bot } },
+    congr' 1, ext ⟨a⟩, refl },
 end
 
 instance is_iso_pre_Radon_comparison (X : Profinite.{0}) :
@@ -338,8 +388,6 @@ begin
     cones.postcompose, iso_whisker_left],
   simp only [category.assoc, limit.lift_π, is_limit.fac],
   erw [limit.lift_π_assoc, is_limit.fac_assoc],
-  dsimp [pre_Radon_cone, pre_Radon_LC_cone],
-  simpa only [nat_trans.naturality],
 end
 
 def is_limit_pre_Radon_cone (X : Profinite.{0}) :
