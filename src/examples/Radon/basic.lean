@@ -256,9 +256,20 @@ def pre_Radon_LC_limit_inverse (X : Profinite.{0}) :
     end,
     cont := begin
       dsimp only [id],
-      sorry,
+      sorry, -- this might be hard...
     end },
-  continuous_to_fun := sorry }
+  continuous_to_fun := begin
+    dsimp only [id],
+    apply weak_dual.continuous_of_continuous_eval, intros ff,
+    dsimp,
+    let F := _, change continuous F,
+    have hF : F = _ ∘ (Top.limit_cone _).π.app ff.discrete_quotient,
+    rotate 2,
+    { intros μ, exact μ.to_fun ff.locally_constant_lift },
+    { refl },
+    rw hF, clear hF F, refine continuous.comp _ (continuous_map.continuous _),
+    apply weak_dual.eval_continuous
+  end }
 
 -- TODO: This can be converted into an actual isomoprhism, if needed.
 instance is_iso_pre_Radon_LC_limit_comparison (X : Profinite.{0}) :
