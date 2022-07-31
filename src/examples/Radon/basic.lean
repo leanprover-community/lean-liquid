@@ -14,7 +14,9 @@ namespace locally_constant
 def comap' {α β γ : Type*} [topological_space α] [topological_space β]
   (f : locally_constant β γ) (g : C(α,β)) : locally_constant α γ :=
 { to_fun := f ∘ g,
-  is_locally_constant := sorry }
+  is_locally_constant := begin
+    intros S, rw set.preimage_comp, apply is_open.preimage g.2, apply f.2,
+  end }
 
 end locally_constant
 
@@ -92,21 +94,36 @@ def map_C {X Y : Profinite.{0}} (f : X ⟶ Y) :
 def map_LC {X Y : Profinite.{0}} (f : X ⟶ Y) :
   locally_constant Y ℝ →L[ℝ] locally_constant X ℝ :=
 { to_fun := λ g, g.comap' f,
-  map_add' := sorry,
-  map_smul' := sorry,
+  map_add' := λ _ _, by { ext, refl },
+  map_smul' := λ _ _, by { ext, refl },
   cont := sorry }
 
 def LC_functor : Profinite.{0}ᵒᵖ ⥤ Top.{0} :=
 { obj := λ X, Top.of $ locally_constant X.unop ℝ,
   map := λ X Y f, ⟨map_LC f.unop, continuous_linear_map.continuous _⟩,
-  map_id' := sorry,
-  map_comp' := sorry }
+  map_id' := λ _, by { ext, refl },
+  map_comp' := λ _ _ _ f g, by { ext, refl } }
 
 def LC_cocone (X : Profinite.{0}) : cocone (X.diagram.op ⋙ LC_functor) :=
 LC_functor.map_cocone X.as_limit_cone.op
 
 def is_colimit_LC_cocone (X : Profinite.{0}) : is_colimit X.LC_cocone :=
-sorry
+{ desc := λ S,
+  { to_fun := λ f, S.ι.app (opposite.op f.discrete_quotient) f.locally_constant_lift,
+    continuous_to_fun := sorry },
+  fac' := begin
+    intros S T, ext a, dsimp,
+    let T' := ((X.LC_cocone.ι.app T) a).discrete_quotient,
+    let W := T.unop ⊓ T',
+    let π₁ : W ⟶ T.unop := hom_of_le inf_le_left,
+    let π₂ : W ⟶ T' := hom_of_le inf_le_right,
+    erw [← S.w π₁.op, ← S.w π₂.op],
+    dsimp, congr' 1, ext ⟨⟩, refl,
+  end,
+  uniq' := begin
+    intros S m hm,
+    ext a, dsimp, rw ← hm, dsimp, congr' 1, ext, refl,
+  end }
 
 lemma LC_continuous_iff (X : Profinite.{0}) (Y : Type) [topological_space Y]
   (f : locally_constant X ℝ → Y) :
@@ -166,8 +183,8 @@ def pre_Radon_functor : Profinite.{0} ⥤ Top.{0} :=
 def pre_Radon_LC_functor : Profinite.{0} ⥤ Top.{0} :=
 { obj := λ X, Top.of X.pre_Radon_LC,
   map := λ X Y f, ⟨map_pre_Radon_LC f, continuous_linear_map.continuous _⟩,
-  map_id' := sorry,
-  map_comp' := sorry }
+  map_id' := λ X, by { ext, dsimp [map_pre_Radon_LC, map_LC], congr' 1, ext, refl },
+  map_comp' := λ X Y Z f g, by { ext, refl } }
 
 lemma pre_Radon.is_bdd_map {X Y : Profinite.{0}} (f : X ⟶ Y)
   (p c : ℝ≥0) (μ : X.pre_Radon) (hμ : μ.is_bdd p c) :
