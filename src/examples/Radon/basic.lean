@@ -214,9 +214,50 @@ def pre_Radon_LC_limit_inverse (X : Profinite.{0}) :
         dsimp [pre_Radon_LC_functor] at ff,
         exact ff e.locally_constant_lift,
       end,
-    map_add' := sorry,
-    map_smul' := sorry,
-    cont := sorry },
+    map_add' := by sorry ; begin
+      intros a b, dsimp only [id],
+      let Wa := a.discrete_quotient,
+      let Wb := b.discrete_quotient,
+      let Wab := (a+b).discrete_quotient,
+      let W := Wa ⊓ Wb ⊓ Wab,
+      let ea : W ⟶ Wa := hom_of_le (le_trans inf_le_left inf_le_left),
+      let eb : W ⟶ Wb := hom_of_le (le_trans inf_le_left inf_le_right),
+      let eab : W ⟶ Wab := hom_of_le inf_le_right,
+      rw [← f.2 ea, ← f.2 eb, ← f.2 eab],
+      dsimp [pre_Radon_LC_functor, map_pre_Radon_LC],
+      rw ← continuous_linear_map.map_add, congr' 1,
+      ext ⟨t⟩, dsimp [map_LC],
+      rw locally_constant.coe_comap,
+      rw locally_constant.coe_comap,
+      rw locally_constant.coe_comap,
+      refl,
+      all_goals { exact continuous_bot }
+    end,
+    map_smul' := by sorry ; begin
+      intros a b, dsimp only [id],
+      let Wab := (a • b).discrete_quotient,
+      let Wb :=  b.discrete_quotient,
+      let W := Wab ⊓ Wb,
+      let eab : W ⟶ Wab := hom_of_le inf_le_left,
+      let eb : W ⟶ Wb := hom_of_le inf_le_right,
+      rw [← f.2 eab, ← f.2 eb],
+      dsimp [pre_Radon_LC_functor, map_pre_Radon_LC],
+      rw ← smul_eq_mul ℝ,
+      erw ← continuous_linear_map.map_smul, congr' 1,
+      ext ⟨t⟩, dsimp [map_LC],
+      -- `locally_constant.comap` is really annoying....
+      -- Why can we not just compose with `continuous_map` instead of this
+      -- dite nonsense. I think having good defeqs for evaluation of
+      -- `locally_constant.comap` is worthwhile!
+      rw locally_constant.coe_comap,
+      rw locally_constant.coe_comap,
+      refl,
+      all_goals { exact continuous_bot }
+    end,
+    cont := begin
+      dsimp only [id],
+      sorry,
+    end },
   continuous_to_fun := sorry }
 
 -- TODO: This can be converted into an actual isomoprhism, if needed.
