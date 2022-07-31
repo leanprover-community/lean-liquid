@@ -129,13 +129,6 @@ lemma pre_Radon.is_bdd_map {X Y : Profinite.{0}} (f : X ⟶ Y)
   (map_pre_Radon f μ).is_bdd p c :=
 sorry
 
-/-
-lemma pre_Radon_LC.is_bdd_map {X Y : Profinite.{0}} (f : X ⟶ Y)
-  (p c : ℝ≥0) (μ : X.pre_Radon_LC) (hμ : μ.is_bdd p c) :
-  (map_pre_Radon_LC f μ).is_bdd p c :=
-sorry
--/
-
 def map_Radon {X Y : Profinite.{0}} (f : X ⟶ Y) (p c : ℝ≥0) :
   X.Radon p c ⟶ Y.Radon p c :=
 { to_fun := λ μ, ⟨map_pre_Radon f μ.1, pre_Radon.is_bdd_map f p c μ.1 μ.2⟩,
@@ -144,17 +137,6 @@ def map_Radon {X Y : Profinite.{0}} (f : X ⟶ Y) (p c : ℝ≥0) :
     refine continuous.comp _ continuous_subtype_coe,
     apply continuous_linear_map.continuous
   end }
-
-/-
-def map_Radon_LC {X Y : Profinite.{0}} (f : X ⟶ Y) (p c : ℝ≥0) :
-  X.Radon_LC p c ⟶ Y.Radon_LC p c :=
-{ to_fun := λ μ, ⟨map_pre_Radon_LC f μ.1, pre_Radon_LC.is_bdd_map f p c μ.1 μ.2⟩,
-  continuous_to_fun := begin
-    apply continuous_subtype_mk,
-    refine continuous.comp _ continuous_subtype_coe,
-    apply continuous_linear_map.continuous
-  end }
--/
 
 def Radon_functor (p c) : Profinite.{0} ⥤ Top.{0} :=
 { obj := λ X, X.Radon p c,
@@ -166,14 +148,6 @@ def Radon_functor (p c) : Profinite.{0} ⥤ Top.{0} :=
   map_comp' := begin
     intros X Y Z f g, ext, refl,
   end } .
-
-/-
-def Radon_LC_functor (p c) : Profinite.{0} ⥤ Top.{0} :=
-{ obj := λ X, X.Radon_LC p c,
-  map := λ X Y f, map_Radon_LC f _ _,
-  map_id' := sorry,
-  map_comp' := sorry } .
--/
 
 def LC_to_C (X : Profinite.{0}) : locally_constant X ℝ →L[ℝ] C(X,ℝ) :=
 { to_fun := locally_constant.to_continuous_map,
