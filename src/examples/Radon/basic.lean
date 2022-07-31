@@ -169,11 +169,6 @@ def Radon_LC_functor (p c) : Profinite.{0} ⥤ Top.{0} :=
   map_id' := sorry,
   map_comp' := sorry } .
 
--- Key calculation 1
-def real_measures_iso (p c : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] :
-  real_measures.functor p ⋙ CompHausFiltPseuNormGrp₁.level.obj c ⋙ CompHaus_to_Top ≅
-  Fintype.to_Profinite ⋙ Radon_functor p c := sorry
-
 def LC_to_C (X : Profinite.{0}) : locally_constant X ℝ →L[ℝ] C(X,ℝ) :=
 { to_fun := locally_constant.to_continuous_map,
   map_add' := λ f g, rfl,
