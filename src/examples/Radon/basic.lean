@@ -429,7 +429,28 @@ def is_limit_Raon_LC_cone (X : Profinite.{0}) (p c : ℝ≥0) [fact (0 < p)] [fa
   is_limit (X.Radon_LC_cone p c) :=
 { lift := λ S, ⟨is_limit_Radon_LC_cone.Radon_LC X p c S,
     is_limit_Radon_LC_cone.continuous_Radon_LC X p c S⟩,
-  fac' := sorry,
-  uniq' := sorry }
+  fac' := begin
+    intros S T, ext t e,
+    dsimp [Radon_LC_cone, Radon_LC_functor, map_Radon_LC,
+      is_limit_Radon_LC_cone.weak_dual, is_limit_Radon_LC_cone.Radon_LC,
+      weak_dual.comap, is_limit_Radon_LC_cone.linear_map],
+    let W₁ := ((continuous_map.comap_LC (X.as_limit_cone.π.app T)) e).discrete_quotient,
+    let W := W₁ ⊓ T,
+    let π₁ : W ⟶ W₁ := hom_of_le inf_le_left,
+    let π₂ : W ⟶ T := hom_of_le inf_le_right,
+    rw [← S.w π₁, ← S.w π₂],
+    dsimp [Radon_LC_functor, map_Radon_LC, weak_dual.comap],
+    congr' 1, ext ⟨⟩, refl,
+  end,
+  uniq' := begin
+    intros S m hm,
+    ext t T,
+    specialize hm T.discrete_quotient,
+    apply_fun (λ e, (e t).1 T.locally_constant_lift) at hm,
+    convert hm using 1,
+    dsimp [is_limit_Radon_LC_cone.Radon_LC, is_limit_Radon_LC_cone.weak_dual,
+      Radon_LC_cone, Radon_LC_functor, map_Radon_LC, weak_dual.comap],
+    congr' 1, ext, refl,
+  end }
 
 end Profinite
