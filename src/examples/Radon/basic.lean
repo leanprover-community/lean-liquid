@@ -17,6 +17,16 @@ local attribute [instance]
   locally_constant.seminormed_add_comm_group
   locally_constant.pseudo_metric_space
 
+namespace locally_constant
+
+instance normed_space (X : Type*)
+  [topological_space X] [compact_space X] [t2_space X] :
+  normed_space ℝ (locally_constant X ℝ) :=
+{ norm_smul_le := sorry,
+  ..(infer_instance : module ℝ _) }
+
+end locally_constant
+
 namespace topological_space.clopens
 
 def indicator {X : Type*} [topological_space X] (U : clopens X) :
@@ -222,6 +232,41 @@ def Radon_iso_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
   inv_hom_id' := begin
     ext t : 2,
     apply X.weak_dual_C_equiv_LC.apply_symm_apply,
-  end }
+  end } .
+
+def Radon_LC_cone (X : Profinite.{0}) (p c : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] :
+  cone (X.diagram ⋙ Radon_LC_functor p c) :=
+(Radon_LC_functor p c).map_cone X.as_limit_cone
+
+namespace is_limit_Radon_LC_cone
+
+variables (X : Profinite.{0}) (p c : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)]
+
+def linear_map (S : cone (X.diagram ⋙ Radon_LC_functor p c)) (t : S.X) :
+  locally_constant X ℝ →ₗ[ℝ] ℝ :=
+{ to_fun := λ e, (S.π.app e.discrete_quotient t).1 e.locally_constant_lift,
+  map_add' := sorry,
+  map_smul' := sorry }
+
+def weak_dual (S : cone (X.diagram ⋙ Radon_LC_functor p c)) (t : S.X) :
+  weak_dual ℝ (locally_constant X ℝ) :=
+linear_map.mk_continuous_of_exists_bound (linear_map X p c S t) sorry -- use c^(1/p)?
+
+def Radon_LC (S : cone (X.diagram ⋙ Radon_LC_functor p c)) (t : S.X) :
+  X.Radon_LC p c :=
+{ val := weak_dual X p c S t,
+  property := sorry }
+
+lemma continuous_Radon_LC (S : cone (X.diagram ⋙ Radon_LC_functor p c)) :
+  continuous (Radon_LC X p c S) := sorry
+
+end is_limit_Radon_LC_cone
+
+def is_limit_Raon_LC_cone (X : Profinite.{0}) (p c : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] :
+  is_limit (X.Radon_LC_cone p c) :=
+{ lift := λ S, ⟨is_limit_Radon_LC_cone.Radon_LC X p c S,
+    is_limit_Radon_LC_cone.continuous_Radon_LC X p c S⟩,
+  fac' := sorry,
+  uniq' := sorry }
 
 end Profinite
