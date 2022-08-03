@@ -370,11 +370,7 @@ begin
         (e.discrete_quotient.fibre ((discrete_quotient.equiv_bot.symm) a)).indicator_LC b,
       dsimp only [topological_space.clopens.indicator_LC_apply],
       rw (show X.fintype_diagram.map π₁ (T.proj b) = T₁.proj b, by refl),
-      split_ifs with h1 h2 h3 h4,
-      { refl },
-      { refine false.elim (h2 _), rwa ← discrete_quotient.mem_fibre_iff' },
-      { refine false.elim (h1 _), rwa discrete_quotient.mem_fibre_iff' },
-      { refl } },
+      erw discrete_quotient.mem_fibre_iff' },
     { intros a _, exact discrete_quotient.equiv_bot a },
     { intros, exact finset.mem_univ _ },
     { intros, apply equiv.apply_symm_apply },
@@ -392,7 +388,30 @@ end
 def Radon_LC (S : cone (X.diagram ⋙ Radon_LC_functor p c)) (t : S.X) :
   X.Radon_LC p c :=
 { val := weak_dual X p c S t,
-  property := sorry }
+  property := begin
+    intros T,
+    dsimp [weak_dual, linear_map],
+    convert (S.π.app T t).2 ⊥ using 1,
+    fapply finset.sum_bij',
+    { intros a _, exact discrete_quotient.equiv_bot a },
+    { intros, apply finset.mem_univ },
+    { intros a ha, congr' 2,
+      let W := (T.fibre a).indicator_LC.discrete_quotient,
+      let E := T ⊓ W,
+      let π₁ : E ⟶ T := hom_of_le inf_le_left,
+      let π₂ : E ⟶ W := hom_of_le inf_le_right,
+      rw [← S.w π₁, ← S.w π₂],
+      dsimp [Radon_LC_functor, map_Radon_LC, weak_dual.comap,
+        continuous_map.comap_LC],
+      congr' 1, ext b, obtain ⟨b,rfl⟩ := discrete_quotient.proj_surjective _ b,
+      change (T.fibre a).indicator_LC b = _,
+      dsimp [topological_space.clopens.indicator_LC_apply],
+      erw discrete_quotient.mem_fibre_iff },
+    { intros a _, exact discrete_quotient.equiv_bot.symm a },
+    { intros, apply finset.mem_univ },
+    { intros, apply equiv.symm_apply_apply },
+    { intros, apply equiv.apply_symm_apply }
+  end }
 
 lemma continuous_Radon_LC (S : cone (X.diagram ⋙ Radon_LC_functor p c)) :
   continuous (Radon_LC X p c S) :=
