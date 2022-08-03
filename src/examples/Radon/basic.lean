@@ -315,8 +315,27 @@ def weak_dual_LC_to_C (X : Profinite.{0}) :
 def weak_dual_C_equiv_LC (X : Profinite.{0}) :
   weak_dual ℝ C(X,ℝ) ≃L[ℝ] weak_dual ℝ (locally_constant X ℝ) :=
 { inv_fun := X.weak_dual_LC_to_C,
-  left_inv := sorry,
-  right_inv := sorry,
+  left_inv := begin
+    intros f, ext t,
+    dsimp [weak_dual_C_to_LC, weak_dual_LC_to_C],
+    apply (locally_constant.pkg X ℝ).induction_on t,
+    { apply is_closed_eq,
+      apply (locally_constant.pkg X ℝ).continuous_extend,
+      apply_instance,
+      apply f.2 },
+    { intros e,
+      rw (locally_constant.pkg X ℝ).extend_coe, refl,
+      apply continuous_linear_map.uniform_continuous,
+      apply_instance }
+  end,
+  right_inv := begin
+    intros f, ext t,
+    dsimp [weak_dual_C_to_LC, weak_dual_LC_to_C,
+      weak_dual.comap],
+    erw (locally_constant.pkg X ℝ).extend_coe,
+    apply continuous_linear_map.uniform_continuous,
+    apply_instance,
+  end,
   continuous_to_fun := continuous_linear_map.continuous _,
   continuous_inv_fun := continuous_linear_map.continuous _,
   ..(X.weak_dual_C_to_LC) }
