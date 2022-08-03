@@ -5,7 +5,7 @@ import locally_constant.completion
 import analysis.special_functions.pow
 import topology.algebra.module.weak_dual
 
-open_locale nnreal big_operators
+open_locale nnreal big_operators classical
 
 noncomputable theory
 
@@ -17,6 +17,11 @@ local attribute [instance]
   locally_constant.seminormed_add_comm_group
   locally_constant.pseudo_metric_space
 
+lemma real.pow_nnnorm_sum_le
+  {ι : Type*} [fintype ι] (r : ι → ℝ)
+  (p : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] :
+  ∥ ∑ i, r i ∥₊^(p : ℝ) ≤ ∑ i, ∥ r i ∥₊^(p : ℝ) := sorry
+
 namespace locally_constant
 
 instance normed_space (X : Type*)
@@ -24,6 +29,11 @@ instance normed_space (X : Type*)
   normed_space ℝ (locally_constant X ℝ) :=
 { norm_smul_le := sorry,
   ..(infer_instance : module ℝ _) }
+
+lemma nnnorm_apply_le_nnnorm (X : Type*)
+  [topological_space X] [compact_space X] [t2_space X]
+  (e : locally_constant X ℝ) (x : X) :
+  ∥ e x ∥₊ ≤ ∥ e ∥₊ := sorry
 
 end locally_constant
 
@@ -39,6 +49,12 @@ def indicator_LC {X : Type*} [topological_space X] (U : clopens X) :
 { to_fun := set.indicator U 1,
   is_locally_constant := sorry }
 
+lemma indicator_apply {X : Type*} [topological_space X] (U : clopens X) (x) :
+  U.indicator x = if x ∈ U then 1 else 0 := rfl
+
+lemma indicator_LC_apply {X : Type*} [topological_space X] (U : clopens X) (x) :
+  U.indicator_LC x = if x ∈ U then 1 else 0 := rfl
+
 end topological_space.clopens
 
 namespace discrete_quotient
@@ -48,7 +64,44 @@ def fibre {X : Type*} [topological_space X] (T : discrete_quotient X)
 { carrier := T.proj ⁻¹' {t},
   clopen' := sorry }
 
+def equiv_bot {X : Type*} [topological_space X] [discrete_topology X] :
+  X ≃ (⊥ : discrete_quotient X) :=
+equiv.of_bijective (discrete_quotient.proj _)
+⟨λ x y h, quotient.exact' h, discrete_quotient.proj_surjective _⟩
+
+lemma mem_fibre_iff {X : Type*} [topological_space X] [compact_space X] [t2_space X]
+  (T : discrete_quotient X) (a : T) (b : X) :
+  T.proj b ∈ discrete_quotient.fibre _ (equiv_bot a) ↔
+  b ∈ discrete_quotient.fibre T a :=
+begin
+  obtain ⟨a,rfl⟩ := discrete_quotient.proj_surjective _ a,
+  dsimp [fibre, equiv_bot],
+  let TT : discrete_quotient T := ⊥,
+  change T.proj b ∈ equiv_bot ⁻¹' {equiv_bot (T.proj a)} ↔ T.proj b ∈ {T.proj a},
+  simp,
+end
+
+lemma mem_fibre_iff' {X : Type*} [topological_space X] [compact_space X] [t2_space X]
+  (T : discrete_quotient X) (a : (⊥ : discrete_quotient T)) (b : X) :
+  T.proj b ∈ discrete_quotient.fibre _ a ↔
+  b ∈ discrete_quotient.fibre T (equiv_bot.symm a) :=
+begin
+  rw [← equiv_bot.apply_symm_apply a, mem_fibre_iff],
+  simp,
+end
+
 end discrete_quotient
+
+lemma locally_constant.eq_sum {X : Type*} [topological_space X] [compact_space X] [t2_space X]
+  (e : locally_constant X ℝ) :
+  e = ∑ t : e.discrete_quotient,
+    e.locally_constant_lift t • (e.discrete_quotient.fibre t).indicator_LC :=
+sorry
+
+lemma locally_constant.nnnorm_eq {X : Type*} [topological_space X] [compact_space X] [t2_space X]
+  (e : locally_constant X ℝ) :
+  ∥ e ∥₊ = ⨆ t : e.discrete_quotient, ∥ e.locally_constant_lift t ∥₊ :=
+sorry
 
 def continuous_map.comap {X Y : Type*}
   [topological_space X] [topological_space Y]
@@ -275,7 +328,66 @@ def linear_map (S : cone (X.diagram ⋙ Radon_LC_functor p c)) (t : S.X) :
 
 def weak_dual (S : cone (X.diagram ⋙ Radon_LC_functor p c)) (t : S.X) :
   weak_dual ℝ (locally_constant X ℝ) :=
-linear_map.mk_continuous_of_exists_bound (linear_map X p c S t) sorry -- use c^(1/p)?
+linear_map.mk_continuous_of_exists_bound (linear_map X p c S t)
+begin
+  use c^(1/(p : ℝ)),
+  intros e,
+  suffices : ∥ linear_map X p c S t e ∥₊ ≤ c^(1/(p : ℝ)) * ∥ e ∥₊,
+    by exact_mod_cast this,
+  have hp : 0 < (p : ℝ) := by exact_mod_cast (fact.out (0 < p)),
+  have hp' : (p : ℝ) ≠ 0,
+  { exact ne_of_gt hp },
+  rw [← nnreal.rpow_le_rpow_iff hp, nnreal.mul_rpow, ← nnreal.rpow_mul],
+  rw [(show 1 / (p : ℝ) * p = 1, by field_simp), nnreal.rpow_one],
+  have H := ((S.π.app e.discrete_quotient) t).2 ⊥,
+  replace H := mul_le_mul H (le_refl (∥e∥₊^(p : ℝ))) (zero_le _) (zero_le _),
+  refine le_trans _ H,
+  rw [mul_comm, finset.mul_sum],
+  nth_rewrite 0 e.eq_sum,
+  simp_rw [linear_map.map_sum, linear_map.map_smul],
+  refine le_trans (real.pow_nnnorm_sum_le _ _) _,
+  have : ∑ (x : (⊥ : discrete_quotient e.discrete_quotient)),
+    ∥e∥₊ ^ (p : ℝ) * ∥(((S.π.app e.discrete_quotient) t).val)
+    ((⊥ : discrete_quotient e.discrete_quotient).fibre x).indicator_LC∥₊ ^ (p : ℝ) =
+    ∑ (x : e.discrete_quotient), ∥e∥₊^(p : ℝ) *
+      ∥ (linear_map X p c S t) (e.discrete_quotient.fibre x).indicator_LC ∥₊^(p : ℝ),
+  { fapply finset.sum_bij',
+    { intros a _, exact discrete_quotient.equiv_bot.symm a },
+    { intros, exact finset.mem_univ _ },
+    { intros, congr' 3, dsimp [linear_map],
+      let T₁ := e.discrete_quotient,
+      let T₂ := (e.discrete_quotient.fibre
+        ((discrete_quotient.equiv_bot.symm) a)).indicator_LC.discrete_quotient,
+      let T := T₁ ⊓ T₂,
+      let π₁ : T ⟶ T₁ := hom_of_le inf_le_left,
+      let π₂ : T ⟶ T₂ := hom_of_le inf_le_right,
+      rw [← S.w π₁, ← S.w π₂],
+      dsimp [Radon_LC_functor, map_Radon_LC, weak_dual.comap],
+      congr' 1,
+      ext b, obtain ⟨b,rfl⟩ := discrete_quotient.proj_surjective _ b,
+      dsimp [continuous_map.comap_LC],
+      change _ =
+        (e.discrete_quotient.fibre ((discrete_quotient.equiv_bot.symm) a)).indicator_LC b,
+      dsimp only [topological_space.clopens.indicator_LC_apply],
+      rw (show X.fintype_diagram.map π₁ (T.proj b) = T₁.proj b, by refl),
+      split_ifs with h1 h2 h3 h4,
+      { refl },
+      { refine false.elim (h2 _), rwa ← discrete_quotient.mem_fibre_iff' },
+      { refine false.elim (h1 _), rwa discrete_quotient.mem_fibre_iff' },
+      { refl } },
+    { intros a _, exact discrete_quotient.equiv_bot a },
+    { intros, exact finset.mem_univ _ },
+    { intros, apply equiv.apply_symm_apply },
+    { intros, apply equiv.symm_apply_apply } },
+  rw this, clear this,
+  apply finset.sum_le_sum, rintros x -,
+  rw [smul_eq_mul, nnnorm_mul, nnreal.mul_rpow],
+  refine mul_le_mul _ (le_refl _) (zero_le _) (zero_le _),
+  apply nnreal.rpow_le_rpow _ (le_of_lt hp),
+  obtain ⟨x,rfl⟩ := discrete_quotient.proj_surjective _ x,
+  change ∥ e x ∥₊ ≤ _,
+  apply locally_constant.nnnorm_apply_le_nnnorm,
+end
 
 def Radon_LC (S : cone (X.diagram ⋙ Radon_LC_functor p c)) (t : S.X) :
   X.Radon_LC p c :=
