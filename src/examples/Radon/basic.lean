@@ -123,16 +123,38 @@ end
 
 end discrete_quotient
 
+lemma locally_constant.sum_apply {ι X Y : Type*} [topological_space X] [add_comm_monoid Y]
+  (f : ι → locally_constant X Y) (S : finset ι) (t : X) :
+  (∑ i in S, f i) t = ∑ i in S, (f i t) := sorry
+
 lemma locally_constant.eq_sum {X : Type*} [topological_space X] [compact_space X] [t2_space X]
   (e : locally_constant X ℝ) :
   e = ∑ t : e.discrete_quotient,
     e.locally_constant_lift t • (e.discrete_quotient.fibre t).indicator_LC :=
-sorry
-
-lemma locally_constant.nnnorm_eq {X : Type*} [topological_space X] [compact_space X] [t2_space X]
-  (e : locally_constant X ℝ) :
-  ∥ e ∥₊ = ⨆ t : e.discrete_quotient, ∥ e.locally_constant_lift t ∥₊ :=
-sorry
+begin
+  ext t,
+  simp_rw [locally_constant.sum_apply, locally_constant.smul_apply],
+  suffices :
+    ∑ (x : ↥(e.discrete_quotient)),
+      (e.locally_constant_lift) x • ((e.discrete_quotient.fibre x).indicator_LC) t =
+    ∑ x in { e.discrete_quotient.proj t },
+      (e.locally_constant_lift) x • ((e.discrete_quotient.fibre x).indicator_LC) t,
+  { rw this,
+    simp only [algebra.id.smul_eq_mul, finset.sum_singleton],
+    change _ = e t * _, symmetry, convert mul_one _,
+    rw [topological_space.clopens.indicator_LC_apply, if_pos],
+    change e.discrete_quotient.proj t ∈ _, simp, -- clopens is missing some `mem_mk` lemma...
+  },
+  symmetry,
+  apply finset.sum_subset, simp only [finset.subset_univ],
+  intros s _ ht,
+  convert smul_zero _,
+  rw [topological_space.clopens.indicator_LC_apply, if_neg],
+  contrapose! ht,
+  change e.discrete_quotient.proj t ∈ _ at ht,
+  simp only [finset.mem_singleton, set.mem_singleton_iff] at ht ⊢,
+  exact ht.symm,
+end
 
 def continuous_map.comap {X Y : Type*}
   [topological_space X] [topological_space Y]
