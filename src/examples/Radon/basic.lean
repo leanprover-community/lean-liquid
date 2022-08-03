@@ -245,8 +245,33 @@ variables (X : Profinite.{0}) (p c : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)]
 def linear_map (S : cone (X.diagram ⋙ Radon_LC_functor p c)) (t : S.X) :
   locally_constant X ℝ →ₗ[ℝ] ℝ :=
 { to_fun := λ e, (S.π.app e.discrete_quotient t).1 e.locally_constant_lift,
-  map_add' := sorry,
-  map_smul' := sorry }
+  map_add' := begin
+    intros e₁ e₂,
+    let W₁ := e₁.discrete_quotient,
+    let W₂ := e₂.discrete_quotient,
+    let W₁₂ := (e₁ + e₂).discrete_quotient,
+    let W := W₁ ⊓ W₂ ⊓ W₁₂,
+    let π₁ : W ⟶ W₁ := hom_of_le (le_trans inf_le_left inf_le_left),
+    let π₂ : W ⟶ W₂ := hom_of_le (le_trans inf_le_left inf_le_right),
+    let π₁₂ : W ⟶ W₁₂ := hom_of_le inf_le_right,
+    rw [← S.w π₁, ← S.w π₂, ← S.w π₁₂],
+    dsimp [Radon_LC_functor, map_Radon_LC, weak_dual.comap, continuous_map.comap_LC],
+    erw ← ((S.π.app W) t).1.map_add, congr' 1,
+    ext ⟨⟩, refl
+  end,
+  map_smul' := begin
+    intros r e,
+    let W₁ := e.discrete_quotient,
+    let W₂ := (r • e).discrete_quotient,
+    let W := W₁ ⊓ W₂,
+    let π₁ : W ⟶ W₁ := hom_of_le inf_le_left,
+    let π₂ : W ⟶ W₂ := hom_of_le inf_le_right,
+    rw [← S.w π₁, ← S.w π₂],
+    dsimp [Radon_LC_functor, map_Radon_LC, weak_dual.comap, continuous_map.comap_LC],
+    rw ← smul_eq_mul,
+    erw ← ((S.π.app W) t).1.map_smul, congr' 1,
+    ext ⟨⟩, refl
+  end }
 
 def weak_dual (S : cone (X.diagram ⋙ Radon_LC_functor p c)) (t : S.X) :
   weak_dual ℝ (locally_constant X ℝ) :=
