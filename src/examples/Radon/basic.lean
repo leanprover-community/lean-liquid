@@ -90,6 +90,37 @@ begin
   simp,
 end
 
+def comap_equiv {X Y : Type*} [topological_space X] [topological_space Y]
+  (f : X → Y) (hf : continuous f) (hf' : function.surjective f)
+  (T : discrete_quotient Y) :
+  T.comap hf ≃ T :=
+equiv.of_bijective (discrete_quotient.map $ le_refl _)
+begin
+  split,
+  { rintros ⟨x⟩ ⟨y⟩ h,
+    apply quotient.sound',
+    apply quotient.exact' h },
+  { rintros ⟨x⟩,
+    obtain ⟨x,rfl⟩ := hf' x,
+    use discrete_quotient.proj _ x, refl }
+end
+
+lemma comap_mem_fibre_iff {X Y : Type*} [topological_space X] [topological_space Y]
+  (f : X → Y) (hf : continuous f)
+  (T : discrete_quotient Y) (a : T.comap hf) (b : X) :
+  b ∈ discrete_quotient.fibre (T.comap hf) a ↔
+  f b ∈ discrete_quotient.fibre T (discrete_quotient.map (le_refl _) a) :=
+begin
+  dsimp [fibre],
+  change b ∈ (T.comap hf).proj ⁻¹' {a} ↔
+    f b ∈ T.proj ⁻¹' {_},
+  obtain ⟨a,rfl⟩ := discrete_quotient.proj_surjective _ a,
+  simp only [set.mem_preimage, set.mem_singleton_iff, map_proj_apply],
+  split,
+  { intros h, apply quotient.sound', apply quotient.exact' h, },
+  { intros h, apply quotient.sound', apply quotient.exact' h, },
+end
+
 end discrete_quotient
 
 lemma locally_constant.eq_sum {X : Type*} [topological_space X] [compact_space X] [t2_space X]
@@ -157,19 +188,60 @@ def bdd_LC {X : Type*} [topological_space X] [compact_space X]
 ∀ (T : discrete_quotient X),
   ∑ t : T, ∥ μ (T.fibre t).indicator_LC ∥₊^(p : ℝ) ≤ c
 
-lemma bdd_comap {X Y : Type*} {p c : ℝ≥0}
-  [topological_space X] [compact_space X] [t2_space X]
-  [topological_space Y] [compact_space Y] [t2_space Y]
-  (μ : weak_dual ℝ C(X,ℝ)) (hμ : μ.bdd p c) (f : C(X,Y)) :
-  (weak_dual.comap f.comap μ).bdd p c :=
-sorry
-
-lemma bdd_LC_comap {X Y : Type*} {p c : ℝ≥0}
+lemma bdd_LC_comap {X Y : Type*} {p c : ℝ≥0} [fact (0 < p)]
   [topological_space X] [compact_space X] [t2_space X]
   [topological_space Y] [compact_space Y] [t2_space Y]
   (μ : weak_dual ℝ (locally_constant X ℝ)) (hμ : μ.bdd_LC p c) (f : C(X,Y)) :
   (weak_dual.comap f.comap_LC μ).bdd_LC p c :=
-sorry
+begin
+  intros T,
+  convert hμ (T.comap f.2) using 1,
+  let ι : T.comap f.2 → T := discrete_quotient.map (le_refl _),
+  have hι : function.injective ι,
+  { rintros ⟨⟩ ⟨⟩ h,
+    apply quotient.sound',
+    apply quotient.exact' h },
+  let S₁ := _, change S₁ = _,
+  have : S₁ = ∑ t in finset.univ.image ι,
+    ∥ ((comap f.comap_LC) μ) (T.fibre t).indicator_LC ∥₊ ^ (p : ℝ),
+  { symmetry, apply finset.sum_subset, simp,
+    intros x _ hx,
+    --simp only [finset.mem_image, finset.mem_univ, exists_true_left, not_exists] at hx,
+    suffices : ((comap f.comap_LC) μ) (T.fibre x).indicator_LC = 0,
+    { simp only [this, nnnorm_zero, nnreal.rpow_eq_zero_iff, eq_self_iff_true,
+        ne.def, nnreal.coe_eq_zero, true_and],
+      exact ne_of_gt (fact.out (0 < p)) },
+    dsimp [comap], convert μ.map_zero,
+    ext t,
+    dsimp [continuous_map.comap_LC, topological_space.clopens.indicator_LC_apply],
+    rw if_neg,
+    contrapose! hx,
+    rw finset.mem_image,
+    refine ⟨discrete_quotient.proj _ t, finset.mem_univ _, hx⟩,
+  },
+  rw this, clear this, symmetry,
+  fapply finset.sum_bij,
+  { intros a _, exact ι a },
+  { intros, dsimp, erw finset.mem_image, refine ⟨a, finset.mem_univ _, rfl⟩ },
+  { intros a ha, congr' 2,
+    dsimp [comap], congr' 1,
+    ext t,
+    erw topological_space.clopens.indicator_LC_apply,
+    erw topological_space.clopens.indicator_LC_apply,
+    rw discrete_quotient.comap_mem_fibre_iff },
+  { intros a₁ a₂ h₁ h₂ hh, apply hι, exact hh },
+  { rintros b hb,
+    rw finset.mem_image at hb,
+    obtain ⟨b,hh,hb⟩ := hb,
+    use [b,hh,hb.symm] },
+end
+
+lemma bdd_comap {X Y : Type*} {p c : ℝ≥0} [fact (0 < p)]
+  [topological_space X] [compact_space X] [t2_space X]
+  [topological_space Y] [compact_space Y] [t2_space Y]
+  (μ : weak_dual ℝ C(X,ℝ)) (hμ : μ.bdd p c) (f : C(X,Y)) :
+  (weak_dual.comap f.comap μ).bdd p c :=
+λ t, by apply bdd_LC_comap (comap (lc_to_c X) μ) hμ f t
 
 end weak_dual
 
