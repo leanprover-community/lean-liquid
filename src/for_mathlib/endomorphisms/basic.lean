@@ -1,9 +1,10 @@
 import category_theory.abelian.projective
+import category_theory.limits.preserves.finite
 import for_mathlib.abelian_category
 
 noncomputable theory
 
-universes v u
+universes v v' u
 
 open category_theory category_theory.limits
 
@@ -79,6 +80,9 @@ protected def forget (C : Type u) [category.{v} C] : endomorphisms C ⥤ C :=
   map_id' := λ X, rfl,
   map_comp' := λ X Y Z f g, rfl }
 
+instance forget_faithful : faithful (endomorphisms.forget C) :=
+{ map_injective' := by { intros X Y f g h, ext, exact h } }
+
 lemma epi_of_epi_f {X Y : endomorphisms C} (f : X ⟶ Y) [epi f.f] : epi f :=
 { left_cancellation := λ Z g h w, begin
     ext, rw [← cancel_epi f.f, ← comp_f, w, comp_f],
@@ -95,7 +99,7 @@ end category
 section limits
 
 variables {C : Type u} [category.{v} C]
-variables {J : Type v} [small_category J]
+variables {J : Type v'} [small_category J]
 
 @[simps]
 def twist_cone {K : J ⥤ endomorphisms C}
@@ -211,7 +215,10 @@ instance preserves_limits_of_shape [has_limits_of_shape J C] :
 instance preserves_limits [has_limits C] : preserves_limits (endomorphisms.forget C) := ⟨⟩
 
 instance [has_finite_limits C] : preserves_finite_limits (endomorphisms.forget C) :=
-by { constructor, introsI J hJ1 hJ2, apply_instance }
+begin
+  apply preserves_finite_limits_of_preserves_finite_limits_of_size.{v},
+  introsI J hJ1 hJ2, apply_instance,
+end
 
 end limits
 
@@ -334,7 +341,10 @@ instance preserves_colimits_of_shape [has_colimits_of_shape J C] :
 instance preserves_colimits [has_colimits C] : preserves_colimits (endomorphisms.forget C) := ⟨⟩
 
 instance [has_finite_colimits C] : preserves_finite_colimits (endomorphisms.forget C) :=
-by { constructor, introsI J hJ1 hJ2, apply_instance }
+begin
+  apply preserves_finite_colimits_of_preserves_finite_colimits_of_size.{v},
+  introsI J hJ1 hJ2, apply_instance,
+end
 
 end colimits
 
@@ -529,8 +539,8 @@ instance : has_zero (X ⟶ Y) := ⟨⟨0, by simp only [comp_zero, zero_comp, ho
 instance : has_add (X ⟶ Y) := ⟨λ f g, ⟨f.f + g.f, by simp only [comp_add, add_comp, hom.comm]⟩⟩
 instance : has_sub (X ⟶ Y) := ⟨λ f g, ⟨f.f - g.f, by simp only [comp_sub, sub_comp, hom.comm]⟩⟩
 instance : has_neg (X ⟶ Y) := ⟨λ f, ⟨-f.f, by simp only [comp_neg, neg_comp, hom.comm]⟩⟩
-instance has_nsmul : has_scalar ℕ (X ⟶ Y) := ⟨λ n f, ⟨n • f.f, by simp only [comp_nsmul, nsmul_comp, hom.comm]⟩⟩
-instance has_zsmul : has_scalar ℤ (X ⟶ Y) := ⟨λ n f, ⟨n • f.f, by simp only [comp_zsmul, zsmul_comp, hom.comm]⟩⟩
+instance has_nsmul : has_smul ℕ (X ⟶ Y) := ⟨λ n f, ⟨n • f.f, by simp only [comp_nsmul, nsmul_comp, hom.comm]⟩⟩
+instance has_zsmul : has_smul ℤ (X ⟶ Y) := ⟨λ n f, ⟨n • f.f, by simp only [comp_zsmul, zsmul_comp, hom.comm]⟩⟩
 
 instance : add_comm_group (X ⟶ Y) :=
 (f_injective X Y).add_comm_group _ rfl (λ _ _, rfl) (λ _, rfl) (λ _ _, rfl) (λ _ _, rfl) (λ _ _, rfl)
@@ -725,9 +735,9 @@ instance [has_coproducts_of_shape (ulift.{v} ℕ) 𝓐] [has_products_of_shape (
     apply is_colimit_cofork_of_is_colimit _ hE,
   end,
   has_finite_products := begin
-    constructor, intros J _ _,
+    constructor, intros J _,
     haveI : has_finite_products 𝓐 := abelian.has_finite_products, -- WHY IS THIS NEEDED!?
-    apply_instance,
+    constructor,
   end,
   .. (_ : preadditive (endomorphisms 𝓐)) }
 

@@ -134,7 +134,7 @@ begin
   dsimp,
   simp only [comp_apply],
   dsimp,
-  simp only [add_zero, unit_of_tensor_iso_unit_inv_app, opaque_eq_to_iso_inv,
+  simp only [add_zero, unit_of_tensor_iso_unit_inv_app,
     discrete.functor_map_id, nat_trans.id_app, category.id_comp, category.assoc,
     nat_trans.naturality, functor.comp_map, μ_hom_inv_app_assoc, functor.map_comp,
     ε_inv_app_obj, discrete.right_unitor_def, eq_to_iso.hom, eq_to_hom_map,
@@ -142,7 +142,9 @@ begin
   erw ← nat_trans.naturality_assoc,
   erw ← nat_trans.naturality_assoc,
   dsimp, let s := _, change _ ≫ _ ≫ s = _, rw ← category.assoc, convert category.comp_id _,
-  dsimp [s], simp,
+  dsimp [s],
+  simp only [eq_to_hom_map, eq_to_hom_app, eq_to_iso.inv, ε_app_obj, discrete.right_unitor_def,
+    category.assoc, μ_inv_hom_app_assoc, eq_to_hom_trans, eq_to_hom_refl],
 end
 
 @[reassoc] lemma shift_iso_Ext_map

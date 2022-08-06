@@ -4,7 +4,7 @@ universe variables u
 
 noncomputable theory
 open_locale nnreal
-open category_theory opposite normed_group_hom system_of_complexes
+open category_theory opposite normed_add_group_hom system_of_complexes
 
 variables (M M' N : system_of_complexes.{u}) (f : M ⟶ M') (g : M' ⟶ N)
 
@@ -53,7 +53,7 @@ begin
     (hgquot _ _).norm_lift hε₁ (N.d i (i+1) (g m')),
   obtain ⟨m₁, hm₁⟩ : ∃ m₁ : M c₁ (i+1), f m₁ + m₁'' = m₁',
   { have hrange : m₁' - m₁'' ∈ f.apply.range,
-    { rw [← hg _ _, mem_ker  _ _, normed_group_hom.map_sub],
+    { rw [← hg _ _, mem_ker  _ _, _root_.map_sub],
       change g m₁' - g m₁'' = 0,
       rw [hm₁', hgm₁'', sub_self] },
     obtain ⟨m₁, hm₁ : f m₁ = m₁' - m₁''⟩ := (mem_range _ _).1 hrange,
@@ -61,7 +61,7 @@ begin
 
   have him : i+2 ≤ m+2 := add_le_add_right hi _,
   have hm₂ : f (M.d (i+1) (i+2) m₁) = -M'.d (i+1) (i+2) m₁'',
-  { rw [← d_apply, eq_sub_of_add_eq hm₁, normed_group_hom.map_sub, ← category_theory.comp_apply,
+  { rw [← d_apply, eq_sub_of_add_eq hm₁, _root_.map_sub, ← category_theory.comp_apply,
        d_comp_d, coe_zero, ← neg_inj, pi.zero_apply, zero_sub], },
   have hle : ∥res (M.d (i+1) (i+2) m₁)∥ ≤ K'' * ∥m₁''∥,
   { calc ∥res (M.d (i+1) (i+2) m₁)∥
@@ -86,11 +86,11 @@ begin
   have hmnew' : mnew₁' = res m₁'' + f (res m₁ - M.d i (i+1) m₀),
   { calc mnew₁'
         = M'.d i (i+1) (res m' - f m₀) : rfl
-    ... = res (M'.d i (i+1) m') - (f (M.d i (i+1) m₀)) : by rw [normed_group_hom.map_sub, d_res _, d_apply]
+    ... = res (M'.d i (i+1) m') - (f (M.d i (i+1) m₀)) : by rw [_root_.map_sub, d_res _, d_apply]
     ... = res (M'.d i (i+1) m') - (f (res m₁)) + (f (res m₁) - f (M.d i (i+1) m₀)) : by abel
     ... = res m₁'' + f ((res m₁) - (M.d i (i+1) m₀)) : by
                         { rw [← system_of_complexes.map_sub, ← res_apply,
-                              ← normed_group_hom.map_sub, ← sub_eq_of_eq_add' hm₁.symm] } },
+                              ← _root_.map_sub, ← sub_eq_of_eq_add' hm₁.symm] } },
   have hnormle : ∥mnew₁'∥ ≤ (K*K'' + 1)*∥N.d i (i+1) (g m')∥ + (K*K'' + 2) * ε₁,
   { calc ∥mnew₁'∥
         = ∥res m₁'' + f (res m₁ - M.d i (i+1) m₀)∥ : by rw [hmnew']

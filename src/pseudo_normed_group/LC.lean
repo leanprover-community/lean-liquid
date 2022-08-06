@@ -63,7 +63,7 @@ lemma norm_T_le [normed_with_aut r V] [fact (0 < r)] (A) :
   ∥(LC.T r V).hom.app A∥ ≤ r :=
 begin
   rw T_eq,
-  refine normed_group_hom.op_norm_le_bound _ (nnreal.zero_le_coe) (λ v, _),
+  refine normed_add_group_hom.op_norm_le_bound _ (nnreal.zero_le_coe) (λ v, _),
   exact le_of_eq (normed_with_aut.norm_T v)
 end
 
@@ -80,7 +80,7 @@ lemma norm_T_inv_le [normed_with_aut r V] [fact (0 < r)] (A) :
   ∥(T_inv r V).app A∥ ≤ r⁻¹ :=
 begin
   rw T_inv_eq',
-  refine normed_group_hom.op_norm_le_bound _ (inv_nonneg.2 (nnreal.zero_le_coe)) (λ v, _),
+  refine normed_add_group_hom.op_norm_le_bound _ (inv_nonneg.2 (nnreal.zero_le_coe)) (λ v, _),
   exact (normed_with_aut.norm_T_inv _ v).le
 end
 
@@ -405,7 +405,7 @@ begin
     rw aux₁,
     exact mul_le_of_le_one_right ((coeff g) ϕ).nat_abs.cast_nonneg this },
   rw [← g.eval_LCFP_eq_eval_LCFP' V r' c₁ c₂, basic_universal_map.eval_LCFP],
-  { apply normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1,
+  { apply normed_add_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1,
     exact locally_constant.comap_hom_norm_noninc _ _, exact aux },
 end
 

@@ -48,7 +48,7 @@ def of_rescale_rescale_strict (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')]
   continuous' := λ c,
   begin
     haveI : fact (c * r⁻¹ * r'⁻¹ ≤ c * (r' * r)⁻¹) :=
-      ⟨le_of_eq (by rw [nnreal.mul_inv, mul_assoc])⟩,
+      ⟨le_of_eq (by rw [mul_inv_rev, mul_assoc])⟩,
     exact comphaus_filtered_pseudo_normed_group.continuous_cast_le (c * r⁻¹ * r'⁻¹) _,
   end,
   ..rescale.of_rescale_rescale_strict_pseudo_normed_group_hom r r' M
@@ -62,7 +62,7 @@ def to_rescale_rescale_strict (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')]
   continuous' := λ c,
   begin
     haveI : fact (c * (r' * r)⁻¹ ≤ c * r⁻¹ * r'⁻¹) :=
-      ⟨le_of_eq (by rw [nnreal.mul_inv, mul_assoc])⟩,
+      ⟨le_of_eq (by rw [mul_inv_rev, mul_assoc])⟩,
     exact comphaus_filtered_pseudo_normed_group.continuous_cast_le (c * (r' * r)⁻¹) _,
   end,
   ..rescale.to_rescale_rescale_strict_pseudo_normed_group_hom r r' M

@@ -92,9 +92,9 @@ instance : has_sub (A ⟶ B) :=
   (λ (f₁ f₂ g : A.as ⟶ B.as) (h : quotient.comp_closure (homotopic V c) f₁ f₂),
     eq_of_homotopy _ _ (h.rel.some.sub_right g))⟩
 
-instance has_nsmul : has_scalar ℕ (A ⟶ B) := ⟨λ n, nsmul_rec n⟩
+instance has_nsmul : has_smul ℕ (A ⟶ B) := ⟨λ n, nsmul_rec n⟩
 
-instance has_zsmul : has_scalar ℤ (A ⟶ B) := ⟨λ n, zsmul_rec n⟩
+instance has_zsmul : has_smul ℤ (A ⟶ B) := ⟨λ n, zsmul_rec n⟩
 
 lemma quotient_map_neg {A B : homological_complex V c} (f : A ⟶ B) :
 (quotient V c).map (-f) = -(quotient V c).map f := rfl

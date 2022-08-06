@@ -280,7 +280,7 @@ begin
   let f' : (forget₂ (Module.{v} ℤ) AddCommGroup).obj (Module.of ℤ M) ⟶ (forget₂ (Module.{v} ℤ) AddCommGroup).obj (Module.of ℤ X) := f,
   let fM := full.preimage f',
   haveI : epi eM,
-  { apply faithful_reflects_epi (forget₂ (Module.{v} ℤ) AddCommGroup.{v}) _,
+  { apply functor.epi_of_epi_map (forget₂ (Module.{v} ℤ) AddCommGroup.{v}) _,
     rw full.witness,
     apply epi.mk,
     intros Z g h H,
@@ -289,8 +289,7 @@ begin
     have H : e ≫ g' = e ≫ h' := H,
     --rw cancel_epi at H,    -- "failed to synthesize type class instance for epi e"
     rw @cancel_epi _ _ _ _ _ _ _inst_2 _ _ at H,
-    exact H
-  },
+    exact H },
   haveI : projective (of ℤ M) := by rw [Module.coe_of'' ℤ M]; apply_instance,
   let pM := projective.factor_thru fM eM,
   use (forget₂ (Module.{v} ℤ) AddCommGroup).map pM,

@@ -2,6 +2,7 @@ import category_theory.limits.fubini
 
 import for_mathlib.Profinite.extend
 import for_mathlib.AddCommGroup.exact
+import for_mathlib.limit_flip_comp_iso
 
 import condensed.ab
 import pseudo_normed_group.bounded_limits
@@ -159,7 +160,7 @@ begin
 end
 
 -- TODO remove this; it's a redundant alias
-@[simps obj_obj obj_map_to_fun map_app {fully_applied := ff}]
+@[simps obj_obj obj_map_apply map_app {fully_applied := ff}]
 def Filtration : ℝ≥0 ⥤ CompHausFiltPseuNormGrp₁.{u} ⥤ CompHaus.{u} :=
 CompHausFiltPseuNormGrp₁.level
 
@@ -405,8 +406,12 @@ def P1_iso {A B : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
     limit (P1_functor.{u} (whisker_left S.fintype_diagram f) hrc ⋙ lim) :=
 begin
   refine has_limit.iso_of_nat_iso (_ ≪≫ (cospan_comp_iso _ _ _).symm) ≪≫
-    (limit_flip_comp_lim_iso_limit_comp_lim _).symm,
-  exact cospan_ext (preserves_limit_iso _ _) (preserves_limit_iso _ _) (preserves_limit_iso _ _)
+    (limit_flip_comp_lim_iso_limit_comp_lim' _).symm,
+
+  -- This next line can be removed later if/when we generalize universe parameters in finite (co)limits
+  refine _ ≪≫ (diagram_iso_cospan _).symm,
+
+  refine cospan_ext (preserves_limit_iso _ _) (preserves_limit_iso _ _) (preserves_limit_iso _ _)
     (by { apply limit.hom_ext, intros, ext, simp, })
     (begin
       apply limit.hom_ext,
@@ -423,8 +428,12 @@ def P2_iso {B C : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
     limit (P2_functor.{u} (whisker_left S.fintype_diagram g) c ⋙ lim) :=
 begin
   refine has_limit.iso_of_nat_iso (_ ≪≫ (cospan_comp_iso _ _ _).symm) ≪≫
-    (limit_flip_comp_lim_iso_limit_comp_lim _).symm,
-  fapply cospan_ext,
+    (limit_flip_comp_lim_iso_limit_comp_lim' _).symm,
+
+  -- This next line can be removed later if/when we generalize universe parameters in finite (co)limits
+  refine _ ≪≫ (diagram_iso_cospan _).symm,
+
+  refine cospan_ext _ _ _ _ _,
   exact (preserves_limit_iso _ _),
   exact category_theory.limits.limit_const_terminal.symm,
   exact (preserves_limit_iso _ _),
@@ -475,7 +484,7 @@ begin
       category_theory.limits.cospan_comp_iso_hom_app_left,
       category_theory.category.assoc,
       category_theory.limits.has_limit.iso_of_nat_iso_inv_π_assoc],
-    erw [limit_flip_comp_lim_iso_limit_comp_lim_hom_π_π, lim_map_π_assoc],
+    erw [limit_flip_comp_lim_iso_limit_comp_lim'_hom_π_π, lim_map_π_assoc],
     simp only [category_theory.category.id_comp,
       CompHausFiltPseuNormGrp₁.exact_with_constant.P1_to_P2_nat_trans_app,
       category_theory.category.assoc],
@@ -489,7 +498,7 @@ begin
       category_theory.limits.pullback.lift_fst],
     dsimp [P1_iso],
     simp only [category_theory.category.assoc],
-    erw [limit_flip_comp_lim_iso_limit_comp_lim_inv_π_π],
+    erw [limit_flip_comp_lim_iso_limit_comp_lim'_inv_π_π],
     simp only [category_theory.limits.has_limit.iso_of_nat_iso_hom_π_assoc,
       category_theory.nat_trans.comp_app,
       category_theory.iso.symm_hom,

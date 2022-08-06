@@ -19,9 +19,9 @@ instance arrow.has_neg (P Q : arrow A) : has_neg (P ⟶ Q) :=
 ⟨λ f, arrow.hom_mk (show (-f.left) ≫ Q.hom = P.hom ≫ (-f.right), by simp)⟩
 instance arrow.has_sub (P Q : arrow A) : has_sub (P ⟶ Q) :=
 ⟨λ f g, arrow.hom_mk (show (f.left - g.left) ≫ Q.hom = P.hom ≫ (f.right - g.right), by simp)⟩
-instance arrow.has_nsmul (P Q : arrow A) : has_scalar ℕ (P ⟶ Q) :=
+instance arrow.has_nsmul (P Q : arrow A) : has_smul ℕ (P ⟶ Q) :=
 ⟨λ n f, arrow.hom_mk (show (n • f.left) ≫ Q.hom = P.hom ≫ (n • f.right), by simp)⟩
-instance arrow.has_zsmul (P Q : arrow A) : has_scalar ℤ (P ⟶ Q) :=
+instance arrow.has_zsmul (P Q : arrow A) : has_smul ℤ (P ⟶ Q) :=
 ⟨λ n f, arrow.hom_mk (show (n • f.left) ≫ Q.hom = P.hom ≫ (n • f.right), by simp)⟩
 .
 @[simp] lemma arrow.has_add_left {P Q : arrow A} (f g : P ⟶ Q) :

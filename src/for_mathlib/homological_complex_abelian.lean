@@ -241,7 +241,7 @@ instance : has_binary_biproducts (homological_complex V c) :=
 end biproduct
 
 instance [has_zero_morphisms V] [has_finite_products V] :
-  has_finite_products (homological_complex V c) := ⟨λ J _ _, by exactI infer_instance⟩
+  has_finite_products (homological_complex V c) := ⟨λ J _, by exactI infer_instance⟩
 
 -- instance [has_zero_morphisms V] [has_kernels V] : has_kernels (homological_complex V c) :=
 -- begin
@@ -382,21 +382,10 @@ begin
 end
 .
 
--- move this
-lemma has_pullback_of_size (C : Type u) [category.{v} C] [has_pullbacks C] :
-  has_limits_of_shape walking_cospan.{w} C :=
-has_limits_of_shape_of_equivalence walking_cospan_equiv.{v}
-
--- move this
-lemma has_pushout_of_size (C : Type u) [category.{v} C] [has_pushouts C] :
-  has_colimits_of_shape walking_span.{w} C :=
-has_colimits_of_shape_of_equivalence walking_span_equiv.{v}
-
 instance [mono f] (i : ι) : mono (f.f i) :=
 begin
   change mono ((eval V c i).map f),
-  haveI := has_pullback_of_size.{max u' v} V,
-  exact category_theory.preserves_mono _ f,
+  apply_instance
 end
 
 lemma mono_of_eval [∀ i, mono (f.f i)] : mono f :=
@@ -414,8 +403,7 @@ lemma mono_iff_eval : mono f ↔ ∀ i, mono (f.f i) :=
 instance [epi f] (i : ι) : epi (f.f i) :=
 begin
   change epi ((eval V c i).map f),
-  haveI := has_pushout_of_size.{max u' v} V,
-  exact category_theory.preserves_epi _ f,
+  apply_instance
 end
 
 lemma epi_of_eval [∀ i, epi (f.f i)] : epi f :=

@@ -53,7 +53,7 @@ begin
     (hD _ hc.1) _ δ hδ _ hfdx,
   let gx' := (g _).f _ x',
   have hdfxx' : (D _).d _ (i+1) (fx - x') = 0,
-  { rw [normed_group_hom.map_sub, hdx', fdx_dfx], exact sub_self _ },
+  { rw [_root_.map_sub, hdx', fdx_dfx], exact sub_self _ },
   obtain ⟨y, hdy, -⟩ := (hD _ hc.1) _ δ hδ _ hdfxx',
   let gy := (g _).f _ y,
   let dgy := C.d _ i gy,
@@ -65,7 +65,7 @@ begin
   have hxdgy : res x - C.d _ _ gy = gx',
   { calc res x - dgy
         = (g _).f _ ((f _).f _ x) - gdy : _
-    ... = gx' : by rw [← normed_group_hom.map_sub, hdy, sub_sub_cancel],
+    ... = gx' : by rw [← _root_.map_sub, hdy, sub_sub_cancel],
     rw [gdy_dgy, ← comp_apply, ← homological_complex.comp_f, hfg _ hc.1], refl },
   rw hxdgy,
   change (∥gx'∥₊ : ℝ) ≤ ∥dx∥₊ + ε,
@@ -177,7 +177,7 @@ open profinitely_filtered_pseudo_normed_group
 { to_fun := λ x, ⟨⟨level f hf c₁ x, Filtration.cast_le M₁ c₁ c₂ x⟩, rfl⟩,
   continuous_to_fun :=
   begin
-    apply continuous_induced_rng,
+    rw continuous_induced_rng,
     refine continuous.prod_mk (f.continuous _ (λ _, rfl)) (Filtration.cast_le M₁ c₁ c₂).continuous,
   end }
 
@@ -200,7 +200,7 @@ begin
   intros y,
   dsimp at y,
   obtain ⟨x, hx1, hx2⟩ := exists_sum N d _ _ y.2,
-  simp only [fst_to_fun, function.comp_app],
+  simp only [fst_apply, function.comp_app],
   refine ⟨⟨⟨y, ⟨x, _⟩⟩, _⟩, rfl⟩,
   { erw rescale.mem_filtration, refine filtration_mono h hx2 },
   { simp only [pseudo_normed_group.level, sum_hom_apply, subtype.coe_mk, ← hx1], refl },
@@ -241,7 +241,7 @@ begin
     suffices : function.surjective ((unop (op (fstₐ (sum_hom M N) _ c (k * c)))).hom),
     { intros i ε hε x hx, cases i,
       { simp only [nat.one_ne_zero, homological_complex.shape, complex_shape.up_rel,
-          exists_and_distrib_left, not_false_iff, normed_group_hom.zero_apply],
+          exists_and_distrib_left, not_false_iff, normed_add_group_hom.zero_apply],
         refine ⟨(prop819_degree_zero _ this _ x hx).symm, 0, _⟩,
         simp only [nnnorm_zero, zero_le'] },
       exact prop819 _ this _ ε hε x hx },

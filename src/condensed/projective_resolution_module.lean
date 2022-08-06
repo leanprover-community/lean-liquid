@@ -195,13 +195,10 @@ begin
       λ S, is_zero.iso (h S) is_zero_initial,
     symmetry,
     apply (colimit.is_colimit _).cocone_point_unique_up_to_iso (_ : is_colimit (as_empty_cocone _)),
-    haveI : creates_colimits FF :=
-      @Condensed_to_ExtrDisc_presheaf_creates_colimits.{u u+2} (@Module.{u+1 u+1} R _)
-        (@Module.Module_category.{u+1 u+1} R _) _ _
-        (@preadditive.preadditive_has_zero_morphisms.{u+1 u+2} (@Module.{u+1 u+1} R _)
-          (@Module.Module_category.{u+1 u+1} R _)
-          (@Module.category_theory.preadditive.{u+1 u+1} R _)) _ _,
-    apply is_colimit_of_reflects FF,
+    haveI : creates_colimits FF := @Condensed_to_ExtrDisc_presheaf_creates_colimits.{u u+2}
+        (@Module.{u+1 u+1} R _) (@Module.Module_category.{u+1 u+1} R _) _ _ _ _ _,
+    haveI := reflects_colimits_of_size_shrink.{0 u+1 0 u+1} FF,
+    apply (is_colimit_of_reflects.{0 0 (u+1) (u+1) (u+2) (u+2)} FF),
     apply evaluation_jointly_reflects_colimits,
     intros S,
     have := is_colimit_empty_cocone_equiv (Module R)

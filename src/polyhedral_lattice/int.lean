@@ -17,9 +17,8 @@ lemma int.sum_units_to_nat_smul (n : ℤ) :
   ∑ (i : units ℤ), int.to_nat (i * n) • (i : ℤ) = n :=
 begin
   rw [units_int.univ, finset.sum_insert], swap, dec_trivial,
-  simp only [neg_mul, mul_one, int.nat_cast_eq_coe_nat, one_mul, nsmul_eq_mul,
-    units.coe_one, units.coe_neg_one, mul_neg, finset.sum_singleton,
-    ← sub_eq_add_neg, int.to_nat_sub_to_nat_neg],
+  simp only [neg_mul, mul_one, one_mul, nsmul_eq_mul, units.coe_one, units.coe_neg_one, mul_neg,
+    finset.sum_singleton, ←sub_eq_add_neg, int.to_nat_sub_to_nat_neg],
 end
 
 instance int.polyhedral_lattice : polyhedral_lattice ℤ :=

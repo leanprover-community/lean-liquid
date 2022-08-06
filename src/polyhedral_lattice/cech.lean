@@ -120,10 +120,10 @@ end
 
 def obj := (fin m →₀ Λ') ⧸ (L f m)
 
-instance : normed_group (obj f m) :=
-add_subgroup.normed_group_quotient _
+instance : normed_add_comm_group (obj f m) :=
+add_subgroup.normed_add_comm_group_quotient _
 
-def π : normed_group_hom (fin m →₀ Λ') (obj f m) :=
+def π : normed_add_group_hom (fin m →₀ Λ') (obj f m) :=
 (L f m).normed_mk
 
 lemma π_apply_eq_zero_iff (x : fin m →₀ Λ') : π f m x = 0 ↔ x ∈ L f m :=
@@ -141,7 +141,7 @@ begin
 end
 
 lemma π_is_quotient : (π f m).is_quotient :=
-normed_group_hom.is_quotient_quotient _
+normed_add_group_hom.is_quotient_quotient _
 
 instance [fact f.to_add_monoid_hom.range.saturated] : polyhedral_lattice (obj f m) :=
 by { delta obj, apply_instance }
@@ -388,7 +388,7 @@ begin
   have H2 := conerve.map_add_hom_π f (g₂.to_order_hom) (finsupp.single 0 (f l)),
   refine H1.trans (eq.trans _ H2.symm), clear H1 H2,
   simp only [finsupp.map_domain_single, finsupp.map_domain.add_monoid_hom_apply],
-  rw [← sub_eq_zero, ← normed_group_hom.map_sub, conerve.π_apply_eq_zero_iff],
+  rw [← sub_eq_zero, ← _root_.map_sub, conerve.π_apply_eq_zero_iff],
   refine ⟨_, λ i, _⟩,
   { simp only [finsupp.sub_apply, finset.sum_sub_distrib, sub_eq_zero, finsupp.single_apply,
       finset.sum_ite_eq, finset.mem_univ, if_true], },
@@ -417,7 +417,7 @@ begin
   refine H1.trans (eq.trans _ H2.symm), clear H1 H2,
   show (conerve.π f 2) _ = (conerve.π f 2) _,
   simp only [finsupp.map_domain_single, finsupp.map_domain.add_monoid_hom_apply],
-  rw [← sub_eq_zero, ← normed_group_hom.map_sub, conerve.π_apply_eq_zero_iff],
+  rw [← sub_eq_zero, ← _root_.map_sub, conerve.π_apply_eq_zero_iff],
   have hδ0 : hom.to_order_hom (δ (0 : fin 2)) 0 = 1 := rfl,
   have hδ1 : hom.to_order_hom (δ (1 : fin 2)) 0 = 0 := rfl,
   erw [hδ0, hδ1],

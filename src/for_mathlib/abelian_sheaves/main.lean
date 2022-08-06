@@ -44,22 +44,37 @@ end parallel_pair
 
 section kernels
 
-variables [limits.has_zero_morphisms A]
+--variables [limits.has_zero_morphisms A]
 -- TODO: Add some instances that derive the following from `[has_kernels A]`.
-variables [limits.has_limits_of_shape.{_ (max v u)} limits.walking_parallel_pair A]
+--variables [limits.has_limits_of_shape limits.walking_parallel_pair A]
+variables [limits.has_finite_limits A]
+
+instance has_finite_limits : limits.has_finite_limits (Sheaf J A) :=
+begin
+  apply limits.has_finite_limits_of_has_finite_limits_of_size.{max v u},
+  introsI K _ _,
+  apply_instance,
+end
+
+instance preserves_finite_limits : limits.preserves_finite_limits (Sheaf_to_presheaf J A) :=
+begin
+  apply limits.preserves_finite_limits_of_preserves_finite_limits_of_size.{max v u},
+  introsI K _ _,
+  apply_instance,
+end
+
+variables [limits.has_zero_morphisms A]
+
+def kernel_iso {F G : Sheaf J A} (η : F ⟶ G) :
+  (Sheaf_to_presheaf J A).obj (limits.kernel η) ≅
+  limits.kernel ((Sheaf_to_presheaf J A).map η) :=
+limits.preserves_kernel.iso (Sheaf_to_presheaf J A) η
 
 def kernel_sheaf {F G : Sheaf J A} (η : F ⟶ G) : Sheaf J A :=
 { val := limits.kernel.{(max v u)} ((Sheaf_to_presheaf J A).map η),
   cond := begin
-    haveI : limits.has_limit (limits.parallel_pair η 0 ⋙ Sheaf_to_presheaf J A) := begin
-      apply limits.has_limit_of_iso (parallel_pair_iso _ _).symm,
-      apply_instance,
-    end,
-    let e : limits.limit (limits.parallel_pair η 0 ⋙ Sheaf_to_presheaf J A) ≅
-      limits.kernel η.val := limits.has_limit.iso_of_nat_iso (parallel_pair_iso _ _),
-    apply presheaf.is_sheaf_of_iso J e.symm,
-    apply is_sheaf_of_is_limit,
-    apply limits.limit.is_limit,
+    apply presheaf.is_sheaf_of_iso J (kernel_iso η).symm,
+    exact Sheaf.cond _,
   end }
 
 def kernel_ι {F G : Sheaf J A} (η : F ⟶ G) : kernel_sheaf η ⟶ F :=
@@ -117,9 +132,10 @@ end kernels
 
 section cokernels
 
-variables [limits.has_zero_morphisms A]
+--variables [limits.has_zero_morphisms A]
 -- TODO: Add some instances that derive the following from `[has_cokernels A]`.
-variables [limits.has_colimits_of_shape.{_ (max v u)} limits.walking_parallel_pair A]
+--variables [limits.has_colimits_of_shape.{_ (max v u)} limits.walking_parallel_pair A]
+variables [limits.has_finite_colimits A]
 
 -- We will need to sheafify....
 variables [concrete_category.{max v u} A]
@@ -128,6 +144,15 @@ variables [limits.preserves_limits (forget A)]
 variables [∀ (X : C), limits.has_colimits_of_shape (J.cover X)ᵒᵖ A]
 variables [∀ (X : C), limits.preserves_colimits_of_shape (J.cover X)ᵒᵖ (forget A)]
 variables [reflects_isomorphisms (forget A)]
+
+instance has_finite_colimits : limits.has_finite_colimits (Sheaf J A) :=
+begin
+  apply limits.has_finite_colimits_of_has_finite_colimits_of_size.{max v u},
+  introsI K _ _,
+  apply_instance,
+end
+
+variables [limits.has_zero_morphisms A]
 
 def cokernel_sheaf {F G : Sheaf J A} (η : F ⟶ G) : Sheaf J A :=
 { val := J.sheafify (limits.cokernel ((Sheaf_to_presheaf J A).map η)), -- ;-)
@@ -191,10 +216,10 @@ end cokernels
 
 section kernels_and_cokernels
 
-variables [limits.has_zero_morphisms A]
 -- TODO: use has kernels and cokernels, when possible... see above
-variables [limits.has_colimits_of_shape.{_ (max v u)} limits.walking_parallel_pair A]
-variables [limits.has_limits_of_shape.{_ (max v u)} limits.walking_parallel_pair A]
+--variables [limits.has_colimits_of_shape.{_ (max v u)} limits.walking_parallel_pair A]
+--variables [limits.has_limits_of_shape.{_ (max v u)} limits.walking_parallel_pair A]
+variables [limits.has_zero_morphisms A] [limits.has_finite_limits A] [limits.has_finite_colimits A]
 
 -- We will need to sheafify....
 variables [concrete_category.{max v u} A]
@@ -365,14 +390,14 @@ end preadditive
 
 section additive
 
-variable [additive_category A]
+variables [additive_category A] [limits.has_finite_limits A]
 
 instance : additive_category (Sheaf J A) :=
 { has_biproducts_of_shape := begin
-    introsI J _ _,
+    introsI K _,
     constructor,
     intros F,
-    apply limits.has_biproduct.of_has_product
+    apply limits.has_biproduct.of_has_product F,
   end,
   ..(by apply_instance : preadditive (Sheaf J A)) }
 

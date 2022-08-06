@@ -33,7 +33,7 @@ end category_theory
 
 open SemiNormedGroup opposite Profinite pseudo_normed_group category_theory breen_deligne
 open profinitely_filtered_pseudo_normed_group category_theory.limits
-open normed_group_hom
+open normed_add_group_hom
 
 namespace SemiNormedGroup
 
@@ -43,18 +43,18 @@ namespace equalizer
 
 def ι {V W : SemiNormedGroup} (f g : V ⟶ W) :
   equalizer f g ⟶ V :=
-normed_group_hom.equalizer.ι _ _
+normed_add_group_hom.equalizer.ι _ _
 
 @[reassoc] lemma condition {V W : SemiNormedGroup} (f g : V ⟶ W) :
   ι f g ≫ f = ι f g ≫ g :=
-normed_group_hom.equalizer.comp_ι_eq _ _
+normed_add_group_hom.equalizer.comp_ι_eq _ _
 
 lemma ι_range {V W : SemiNormedGroup} (f g : V ⟶ W) :
   (ι f g).range = (f - g).ker :=
 begin
-  ext, rw [normed_group_hom.mem_range, normed_group_hom.mem_ker],
+  ext, rw [normed_add_group_hom.mem_range, normed_add_group_hom.mem_ker],
   split,
-  { rintro ⟨x, rfl⟩, rw [normed_group_hom.sub_apply], exact x.2 },
+  { rintro ⟨x, rfl⟩, rw [normed_add_group_hom.sub_apply], exact x.2 },
   { intro h, refine ⟨⟨x, h⟩, rfl⟩, }
 end
 
@@ -62,14 +62,14 @@ lemma ι_range' {V W : SemiNormedGroup} (f g : V ⟶ W) :
   (ι f g).range = (g - f).ker :=
 begin
   rw ι_range, ext x,
-  simp only [normed_group_hom.mem_ker, normed_group_hom.sub_apply, sub_eq_zero],
+  simp only [normed_add_group_hom.mem_ker, normed_add_group_hom.sub_apply, sub_eq_zero],
   rw eq_comm
 end
 
 def map {V₁ V₂ W₁ W₂ : SemiNormedGroup} {f₁ f₂ g₁ g₂} (φ : V₁ ⟶ V₂) (ψ : W₁ ⟶ W₂)
   (hf : φ ≫ f₂ = f₁ ≫ ψ) (hg : φ ≫ g₂ = g₁ ≫ ψ) :
   equalizer f₁ g₁ ⟶ equalizer f₂ g₂ :=
-normed_group_hom.equalizer.map _ _ hf.symm hg.symm
+normed_add_group_hom.equalizer.map _ _ hf.symm hg.symm
 
 lemma map_comp_ι {V₁ V₂ W₁ W₂ : SemiNormedGroup} {f₁ f₂ g₁ g₂} (φ : V₁ ⟶ V₂) (ψ : W₁ ⟶ W₂)
   (hf : φ ≫ f₂ = f₁ ≫ ψ) (hg : φ ≫ g₂ = g₁ ≫ ψ) :
@@ -102,13 +102,13 @@ by { ext, refl }
 lemma norm_map_le {V₁ V₂ W₁ W₂ : SemiNormedGroup} {f₁ f₂ g₁ g₂} {φ : V₁ ⟶ V₂} {ψ : W₁ ⟶ W₂}
   (hf : φ ≫ f₂ = f₁ ≫ ψ) (hg : φ ≫ g₂ = g₁ ≫ ψ) (C : ℝ) (hφ : ∥ι f₁ g₁ ≫ φ∥ ≤ C) :
   ∥map φ ψ hf hg∥ ≤ C :=
-normed_group_hom.equalizer.norm_map_le _ _ C hφ
+normed_add_group_hom.equalizer.norm_map_le _ _ C hφ
 
 @[simps obj map]
 protected def F {J} [category J] {V W : J ⥤ SemiNormedGroup} (f g : V ⟶ W) : J ⥤ SemiNormedGroup :=
 { obj := λ X, of ((f.app X).equalizer (g.app X)),
   map := λ X Y φ, equalizer.map (V.map φ) (W.map φ) (f.naturality _) (g.naturality _),
-  map_id' := λ X, by simp only [category_theory.functor.map_id]; exact normed_group_hom.equalizer.map_id,
+  map_id' := λ X, by simp only [category_theory.functor.map_id]; exact normed_add_group_hom.equalizer.map_id,
   map_comp' := λ X Y Z φ ψ, begin
     simp only [functor.map_comp],
     exact (map_comp_map _ _ _ _).symm
@@ -149,7 +149,7 @@ variables (f : M₁ ⟶ M₂) (g : M₂ ⟶ M₃)
 def CLCTinv (r : ℝ≥0) (V : SemiNormedGroup)
   [normed_with_aut r V] [fact (0 < r)] {A B : Profiniteᵒᵖ} (f g : A ⟶ B) :
   SemiNormedGroup :=
-SemiNormedGroup.of $ normed_group_hom.equalizer
+SemiNormedGroup.of $ normed_add_group_hom.equalizer
   ((CLC V).map f)
   ((CLC V).map g ≫ (CLC.T_inv r V).app B)
 
@@ -163,13 +163,13 @@ SemiNormedGroup.equalizer.ι _ _
 lemma ι_range (r : ℝ≥0) (V : SemiNormedGroup)
   [normed_with_aut r V] [fact (0 < r)] {A B : Profiniteᵒᵖ} (f g : A ⟶ B) :
   (ι r V f g).range =
-    normed_group_hom.ker ((CLC V).map f - ((CLC V).map g ≫ (CLC.T_inv r V).app B)) :=
+    normed_add_group_hom.ker ((CLC V).map f - ((CLC V).map g ≫ (CLC.T_inv r V).app B)) :=
 SemiNormedGroup.equalizer.ι_range _ _
 
 lemma ι_range' (r : ℝ≥0) (V : SemiNormedGroup)
   [normed_with_aut r V] [fact (0 < r)] {A B : Profiniteᵒᵖ} (f g : A ⟶ B) :
   (ι r V f g).range =
-    normed_group_hom.ker (((CLC V).map g ≫ (CLC.T_inv r V).app B) - (CLC V).map f) :=
+    normed_add_group_hom.ker (((CLC V).map g ≫ (CLC.T_inv r V).app B) - (CLC V).map f) :=
 SemiNormedGroup.equalizer.ι_range' _ _
 
 def map {A₁ B₁ A₂ B₂ : Profiniteᵒᵖ} (f₁ g₁ : A₁ ⟶ B₁) (f₂ g₂ : A₂ ⟶ B₂)
@@ -183,7 +183,7 @@ by rw [← category.assoc, ← functor.map_comp, h₂, functor.map_comp,
 lemma map_comp_ι {A₁ B₁ A₂ B₂ : Profiniteᵒᵖ} (f₁ g₁ : A₁ ⟶ B₁) (f₂ g₂ : A₂ ⟶ B₂)
   (ϕ : A₁ ⟶ A₂) (ψ : B₁ ⟶ B₂) (h₁ : ϕ ≫ f₂ = f₁ ≫ ψ) (h₂ : ϕ ≫ g₂ = g₁ ≫ ψ) :
   map r V f₁ g₁ f₂ g₂ ϕ ψ h₁ h₂ ≫ ι r V _ _ = ι _ _ _ _ ≫ (CLC V).map ϕ :=
-normed_group_hom.equalizer.ι_comp_map _ _
+normed_add_group_hom.equalizer.ι_comp_map _ _
 
 lemma map_norm_noninc {A₁ B₁ A₂ B₂ : Profiniteᵒᵖ} (f₁ g₁ : A₁ ⟶ B₁) (f₂ g₂ : A₂ ⟶ B₂)
   (ϕ : A₁ ⟶ A₂) (ψ : B₁ ⟶ B₂) (h₁ h₂) :
@@ -344,7 +344,7 @@ begin
   refine @is_closed.complete_space_coe _ (id _) (id _) _ _,
   { apply uniform_space.completion.complete_space },
   { refine is_closed_eq _ continuous_const,
-    apply normed_group_hom.continuous }
+    apply normed_add_group_hom.continuous }
 end
 
 /-- The functor that sends `M` and `c` to `V-hat((filtration M c)^n)^{T⁻¹}`,
@@ -405,7 +405,7 @@ begin
   rw [← this, CLC.T_inv_eq, nat_trans.comp_app, ← category.assoc ((CLC V).map _)],
   unfreezingI { subst c₃ },
   rw [← SemiNormedGroup.equalizer.condition_assoc, ← category.assoc],
-  refine normed_group_hom.norm_comp_le_of_le' 1 r r (mul_one ↑r).symm _ _,
+  refine normed_add_group_hom.norm_comp_le_of_le' 1 r r (mul_one ↑r).symm _ _,
   { apply CLC.norm_T_le },
   { apply norm_noninc.norm_noninc_iff_norm_le_one.1,
     exact (CLC.map_norm_noninc V _).comp equalizer.ι_norm_noninc }
@@ -541,7 +541,7 @@ lemma norm_eval_CLCFPTinv₂_le [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' *
   ∥(ϕ.eval_CLCFPTinv₂ r V r' c₁ c₂ c₃ c₄).app M∥ ≤ N :=
 begin
   apply SemiNormedGroup.equalizer.norm_map_le,
-  refine normed_group_hom.norm_comp_le_of_le' _ _ _ (mul_one _).symm _ _,
+  refine normed_add_group_hom.norm_comp_le_of_le' _ _ _ (mul_one _).symm _ _,
   { apply norm_eval_CLCFP_le, exact h },
   { apply norm_noninc.norm_noninc_iff_norm_le_one.1,
     exact equalizer.ι_norm_noninc }
@@ -614,7 +614,7 @@ begin
   rw ← aux,
   refine le_trans _ hr,
   rw mul_comm,
-  apply normed_group_hom.norm_comp_le_of_le,
+  apply normed_add_group_hom.norm_comp_le_of_le,
   { apply_mod_cast norm_eval_CLCFPTinv_le, exact hN },
   { haveI : fact (c' ≤ r' ^ k * c₁) := ⟨H⟩,
     rw nnreal.coe_pow,

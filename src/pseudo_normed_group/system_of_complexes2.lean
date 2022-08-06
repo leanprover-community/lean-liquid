@@ -65,7 +65,7 @@ def T_inv [normed_with_aut r V]
   (κ : ℝ≥0 → ℕ → ℝ≥0) [∀ c, BD.suitable (κ c)] [∀ (n : ℕ), fact (monotone (function.swap κ n))] :
   aux_system r' BD M V κ ⟶ aux_system r' BD M V κ :=
 { app := λ c,
-  { f := λ i, normed_group_hom.completion $ (SemiNormedGroup.LocallyConstant.map $ normed_with_aut.T.inv).app _,
+  { f := λ i, normed_add_group_hom.completion $ (SemiNormedGroup.LocallyConstant.map $ normed_with_aut.T.inv).app _,
     comm' := begin
       rintro i j (rfl : i + 1 = j),
       dsimp only [aux_system, functor.comp_obj, homological_complex.unop_functor,
@@ -166,7 +166,7 @@ begin
   rw [chain_complex.of_d],
   dsimp [FreeAb.eval, functor.map_FreeAb, functor.right_op_map, FPsystem.d,
     universal_map.eval_FP2, universal_map.eval_CLCFP, universal_map.eval_LCFP],
-  simp only [nat_trans.app_sum, map_sum, ← normed_group_hom_completion_hom_apply,
+  simp only [nat_trans.app_sum, map_sum, ← normed_add_group_hom_completion_hom_apply,
     category_theory.unop_sum],
   congr' 1,
   refine finset.sum_congr rfl _,

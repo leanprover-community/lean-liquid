@@ -79,7 +79,7 @@ lemma is_clopen_sUnion {H : Type*} [topological_space H]
 lemma clopen_finite_Union {H : Type*} [topological_space H]
   (s : finset(set H)) (hs : ∀ x ∈ s, is_clopen x) :
   is_clopen ⋃₀ (s : set(set H)) :=
-  by { rw set.sUnion_eq_bUnion, apply is_clopen_bUnion (set.to_finite _) hs }
+  by { rw set.sUnion_eq_bUnion, apply is_clopen_bUnion s.finite_to_set hs, }
 
 /-- Given a finite set of clopens, one can find a finite disjoint set of clopens contained in
   it. -/
@@ -93,8 +93,8 @@ lemma clopen_Union_disjoint {H : Type*} [topological_space H]
 begin
   classical,
   apply finset.induction_on' s,
-  { use ∅, simp only [finset.not_mem_empty, set.mem_empty_eq, forall_const, finset.coe_empty,
-      eq_self_iff_true, and_self, is_empty.forall_iff], },
+  { use ∅, simp only [finset.not_mem_empty, set.mem_empty_eq, forall_const,
+      finset.coe_empty, eq_self_iff_true, and_self, is_empty.forall_iff] },
   { rintros a S h's hS aS ⟨t, clo, union, sub, disj⟩,
     set b := a \ ⋃₀ S with hb,
     refine ⟨insert b t, _, _, ⟨λ x hx, _, λ x y hx hy ne, _⟩⟩,
@@ -254,7 +254,7 @@ abbreviation s1 := λ (x : s' ε f), (x.1 : set X)
 
 /-- The range of `s1` is finite. -/
 lemma fin : (set.range (s1 ε f)).finite :=
-by { apply set.finite_range _, exact finite.of_fintype ↥(s' ε f) }
+by { apply set.finite_range _, exact finite.of_fintype ↥(s' ε f), }
 
 /-- Any element in the range of `s1` is clopen. -/
 lemma is_clopen_x {x : set X} (hx : x ∈ (fin ε f).to_finset) : is_clopen x :=
@@ -311,7 +311,7 @@ begin
       (set.finite.to_finset (fin ε f)) (λ x hx, (is_clopen_x ε f hx)))).2.1,
     delta s1 at hs,
     suffices : a ∈ ⋃₀ (finset_clopen ε f : set(set X)),
-    { simp only [exists_prop, finset.mem_coe, set.mem_sUnion] at this,
+    { simp only [set.mem_sUnion, finset.mem_coe, exists_prop] at this,
       cases this with j hj, refine ⟨j, hj.1, hj.2⟩, },
     { rw finset_clopen,
       rw ←hs,

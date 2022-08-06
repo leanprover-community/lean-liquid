@@ -158,18 +158,25 @@ begin
         apply homological_complex.d_to_eq },
       { dsimp,
         rw [category.comp_id, category.id_comp],
-        rw homological_complex.d_from_eq _ (show (complex_shape.up ℤ).rel 0 1, from rfl),
+        erw homological_complex.d_from_eq _ (show (complex_shape.up ℤ).rel 0 1, from rfl),
         exact limits.zero_comp } },
     { ext,
-      dsimp [homology.map_iso, homological_complex.homology_functor_single],
+      dsimp only [homology.map_iso, homological_complex.homology_functor_single],
       rw [← cancel_epi (limits.kernel_subobject_iso _).hom, homology.π'_eq_π_assoc],
       simp only [homology.π'_desc', category.comp_id, homological_complex.hom.sq_from_left,
         limits.kernel_subobject_arrow_assoc, homology.π_desc, homology.map_desc,
         limits.kernel_subobject_map_arrow_assoc, arrow.iso_mk_hom_left,
         limits.kernel_subobject_map_arrow],
-      dsimp [chain_complex.single₀_comp_embed_iso_single,
+      dsimp only [chain_complex.single₀_comp_embed_iso_single,
         chain_complex.single₀_comp_embed_iso_single_component],
-      simp,
+      simp only [limits.kernel_subobject_map_arrow, limits.kernel_subobject_map_arrow_assoc, homological_complex.hom.sq_from_left,
+        homological_complex.hom.iso_of_components_hom_f, functor.comp_map, homology_functor_map, nat_iso.of_components.app,
+        eq_to_iso_refl, iso.trans_refl, iso.trans_hom, functor.map_iso_hom, homology.congr_hom, homology_zero_zero_hom,
+        homology.map_desc, homology.π_map_assoc, limits.kernel_zero_iso_source_hom, limits.kernel_subobject_arrow_assoc],
+      erw [homology.π_desc, limits.kernel_subobject_map_arrow_assoc],
+      simp only [homological_complex.hom.sq_from_left, limits.kernel_subobject_map_arrow_assoc, arrow.iso_mk_hom_left],
+      dsimp only [chain_complex.single₀_comp_embed_iso_single_component],
+      erw [iso.refl_hom, iso.refl_hom, category.id_comp, category.id_comp, category.comp_id], refl,
       apply_instance },
     { apply_instance } },
   { refine limits.is_zero.is_iso _ _ _; refine exact.homology_is_zero _ _ (exact_of_zero _ _), },
@@ -200,7 +207,8 @@ lemma _root_.homological_complex.shift_equiv_unit_app (i j : ℤ) (X : cochain_c
   homological_complex.hom.f ((shift_equiv _ i).unit.app X) j = (X.X_eq_to_iso $ by simp).hom :=
 begin
   dsimp [shift_equiv, unit_of_tensor_iso_unit],
-  simp [homological_complex.X_eq_to_iso],
+  simp only [homological_complex.X_eq_to_iso, eq_to_hom_map, eq_to_hom_app, eq_to_iso.hom,
+    homological_complex.eq_to_hom_f, eq_to_hom_trans, homological_complex.shift_μ_inv_app_f],
 end
 
 @[simp]
@@ -208,8 +216,10 @@ lemma _root_.homological_complex.shift_equiv_unit_inv_app (i j : ℤ) (X : cocha
   homological_complex.hom.f ((shift_equiv _ i).unit_inv.app X) j = (X.X_eq_to_iso $ by simp).hom :=
 begin
   dsimp [shift_equiv, unit_of_tensor_iso_unit],
-  simp [homological_complex.X_eq_to_iso],
+  simp only [homological_complex.X_eq_to_iso, eq_to_hom_map, eq_to_hom_app, eq_to_iso.hom,
+    homological_complex.eq_to_hom_f, homological_complex.shift_ε_inv_app_f, eq_to_hom_trans],
 end
+
 @[simp]
 lemma _root_.category_theory.equivalence.symm_to_adjunction_unit {C D : Type*} [category C]
   [category D] (e : C ≌ D) : e.symm.to_adjunction.unit = e.counit_inv := rfl
@@ -219,7 +229,8 @@ lemma _root_.homological_complex.shift_equiv_counit_app (i j : ℤ) (X : cochain
   homological_complex.hom.f ((shift_equiv _ i).counit.app X) j = (X.X_eq_to_iso $ by simp).hom :=
 begin
   dsimp [shift_equiv, unit_of_tensor_iso_unit],
-  simpa [homological_complex.X_eq_to_iso],
+  simp only [homological_complex.X_eq_to_iso, eq_to_hom_map, eq_to_hom_app, eq_to_iso.hom,
+    homological_complex.eq_to_hom_f, homological_complex.shift_ε_inv_app_f, eq_to_hom_trans],
 end
 
 @[simp]
@@ -227,7 +238,10 @@ lemma _root_.homological_complex.shift_equiv_counit_inv_app (i j : ℤ) (X : coc
   homological_complex.hom.f ((shift_equiv _ i).counit_inv.app X) j = (X.X_eq_to_iso $ by simp).hom :=
 begin
   dsimp [shift_equiv, unit_of_tensor_iso_unit],
-  simpa [homological_complex.X_eq_to_iso],
+  simpa only [homological_complex.X_eq_to_iso, eq_to_hom_map, eq_to_hom_app, eq_to_iso.hom,
+    add_neg_equiv_counit_iso_inv, nat_trans.comp_app, homological_complex.comp_f,
+    homological_complex.shift_ε_hom_app_f, homological_complex.eq_to_hom_f,
+    homological_complex.shift_μ_inv_app_f, eq_to_hom_trans],
 end
 
 variable [enough_projectives C]
@@ -318,7 +332,7 @@ namespace AddCommGroup
 
 -- We only need `G` to preserve epimorphisms, but we don't have such a class.
 lemma preserves_projectives {C D : Type*} [category C] [category.{v} D] {F : C ⥤ D} {G : D ⥤ C}
-  (adj : F ⊣ G) [preserves_colimits_of_shape walking_span.{v} G] (P : C) [projective P] :
+  (adj : F ⊣ G) [preserves_colimits_of_shape walking_span G] (P : C) [projective P] :
     projective (F.obj P) :=
 begin
   constructor,
@@ -332,11 +346,11 @@ instance {C D : Type*} [category C] [category D] {F : C ⥤ D}
   {G : D ⥤ C} (adj : F ⊣ G) [faithful G] (X : D) : epi (adj.counit.app X) :=
 begin
   haveI : split_epi (G.map (adj.counit.app X)) := ⟨_, adj.right_triangle_components⟩,
-  exact faithful_reflects_epi G infer_instance
+  exact G.epi_of_epi_map infer_instance
 end
 
 lemma enough_projectives_of_adjoint {C D : Type*} [category C] [category.{v} D] {F : C ⥤ D}
-  {G : D ⥤ C} (adj : F ⊣ G) [preserves_colimits_of_shape walking_span.{v} G] [faithful G]
+  {G : D ⥤ C} (adj : F ⊣ G) [preserves_colimits_of_shape walking_span G] [faithful G]
   [enough_projectives C] : enough_projectives D :=
 begin
   haveI : is_left_adjoint F := ⟨_, adj⟩,
@@ -375,6 +389,8 @@ end
 noncomputable theory
 variable (n : ℕ)
 
+-- move me (the rest of the file)
+
 def zmod_resolution : chain_complex AddCommGroup ℕ :=
 chain_complex.mk' (of ℤ) (of ℤ) (n • 𝟙 _) (λ _, ⟨0, 0, zero_comp⟩)
 
@@ -382,7 +398,7 @@ example : (zmod_resolution n).X 0 = of ℤ := rfl
 
 def zmod_resolution_pi_f :
   Π (i : ℕ), (zmod_resolution n).X i ⟶ ((chain_complex.single₀ AddCommGroup).obj (of $ zmod n)).X i
-| 0     := show of ℤ ⟶ of (zmod n), from @int.cast_add_hom _ _ ⟨(1 : zmod n)⟩
+| 0     := show of ℤ ⟶ of (zmod n), from (int.cast_ring_hom (zmod n)).to_add_monoid_hom
 | (i+1) := 0
 
 def zmod_resolution_pi :
@@ -393,11 +409,13 @@ def zmod_resolution_pi :
     { ext k, dsimp [zmod_resolution_pi_f, zmod_resolution],
       simp only [zero_apply, fin.coe_zero, comp_apply, int.coe_cast_add_hom],
       simp only [chain_complex.mk'_d_1_0, add_monoid_hom.coe_smul, pi.smul_apply, id_apply,
-        nsmul_one, int.nat_cast_eq_coe_nat, int.coe_nat_bit0, int.coe_nat_succ, int.coe_nat_zero,
-        zero_add, int.cast_bit0, int.cast_one],
-      exact (zmod.nat_cast_self n).symm },
+        nsmul_one, int.coe_nat_bit0, int.coe_nat_succ, int.coe_nat_zero, zero_add, int.cast_bit0,
+        int.cast_one, map_nsmul],
+      simp only [ring_hom.coe_add_monoid_hom, ring_hom.eq_int_cast, int.cast_one, nsmul_one, zmod.nat_cast_self], },
     { exact comp_zero.trans comp_zero.symm }
   end }
+
+local attribute [-instance] limits.has_smallest_colimits_of_has_colimits
 
 instance : projective (AddCommGroup.of ℤ) :=
 preserves_projectives (functor.as_equivalence (forget₂ (Module ℤ) AddCommGroup)).to_adjunction
@@ -454,39 +472,5 @@ lemma zmod.nsmul_eq_zero (k : zmod n) : n • k = 0 := by norm_num
   left_inv := λ x, rfl,
   right_inv := by { rintro ⟨x, hx⟩, refl },
   map_add' := λ x y, rfl }
-
-def Ext_zmod (hn : n ≠ 0) :
-  ((Ext' 1).obj (op $ of $ zmod n)).obj (of $ zmod n) ≅ of (zmod n) :=
-begin
-  refine Ext'_iso (op $ of $ zmod n) (of $ zmod n) 1 (zmod_resolution n) (zmod_resolution_pi n)
-    (zmod_resolution_is_resolution n hn) ≪≫
-      (homology_iso _ 0 (-1) (-2) rfl rfl) ≪≫ _,
-  refine (AddCommGroup.homology_iso _ _ _) ≪≫ _,
-  refine add_equiv_iso_AddCommGroup_iso.hom _,
-  refine add_equiv.surjective_congr _ (quotient_add_group.mk' _) (add_monoid_hom.id _)
-    (quot.mk_surjective _) function.surjective_id _,
-  refine (add_equiv.add_subgroup_congr _).trans _,
-  { exact ⊤ },
-  { convert add_monoid_hom.ker_zero using 2,
-    refine is_zero.eq_of_tgt _ _ _,
-    refine AddCommGroup.is_zero_of_eq _ _,
-    intros f g,
-    apply category_theory.limits.has_zero_object.from_zero_ext, },
-  { refine (add_subgroup.equiv_top _).symm.trans (zmultiples_add_hom _).symm, },
-  { simp only [add_monoid_hom.ker_zero, quotient_add_group.ker_mk,
-     functor.map_homological_complex_obj_d, homological_complex.op_d],
-    ext ⟨f, hf⟩,
-    simp only [add_subgroup.mem_comap, add_equiv.coe_to_add_monoid_hom, add_equiv.coe_trans,
-      function.comp_app, zmultiples_add_hom_symm_apply, add_subgroup.coe_subtype,
-      add_subgroup.coe_mk, add_monoid_hom.mem_range],
-    simp only [add_subgroup.equiv_top_symm_apply, add_monoid_hom.mem_ker],
-    dsimp [add_equiv.add_subgroup_congr, zmod_resolution],
-    split,
-    { intro hf1, refine ⟨0, comp_zero.trans _⟩, ext1, exact hf1.symm },
-    { intro H, cases H with g hg, rw [← hg, coe_comp],
-      convert g.map_nsmul _ _ using 1,
-      simp only [eq_to_hom_refl, id_apply, zmod.nsmul_eq_zero] } }
-end
-
 
 end AddCommGroup

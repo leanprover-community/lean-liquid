@@ -12,7 +12,7 @@ namespace category_theory
 
 namespace endomorphisms
 
-variables (𝓐 : Type u) [category.{v} 𝓐] [abelian 𝓐] [has_coproducts 𝓐] [AB4 𝓐]
+variables (𝓐 : Type u) [category.{v} 𝓐] [abelian 𝓐] [has_coproducts.{v} 𝓐] [AB4 𝓐]
   [has_products_of_shape (ulift.{v} ℕ) 𝓐]
 
 instance : AB4 (endomorphisms 𝓐) :=
@@ -20,7 +20,7 @@ begin
   constructor, introsI α X Y f hf,
   let t := _, change mono t,
   suffices : mono ((endomorphisms.forget _).map t),
-  { resetI, apply category_theory.reflects_mono (endomorphisms.forget _) },
+  { refine (endomorphisms.forget _).mono_of_mono_map this, },
   let e₁ : (endomorphisms.forget 𝓐).obj (∐ λ (a : α), X a) ≅
     ∐ (λ a : α, (endomorphisms.forget _).obj (X a)) :=
     preserves_colimit_iso _ _ ≪≫ has_colimit.iso_of_nat_iso (discrete.nat_iso $ λ _, iso.refl _),
@@ -43,8 +43,7 @@ begin
   rw this,
   apply_with mono_comp { instances := ff }, apply_instance,
   apply_with mono_comp { instances := ff }, swap, apply_instance,
-  apply AB4.cond, intros a,
-  apply category_theory.preserves_mono (endomorphisms.forget _),
+  apply AB4.cond, intros a, apply_instance,
 end
 
 end endomorphisms

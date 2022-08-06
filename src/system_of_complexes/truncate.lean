@@ -89,7 +89,9 @@ def truncate : cochain_complex SemiNormedGroup.{u} ℕ ⥤ cochain_complex SemiN
   map_comp' := λ C₁ C₂ C₃ f g, by ext (n|n) ⟨x⟩; refl }
 
 instance truncate.additive : truncate.additive :=
-{ map_add' := by { intros, ext (n|n) ⟨⟩; refl } }
+{ map_add' := by { intros, ext (_|n) ⟨⟩;
+    simp only [truncate_map, truncate.map_f_2, homological_complex.add_f_apply, preadditive.comp_add,
+      truncate.map_f, explicit_cokernel.map, preadditive.add_comp, explicit_cokernel_π_desc], } }
 
 end SemiNormedGroup
 
@@ -138,14 +140,13 @@ begin
   obtain ⟨i₀, -, hi₀, rfl, y, hy⟩ := hC c hc _ (nat.succ_le_succ hi) x ε hε,
   obtain rfl : i₀ = 0, { rwa nat.sub_self at hi₀ }, clear hi,
   refine ⟨0, _, rfl, rfl, 0, _⟩,
-  simp only [normed_group_hom.map_zero, sub_zero,
-    normed_group_hom.map_neg, truncate_obj_d_zero_one, norm_neg],
+  simp only [map_zero, sub_zero, map_neg, truncate_obj_d_zero_one, norm_neg],
   calc _ = ∥π c (res x - C.d 0 1 y)∥ : _
   ... ≤ ∥res x - C.d 0 1 y∥ : SemiNormedGroup.norm_noninc_explicit_cokernel_π _ _
   ... ≤ _ : hy,
   have hπy : π c (C.d 0 1 y) = 0,
   { show (C.d 0 1 ≫ π c) y = 0, rw [SemiNormedGroup.comp_explicit_cokernel_π], refl },
-  simp only [normed_group_hom.map_sub, hπy, sub_zero], refl
+  simp only [_root_.map_sub, hπy, sub_zero], refl
 end
 | c hc (i+1) hi x ε hε :=
 begin
@@ -171,8 +172,7 @@ begin
     exact Hxx' },
   obtain ⟨_, _, rfl, rfl, y', H⟩ := hC c hc _ (nat.zero_le m) (π _ x) δ hδ,
   refine ⟨0, 2, rfl, rfl, y, _⟩,
-  simp only [d_self_apply, normed_group_hom.map_zero, sub_zero,
-    truncate_obj_d_zero_one, norm_neg] at H ⊢,
+  simp only [d_self_apply, map_zero, sub_zero, truncate_obj_d_zero_one, norm_neg] at H ⊢,
   calc ∥res x - (C.d 0 1) y∥ ≤ ∥x'∥ : by rw [hy, sub_sub_cancel]
   ... ≤ ∥π c (res x)∥ + δ : Hx'.le
   ... ≤ ↑K * ∥C.d 1 2 x∥ + δ + δ : add_le_add_right H _

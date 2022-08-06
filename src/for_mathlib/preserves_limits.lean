@@ -83,7 +83,7 @@ begin
   delta category_theory.functor.map_homological_complex_X_prev homological_complex.X_prev_iso,
   split_ifs,
   { injection h.symm.trans (c.prev_eq_some r) },
-  { simp }
+  { simp only [eq_to_hom_map, eq_to_iso.hom, eq_to_iso.inv, eq_to_hom_trans] }
 end
 
 noncomputable
@@ -111,7 +111,7 @@ begin
   delta category_theory.functor.map_homological_complex_X_next homological_complex.X_next_iso,
   split_ifs,
   { injection h.symm.trans (c.next_eq_some r) },
-  { simp }
+  { simp only [eq_to_hom_map, eq_to_iso.hom, eq_to_iso.inv, eq_to_hom_trans] }
 end
 
 lemma category_theory.functor.map_homological_complex_d_from (F : C ⥤ D) [F.additive]

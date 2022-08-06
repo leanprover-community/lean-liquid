@@ -17,7 +17,7 @@ of `pseudo_normed_group.with_Tinv`.
 noncomputable theory
 open_locale nnreal big_operators
 
-open pseudo_normed_group semi_normed_group
+open pseudo_normed_group seminormed_add_comm_group
 
 lemma int.one_mem_filtration : (1 : ℤ) ∈ filtration ℤ 1 :=
 by simp only [nnnorm_one, mem_filtration_iff]

@@ -99,9 +99,8 @@ def Top.to_Condensed (T : Top.{u}) : CondensedSet :=
           intros t,
           exact sum.rec_on t a.down b.down },
         { dsimp,
-          apply continuous_sup_dom,
-          { apply continuous_coinduced_dom, exact a.down.continuous },
-          { apply continuous_coinduced_dom, exact b.down.continuous } },
+          simp only [continuous_sup_dom, continuous_coinduced_dom],
+          exact ⟨a.down.continuous, b.down.continuous⟩ },
         { ext, refl, refl } } },
     { intros X B π hh,
       split,
@@ -213,7 +212,7 @@ instance preserves_finite_biproducts_Condensed_evaluation
   limits.preserves_finite_biproducts
   (Condensed.evaluation Ab.{u+1} S : Condensed.{u} Ab.{u+1} ⥤ Ab.{u+1}) :=
 begin
-  constructor, introsI J _ _,
+  constructor, introsI J _,
   apply preserves_biproducts_of_shape_of_preserves_products_of_shape,
 end
 

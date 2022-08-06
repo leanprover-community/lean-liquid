@@ -84,7 +84,7 @@ begin
   split,
   { intro hf, simpa only [mul_one] using hf int.one_mem_filtration },
   { intros hx c₁ n hn,
-    rw [semi_normed_group.mem_filtration_iff] at hn,
+    rw [seminormed_add_comm_group.mem_filtration_iff] at hn,
     have aux := pseudo_normed_group.int_smul_mem_filtration n _ c hx,
     rw [nnreal.coe_nat_abs] at aux,
     rw [← (HomZ_map_equiv M).symm_apply_apply f, HomZ_map_equiv_symm_apply,

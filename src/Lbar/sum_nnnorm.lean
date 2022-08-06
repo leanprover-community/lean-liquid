@@ -8,8 +8,8 @@ section families_of_add_comm_groups
 
 variables {S : Fintype} {α β : Type*}
 
---  Not needed anymore: the `semi_normed_group` instance has been removed
-lemma sum_nnnorm_add_le [semi_normed_group α] (F G : S → α) :
+--  Not needed anymore: the `seminormed_add_comm_group` instance has been removed
+lemma sum_nnnorm_add_le [seminormed_add_comm_group α] (F G : S → α) :
   ∥F + G∥₊ ≤ ∥F∥₊ + ∥G∥₊ :=
 show ∑ s, ∥F s + G s∥₊ ≤ ∑ s, ∥F s∥₊ + ∑ s, ∥G s∥₊, from
 le_trans (sum_le_sum (λ i hi, nnnorm_add_le _ _)) sum_add_distrib.le

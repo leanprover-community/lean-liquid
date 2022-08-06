@@ -735,8 +735,8 @@ end
 instance : has_add (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨add⟩
 instance : has_neg (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨neg⟩
 instance : has_sub (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨sub⟩
-instance has_nsmul : has_scalar ℕ (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨nsmul⟩
-instance has_zsmul : has_scalar ℤ (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨zsmul⟩
+instance has_nsmul : has_smul ℕ (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨nsmul⟩
+instance has_zsmul : has_smul ℤ (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨zsmul⟩
 
 instance : add_comm_group (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :=
 function.injective.add_comm_group
@@ -975,7 +975,7 @@ def pi_lift {N : Type*} [comphaus_filtered_pseudo_normed_group N]
   continuous' :=
   begin
     intros c₁ c₂ f₀ hf₀,
-    apply continuous_induced_rng,
+    rw continuous_induced_rng,
     apply continuous_pi,
     intro i,
     let g := function.eval i ∘ filtration_pi_homeo M c₂ ∘ f₀,

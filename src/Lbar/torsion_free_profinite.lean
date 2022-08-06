@@ -23,7 +23,7 @@ lemma limit_torsion_free_to_Ab
 begin
   let L := get_limit_cone _,
   haveI := AddCommGroup.forget_preserves_limits.{u u},
-  have h_inj := @concrete.to_product_injective_of_is_limit AddCommGroup.{u} _ _
+  have h_inj := @concrete.to_product_injective_of_is_limit.{u} AddCommGroup.{u} _ _
     C _ J _ L.cone L.is_limit,
   fconstructor,
   intros c x hx,

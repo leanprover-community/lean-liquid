@@ -14,8 +14,8 @@ noncomputable theory
 open filter set function normed_add_comm_group uniform_space normed_add_group_hom finset
 open_locale topological_space big_operators
 
-lemma controlled_exactness {M M₁ M₂ : Type*} [seminormed_add_comm_group M]
-  [seminormed_add_comm_group M₁] [seminormed_add_comm_group M₂]
+lemma controlled_exactness {M M₁ M₂ : Type*} [seminormed_add_comm_group M] [seminormed_add_comm_group M₁]
+  [seminormed_add_comm_group M₂]
   {f : normed_add_group_hom M₁ M} {C : ℝ} (hC : 0 < C) {D : ℝ}
   {g : normed_add_group_hom M M₂}
   (h : f.surjective_on_with g.ker C)
@@ -25,8 +25,7 @@ begin
   intros ε ε_pos hatm hatm_in,
   by_cases H : hatm = 0,
   { use 0,
-    simp only [H, norm_zero, mul_zero, le_refl, and_true],
-    exact add_monoid_hom.map_zero _ },
+    simp only [H, le_refl, norm_zero, eq_self_iff_true, and_self, mul_zero, map_zero], },
   set hatf := f.completion,
   set i := incl g.ker,
 

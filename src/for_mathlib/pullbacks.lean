@@ -58,6 +58,8 @@ def equivalence.pullback_cone : cone (cospan f g) :=
       { tidy }
     end } } .
 
+attribute [reassoc] equivalence.unit_inverse_comp
+
 -- This is a mess :-(
 -- Please fix before moving this file to mathlib!
 def equivalence.is_limit_pullback_cone : limits.is_limit (e.pullback_cone f g) :=
@@ -113,22 +115,18 @@ def equivalence.is_limit_pullback_cone : limits.is_limit (e.pullback_cone f g) :
     apply pullback.hom_ext,
     { simp only [functor.map_comp, pullback.lift_fst, iso.app_hom, iso.app_inv, category.assoc],
       specialize h walking_cospan.left,
-      dsimp [equivalence.pullback_cone._match_1] at h,
       rw ← h,
       simp only [functor.map_comp, equivalence.inv_fun_map, category.assoc,
-        equivalence.unit_inverse_comp, category.comp_id],
-      simp_rw ← category.assoc,
-      congr' 2,
-      simp only [equivalence.unit_inverse_comp], erw category.id_comp, },
+        equivalence.unit_inverse_comp_assoc, category.comp_id,
+        equivalence.pullback_cone, equivalence.pullback_cone_π_app, functor.map_comp,
+        equivalence.unit_inverse_comp], },
     { simp only [functor.map_comp, pullback.lift_snd, iso.app_hom, iso.app_inv, category.assoc],
       specialize h walking_cospan.right,
-      dsimp [equivalence.pullback_cone._match_1] at h,
       rw ← h,
       simp only [functor.map_comp, equivalence.inv_fun_map, category.assoc,
-        equivalence.unit_inverse_comp, category.comp_id],
-      simp_rw ← category.assoc,
-      congr' 2,
-      simp only [equivalence.unit_inverse_comp], erw category.id_comp }
+        equivalence.unit_inverse_comp_assoc, category.comp_id,
+        equivalence.pullback_cone, equivalence.pullback_cone_π_app, functor.map_comp,
+        equivalence.unit_inverse_comp], }
   end } .
 
 include e

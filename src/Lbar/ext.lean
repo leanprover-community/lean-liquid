@@ -32,7 +32,7 @@ def Tinv_sub (S : Profinite.{u}) (V : SemiNormedGroup.{u}) [normed_with_aut r V]
   ((Ext' i).obj (op $ (Lbar.condensed.{u} r').obj S)).obj V.to_Cond :=
 ((Ext' i).map ((condensify_Tinv _).app S).op).app _ -
 ((Ext' i).obj _).map (Condensed.of_top_ab_map (normed_with_aut.T.inv).to_add_monoid_hom
-  (normed_group_hom.continuous _))
+  (normed_add_group_hom.continuous _))
 
 -- move me
 attribute [simps] Condensed.of_top_ab_map
@@ -41,6 +41,12 @@ variables (S : Profinite.{0}) (V : SemiNormedGroup.{0})
 variables [complete_space V] [separated_space V]
 variables (r')
 
+-- TODO(!): TC loop? using "by apply_instance" causes a maximum TC error
+instance (X : Profinite.{0}) :
+  preserves_limits_of_shape.{0 0 0 0 1 1}
+  (discrete_quotient.{0} ↥X) (PFPNGT₁_to_CHFPNG₁ₑₗ.{0} r') := {}
+
+set_option pp.universes true
 def condensify_iso_extend :
   condensify (Fintype_Lbar.{0 0} r' ⋙ PFPNGT₁_to_CHFPNG₁ₑₗ r') ≅
   (Profinite.extend (Fintype_Lbar.{0 0} r')) ⋙
@@ -287,7 +293,7 @@ begin
     nat_trans.app_nsmul,  category_theory.op_nsmul, two_nsmul, nat_trans.id_app, op_id,
     functor.map_sub, functor.map_add, category_theory.functor.map_id],
   convert is_iso_Tinv_sub r r' S V i using 2,
-  suffices : Condensed.of_top_ab_map (normed_group_hom.to_add_monoid_hom normed_with_aut.T.inv) _ =
+  suffices : Condensed.of_top_ab_map (normed_add_group_hom.to_add_monoid_hom normed_with_aut.T.inv) _ =
     2 • 𝟙 _,
   { rw [this, two_nsmul, functor.map_add, category_theory.functor.map_id], refl, },
   ext T f t,

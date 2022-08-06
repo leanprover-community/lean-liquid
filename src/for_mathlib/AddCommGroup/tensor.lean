@@ -491,7 +491,7 @@ begin
   suffices : ∀ i, mono (η.app i),
   { resetI, apply mono_colim_map_of_mono },
   intros i,
-  obtain ⟨α, _, e, -⟩ := exists_sigma_iso_of_index _ i, resetI,
+  obtain ⟨α : Type u, _, e, -⟩ := exists_sigma_iso_of_index _ i, resetI,
   change mono ((tensor_functor.obj (of i.val)).map f),
   clear eX eY,
   let eX : ((tensor_functor.obj (of i.val)).obj X) ≅

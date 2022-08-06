@@ -368,20 +368,20 @@ end
 instance chpng_real_measures : comphaus_filtered_pseudo_normed_group (ℳ p S) :=
 { continuous_add' := begin
     intros c₁ c₂,
-    apply continuous_induced_rng,
+    rw continuous_induced_rng,
     simp only [function.comp, pseudo_normed_group.add'_eq],
     exact (continuous_subtype_val.comp continuous_fst).add
           (continuous_subtype_val.comp continuous_snd),
   end,
   continuous_neg' := begin
     intros c,
-    apply continuous_induced_rng,
+    rw continuous_induced_rng,
     simp only [function.comp, pseudo_normed_group.neg'_eq],
     exact continuous_subtype_val.neg,
   end,
   continuous_cast_le := begin
     introsI c₁ c₂ h,
-    apply continuous_induced_rng,
+    rw continuous_induced_rng,
     simp only [function.comp, pseudo_normed_group.coe_cast_le],
     exact continuous_subtype_val,
   end,
@@ -399,7 +399,8 @@ def map_hom [fact (0 < p)] (f : S ⟶ S') :
   map_add' := λ F G, by { ext s i, simp only [finset.sum_add_distrib, add_apply, map_apply], },
   strict' := λ c F hF, (map_bound _ _).trans hF,
   continuous' := λ c, begin
-    refine continuous_induced_rng (continuous_pi _),
+    rw continuous_induced_rng,
+    apply continuous_pi _,
     intro s',
     simp only [function.comp, map_apply],
     refine continuous.sum' _ _ _,

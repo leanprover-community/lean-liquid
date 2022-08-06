@@ -5,6 +5,7 @@ import linear_algebra.free_module.basic
 
 open_locale big_operators
 
+open order
 
 section finset
 
@@ -114,7 +115,7 @@ variables {o : ordinal} {a : {i // i < o} → R}
 lemma support_remove
   {i : ordinal}
   {j_good : { i // a i ≠ 0}}
-  (hj: j_good.1.1.succ = i)
+  (hj: succ j_good.1.1 = i)
   {l l': {i // a i ≠ 0} →₀ R}
   (hsupp: ((l.support) : set { i // a i ≠ 0}) ⊆ λ (x : {i // a i ≠ 0}), x.1.1 < i)
   (hl' : l' = l + finsupp.single j_good (-(l j_good))) :
@@ -148,7 +149,7 @@ begin
     have hx' := hx₁,
     rw l'.3 x at hx',
     rw this at hx',
-    have hxi : j_good.1.1.succ ≤ x.1.1 := succ_order.succ_le_of_lt h_1,
+    have hxi : succ j_good.1.1 ≤ x.1.1 := succ_order.succ_le_of_lt h_1,
     rw hj at hxi,
     have := not_mem_subset hsupp (not_lt_of_ge hxi),
     have := mt (l.3 x).2 this,
@@ -175,14 +176,14 @@ begin
   { let m := l.support.max' hemp,
     dsimp at hsupp,
     have hm₀ : ↑↑m < i := by exact_mod_cast mem_of_subset_of_mem hsupp (finset.max'_mem l.support hemp),
-    have hm : m.1.1.succ < i := (ordinal.succ_lt_of_is_limit hlim).2 hm₀,
-    have hmo : m.1.1.succ ≤ o := le_of_lt (lt_of_lt_of_le hm hio),
-    have hsub : (l.support : set good) ⊆ (λ x : good, x.1.1 < m.1.1.succ),
+    have hm : succ m.1.1 < i := (ordinal.succ_lt_of_is_limit hlim).2 hm₀,
+    have hmo : succ m.1.1 ≤ o := le_of_lt (lt_of_lt_of_le hm hio),
+    have hsub : (l.support : set good) ⊆ (λ x : good, x.1.1 < succ m.1.1),
     intros x hx,
     have hx : x ∈ l.support := hx,
     have : x.1.1 ≤ m.1.1 := finset.le_max' l.support x hx,
     exact order.lt_succ_iff.2 this,
-    exact H m.1.1.succ hm hmo l hsub hl
+    exact H (succ m.1.1) hm hmo l hsub hl
   },
   { rw finset.not_nonempty_iff_eq_empty at hemp,
     exact finsupp.support_eq_empty.1 hemp
@@ -212,14 +213,14 @@ begin
   { let m := l.support.max' hemp,
     dsimp at hsupp,
     have hm₀ : ↑m < i := by exact_mod_cast mem_of_subset_of_mem hsupp (finset.max'_mem l.support hemp),
-    have hm : m.1.succ < i := (ordinal.succ_lt_of_is_limit hlim).2 hm₀,
-    have hmo : m.1.succ ≤ o := le_of_lt (lt_of_lt_of_le hm hio),
-    have hsub : (l.support : set ords) ⊆ (λ x : ords, x.1 < m.1.succ),
+    have hm : succ m.1 < i := (ordinal.succ_lt_of_is_limit hlim).2 hm₀,
+    have hmo : succ m.1 ≤ o := le_of_lt (lt_of_lt_of_le hm hio),
+    have hsub : (l.support : set ords) ⊆ (λ x : ords, x.1 < succ m.1),
     intros x hx,
     have hx : x ∈ l.support := hx,
     have : x.1 ≤ m.1 := finset.le_max' l.support x hx,
     exact order.lt_succ_iff.2 this,
-    exact H m.1.succ hm hmo l hsub hl
+    exact H (succ m.1) hm hmo l hsub hl
   },
   { rw finset.not_nonempty_iff_eq_empty at hemp,
     simp only [finsupp.support_eq_empty.1 hemp, _root_.map_zero, zero_mem]
@@ -257,11 +258,11 @@ begin
   rcases (hlim hi) with ⟨j, hj⟩,
   have hji : j < i := hj.1,
   have hjo : j < o := lt_of_lt_of_le hji hio,
-  have hj : j.succ = i := le_antisymm (ordinal.succ_le.2 hj.1) hj.2,
+  have hj : succ j = i := le_antisymm (succ_le_iff.2 hj.1) hj.2,
 
-  have not_j_lt_x : ∀ (x : good), ∀ (j : ordinal), x ∈ l.support → j < x.1.1 → j.succ = i → false,
+  have not_j_lt_x : ∀ (x : good), ∀ (j : ordinal), x ∈ l.support → j < x.1.1 → succ j = i → false,
   { intros x j hx h_1 hj,
-    have hi : j.succ ≤ x := succ_order.succ_le_of_lt h_1,
+    have hi : succ j ≤ x := succ_order.succ_le_of_lt h_1,
     rw hj at hi,
     have hi' := mem_of_subset_of_mem hsupp hx,
     have hi' : ↑↑x < i := hi',
@@ -275,7 +276,7 @@ begin
     by_cases hjsupp : j_good ∈ l.support,
     { let l' := l + finsupp.single j_good (-(l j_good)),
       have hsupp' : (l'.support : set good) ⊆ (λ x : good, x.1.1 < j),
-      { have : j_good.1.1.succ = i := hj,
+      { have : succ j_good.1.1 = i := hj,
         exact support_remove this hsupp rfl
       },
       let lB := Exists.some (hB_BB j l' hsupp'),
@@ -366,7 +367,7 @@ lemma span_succ
   (hsupp : (l.support : set {i // i < o}) ⊆ (λ x, x.1 < i))
   (hl : finsupp.total { i // i < o} M R B l ∈ N)
   (hBB : ∀ i, ((B.repr (BB i)).support : set {i // i < o}) ⊆ (λ x, x.1 ≤ i))
-  (hc : ∀ j : {i // i < o}, (i = j.1.succ) →
+  (hc : ∀ j : {i // i < o}, (i = succ j.1) →
     ∃ r : R, (B.coord j) (finsupp.total {i // i < o} M R B l) = r •  a j)
    (hBBN : ∀ i, BB i ∈ N)
   (hBBa : ∀ j : { i // a i ≠ 0}, (B.coord j) (BB j) = a j) :
@@ -381,11 +382,11 @@ begin
   rcases (hlim hi) with ⟨j, hj⟩,
   have hji : j < i := hj.1,
   have hjo : j < o := lt_of_lt_of_le hji hio,
-  have hj : j.succ = i := le_antisymm (ordinal.succ_le.2 hj.1) hj.2,
+  have hj : succ j = i := le_antisymm (succ_le_iff.2 hj.1) hj.2,
 
-  have not_j_lt_x : ∀ (x : ords), ∀ (j : ordinal), x ∈ l.support → j < x.1 → j.succ = i → false,
+  have not_j_lt_x : ∀ (x : ords), ∀ (j : ordinal), x ∈ l.support → j < x.1 → succ j = i → false,
   { intros x j hx h_1 hj,
-    have hi : j.succ ≤ x := succ_order.succ_le_of_lt h_1,
+    have hi : succ j ≤ x := succ_order.succ_le_of_lt h_1,
     rw hj at hi,
     have hi' := mem_of_subset_of_mem hsupp hx,
     have hi' : ↑x < i := hi',
@@ -407,7 +408,7 @@ begin
       have hsupp₀ : (l'.support : set {i // i < o}) ⊆ (λ x, x.1 < i),
       { have hBBj := hBB j_good,
         have hBBj' : (B.repr) (BB j_good) ∈ finsupp.supported R R (λ (x : ords), x.val < i),
-        have hx : ∀ x : ords, x.1 ≤ j → x.1 < j.succ := λ x p, lt_of_le_of_lt p (ordinal.lt_succ_self j),
+        have hx : ∀ x : ords, x.1 ≤ j → x.1 < succ j := λ x p, lt_of_le_of_lt p (lt_succ j),
         rw hj at hx,
         intros y hy,
         have := mem_of_subset_of_mem hBBj hy,
@@ -443,7 +444,7 @@ begin
         have hx := mem_of_subset_of_mem hsupp₀ hx,
         have hx : x.1 < i := hx,
         rw ←hj at hx,
-        have := mt (not_covby_iff (ordinal.lt_succ_self j)).2 (not_not.2 (order.succ_eq_iff_covby.mp rfl)),
+        have := mt (not_covby_iff (lt_succ j)).2 (not_not.2 (order.succ_eq_iff_covby.mp rfl)),
         push_neg at this,
         have := not_lt_of_ge (this x h_1),
         contradiction
@@ -677,7 +678,7 @@ begin
   -- Prove lemmas about the data which are useful as hypotheses to the auxiliary lemmas above.
   have hc : ∀ i : ordinal, ∀ l : ords →₀ R, finsupp.total ords M R B l ∈ N →
     ((l.support : set ords) ⊆ (λ x, x.1 < i)) →
-    ∀ j : ords, (i = j.1.succ) →
+    ∀ j : ords, (i = succ j.1) →
     ∃ r : R, (B.coord j) (finsupp.total ords M R B l) = r •  a j,
   { intros i l hl hsupp j hij,
     have hI : (B.coord j) (⇑(finsupp.total ords M R ⇑B) l) ∈ ideal j,
@@ -748,9 +749,7 @@ begin
     rw [←ne.def, ←finsupp.mem_support_iff] at hx,
     have hx := mem_of_subset_of_mem hsupp hx,
     rw function.injective.mem_set_image (basis.injective b) at hx,
-    have henum := ordinal.enum_le_enum r x.2 i.1.2,
-    simp at henum,
-    apply henum.1,
+    apply (ordinal.enum_le_enum r x.2 i.1.2).1,
     assumption
   },
 

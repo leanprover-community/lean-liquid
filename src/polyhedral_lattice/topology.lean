@@ -7,7 +7,7 @@ open_locale nnreal big_operators
 
 namespace polyhedral_lattice
 
-open pseudo_normed_group normed_group
+open pseudo_normed_group normed_add_comm_group
 
 variables (Λ : Type*) [polyhedral_lattice Λ]
 
@@ -27,7 +27,7 @@ begin
   intro i,
   apply nat.succ_le_succ,
   contrapose! H,
-  simp only [not_le, semi_normed_group.mem_filtration_iff, h2],
+  simp only [not_le, seminormed_add_comm_group.mem_filtration_iff, h2],
   have aux : 0 < ∥l i∥₊,
   { rw [zero_lt_iff, ne.def, nnnorm_eq_zero], exact hl' i },
   calc ε
@@ -43,7 +43,7 @@ begin
     exact λ _ _, zero_le', }
 end
 
-open metric semi_normed_group
+open metric seminormed_add_comm_group
 
 instance : discrete_topology Λ :=
 discrete_topology_of_open_singleton_zero $

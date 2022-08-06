@@ -1,6 +1,6 @@
 import algebraic_topology.cech_nerve
 
-universe u
+universes v u
 
 noncomputable theory
 
@@ -10,12 +10,12 @@ namespace category_theory
 
 open category_theory.limits
 
-variables {C : Type*} [category C]
+variables {C : Type u} [category.{v} C]
 
 namespace simplicial_object
 
 variables [∀ (n : ℕ) (f : arrow C),
-  has_wide_pullback f.right (λ i : ulift (fin (n+1)), f.left) (λ i, f.hom)]
+  has_wide_pullback.{0} f.right (λ i : fin (n+1), f.left) (λ i, f.hom)]
 
 section
 open simplex_category opposite limits.wide_pullback
@@ -37,13 +37,13 @@ end
 @[simps]
 def augmented_cech_nerve.left_obj_zero_iso (F : arrow C) :
   F.augmented_cech_nerve.left.obj (op [0]) ≅ F.left :=
-{ hom := π _ ⟨0⟩,
+{ hom := π _ 0,
   inv := lift F.hom (λ _, 𝟙 _) (λ _, category.id_comp _),
   hom_inv_id' :=
   begin
     ext,
     { rw [category.assoc, lift_π, category.id_comp, category.comp_id],
-      cases j, congr' 2, dsimp at j ⊢, exact subsingleton.elim _ _ },
+      congr' 2, dsimp at j ⊢, exact subsingleton.elim _ _ },
     { simp only [π_arrow, category.id_comp, limits.wide_pullback.lift_base, category.assoc], }
   end,
   inv_hom_id' := lift_π _ _ _ _ _ }
@@ -51,8 +51,8 @@ def augmented_cech_nerve.left_obj_zero_iso (F : arrow C) :
 
 -- move this
 lemma augmented_cech_nerve.left_map_comp_obj_zero_iso
-  (F : arrow C) (n : simplex_category) (i : ulift (fin (n.len+1))) :
-  F.augmented_cech_nerve.left.map (n.const i.down).op ≫ (augmented_cech_nerve.left_obj_zero_iso F).hom =
+  (F : arrow C) (n : simplex_category) (i : (fin (n.len+1))) :
+  F.augmented_cech_nerve.left.map (n.const i).op ≫ (augmented_cech_nerve.left_obj_zero_iso F).hom =
   wide_pullback.π _ i :=
 begin
   rw [← iso.eq_comp_inv],
@@ -73,7 +73,7 @@ lemma equivalence_left_to_right_left_app_zero_comp_π
   G.left :=
 begin
   dsimp only [equivalence_left_to_right_left_app, unop_op],
-  rw [limits.wide_pullback.lift_π, simplex_category.hom_zero_zero ([0].const i.down),
+  rw [limits.wide_pullback.lift_π, simplex_category.hom_zero_zero ([0].const i),
     op_id, X.left.map_id, category.id_comp],
 end
 .

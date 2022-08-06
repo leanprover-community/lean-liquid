@@ -95,7 +95,7 @@ lemma Ext_coproduct_iso_naturality_inv
   [category.{v} A]
   [abelian A]
   [enough_projectives A]
-  [has_coproducts A]
+  [has_coproducts.{v} A]
   [AB4 A]
   {α : Type v}
   (X₁ X₂ : α → bounded_homotopy_category A)

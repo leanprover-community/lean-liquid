@@ -28,7 +28,7 @@ variables (ι : ulift.{u+1} ℕ → ℝ≥0) (hι : monotone ι)
 set_option pp.universes true
 
 lemma homotopy_category.colimit_cofan_bdd {A : Type u} [category.{v} A] [abelian A]
-[has_coproducts A] {α : Type v} (X : α → bounded_homotopy_category A)
+[has_coproducts.{v} A] {α : Type v} (X : α → bounded_homotopy_category A)
   [uniformly_bounded X] : homotopy_category.is_bounded_above
   (homotopy_category.colimit_cofan $ λ a : α, (X a).val).X :=
 begin
@@ -80,7 +80,7 @@ end
 
 @[reassoc]
 lemma Ext_coproduct_iso_π
-  (A : Type u) [category.{v} A] [abelian A] [enough_projectives A] [has_coproducts A] [AB4 A]
+  (A : Type u) [category.{v} A] [abelian A] [enough_projectives A] [has_coproducts.{v} A] [AB4 A]
   (X : ulift.{v} ℕ → bounded_homotopy_category A) [uniformly_bounded X] (i : ℤ) (Y) (k) :
   (Ext_coproduct_iso X i Y).hom ≫ pi.π _ k =
   ((Ext i).map $ quiver.hom.op $ sigma.ι _ _).app Y :=
@@ -163,7 +163,7 @@ lemma Tinv2_iso_of_bicartesian_aux [normed_with_aut r V]
   (of_hom (QprimeFP.shift_sub_id ι hι (QprimeFP_int r' BD.data κ M)))
   (auux $ commsq_shift_sub_id_Tinv _ _ _ _ _ _)
   (auux $ commsq_shift_sub_id_ι _ _ _ _ _ _)
-  ((single _ 0).map (Condensed.of_top_ab_map (normed_group_hom.to_add_monoid_hom (normed_with_aut.T.inv : V ⟶ V)) (normed_group_hom.continuous _)))
+  ((single _ 0).map (Condensed.of_top_ab_map (normed_add_group_hom.to_add_monoid_hom (normed_with_aut.T.inv : V ⟶ V)) (normed_add_group_hom.continuous _)))
   i).bicartesian :=
 begin
   have h1 := _, have h2 := _, have h3 := _,
@@ -221,7 +221,7 @@ lemma Tinv2_iso_of_bicartesian [normed_with_aut r V]
     ((Ext (i+1)).obj ((BD.eval freeCond').op.obj (op (M.to_Condensed)))).map
       ((single (Condensed Ab) 0).map
         (Condensed.of_top_ab_map
-          (normed_group_hom.to_add_monoid_hom normed_with_aut.T.inv) (normed_group_hom.continuous _)))) :=
+          (normed_add_group_hom.to_add_monoid_hom normed_with_aut.T.inv) (normed_add_group_hom.continuous _)))) :=
 begin
   let Vc := (single (Condensed Ab) 0).obj V.to_Cond,
   have SES₁ := QprimeFP.short_exact BD κ₂ M ι hι hκ₂,
@@ -237,7 +237,7 @@ begin
     (commsq_shift_sub_id_ι BD.data _ _ M ι hι)
     (commsq_sigma_proj_ι BD _ _ M ι)
     Vc ((single _ _).map $ Condensed.of_top_ab_map
-      (normed_group_hom.to_add_monoid_hom normed_with_aut.T.inv) (normed_group_hom.continuous _))
+      (normed_add_group_hom.to_add_monoid_hom normed_with_aut.T.inv) (normed_add_group_hom.continuous _))
     _
     (Tinv2_iso_of_bicartesian_aux _ _ _ _ _ _ _ _ _ H1)
     (Tinv2_iso_of_bicartesian_aux _ _ _ _ _ _ _ _ _ H2),
@@ -258,7 +258,7 @@ lemma Tinv2_iso_of_bicartesian' [normed_with_aut r V]
     ((Ext i).obj ((BD.eval freeCond').op.obj (op (M.to_Condensed)))).map
       ((single (Condensed Ab) 0).map
         (Condensed.of_top_ab_map
-          (normed_group_hom.to_add_monoid_hom normed_with_aut.T.inv) (normed_group_hom.continuous _)))) :=
+          (normed_add_group_hom.to_add_monoid_hom normed_with_aut.T.inv) (normed_add_group_hom.continuous _)))) :=
 begin
   obtain ⟨i, rfl⟩ : ∃ k, k+1 = i := ⟨i-1, sub_add_cancel _ _⟩,
   obtain ⟨ι, hι, hκ, hκ₂, H1, H2⟩ := H i,

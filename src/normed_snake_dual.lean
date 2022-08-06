@@ -45,7 +45,7 @@ universe variables u
 
 noncomputable theory
 open_locale nnreal
-open category_theory opposite normed_group_hom system_of_complexes
+open category_theory opposite normed_add_group_hom system_of_complexes
 
 variables {M N P : system_of_complexes.{u}} {f : M ⟶ N} {g : N ⟶ P}
 
@@ -72,8 +72,8 @@ lemma norm_sub_le_split {k' c c₁ : ℝ≥0} {i i' i'' : ℕ}
 calc ∥res m - (M.d i' i) m₁∥
       = ∥f (res m - (M.d i' i) m₁)∥ : (hfnorm _ _ _).symm
   ... = ∥res (f m) - (N.d i' i (res n₁) - N.d i' i ((N.d i'' i') n₂ + nnew₁))∥ :
-    by rw [hom_apply, normed_group_hom.map_sub, ←hom_apply, ←hom_apply, ←res_apply,
-      ←d_apply, hm₁, sub_sub, normed_group_hom.map_sub]
+    by rw [hom_apply, _root_.map_sub, ←hom_apply, ←hom_apply, ←res_apply,
+      ←d_apply, hm₁, sub_sub, _root_.map_sub]
   ... = ∥(res (f m) - N.d i' i (res n₁)) + N.d i' i ((N.d i'' i') n₂ + nnew₁)∥ :
     by rw [sub_eq_add_neg, neg_sub, sub_eq_neg_add, ← add_assoc, ← sub_eq_add_neg]
   ... ≤ ∥res (f m) - N.d i' i (res n₁)∥ + ∥N.d i' i ((N.d i'' i') n₂ + nnew₁)∥ : norm_add_le _ _
@@ -94,7 +94,7 @@ lemma norm_sub_le_mul_norm_add_lhs {k' K c c₁ : ℝ≥0} {ε₁ : ℝ} {i i' :
   (hn₁ : ∥res (f m) - (N.d i' i) n₁∥ ≤ K * ∥(N.d i (i + 1)) (f m)∥ + ε₁) :
   ∥(res (f m) : N c i) - N.d i' i (res n₁)∥ ≤ K * ∥(N.d i (i + 1)) (f m)∥ + ε₁ :=
 calc ∥(res (f m) : N c i) - N.d i' i (res n₁)∥
-      = ∥res (res (f m) - (N.d i' i) n₁)∥ : by rw [normed_group_hom.map_sub, d_res, ← res_res]
+      = ∥res (res (f m) - (N.d i' i) n₁)∥ : by rw [_root_.map_sub, d_res, ← res_res]
   ... ≤ K * ∥(N.d i (i + 1)) (f m)∥ + ε₁  : trans (hN_adm.res_norm_noninc _ c _ _ _) hn₁
 
 /-!
@@ -116,10 +116,10 @@ lemma norm_sub_le_mul_norm_add_rhs {k' K K' r₁ r₂ c c₁ : ℝ≥0} {ε₁ �
   ∥(N.d i' i ((N.d i'' i') n₂ + nnew₁) : N c i)∥ ≤
     K * K' * r₁ * r₂ * ∥(N.d i (i+1)) (f m)∥ + K' * r₁ * r₂ * ε₁ + r₂ * ε₂ :=
 calc ∥(N.d i' i ((N.d i'' i') n₂ + nnew₁) : N c i)∥
-      = ∥N.d i' i nnew₁∥ : by simp only [normed_group_hom.map_add, zero_add, d_d]
+      = ∥N.d i' i nnew₁∥ : by simp only [map_add, zero_add, d_d]
   ... ≤ r₂ * ∥g (res n₁ - (N.d i'' i') n₂)∥ : trans (hN_adm.d_norm_noninc _ _ i' i nnew₁) hnormnnew₁
   ... = r₂ * ∥res (g n₁) - P.d i'' i' (g n₂)∥ :
-    by rw [hom_apply, normed_group_hom.map_sub, ←hom_apply, ←hom_apply, ←res_apply _ _ g, ←d_apply]
+    by rw [hom_apply, _root_.map_sub, ←hom_apply, ←hom_apply, ←res_apply _ _ g, ←d_apply]
   ... ≤ r₂ * (K' * ∥P.d i' (i'+1) (g n₁)∥ + ε₂) : mul_le_mul_of_nonneg_left hp₂ r₂.coe_nonneg
   ... = r₂ * (K' * ∥g (res (f m) - N.d i' i n₁)∥ + ε₂) : by rw [d_apply _ _ g _, hii', hfm]
   ... ≤ r₂ * (K' * (r₁ * ∥res (f m) - N.d i' i n₁∥) + ε₂) :
@@ -245,11 +245,11 @@ begin
   let n₁' := N.d (i - 1 - 1) (i - 1) n₂,
   obtain ⟨nnew₁, hnnew₁, hnrmnew₁⟩ := Hg c (i - 1) (trans Hi' a.succ.le_succ) (g (res n₁ - n₁')),
   have hker : (res n₁ - n₁') - nnew₁ ∈ g.apply.ker,
-  { rw [mem_ker, normed_group_hom.map_sub, sub_eq_zero, ←hom_apply, ←hom_apply, hnnew₁] },
+  { rw [mem_ker, _root_.map_sub, sub_eq_zero, ←hom_apply, ←hom_apply, hnnew₁] },
   rw ←hg at hker,
   obtain ⟨m₁, hm₁ : f m₁ = res n₁ - n₁' - nnew₁⟩ := (mem_range _ _).1 hker,
   refine ⟨i - 1, rfl, m₁, _⟩,
-  have hfnrm : ∀ c i (x : M c i), ∥f.apply x∥ = ∥x∥ := λ c i x, (isometry_iff_norm _).1 (hf c i) x,
+  have hfnrm : ∀ c i (x : M c i), ∥f.apply x∥ = ∥x∥ := λ c i x, (add_monoid_hom_class.isometry_iff_norm _).1 (hf c i) x,
   by_cases hizero : i = 0,
   { subst hizero,
     convert norm_sub_le_mul_mul_norm_add (K' * r₁ * r₂) _ hfnrm _ hn₁,
@@ -266,7 +266,7 @@ begin
           mul_inv_cancel_left₀ (nnreal.coe_ne_zero.mpr H)] } },
     { have : f (res m : M (k' * c) i) ∈ f.apply.range, { rw mem_range, exact ⟨res m, rfl⟩ },
       rw [hg, mem_ker] at this,
-      rw [hom_apply g (res (f m) - (N.d (i - 1) i) n₁), res_apply, normed_group_hom.map_sub, this,
+      rw [hom_apply g (res (f m) - (N.d (i - 1) i) n₁), res_apply, _root_.map_sub, this,
         zero_sub, norm_neg, ←hom_apply] } }
 end
 

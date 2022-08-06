@@ -142,8 +142,8 @@ begin
   dsimp [range_equiv_Icc],
   rw [← sub_sub, sub_right_comm, ← zpow_coe_nat],
   refine congr_arg ((*) _) (congr_arg (pow 2) _),
-  have := @nat.cast_sub ℤ _ _ _ _ (mem_range_succ_iff.mp x.2),
-  simpa only [this, h, int.nat_cast_eq_coe_nat, sub_left_inj, subtype.val_eq_coe],
+  have := @nat.cast_sub ℤ _ _ _ (mem_range_succ_iff.mp x.2),
+  simpa only [this, h, sub_left_inj, subtype.val_eq_coe],
 end
 
 lemma sum_range_sum_Icc (f : ℤ → ℝ) (n d : ℤ) (hn : 0 ≤ n - d) :

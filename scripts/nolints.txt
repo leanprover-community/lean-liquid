@@ -4,6 +4,8 @@ run_cmd tactic.skip
 -- Lbar/ext.lean
 apply_nolint Lbar.Tinv_sub unused_arguments
 apply_nolint Lbar.condensify_iso_extend unused_arguments
+apply_nolint Lbar.PFPNGT₁_to_CHFPNG₁ₑₗ.category_theory.limits.preserves_limits_of_shape unused_arguments
+apply_nolint Lbar.PFPNGT₁_to_CHFPNG₁ₑₗ.category_theory.limits.preserves_limits_of_shape fails_quickly
 
 -- Lbar/ext_aux1.lean
 apply_nolint ExtQprime_iso_aux_system_obj_aux' unused_arguments
@@ -104,6 +106,7 @@ apply_nolint finite_product_colimit_setup.CT unused_arguments
 apply_nolint finite_product_colimit_setup.KC unused_arguments
 apply_nolint finite_product_colimit_setup.Q unused_arguments
 apply_nolint finite_product_colimit_setup.Q₀ unused_arguments
+apply_nolint finite_product_colimit_setup.Q₁ unused_arguments
 apply_nolint finite_product_colimit_setup.T unused_arguments
 apply_nolint finite_product_colimit_setup.ct_iso unused_arguments
 apply_nolint finite_product_condition_holds_for_colimit unused_arguments
@@ -150,7 +153,7 @@ apply_nolint Profinite.sigma_iso_of_equiv_aux unused_arguments
 
 -- for_mathlib/SemiNormedGroup.lean
 apply_nolint SemiNormedGroup.metric_space fails_quickly unused_arguments
-apply_nolint SemiNormedGroup.normed_group fails_quickly
+apply_nolint SemiNormedGroup.normed_add_comm_group fails_quickly
 
 -- for_mathlib/ab4.lean
 apply_nolint category_theory.eval_next_iso_of_some unused_arguments
@@ -513,8 +516,8 @@ apply_nolint locally_constant.density.set_clopen unused_arguments
 -- normed_free_pfpng/basic.lean
 apply_nolint normed_free_pfpng unused_arguments
 
--- normed_group/pseudo_normed_group.lean
-apply_nolint semi_normed_group.pseudo_normed_group instance_priority
+-- normed_add_comm_group/pseudo_normed_group.lean
+apply_nolint seminormed_add_comm_group.pseudo_normed_group instance_priority
 
 -- polyhedral_lattice/topology.lean
 apply_nolint polyhedral_lattice.discrete_topology instance_priority
@@ -525,7 +528,7 @@ apply_nolint locally_constant.comap_map unused_arguments
 apply_nolint locally_constant.map_zero unused_arguments
 apply_nolint locally_constant.norm_map_aut unused_arguments
 apply_nolint partial_sum_geom unused_arguments
-apply_nolint semi_normed_group.inhabited instance_priority
+apply_nolint seminormed_add_comm_group.inhabited instance_priority
 
 -- prop_92/prop_92.lean
 apply_nolint CLCFP.T_inv_sub_Tinv unused_arguments

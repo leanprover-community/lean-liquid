@@ -317,7 +317,7 @@ end
 
 include hT1
 
-variables [has_coproducts 𝓐] [AB4 𝓐]
+variables [has_coproducts.{v} 𝓐] [AB4 𝓐]
 
 lemma bdd_step₆_free₁
   (IH : ∀ i ≤ j, is_zero $ ((Ext' i).obj (op A)).obj B)
@@ -718,7 +718,7 @@ end
 end
 
 variables [enough_projectives 𝓐]
-variables [has_coproducts (endomorphisms 𝓐)]
+variables [has_coproducts.{v} (endomorphisms 𝓐)]
 variables [AB4 (endomorphisms 𝓐)]
 
 lemma main_lemma_general
@@ -805,13 +805,20 @@ begin
     ((endo_T T).obj A) (endomorphisms.forget _),
 end
 
-instance endo_T_preserves_finite_colimits {𝓐 : Type*} [category 𝓐]
+set_option pp.universes true
+
+instance endo_T_preserves_finite_colimits {𝓐 : Type u} [category.{v} 𝓐]
   (T : 𝓐 ⥤ Ab.{v} ⥤ 𝓐) (A : endomorphisms 𝓐)
   [preserves_finite_colimits (T.obj A.X)] :
   preserves_finite_colimits ((endo_T T).obj A) :=
 begin
   constructor, introsI J hJ1 hJ2,
-  haveI : reflects_colimits_of_shape J (endomorphisms.forget 𝓐) := {},
+  -- Move this
+  haveI : reflects_colimits_of_shape J (endomorphisms.forget 𝓐),
+  { let E : J ≌ as_small.{v} J := as_small.equiv,
+    suffices : reflects_colimits_of_shape (as_small.{v} J) (endomorphisms.forget 𝓐),
+    { resetI, apply reflects_colimits_of_shape_of_equiv E.symm, },
+    constructor },
   haveI : preserves_colimits_of_shape J ((endo_T T).obj A ⋙ endomorphisms.forget 𝓐),
   { apply preserves_colimits_of_shape_of_nat_iso (endo_T_comp_forget T A).symm,
     apply_instance, },

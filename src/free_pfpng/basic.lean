@@ -194,7 +194,7 @@ def Fintype.free_pfpng_unit :
   naturality' := λ S T f, begin
     ext s t,
     delta ProFiltPseuNormGrp₁.level,
-    simp only [Fintype.to_Profinite_map_to_fun, Profinite.coe_comp, continuous_map.coe_mk,
+    simp only [Fintype.to_Profinite_map_apply, Profinite.coe_comp, continuous_map.coe_mk,
       function.comp_app, subtype.coe_mk, category_theory.functor.comp_map, free_pfpng_functor_map,
       pseudo_normed_group.level_coe, subtype.coe_mk, free_pfpng.map, finset.mem_filter, true_and,
       finset.mem_univ, strict_comphaus_filtered_pseudo_normed_group_hom.coe_mk, finset.sum_ite_eq],

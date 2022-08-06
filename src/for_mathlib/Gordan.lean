@@ -70,7 +70,7 @@ def intersect_halfspaces (l : ι → Λ →+ ℤ) : submodule ℕ Λ :=
   end,
   smul_mem' := λ c x hx i,
   begin
-    simp only [nsmul_eq_mul, int.nat_cast_eq_coe_nat, add_monoid_hom.map_nsmul],
+    simp only [nsmul_eq_mul, add_monoid_hom.map_nsmul],
     apply mul_nonneg (int.coe_zero_le c) (hx i),
   end }
 
@@ -216,13 +216,13 @@ noncomputable def upgrade_functional {α : Type*} [fintype α] (f : (α → ℤ)
     suffices : f ((scale_factor g₁ * scale_factor g₂) • scale_up (g₁ + g₂)) =
       f (scale_factor (g₁ + g₂) • (scale_factor g₂ • scale_up g₁ + scale_factor g₁ • scale_up g₂)),
     { simp only [add_monoid_hom.map_nsmul, add_monoid_hom.map_add] at this,
-      simp only [nsmul_eq_mul, int.nat_cast_eq_coe_nat, mul_comm _ (f _)] at this,
+      simp only [nsmul_eq_mul, mul_comm _ (f _)] at this,
       rw this,
       apply mul_comm },
     congr' 1,
     ext1 a,
     simp only [pi.add_apply, pi.smul_apply],
-    simp only [nsmul_eq_mul, int.nat_cast_eq_coe_nat, int.coe_nat_mul, mul_add],
+    simp only [nsmul_eq_mul, int.coe_nat_mul, mul_add],
     rw ←rat.coe_int_inj,
     push_cast,
     simp only [scale_up_coord, pi.add_apply],
@@ -240,29 +240,17 @@ noncomputable def upgrade_functional {α : Type*} [fintype α] (f : (α → ℤ)
         f ((scale_factor (m • x) * m.num : ℤ) • scale_up x),
     { simp only [add_monoid_hom.map_zsmul, add_monoid_hom.map_nsmul] at this,
       simp only [int.coe_nat_mul],
-      simp only [algebra.id.smul_eq_mul, rat.num_div_denom, nsmul_eq_mul, int.nat_cast_eq_coe_nat,
-        int.coe_nat_mul] at this,
+      simp only [algebra.id.smul_eq_mul, rat.num_div_denom, nsmul_eq_mul, int.coe_nat_mul] at this,
       rw [mul_comm (f _), this, mul_comm _ m.num, mul_right_comm] },
     congr' 1,
     ext1 a,
     simp only [pi.smul_apply],
-    simp only [algebra.id.smul_eq_mul, nsmul_eq_mul, int.nat_cast_eq_coe_nat, int.coe_nat_mul],
+    simp only [algebra.id.smul_eq_mul, nsmul_eq_mul, int.coe_nat_mul],
     rw ←rat.coe_int_inj,
     push_cast,
     simp only [scale_up_coord, pi.smul_apply, algebra.id.smul_eq_mul, ←rat.mul_denom_eq_num],
     ring!,
   end }.
-
-lemma thingy {R : Type*} [semiring R] (t : ℕ) (a : α) : (t : R) = (coe t : α → R) a :=
-begin
-  simp only [pi.coe_nat],
-  -- simp only [int.nat_cast_eq_coe_nat, pi.coe_nat],
-end
-
-lemma thingy' (t : ℕ) (a : α) : (t : ℤ) = (coe t : α → ℤ) a :=
-begin
-  simp only [int.nat_cast_eq_coe_nat, pi.coe_nat],
-end
 
 lemma upgrade_id {α : Type*} [fintype α] (f : (α → ℤ) →+ ℤ) (g : α → ℤ) :
   upgrade_functional f (to_rational_point g) = f g :=
@@ -270,15 +258,13 @@ begin
   dsimp [upgrade_functional, to_rational_point],
   rw div_eq_iff (rat_scale_factor_ne_zero _),
   norm_cast,
-  rw [mul_comm, ←int.nat_cast_eq_coe_nat, ←nsmul_eq_mul, ←add_monoid_hom.map_nsmul],
+  rw [mul_comm, ←nsmul_eq_mul, ←add_monoid_hom.map_nsmul],
   congr' 1,
   ext a,
   simp only [nsmul_eq_mul, pi.mul_apply],
   rw ←rat.coe_int_inj,
   rw scale_up_coord,
   norm_cast,
-  congr' 1,
-  apply thingy',
 end
 
 section
@@ -300,9 +286,7 @@ begin
       convert z using 1,
       ext1 i,
       simp only [nsmul_eq_mul, pi.smul_apply],
-      change _ = _ * _,
-      congr' 1,
-      simp },
+      refl, },
     { rw submodule.span_le,
       intros x,
       simp only [set_like.mem_coe, finset.mem_coe, finset.coe_image, ←set.image_comp],
@@ -322,7 +306,6 @@ begin
       rw ←mul_assoc,
       convert (one_mul (x i)).symm,
       convert inv_mul_cancel _,
-      apply (thingy _ _).symm,
       apply rat_scale_factor_ne_zero } },
   { rintro ⟨S, rfl⟩,
     refine ⟨_, rfl⟩ }

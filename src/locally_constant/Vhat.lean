@@ -18,7 +18,7 @@ an automorphism which scales norms by a constant factor `r`.
 
 ## TODO
 
-Pull off the stuff about completions and put it into `normed_group/SemiNormedGroup`?
+Pull off the stuff about completions and put it into `normed_add_comm_group/SemiNormedGroup`?
 Then `system_of_complexes.basic` would not have to import this file.
 
 -/
@@ -44,7 +44,7 @@ instance normed_with_aut_Completion (V : SemiNormedGroup.{u}) (r : ℝ≥0) [nor
     intro v,
     calc _ = _ : congr_arg norm (completion.map_coe _ _)
        ... = _ : _,
-    { exact normed_group_hom.uniform_continuous _ },
+    { exact normed_add_group_hom.uniform_continuous _ },
     { erw [completion.norm_coe, normed_with_aut.norm_T, completion.norm_coe] }
   end }
 
@@ -58,7 +58,7 @@ begin
   simp only [incl_apply, category_theory.comp_apply, Completion_T_inv_eq],
   change completion.map normed_with_aut.T.hom _ = _,
   rw completion.map_coe,
-  exact normed_group_hom.uniform_continuous _,
+  exact normed_add_group_hom.uniform_continuous _,
 end
 
 lemma T_hom_eq {V : SemiNormedGroup} {r : ℝ≥0} [normed_with_aut r V] :

@@ -38,8 +38,7 @@ begin
     apply exact_seq.cons,
     { exact preserves_exact_of_preserves_finite_colimits_of_epi _ A.exact' },
     { rw [← exact_iff_exact_seq],
-      exact ((abelian.tfae_epi (F.obj A.3) (F.map A.g)).out 0 2).1
-        (category_theory.preserves_epi _ _) }
+      exact ((abelian.tfae_epi (F.obj A.3) (F.map A.g)).out 0 2).1 infer_instance, }
 end
 
 end les

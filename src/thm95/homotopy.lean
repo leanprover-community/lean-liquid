@@ -111,7 +111,7 @@ NSH_δ_res κ' (N₂ r r' BD κ' m) _ ≫ (BD_map (BD.data.proj (2 ^ N₂ r r' B
 lemma norm_NSH_δ_le {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} (c : ℝ≥0) (q : ℕ) :
   ∥(@NSH_δ BD r r' _ _ _ _ V _ κ κ' _ m M c).f q∥ ≤ (ε r r' BD κ' m) :=
 begin
-  refine le_trans (normed_group_hom.norm_comp_le_of_le'
+  refine le_trans (normed_add_group_hom.norm_comp_le_of_le'
     (r ^ (b r r' BD κ' m)) (N r r' BD κ' m) _ (mul_comm _ _) _ _) _,
   { apply universal_map.norm_eval_CLCFPTinv₂_le,
     apply universal_map.proj_bound_by },
