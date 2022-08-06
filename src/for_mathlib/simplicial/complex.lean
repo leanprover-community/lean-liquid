@@ -5,8 +5,6 @@ import algebraic_topology.simplicial_object
 
 import algebra.homology.homological_complex
 
-import for_mathlib.unop
-
 namespace category_theory
 
 variables {C : Type*} [category C] [preadditive C] (M : cosimplicial_object C)

@@ -1,7 +1,6 @@
 import for_mathlib.homological_complex_op
 import for_mathlib.split_exact
 import for_mathlib.AddCommGroup.exact
-import for_mathlib.unop
 
 import pseudo_normed_group.FP2
 import pseudo_normed_group.system_of_complexes

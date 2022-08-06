@@ -1,5 +1,4 @@
 import free_pfpng.setup
-import for_mathlib.logic
 
 noncomputable theory
 

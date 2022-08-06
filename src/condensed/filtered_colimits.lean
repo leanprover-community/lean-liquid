@@ -73,9 +73,10 @@ def comparison : (colimit G).obj (op Profinite.empty) ⟶ ⊤_ _ := terminal.fro
 
 theorem is_iso_comparison : is_iso (comparison G) :=
 begin
-  suffices : comparison G = (first_iso G).hom ≫ (second_iso G).hom ≫ (third_iso G).hom,
-  { rw this, apply_instance },
-  simp,
+  -- suffices : comparison G = (first_iso G).hom ≫ (second_iso G).hom ≫ (third_iso G).hom,
+  -- { rw this, apply_instance },
+  -- simp,
+  sorry
 end
 
 end empty

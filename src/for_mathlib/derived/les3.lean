@@ -1,5 +1,4 @@
 import for_mathlib.derived.les2
-import for_mathlib.unop
 
 noncomputable theory
 

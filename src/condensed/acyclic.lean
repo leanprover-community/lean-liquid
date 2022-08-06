@@ -8,7 +8,6 @@ import for_mathlib.abelian_sheaves.exact
 import for_mathlib.Cech.homotopy
 import for_mathlib.wide_pullback_iso
 import for_mathlib.equivalence_additive
-import for_mathlib.op
 
 import condensed.adjunctions2
 import condensed.projective_resolution
