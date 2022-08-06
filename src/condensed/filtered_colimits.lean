@@ -59,10 +59,22 @@ let e₁ := is_colimit_of_preserves ((evaluation _ _).obj (op Profinite.empty))
       end in
 e₂ ≪≫ has_colimit.iso_of_nat_iso e₃
 
+-- Move this!
 noncomputable
-def second_iso : colimit (limit (functor.empty _ ⋙ G.flip)) ≅
-  limit (colimit (functor.empty _ ⋙ G.flip).flip) :=
-  colimit_limit_iso _
+instance preserves_finite_limits_of_concrete :
+  preserves_finite_limits (colim : (J ⥤ C) ⥤ C) :=
+begin
+  apply preserves_finite_limits_of_preserves_finite_limits_of_size,
+  introsI K _ _,
+  exact limits.filtered_colim_preserves_finite_limits,
+end
+
+noncomputable
+def second_iso : colimit (limit (functor.empty.{0} _ ⋙ G.flip)) ≅
+  limit (colimit (functor.empty.{0} _ ⋙ G.flip).flip) :=
+(is_limit_of_preserves colim (limit.is_limit _)).cone_point_unique_up_to_iso (limit.is_limit _) ≪≫
+  (has_limit.iso_of_nat_iso (colimit_flip_iso_comp_colim _).symm)
+--colimit_limit_iso _ -- TODO: Fix universes in `colimit_limit_iso`.
 
 noncomputable
 def third_iso : limit (colimit (functor.empty _ ⋙ G.flip).flip) ≅ ⊤_ _ :=
@@ -73,10 +85,9 @@ def comparison : (colimit G).obj (op Profinite.empty) ⟶ ⊤_ _ := terminal.fro
 
 theorem is_iso_comparison : is_iso (comparison G) :=
 begin
-  -- suffices : comparison G = (first_iso G).hom ≫ (second_iso G).hom ≫ (third_iso G).hom,
-  -- { rw this, apply_instance },
-  -- simp,
-  sorry
+  suffices : comparison G = (first_iso G).hom ≫ (second_iso G).hom ≫ (third_iso G).hom,
+  { rw this, apply_instance },
+  simp,
 end
 
 end empty
@@ -155,7 +166,9 @@ e₂ ≪≫ has_colimit.iso_of_nat_iso (first_iso_aux X Y G)
 noncomputable
 def second_iso : colimit (prod (G.flip.obj (op X)) (G.flip.obj (op Y))) ≅
   limit (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip) :=
-colimit_limit_iso _
+(is_limit_of_preserves colim (limit.is_limit _)).cone_point_unique_up_to_iso (limit.is_limit _) ≪≫
+  (has_limit.iso_of_nat_iso (colimit_flip_iso_comp_colim _).symm)
+--colimit_limit_iso _
 
 noncomputable
 def third_iso_aux_left :
@@ -303,8 +316,7 @@ begin
       (discrete.mk walking_pair.left), dsimp at this,
   slice_rhs 2 3 { rw this }, clear this,
   simp only [limit.cone_π, category.assoc, limit.lift_π_assoc,
-    cones.postcompose_obj_π, nat_trans.comp_app,
-    binary_fan.mk_π_app_left, nat_iso.of_components.hom_app],
+    cones.postcompose_obj_π, nat_trans.comp_app, nat_iso.of_components.hom_app],
   have := (is_colimit_of_preserves ((evaluation _ C).obj (discrete.mk walking_pair.left))
     (colimit.is_colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip)).fac _ j,
   dsimp at this, slice_rhs 3 4 { rw this }, clear this,
@@ -342,8 +354,7 @@ begin
       (discrete.mk walking_pair.right), dsimp at this,
   slice_rhs 2 3 { rw this }, clear this,
   simp only [limit.cone_π, category.assoc, limit.lift_π_assoc,
-    cones.postcompose_obj_π, nat_trans.comp_app,
-    binary_fan.mk_π_app_left, nat_iso.of_components.hom_app],
+    cones.postcompose_obj_π, nat_trans.comp_app, nat_iso.of_components.hom_app],
   have := (is_colimit_of_preserves ((evaluation _ C).obj (discrete.mk walking_pair.right))
     (colimit.is_colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip)).fac _ j,
   dsimp at this, slice_rhs 3 4 { rw this }, clear this,
@@ -469,7 +480,9 @@ def second_iso : colimit (equalizer
     limit (colimit (parallel_pair
       (G.flip.map (Profinite.pullback.fst f f).op)
       (G.flip.map (Profinite.pullback.snd f f).op)).flip) :=
-colimit_limit_iso _
+(is_limit_of_preserves colim (limit.is_limit _)).cone_point_unique_up_to_iso (limit.is_limit _) ≪≫
+  (has_limit.iso_of_nat_iso (colimit_flip_iso_comp_colim _).symm)
+--colimit_limit_iso _
 
 noncomputable
 def third_iso_aux :
