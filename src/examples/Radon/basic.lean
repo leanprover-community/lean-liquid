@@ -209,7 +209,14 @@ def lc_to_c (X : Type*)
 { to_fun := λ f, f.to_continuous_map,
   map_add' := λ _ _, rfl,
   map_smul' := λ _ _, rfl,
-  cont := sorry }
+  cont := begin
+    apply isometry.continuous,
+    intros f g,
+    simp only [edist_dist, dist_eq_norm, continuous_map.norm_eq_supr_norm,
+      locally_constant.norm_def, locally_constant.to_continuous_map_eq_coe,
+      continuous_map.coe_sub, locally_constant.coe_continuous_map, pi.sub_apply],
+    refl,
+  end }
 
 namespace weak_dual
 
