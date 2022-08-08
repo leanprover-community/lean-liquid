@@ -4,6 +4,7 @@ import locally_constant.SemiNormedGroup
 import locally_constant.completion
 import analysis.special_functions.pow
 import topology.algebra.module.weak_dual
+import analysis.mean_inequalities_pow
 
 open_locale nnreal big_operators classical
 
@@ -20,7 +21,21 @@ local attribute [instance]
 lemma real.pow_nnnorm_sum_le
   {ι : Type*} [fintype ι] (r : ι → ℝ)
   (p : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] :
-  ∥ ∑ i, r i ∥₊^(p : ℝ) ≤ ∑ i, ∥ r i ∥₊^(p : ℝ) := sorry
+  ∥ ∑ i, r i ∥₊^(p : ℝ) ≤ ∑ i, ∥ r i ∥₊^(p : ℝ) :=
+begin
+  refine finset.le_sum_of_subadditive (λ x : ℝ, ∥ x ∥₊^(p : ℝ)) _ _
+    (finset.univ : finset ι) r,
+  { simp only [nnnorm_zero, nnreal.rpow_eq_zero_iff, eq_self_iff_true, ne.def,
+      nnreal.coe_eq_zero, true_and],
+    exact ne_of_gt (fact.out _) },
+  { intros x y,
+    dsimp,
+    refine le_trans _ (nnreal.rpow_add_le_add_rpow _ _ _ _),
+    rw nnreal.rpow_le_rpow_iff,
+    apply nnnorm_add_le,
+    any_goals { exact_mod_cast fact.out _ },
+    any_goals { assumption } }
+end
 
 namespace locally_constant
 
