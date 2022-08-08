@@ -48,7 +48,14 @@ instance normed_space (X : Type*)
 lemma nnnorm_apply_le_nnnorm (X : Type*)
   [topological_space X] [compact_space X] [t2_space X]
   (e : locally_constant X ℝ) (x : X) :
-  ∥ e x ∥₊ ≤ ∥ e ∥₊ := sorry
+  ∥ e x ∥₊ ≤ ∥ e ∥₊ :=
+begin
+  change _ ≤ Sup _,
+  apply le_cSup,
+  let S := _, change bdd_above S, suffices : is_compact S, apply is_compact.bdd_above this,
+  apply is_compact_range, refine continuous.comp _ e.continuous, exact continuous_norm,
+  use x, refl,
+end
 
 end locally_constant
 
