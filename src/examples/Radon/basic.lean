@@ -147,7 +147,12 @@ end discrete_quotient
 
 lemma locally_constant.sum_apply {ι X Y : Type*} [topological_space X] [add_comm_monoid Y]
   (f : ι → locally_constant X Y) (S : finset ι) (t : X) :
-  (∑ i in S, f i) t = ∑ i in S, (f i t) := sorry
+  (∑ i in S, f i) t = ∑ i in S, (f i t) :=
+begin
+  let ee : locally_constant X Y →+ X → Y := locally_constant.coe_fn_add_monoid_hom,
+  change (ee (∑ i in S, f i)) t = ∑ i in S, (ee (f i) t),
+  rw [ee.map_sum, finset.sum_apply],
+end
 
 lemma locally_constant.eq_sum {X : Type*} [topological_space X] [compact_space X] [t2_space X]
   (e : locally_constant X ℝ) :
