@@ -324,18 +324,17 @@ def weak_dual_C_to_LC (X : Profinite.{0}) :
 weak_dual.comap $ lc_to_c _
 
 def weak_dual_LC_to_C (X : Profinite.{0}) :
-  weak_dual ℝ (locally_constant X ℝ) →L[ℝ] weak_dual ℝ C(X,ℝ) :=
+  weak_dual ℝ (locally_constant X ℝ) →ₗ[ℝ] weak_dual ℝ C(X,ℝ) :=
 { to_fun := λ f,
   { to_fun := (locally_constant.pkg X ℝ).extend f,
     map_add' := sorry,
     map_smul' := sorry,
     cont := (locally_constant.pkg X ℝ).continuous_extend },
   map_add' := sorry,
-  map_smul' := sorry,
-  cont := sorry }
+  map_smul' := sorry }
 
 def weak_dual_C_equiv_LC (X : Profinite.{0}) :
-  weak_dual ℝ C(X,ℝ) ≃L[ℝ] weak_dual ℝ (locally_constant X ℝ) :=
+  weak_dual ℝ C(X,ℝ) ≃ₗ[ℝ] weak_dual ℝ (locally_constant X ℝ) :=
 { inv_fun := X.weak_dual_LC_to_C,
   left_inv := begin
     intros f, ext t,
@@ -358,8 +357,8 @@ def weak_dual_C_equiv_LC (X : Profinite.{0}) :
     apply continuous_linear_map.uniform_continuous,
     apply_instance,
   end,
-  continuous_to_fun := continuous_linear_map.continuous _,
-  continuous_inv_fun := continuous_linear_map.continuous _,
+--  continuous_to_fun := continuous_linear_map.continuous _,
+--  continuous_inv_fun := continuous_linear_map.continuous _,
   ..(X.weak_dual_C_to_LC) }
 
 def Radon_to_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
@@ -374,31 +373,97 @@ def Radon_to_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
 
 def Radon_LC_to_Radon (X : Profinite.{0}) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)]:
-  X.Radon_LC p c ⟶ X.Radon p c :=
-{ to_fun := λ μ, ⟨weak_dual_LC_to_C _ μ.1, begin
+  X.Radon_LC p c → X.Radon p c :=
+λ μ, ⟨weak_dual_LC_to_C _ μ.1, begin
     change (weak_dual_C_to_LC _ (weak_dual_LC_to_C _ μ.1)).bdd_LC p c,
     erw X.weak_dual_C_equiv_LC.apply_symm_apply,
     exact μ.2,
-  end⟩,
-  continuous_to_fun := begin
-    apply continuous_subtype_mk,
-    refine continuous.comp _ continuous_subtype_coe,
-    exact continuous_linear_map.continuous _,
-  end }
+  end⟩
 
-def Radon_iso_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
-  [fact (0 < p)] [fact (p ≤ 1)]:
-  X.Radon p c ≅ X.Radon_LC p c :=
-{ hom := X.Radon_to_Radon_LC p c,
-  inv := X.Radon_LC_to_Radon p c,
-  hom_inv_id' := begin
-    ext t : 2,
+def Radon_LC_to_fun (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  X.Radon_LC p c → locally_constant X ℝ → ℝ :=
+λ μ, μ.1
+
+lemma Radon_LC_to_fun_injective (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  function.injective (X.Radon_LC_to_fun p c) :=
+begin
+  intros a b h, ext x : 2,
+  exact congr_fun h x
+end
+
+lemma Radon_LC_to_fun_continuous (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  continuous (X.Radon_LC_to_fun p c) :=
+begin
+  apply continuous_pi,
+  intros f,
+  refine continuous.comp (weak_dual.eval_continuous f) (continuous_subtype_coe),
+end
+
+--WHY!?!?!?
+instance t2_space_LC_to_R (X : Profinite.{0}) :
+  t2_space (locally_constant X ℝ → ℝ) :=
+@Pi.t2_space (locally_constant X ℝ) (λ _, ℝ) infer_instance
+begin
+  intros a, dsimp,
+  apply_instance
+end
+
+instance t2_space_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  t2_space (X.Radon_LC p c) :=
+⟨λ f g h, separated_by_continuous (X.Radon_LC_to_fun_continuous p c)
+  $ (X.Radon_LC_to_fun_injective p c).ne h⟩
+
+instance compact_space_Radon (X : Profinite) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  compact_space (X.Radon p c) := sorry
+
+def Radon_equiv_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  X.Radon p c ≃ X.Radon_LC p c :=
+{ to_fun := X.Radon_to_Radon_LC p c,
+  inv_fun := X.Radon_LC_to_Radon p c,
+  left_inv := begin
+    intros t, ext1,
     apply X.weak_dual_C_equiv_LC.symm_apply_apply,
   end,
-  inv_hom_id' := begin
-    ext t : 2,
+  right_inv := begin
+    intros t, ext1,
     apply X.weak_dual_C_equiv_LC.apply_symm_apply,
-  end } .
+  end }
+
+lemma continuous_Radon_equiv_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  continuous (X.Radon_equiv_Radon_LC p c) :=
+continuous_map.continuous _
+
+lemma continuous_Radon_equiv_Radon_LC_symm (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  continuous (X.Radon_equiv_Radon_LC p c).symm :=
+begin
+  rw continuous_iff_is_closed,
+  intros T hT,
+  rw ← equiv.image_eq_preimage,
+  apply is_compact.is_closed,
+  apply is_compact.image,
+  exact is_closed.is_compact hT,
+  exact continuous_map.continuous _,
+end
+
+def Radon_homeomorph_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  X.Radon p c ≃ₜ X.Radon_LC p c :=
+{ continuous_to_fun := continuous_Radon_equiv_Radon_LC _ _ _,
+  continuous_inv_fun := continuous_Radon_equiv_Radon_LC_symm _ _ _,
+  ..(X.Radon_equiv_Radon_LC p c) }
+
+def Radon_iso_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  X.Radon p c ≅ X.Radon_LC p c :=
+Top.iso_of_homeo (X.Radon_homeomorph_Radon_LC p c)
 
 def Radon_LC_cone (X : Profinite.{0}) (p c : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] :
   cone (X.diagram ⋙ Radon_LC_functor p c) :=
