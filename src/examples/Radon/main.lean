@@ -1,4 +1,5 @@
 import examples.Radon.LC_limit
+import analysis.normed_space.weak_dual
 
 open_locale nnreal big_operators classical
 
@@ -59,9 +60,70 @@ def Radon_LC_to_Radon (X : Profinite.{0}) (p c : ℝ≥0)
     exact μ.2,
   end⟩
 
+def Radon_LC_to_weak_dual (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  X.Radon_LC p c → weak_dual ℝ (locally_constant X ℝ) := subtype.val
+
+instance t2_space_weak_dual (X : Profinite.{0}) :
+  t2_space (weak_dual ℝ (locally_constant X ℝ)) := sorry
+
+lemma Radon_LC_closed_embedding (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  closed_embedding (X.Radon_LC_to_weak_dual p c) :=
+closed_embedding_subtype_coe
+begin
+  apply is_compact.is_closed,
+  let S := _, change is_compact S,
+  have : S = set.range (X.Radon_LC_to_weak_dual p c),
+  { erw subtype.range_val, refl },
+  rw this, clear this,
+  apply is_compact_range,
+  exact continuous_subtype_coe,
+end
+
+def Radon_to_weak_dual (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  X.Radon p c → weak_dual ℝ C(X,ℝ) := subtype.val
+
+lemma Radon_closed_embedding (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  closed_embedding (X.Radon_to_weak_dual p c) :=
+closed_embedding_subtype_coe
+begin
+  let T : set (weak_dual ℝ (locally_constant X ℝ)) :=
+    { f | f.bdd_LC p c },
+  change is_closed (X.weak_dual_C_to_LC ⁻¹' T),
+  apply is_closed.preimage,
+  exact (weak_dual_C_to_LC X).continuous,
+  convert (X.Radon_LC_closed_embedding p c).closed_range,
+  erw subtype.range_val, refl,
+end
+
+lemma Radon_closed_embedding_range_bdd (X : Profinite) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] : metric.bounded
+  (normed_space.dual.to_weak_dual ⁻¹' set.range (X.Radon_to_weak_dual p c)) :=
+begin
+  -- Use c^(1/p)
+  rw metric.bounded_iff_subset_ball,
+  use c^(1/(p : ℝ)),
+  swap, use 0,
+
+  sorry
+end
+
 instance compact_space_Radon (X : Profinite) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
-  compact_space (X.Radon p c) := sorry
+  compact_space (X.Radon p c) :=
+begin
+  let e : X.Radon p c ≃ₜ set.range (X.Radon_to_weak_dual p c) :=
+    homeomorph.of_embedding _ (X.Radon_closed_embedding p c).to_embedding,
+  suffices : compact_space (set.range (X.Radon_to_weak_dual p c)),
+  { resetI, apply e.symm.compact_space },
+  rw ← is_compact_iff_compact_space,
+  apply weak_dual.is_compact_of_bounded_of_closed,
+  apply Radon_closed_embedding_range_bdd,
+  exact (X.Radon_closed_embedding p c).closed_range,
+end
 
 def Radon_equiv_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
