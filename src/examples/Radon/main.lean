@@ -104,11 +104,58 @@ lemma Radon_closed_embedding_range_bdd (X : Profinite) (p c : ℝ≥0)
   (normed_space.dual.to_weak_dual ⁻¹' set.range (X.Radon_to_weak_dual p c)) :=
 begin
   -- Use c^(1/p)
+  letI : uniform_space (locally_constant.pkg X ℝ).space :=
+    (locally_constant.pkg X ℝ).uniform_struct,
   rw metric.bounded_iff_subset_ball,
   use c^(1/(p : ℝ)),
   swap, use 0,
+  rintros μ hμ,
+  change ∥ _ - _ ∥ ≤ _,
+  rw sub_zero,
+  apply continuous_linear_map.op_norm_le_bound,
+  exact_mod_cast zero_le _,
+  intros f,
+  apply (locally_constant.pkg X ℝ).induction_on f,
+  { apply is_closed_le,
+    refine continuous.comp (continuous_norm) _,
+    exact μ.continuous,
+    refine continuous.comp (continuous_mul_left _) continuous_norm },
+  { intros e,
+    let γ : weak_dual ℝ (locally_constant X ℝ) :=
+      X.weak_dual_C_to_LC μ,
+    dsimp [locally_constant.pkg],
+    have : μ e = γ e, refl, rw this, clear this,
+    have : ∥ e.to_continuous_map ∥ = ∥ e ∥,
+    { simp only [continuous_map.norm_eq_supr_norm,
+        locally_constant.norm_def, locally_constant.to_continuous_map_eq_coe,
+        locally_constant.coe_continuous_map] },
+    erw this, clear this,
+    suffices : ∥ γ e ∥₊ ≤ c^(1 / (p : ℝ)) * ∥ e ∥₊, by exact_mod_cast this,
+    have hp : 0 < (p : ℝ) := by exact_mod_cast (fact.out (0 < p)),
+    have hp' : (p : ℝ) ≠ 0,
+    { exact ne_of_gt hp },
+    rw [← nnreal.rpow_le_rpow_iff hp, nnreal.mul_rpow, ← nnreal.rpow_mul],
+    rw [(show 1 / (p : ℝ) * p = 1, by field_simp), nnreal.rpow_one],
+    obtain ⟨δ,hδ⟩ := hμ,
+    have H := δ.2 e.discrete_quotient,
+    replace H := mul_le_mul H (le_refl (∥ e ∥₊^(p : ℝ))) (zero_le _) (zero_le _),
+    refine le_trans _ H, clear H,
+    rw [mul_comm, finset.mul_sum],
+    nth_rewrite 0 e.eq_sum,
 
-  sorry
+    simp_rw [γ.map_sum, γ.map_smul],
+    refine le_trans (real.pow_nnnorm_sum_le _ _) _,
+
+    apply finset.sum_le_sum, rintros x -,
+    rw [smul_eq_mul, nnnorm_mul, nnreal.mul_rpow],
+    refine mul_le_mul _ (le_of_eq _) (zero_le _) (zero_le _),
+    apply nnreal.rpow_le_rpow _ (le_of_lt hp),
+    obtain ⟨x,rfl⟩ := discrete_quotient.proj_surjective _ x,
+    change ∥ e x ∥₊ ≤ _,
+    apply locally_constant.nnnorm_apply_le_nnnorm,
+
+    congr' 2,
+    change _ = X.Radon_to_weak_dual p c δ _, rw hδ, refl },
 end
 
 instance compact_space_Radon (X : Profinite) (p c : ℝ≥0)
