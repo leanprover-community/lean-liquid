@@ -81,9 +81,9 @@ def explicit_cocone : cocone F :=
       (direct_sum.of _ j),
     naturality' := begin
       intros i j f, ext t,
-      simp only [comp_apply, add_monoid_hom.coe_comp,
-        quotient_add_group.coe_mk', function.comp_app, functor.const.obj_map,
-        id_apply],
+      dsimp,
+      simp only [comp_apply, add_monoid_hom.coe_comp, quotient_add_group.coe_mk',
+        function.comp_app, id_apply],
       rw quotient_add_group.eq_iff_sub_mem,
       apply add_subgroup.subset_closure,
       dsimp, refine ⟨i, j, f, t, rfl⟩,

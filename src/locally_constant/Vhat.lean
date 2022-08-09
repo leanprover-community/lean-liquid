@@ -75,7 +75,7 @@ lemma LCC_obj_map' (V : SemiNormedGroup) {X Y : Profiniteᵒᵖ} (f : Y ⟶ X) :
   (LCC.obj V).map f = Completion.map ((LocallyConstant.obj V).map f) :=
 begin
   delta LCC,
-  simp only [curry.obj_obj_map, LocallyConstant_obj_map, functor.comp_map, uncurry.obj_map,
+  simp only [curry_obj_obj_map, LocallyConstant_obj_map, functor.comp_map, uncurry_obj_map,
     nat_trans.id_app, functor.map_comp, functor.map_id, category_theory.functor.map_id],
   erw [← functor.map_comp, category.id_comp]
 end

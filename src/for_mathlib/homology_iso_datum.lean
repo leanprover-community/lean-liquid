@@ -424,7 +424,7 @@ end
 open_locale zero_object
 
 def of_homological_complex_of_next_eq_none' (X : homological_complex A c) (i j : M)
-  (hij : c.rel i j) (hj : c.next j = none) {Z : A} (hZ : is_zero Z) (f : _ ⟶ Z) (hf : f = 0) :
+  (hij : c.rel i j) (hj : c.next j = j) {Z : A} (hZ : is_zero Z) (f : _ ⟶ Z) (hf : f = 0) :
   homology_iso_datum (X.d i j) f (X.homology j) :=
 begin
   refine (homology_iso_datum.tautological' (X.d_to j) (X.d_from j)

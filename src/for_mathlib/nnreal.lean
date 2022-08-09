@@ -91,7 +91,7 @@ begin
   induction s using finset.induction_on with i s his IH,
   { simp only [nnreal.zero_rpow hp_pos.ne', finset.sum_empty, le_zero_iff], },
   { simp only [his, finset.sum_insert, not_false_iff],
-    exact (nnreal.rpow_add_le_add_rpow _ _ hp_pos hp1).trans (add_le_add le_rfl IH), }
+    exact (nnreal.rpow_add_le_add_rpow _ _ hp_pos.le hp1).trans (add_le_add le_rfl IH), }
 end
 
 lemma nnreal.le_self_rpow {a : ℝ≥0} {m : ℝ} (ha : 1 ≤ a) (hm : 1 ≤ m) : a ≤ a ^ m :=

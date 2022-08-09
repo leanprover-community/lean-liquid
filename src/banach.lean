@@ -142,7 +142,7 @@ begin
   { subst r, simp only [zero_le_one, real.rpow_zero, le_add_iff_nonneg_left], },
   let x' : ℝ≥0 := ⟨x, hx⟩,
   let y' : ℝ≥0 := ⟨y, hy⟩,
-  exact_mod_cast ennreal.rpow_add_le_add_rpow x' y' (lt_of_le_of_ne h0r hr) hr1,
+  exact_mod_cast ennreal.rpow_add_le_add_rpow x' y' h0r hr1,
 end
 
 set_option extends_priority 920

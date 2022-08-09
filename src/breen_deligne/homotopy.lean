@@ -24,13 +24,7 @@ def homotopy_two_mul {BD₁ BD₂ : data} {f g : BD₁ ⟶ BD₂} (h : homotopy 
   begin
     intro j,
     simp only [mul_map_f, h.comm j, add_monoid_hom.map_add],
-    dsimp [d_next, prev_d],
-    rcases (complex_shape.down ℕ).next j with _|⟨k,hk⟩;
-    rcases (complex_shape.down ℕ).prev j with _|⟨i,hi⟩;
-    dsimp [d_next, prev_d];
-    simp only [add_zero, zero_add, add_monoid_hom.map_zero];
-    repeat { erw [universal_map.mul_comp] };
-    refl
+    congr' 2; { erw [universal_map.mul_comp], refl, },
   end }
 
 def homotopy_pow' (h : homotopy (BD.proj 2) (BD.sum 2)) :
@@ -126,7 +120,6 @@ begin
     refine @universal_map.suitable.comp _ _ _ _ _ _ c _ (id _) (id _),
     { apply_instance },
     { dsimp [data.mul_mul_iso, FreeMat.mul_mul_iso],
-      erw [nat_iso.of_components.inv_app, FreeMat.iso_mk'_inv],
       apply_instance } }
 end
 

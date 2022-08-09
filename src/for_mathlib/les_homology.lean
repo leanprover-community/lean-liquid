@@ -131,22 +131,6 @@ lemma _root_.option.eq_none_or_eq_some {α : Type*} : ∀ (o : option α), o = n
 | option.none     := or.inl rfl
 | (option.some a) := or.inr ⟨a, rfl⟩
 
-lemma X_next_is_zero (A : homological_complex C c) (i : ι) (hi : c.next i = none) :
-  is_zero (A.X_next i) :=
-(limits.is_zero_zero _).of_iso (X_next_iso_zero A hi)
-
-lemma X_prev_is_zero (A : homological_complex C c) (i : ι) (hi : c.prev i = none) :
-  is_zero (A.X_prev i) :=
-(limits.is_zero_zero _).of_iso (X_prev_iso_zero A hi)
-
-lemma next_eq_zero {A₁ A₂ : homological_complex C c} (f : A₁ ⟶ A₂) (i : ι) (hi : c.next i = none) :
-  f.next i = 0 :=
-(X_next_is_zero _ _ hi).eq_of_src _ _
-
-lemma prev_eq_zero {A₁ A₂ : homological_complex C c} (f : A₁ ⟶ A₂) (i : ι) (hi : c.prev i = none) :
-  f.prev i = 0 :=
-(X_prev_is_zero _ _ hi).eq_of_src _ _
-
 lemma exact_next {A₁ A₂ A₃ : homological_complex C c} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃)
   (i j : ι) (hij : c.rel i j) (h : exact (f.f j) (g.f j)) :
   exact (f.next i) (g.next i) :=
@@ -158,14 +142,7 @@ end
 
 lemma exact_next' {A₁ A₂ A₃ : homological_complex C c} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃) (i : ι)
   (h : ∀ n, exact (f.f n) (g.f n)) : exact (f.next i) (g.next i) :=
-begin
-  rcases (c.next i).eq_none_or_eq_some with (hi | ⟨⟨j, hij⟩, hi⟩),
-  { rw [next_eq_zero _ _ hi],
-    apply_with exact_zero_left_of_mono { instances := ff },
-    { apply_instance },
-    { refine ⟨λ Z a b H, _⟩, apply (X_next_is_zero _ _ hi).eq_of_tgt } },
-  exact exact_next f g i j hij (h j)
-end
+h _
 
 lemma exact_prev {A₁ A₂ A₃ : homological_complex C c} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃)
   (i j : ι) (hij : c.rel i j) (h : exact (f.f i) (g.f i)) :
@@ -178,14 +155,7 @@ end
 
 lemma exact_prev' {A₁ A₂ A₃ : homological_complex C c} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃) (j : ι)
   (h : ∀ n, exact (f.f n) (g.f n)) : exact (f.prev j) (g.prev j) :=
-begin
-  rcases (c.prev j).eq_none_or_eq_some with (hj | ⟨⟨i, hij⟩, hj⟩),
-  { rw [prev_eq_zero _ _ hj],
-    apply_with exact_zero_left_of_mono { instances := ff },
-    { apply_instance },
-    { refine ⟨λ Z a b H, _⟩, apply (X_prev_is_zero _ _ hj).eq_of_tgt } },
-  exact exact_prev f g i j hij (h i)
-end
+h _
 
 lemma mono_next {A₁ A₂ : homological_complex C c} (f : A₁ ⟶ A₂)
   (i j : ι) (hij : c.rel i j) [mono (f.f j)] :
@@ -200,11 +170,7 @@ end
 instance mono_next' {A₁ A₂ : homological_complex C c} (f : A₁ ⟶ A₂)
   (i : ι) [∀ n, mono (f.f n)] :
   mono (f.next i) :=
-begin
-  rcases (c.next i).eq_none_or_eq_some with (hi | ⟨⟨j, hij⟩, hi⟩),
-  { refine ⟨λ Z a b H, _⟩, apply (X_next_is_zero _ _ hi).eq_of_tgt },
-  exact mono_next f i j hij
-end
+by apply_assumption
 
 lemma epi_prev {A₁ A₂ : homological_complex C c} (f : A₁ ⟶ A₂)
   (i j : ι) (hij : c.rel i j) [epi (f.f i)] :
@@ -219,11 +185,7 @@ end
 instance epi_prev' {A₁ A₂ : homological_complex C c} (f : A₁ ⟶ A₂)
   (j : ι) [∀ n, epi (f.f n)] :
   epi (f.prev j) :=
-begin
-  rcases (c.prev j).eq_none_or_eq_some with (hj | ⟨⟨i, hij⟩, hj⟩),
-  { refine ⟨λ Z a b H, _⟩, apply (X_prev_is_zero _ _ hj).eq_of_src },
-  exact epi_prev f i j hij
-end
+by apply_assumption
 
 instance {A B : homological_complex C c} (f : A ⟶ B) [∀ n, epi (f.f n)] (i : ι) :
   epi (boundaries_map f i) :=
