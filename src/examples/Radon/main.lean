@@ -64,8 +64,20 @@ def Radon_LC_to_weak_dual (X : Profinite.{0}) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
   X.Radon_LC p c → weak_dual ℝ (locally_constant X ℝ) := subtype.val
 
+def weak_dual_LC_to_fun (X : Profinite.{0}) :
+  weak_dual ℝ (locally_constant X ℝ) → locally_constant X ℝ → ℝ := λ μ x, μ x
+
+lemma continuous_weak_dual_LC_to_fun (X : Profinite.{0}) :
+  continuous X.weak_dual_LC_to_fun :=
+begin
+  apply continuous_pi, intros e,
+  exact weak_dual.eval_continuous _,
+end
+
 instance t2_space_weak_dual (X : Profinite.{0}) :
-  t2_space (weak_dual ℝ (locally_constant X ℝ)) := sorry
+  t2_space (weak_dual ℝ (locally_constant X ℝ)) :=
+⟨λ x y h, separated_by_continuous (X.continuous_weak_dual_LC_to_fun) $
+  λ c, h $ by { ext t, apply_fun (λ e, e t) at c, exact c } ⟩
 
 lemma Radon_LC_closed_embedding (X : Profinite.{0}) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
