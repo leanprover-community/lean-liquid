@@ -369,93 +369,36 @@ def embed_homotopy (e : cι.embedding cι') :
     rintro i' j' rfl rfl h',
     exact hij (e.c h')
   end,
-  comm := λ i',  begin
+  comm := λ i', begin
     by_cases hi : ∃ i : ι, i' = e.f i,
     { rcases hi with ⟨i, rfl⟩,
-      have this := h.comm i,
-      have h4 := e.r_f i,
-      -- it's `exact this` modulo `h4`
-      delta embed embed.map,
+      delta embed embed.map embed.obj embed.X embed.d embed.f
+        embed_homotopy_hom d_next prev_d id_rhs,
+      dsimp only [add_monoid_hom.mk'_apply],
+      rw e.r_f i,
       dsimp only,
-      apply_fun (λ x, (embed_iso e i).hom ≫ x ≫ (embed_iso e i).symm.hom) at this,
-      convert this,
-      { simp only [embed_iso, eq_to_iso.hom, iso.symm_hom, eq_to_iso.inv,
-          functor.conj_eq_to_hom_iff_heq],
-        rw e.r_f i,
-        refl, },
-      { simp only [embed_iso, eq_to_iso.hom, iso.symm_hom, eq_to_iso.inv,
-          preadditive.add_comp, category.assoc, preadditive.comp_add],
-        congr' 2,
-        { -- next 30 lines is hacky d_next argument
-          rw functor.conj_eq_to_hom_iff_heq,
-          delta d_next embed.obj id_rhs embed_homotopy_hom,
-          dsimp only,
-          induction hi : cι.next i,
-          { delta complex_shape.next option.choice at hi,
-            split_ifs at hi with h1, cases hi, clear hi,
-            simp only [add_monoid_hom.mk'_apply],
-            simp only [nonempty_subtype, not_exists] at h1,
-            induction hi' : cι'.next (e.f i),
-            { simp only,
-              rw ← functor.conj_eq_to_hom_iff_heq,
-              { simp only [zero_comp, comp_zero] },
-              { rw h4, refl },
-              { rw h4, refl },
-            },
-            { cases val with j hj,
-              rw h4,
-              simp only [heq_iff_eq],
-              by_cases hj' : e.r j = none,
-              { rw hj', simp only [embed.d_to_none, zero_comp] },
-              obtain ⟨i₁, hi₁⟩ := option.ne_none_iff_exists.1 hj',
-              rw ← hi₁,
-              specialize h1 i₁,
-              simp [h.zero' _ _ h1] } },
-          { cases val with j hj,
-            have cj' : cι'.next (e.f i) = some ⟨e.f j, _⟩ :=
-              cι'.next_eq_some (e.c hj),
-            rw cj',
-            simp only [add_monoid_hom.mk'_apply],
-            rw [e.r_f j, h4],
-            simp } },
-        { rw functor.conj_eq_to_hom_iff_heq,
-          delta prev_d embed.obj id_rhs embed_homotopy_hom,
-          dsimp only,
-          induction hi : cι.prev i,
-          { delta complex_shape.prev option.choice at hi,
-            split_ifs at hi with h1, cases hi, clear hi,
-            simp only [add_monoid_hom.mk'_apply],
-            simp only [nonempty_subtype, not_exists] at h1,
-            induction hi' : cι'.prev (e.f i),
-            { simp only,
-              rw ← functor.conj_eq_to_hom_iff_heq,
-              { simp only [zero_comp, comp_zero] },
-              { rw h4, refl },
-              { rw h4, refl },
-            },
-            { cases val with j hj,
-              rw h4,
-              simp only [heq_iff_eq],
-              by_cases hj' : e.r j = none,
-              { rw hj', simp only [embed.d_to_none, zero_comp] },
-              obtain ⟨i₁, hi₁⟩ := option.ne_none_iff_exists.1 hj',
-              rw ← hi₁,
-              specialize h1 i₁,
-              simp [h.zero' _ _ h1] } },
-          { cases val with j hj,
-            rw [cι'.prev_eq_some (e.c hj),add_monoid_hom.mk'_apply],
-            simp only [add_monoid_hom.mk'_apply],
-            rw [e.r_f j, h4],
-            simp },
-        },
-        { rw [functor.conj_eq_to_hom_iff_heq, e.r_f i],
-          refl, } } },
+      rw h.comm i,
+      delta d_next prev_d id_rhs,
+      dsimp only [add_monoid_hom.mk'_apply],
+      rw add_left_inj,
+      congr' 1,
+      { by_cases aux : ∃ j, cι.rel i j,
+        { rcases aux with ⟨j, hj⟩,
+          rw [cι.next_eq' hj, cι'.next_eq' (e.c hj), e.r_f] },
+        { push_neg at aux,
+          induction x : e.r (cι'.next (e.f i));
+          simp only [X.shape _ _ (aux _), zero_comp], } },
+      { by_cases aux : ∃ j, cι.rel j i,
+        { rcases aux with ⟨j, hj⟩,
+          rw [cι.prev_eq' hj, cι'.prev_eq' (e.c hj), e.r_f] },
+        { push_neg at aux,
+          induction x : e.r (cι'.prev (e.f i));
+          simp only [Y.shape _ _ (aux _), comp_zero], } } },
     { -- i' not in image
       have foo := e.r_none _ hi,
       suffices : subsingleton (embed.X X (e.r i') ⟶ embed.X Y (e.r i')),
       { refine @subsingleton.elim _ this _ _ },
-      convert (homological_complex.embed.subsingleton_of_none X _),
-    },
+      convert (homological_complex.embed.subsingleton_of_none X _), },
   end }
 
 end homotopy
@@ -482,6 +425,7 @@ nat_iso.of_components
   simp only [category.assoc, iso.inv_hom_id, category.comp_id],
 end)
 
+/-
 def embed_comp_prev_functor (𝓐 : Type*) [category 𝓐] [abelian 𝓐]
   {c₁ : complex_shape ι₁} {c₂ : complex_shape ι₂} (e : c₁.embedding c₂) (he : e.c_iff) (i₁ : ι₁) :
   embed e ⋙ prev_functor 𝓐 c₂ (e.f i₁) ≅ prev_functor 𝓐 c₁ i₁ :=
@@ -668,6 +612,7 @@ begin
     repeat { erw category.comp_id, },
     apply embed_d_from, },
 end
+-/
 
 def homology_embed_nat_iso (𝓐 : Type*) [category 𝓐] [abelian 𝓐]
 {c₁ : complex_shape ι₁} {c₂ : complex_shape ι₂} (e : c₁.embedding c₂) (he : e.c_iff)

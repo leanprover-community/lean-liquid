@@ -103,13 +103,11 @@ def homotopy_shift {X Y : cochain_complex V ℤ} {f g : X ⟶ Y} (h : homotopy f
 { hom := λ i j, n.neg_one_pow • h.hom _ _,
   zero' := λ i j r, by { rw ← complex_shape.up_add_right_cancel n at r, simp [h.zero _ _ r] },
   comm := λ i, begin
-    dsimp,
-    suffices : X.d (i + n) (i + n + 1) ≫ h.hom (i + n + 1) (i + n) +
-      h.hom (i + n) (i + n - 1) ≫ Y.d (i + n - 1) (i + n) =
-      X.d (i + n) (i + 1 + n) ≫ h.hom (i + 1 + n) (i + n) +
-      h.hom (i + n) (i - 1 + n) ≫ Y.d (i - 1 + n) (i + n),
-    { simpa [h.comm (i+n), d_next, prev_d, add_right_inj] },
-    congr' 3; ring,
+    dsimp, delta d_from d_to from_next to_prev,
+    simp only [h.comm (i+n), d_next, prev_d, add_left_inj, add_monoid_hom.mk'_apply,
+      shift_d, shift_X, zsmul_comp, comp_zsmul, int.neg_one_pow_smul_self],
+    delta X_next X_prev, dsimp,
+    congr' 3; simp only [cochain_complex.next, cochain_complex.prev]; ring,
   end }
 
 variable (V)
