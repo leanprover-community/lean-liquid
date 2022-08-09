@@ -174,6 +174,8 @@ def Radon_functor_iso_Radon_LC_functor (p c : ℝ≥0)
   Radon_functor p c ≅ Radon_LC_functor p c :=
 nat_iso.of_components
 (λ X, X.Radon_iso_Radon_LC p c)
-sorry
+begin
+  intros X Y f, ext, refl,
+end
 
 end Profinite
