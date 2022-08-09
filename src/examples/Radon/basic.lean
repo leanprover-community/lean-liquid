@@ -5,6 +5,7 @@ import locally_constant.completion
 import analysis.special_functions.pow
 import topology.algebra.module.weak_dual
 import analysis.mean_inequalities_pow
+import real_measures.condensed
 
 open_locale nnreal big_operators classical
 
@@ -637,7 +638,7 @@ end
 
 end is_limit_Radon_LC_cone
 
-def is_limit_Raon_LC_cone (X : Profinite.{0}) (p c : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] :
+def is_limit_Radon_LC_cone (X : Profinite.{0}) (p c : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] :
   is_limit (X.Radon_LC_cone p c) :=
 { lift := λ S, ⟨is_limit_Radon_LC_cone.Radon_LC X p c S,
     is_limit_Radon_LC_cone.continuous_Radon_LC X p c S⟩,
@@ -664,5 +665,53 @@ def is_limit_Raon_LC_cone (X : Profinite.{0}) (p c : ℝ≥0) [fact (0 < p)] [fa
       Radon_LC_cone, Radon_LC_functor, map_Radon_LC, weak_dual.comap],
     congr' 1, ext, refl,
   end }
+
+.
+
+def Radon_LC_comparison (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  X.diagram ⋙ Radon_LC_functor p c ≅
+  X.fintype_diagram ⋙ real_measures.functor p ⋙ CompHausFiltPseuNormGrp₁.level.obj c ⋙
+  CompHaus_to_Top := sorry
+
+instance compact_space_Radon_LC_of_discrete_quotient (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] (T : discrete_quotient X) :
+  compact_space (Radon_LC (X.diagram.obj T) p c) :=
+begin
+  change compact_space ((X.diagram ⋙ Radon_LC_functor p c).obj T),
+  let e := Top.homeo_of_iso ((Radon_LC_comparison X p c).app T),
+  haveI : compact_space
+    ((X.fintype_diagram ⋙ real_measures.functor p ⋙ CompHausFiltPseuNormGrp₁.level.obj c
+    ⋙ CompHaus_to_Top).obj T),
+  { change compact_space ((X.fintype_diagram ⋙ real_measures.functor p
+      ⋙ CompHausFiltPseuNormGrp₁.level.obj c).obj T), apply_instance },
+  exact e.symm.compact_space,
+end
+
+def Radon_LC_CompHaus_diagram (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  discrete_quotient X ⥤ CompHaus.{0} :=
+{ obj := λ T, CompHaus.of $ (X.diagram.obj T).Radon_LC p c,
+  map := λ S T e, (Radon_LC_functor p c).map $ X.diagram.map e,
+  map_id' := sorry,
+  map_comp' := sorry }
+
+def compact_space_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  compact_space (X.Radon_LC p c) :=
+begin
+  let e₁ : X.Radon_LC p c ≅ limit (X.diagram ⋙ Radon_LC_functor p c) :=
+    (X.is_limit_Radon_LC_cone p c).cone_point_unique_up_to_iso (limit.is_limit _),
+  let e₂ :
+    CompHaus_to_Top.obj (limit $ X.Radon_LC_CompHaus_diagram p c) ≅
+    limit (X.diagram ⋙ Radon_LC_functor p c)  :=
+    (is_limit_of_preserves CompHaus_to_Top (limit.is_limit _)).cone_point_unique_up_to_iso
+    (limit.is_limit _),
+  let e := Top.homeo_of_iso (e₂ ≪≫ e₁.symm),
+  haveI : compact_space
+    (CompHaus_to_Top.obj (limit $ X.Radon_LC_CompHaus_diagram p c)),
+  { show compact_space ↥((limit $ X.Radon_LC_CompHaus_diagram p c)), apply_instance },
+  exact e.compact_space,
+end
 
 end Profinite
