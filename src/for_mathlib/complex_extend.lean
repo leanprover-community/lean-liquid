@@ -717,31 +717,51 @@ begin
   sorry
 end
 
-def homology_embed_nat_iso (𝓐 : Type*) [category 𝓐] [abelian 𝓐]
-{c₁ : complex_shape ι₁} {c₂ : complex_shape ι₂} (e : c₁.embedding c₂) (he : e.c_iff)
-  (i₁ : ι₁) (i₂ : ι₂) (h₁₂ : e.f i₁ = i₂) :
-  embed e ⋙ homology_functor 𝓐 c₂ i₂ ≅ homology_functor 𝓐 c₁ i₁ :=
+@[simp]
+def embed_short_complex_π₁_π :
+  short_complex.functor_homological_complex 𝓐 c₁ i₁ ⋙ short_complex.π₁ ⟶
+  embed e ⋙ short_complex.functor_homological_complex 𝓐 c₂ i₂ ⋙ short_complex.π₁ :=
 begin
+  by_cases e.r (c₂.prev i₂) = some (c₁.prev i₁),
+  { exact (embed_eval_iso_of_some e _ _ h).inv, },
+  { exact 0, },
+end
+
+def embed_short_complex_π₃_π :
+  short_complex.functor_homological_complex 𝓐 c₁ i₁ ⋙ short_complex.π₃ ⟶
+  embed e ⋙ short_complex.functor_homological_complex 𝓐 c₂ i₂ ⋙ short_complex.π₃ :=
+begin
+  by_cases e.r (c₂.next i₂) = some (c₁.next i₁),
+  { exact (embed_eval_iso_of_some e _ _ h).inv, },
+  { exact 0, },
+end
+
+def embed_short_complex_π :
+  short_complex.functor_homological_complex 𝓐 c₁ i₁ ⟶
+  embed e ⋙ short_complex.functor_homological_complex 𝓐 c₂ i₂ :=
+short_complex.nat_trans_hom_mk
+  (embed_short_complex_π₁_π 𝓐 e _ _ h₁₂)
+  (embed_short_complex_π₂_iso 𝓐 e _ _ h₁₂).inv
+  (embed_short_complex_π₃_π 𝓐 e _ _ h₁₂)
+begin
+  sorry
+end
+begin
+  sorry
+end
+
 /- stategy : similarly as with `embed_short_complex_ι` define
 a natural transformation `embed_short_complex_π` in the other direction,
 and show that they induce inverse isomorphisms. The key lemmas should
 be that if we have an endomorphism of a `short_complex` that is
 the identity in the middle, then the induced map on homology is
 the identity. -/
-  calc embed e ⋙ homology_functor 𝓐 c₂ i₂ ≅
-    embed e ⋙ (short_complex.functor_homological_complex 𝓐 c₂ i₂ ⋙
-      short_complex.homology_functor) : _
-  ... ≅ (embed e ⋙ short_complex.functor_homological_complex 𝓐 c₂ i₂) ⋙
-      short_complex.homology_functor : _
-  ... ≅ short_complex.functor_homological_complex 𝓐 c₁ i₁ ⋙
-    short_complex.homology_functor : _
-  ... ≅ homology_functor 𝓐 c₁ i₁ : _,
-  { exact iso_whisker_left _ (short_complex.homology_functor_iso 𝓐 c₂ i₂), },
-  { exact (functor.associator _ _ _).symm, },
-  { exact iso_whisker_right
-    (embed_short_complex_functor_homological_complex 𝓐 e he i₁ i₂ h₁₂) _, },
-  { exact (short_complex.homology_functor_iso 𝓐 c₁ i₁).symm, },
-end
+def homology_embed_nat_iso  :
+  embed e ⋙ homology_functor 𝓐 c₂ i₂ ≅ homology_functor 𝓐 c₁ i₁ :=
+{ hom := embed_short_complex_ι 𝓐 e i₁ i₂ h₁₂ ◫ (𝟙 short_complex.homology_functor),
+  inv := embed_short_complex_π 𝓐 e i₁ i₂ h₁₂ ◫ (𝟙 short_complex.homology_functor),
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry, }
 
 end homology_comparison
 
