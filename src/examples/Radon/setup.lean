@@ -43,7 +43,9 @@ namespace locally_constant
 instance normed_space (X : Type*)
   [topological_space X] [compact_space X] [t2_space X] :
   normed_space ℝ (locally_constant X ℝ) :=
-{ norm_smul_le := sorry,
+{ norm_smul_le := λ a f, by simpa only [norm_def, coe_smul, pi.smul_apply, algebra.id.smul_eq_mul,
+    real.norm_eq_abs, abs_mul, mul_comm (abs a)] using
+      (real.supr_mul_of_nonneg (abs_nonneg _) _).symm.le,
   ..(infer_instance : module ℝ _) }
 
 lemma nnnorm_apply_le_nnnorm (X : Type*)
@@ -62,10 +64,36 @@ end locally_constant
 
 namespace topological_space.clopens
 
+lemma indicator_continuous {X Y : Type*} [topological_space X] [topological_space Y] [has_zero Y]
+  (U : clopens X) (f : X → Y) (hf : continuous f) :
+  continuous (set.indicator (U : set X) f) :=
+begin
+  constructor, intros V hV,
+  set W : set X := (U : set X).indicator f ⁻¹' V,
+  by_cases h0 : (0:Y) ∈ V,
+  { suffices : W = f ⁻¹' V ∪ Uᶜ,
+    { rw this, exact (hV.preimage hf).union U.clopen.compl.is_open },
+    classical, ext x,
+    simp only [set.mem_preimage, set.mem_union_eq, set.mem_compl_eq, set_like.mem_coe,
+      set.indicator_apply],
+    split_ifs with hxU,
+    { simp only [hxU, not_true, or_false] },
+    { simp only [h0, hxU, true_iff, not_false_iff, or_true], }, },
+  { suffices : W = f ⁻¹' V ∩ U,
+    { rw this, exact (hV.preimage hf).inter U.clopen.is_open },
+    classical, ext x,
+    simp only [set.mem_preimage, set.mem_union_eq, set.mem_compl_eq, set_like.mem_coe,
+      set.indicator_apply],
+    split_ifs with hxU,
+    { simp only [hxU, set.mem_inter_eq, set.mem_preimage, set_like.mem_coe, and_true] },
+    { simp only [h0, false_iff, set.mem_inter_eq, set.mem_preimage, set_like.mem_coe, not_and],
+      intro, assumption, } }
+end
+
 def indicator {X : Type*} [topological_space X] (U : clopens X) :
   C(X,ℝ) :=
 { to_fun := set.indicator U 1,
-  continuous_to_fun := sorry }
+  continuous_to_fun := indicator_continuous _ _ continuous_one }
 
 def indicator_LC {X : Type*} [topological_space X] (U : clopens X) :
   locally_constant X ℝ :=
