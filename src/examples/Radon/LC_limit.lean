@@ -230,4 +230,15 @@ def Radon_LC_CompHaus_functor (p c : ℝ≥0)
   map_id' := (Radon_LC_functor p c).map_id,
   map_comp' := λ X Y Z f g, (Radon_LC_functor p c).map_comp f g }
 
+def Radon_LC_CompHaus_cone (X : Profinite.{0}) (p c : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] :
+  cone (X.diagram ⋙ Radon_LC_CompHaus_functor p c) :=
+(Radon_LC_CompHaus_functor p c).map_cone X.as_limit_cone
+
+def is_limit_Radon_LC_CompHaus_cone (X : Profinite.{0}) (p c : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] :
+  is_limit (X.Radon_LC_CompHaus_cone p c) :=
+begin
+  apply is_limit_of_reflects CompHaus_to_Top,
+  apply is_limit_Radon_LC_cone,
+end
+
 end Profinite
