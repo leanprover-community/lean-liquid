@@ -17,7 +17,20 @@ lemma comp_apply {X Y Z : CompHaus} (f : X ⟶ Y) (g : Y ⟶ Z) (x : X) :
 
 lemma continuous_of_is_limit (F : J ⥤ CompHaus.{u}) (C : cone F) (hC : is_limit C)
   (Y : Type u) [topological_space Y] (t : Y → C.X)
-  (h : ∀ j, continuous (C.π.app j ∘ t)) : continuous t := sorry
+  (h : ∀ j, continuous (C.π.app j ∘ t)) : continuous t :=
+begin
+  let CC := CompHaus_to_Top.map_cone C,
+  let hCC : is_limit CC := is_limit_of_preserves CompHaus_to_Top hC,
+  let E : cone (F ⋙ CompHaus_to_Top) := ⟨Top.of Y, λ j, ⟨_,h j⟩, _⟩,
+  convert (hCC.lift E).continuous,
+  ext1 a,
+  apply concrete.is_limit_ext _ hCC, intros j,
+  change _ = (hCC.lift E ≫ CC.π.app j) _,
+  rw hCC.fac, refl,
+  intros i j f, ext, dsimp,
+  change _ = (C.π.app _ ≫ F.map _) _,
+  rw C.w,
+end
 
 end CompHaus
 
