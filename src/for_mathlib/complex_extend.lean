@@ -192,6 +192,21 @@ by { subst h₁, subst h₂, change _ = 𝟙 _ ≫ _ ≫ 𝟙 _, simpa }
 @[simp] lemma embed.d_some_some (i j : ι) : embed.d X (some i) (some j) = X.d i j :=
 rfl
 
+lemma embed.d_ne_zero (e₁ e₂ : option ι) (h : embed.d X e₁ e₂ ≠ 0) :
+  ∃ (i j : ι) (h₁ : e₁ = some i) (h₂ : e₂ = some j), X.d i j ≠ 0 :=
+begin
+  rcases h₁ : e₁ with _ | ⟨i⟩,
+  { exfalso,
+    apply h,
+    exact embed.d_of_none_src X h₁, },
+  { rcases h₂ : e₂ with _ | ⟨j⟩,
+    { exfalso,
+      apply h,
+      exact embed.d_of_none_tgt X h₂, },
+    { substs h₁ h₂,
+      refine ⟨i, j, rfl, rfl, h⟩, }, },
+end
+
 /-- Prop-valued so probably won't break anything. To deal with zerology. -/
 instance homological_complex.embed.subsingleton_to_none (c : _) : subsingleton (c ⟶ embed.X X none) :=
 @unique.subsingleton _ (has_zero_object.unique_from c)
@@ -635,6 +650,7 @@ variables (𝓐 : Type*) [category 𝓐] [abelian 𝓐] (e : c₁.embedding c₂
   (i₁ : ι₁) (i₂ : ι₂) (h₁₂ : e.f i₁ = i₂)
 include h₁₂
 
+@[simp]
 def embed_short_complex_π₁_ι :
   embed e ⋙ short_complex.functor_homological_complex 𝓐 c₂ i₂ ⋙ short_complex.π₁ ⟶
   short_complex.functor_homological_complex 𝓐 c₁ i₁ ⋙ short_complex.π₁ :=
@@ -644,6 +660,7 @@ begin
   { exact 0, },
 end
 
+@[simp]
 def embed_short_complex_π₂_iso :
   embed e ⋙ short_complex.functor_homological_complex 𝓐 c₂ i₂ ⋙ short_complex.π₂ ≅
   short_complex.functor_homological_complex 𝓐 c₁ i₁ ⋙ short_complex.π₂ :=
@@ -662,10 +679,37 @@ def embed_short_complex_ι :
   embed e ⋙ short_complex.functor_homological_complex 𝓐 c₂ i₂ ⟶
   short_complex.functor_homological_complex 𝓐 c₁ i₁ :=
 short_complex.nat_trans_hom_mk
-    (embed_short_complex_π₁_ι 𝓐 e _ _ h₁₂)
-    (embed_short_complex_π₂_iso 𝓐 e _ _ h₁₂).hom
-    (embed_short_complex_π₃_ι 𝓐 e _ _ h₁₂)
-    sorry sorry
+  (embed_short_complex_π₁_ι 𝓐 e _ _ h₁₂)
+  (embed_short_complex_π₂_iso 𝓐 e _ _ h₁₂).hom
+  (embed_short_complex_π₃_ι 𝓐 e _ _ h₁₂)
+begin
+  ext X,
+  dsimp,
+  split_ifs,
+  { sorry, },
+  { suffices : ((embed e).obj X).d_to i₂ = 0,
+    { dsimp, simp only [this, zero_comp], },
+    rcases h₂ : e.r (c₂.prev i₂) with _ | j,
+    { apply is_zero.eq_of_src,
+      apply embed.X_is_zero_of_none,
+      exact h₂, },
+    { subst h₁₂,
+      change embed.d X (e.r (c₂.prev (e.f i₁))) (e.r (e.f i₁)) = 0,
+      by_contra h',
+      rcases embed.d_ne_zero _ _ _ h' with ⟨i, k, h₃, h₄, h₅⟩,
+      rw e.r_f at h₄,
+      rw h₂ at h₃,
+      simp only at h₄ h₃,
+      substs h₃ h₄,
+      have h₅' : c₁.rel j i₁,
+      { by_contra h₅'',
+        exact h₅ (X.shape _ _ h₅''), },
+      rw c₁.prev_eq' h₅' at h,
+      exact h h₂, }, },
+end
+begin
+  sorry
+end
 
 def homology_embed_nat_iso (𝓐 : Type*) [category 𝓐] [abelian 𝓐]
 {c₁ : complex_shape ι₁} {c₂ : complex_shape ι₂} (e : c₁.embedding c₂) (he : e.c_iff)
