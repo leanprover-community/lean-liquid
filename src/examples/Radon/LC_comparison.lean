@@ -19,9 +19,22 @@ def Radon_LC_to_fun (X : Profinite.{0}) (p c : ℝ≥0)
   X.Radon_LC p c → locally_constant X ℝ → ℝ :=
 λ μ, μ.1
 
+def Radon_to_fun (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  X.Radon p c → C(X,ℝ) → ℝ :=
+λ μ, μ.1
+
 lemma Radon_LC_to_fun_injective (X : Profinite.{0}) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
   function.injective (X.Radon_LC_to_fun p c) :=
+begin
+  intros a b h, ext x : 2,
+  exact congr_fun h x
+end
+
+lemma Radon_to_fun_injective (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  function.injective (X.Radon_to_fun p c) :=
 begin
   intros a b h, ext x : 2,
   exact congr_fun h x
@@ -36,10 +49,19 @@ begin
   refine continuous.comp (weak_dual.eval_continuous f) (continuous_subtype_coe),
 end
 
+lemma Radon_to_fun_continuous (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  continuous (X.Radon_to_fun p c) :=
+begin
+  apply continuous_pi,
+  intros f,
+  refine continuous.comp (weak_dual.eval_continuous f) (continuous_subtype_coe),
+end
+
 --WHY!?!?!?
-instance t2_space_LC_to_R (X : Profinite.{0}) :
-  t2_space (locally_constant X ℝ → ℝ) :=
-@Pi.t2_space (locally_constant X ℝ) (λ _, ℝ) infer_instance
+instance t2_space_fun_to_R (X : Type*) :
+  t2_space (X → ℝ) :=
+@Pi.t2_space X (λ _, ℝ) infer_instance
 begin
   intros a, dsimp,
   apply_instance
@@ -50,6 +72,12 @@ instance t2_space_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
   t2_space (X.Radon_LC p c) :=
 ⟨λ f g h, separated_by_continuous (X.Radon_LC_to_fun_continuous p c)
   $ (X.Radon_LC_to_fun_injective p c).ne h⟩
+
+instance t2_space_Radon (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  t2_space (X.Radon p c) :=
+⟨λ f g h, separated_by_continuous (X.Radon_to_fun_continuous p c)
+  $ (X.Radon_to_fun_injective p c).ne h⟩
 
 def Radon_LC_comparison_component_equiv_aux (X : Profinite.{0}) (p : ℝ≥0)
   (T : discrete_quotient X) :

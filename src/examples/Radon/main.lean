@@ -237,4 +237,75 @@ begin
   intros X Y f, ext, refl,
 end
 
+def Radon_CompHaus_functor (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  Profinite.{0} ⥤ CompHaus.{0} :=
+{ obj := λ X, CompHaus.of $ X.Radon p c,
+  map := λ X Y f, (Radon_functor p c).map f,
+  map_id' := (Radon_functor p c).map_id,
+  map_comp' := λ _ _ _ f g, (Radon_functor p c).map_comp f g }
+
+def Radon_CompHaus_functor_iso_Radon_LC_CompHaus_functor (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  Radon_CompHaus_functor p c ≅ Radon_LC_CompHaus_functor p c :=
+nat_iso.of_components
+(λ X,
+{ hom := (Radon_functor_iso_Radon_LC_functor p c).hom.app X,
+  inv := (Radon_functor_iso_Radon_LC_functor p c).inv.app X,
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry })
+sorry
+
+def Radon_CompHaus_cone (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  cone (X.diagram ⋙ Radon_CompHaus_functor p c) :=
+(Radon_CompHaus_functor p c).map_cone X.as_limit_cone
+
+def is_limit_Radon_CompHaus_cone (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  is_limit (X.Radon_CompHaus_cone p c) :=
+{ lift := λ S,
+    (X.is_limit_Radon_LC_CompHaus_cone p c).lift
+    ⟨S.X, S.π ≫ whisker_left _ (Radon_CompHaus_functor_iso_Radon_LC_CompHaus_functor p c).hom⟩ ≫
+    (Radon_CompHaus_functor_iso_Radon_LC_CompHaus_functor p c).inv.app _,
+  fac' := sorry,
+  uniq' := sorry }
+
+def Radon_LC_CompHaus_comparison (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  X.diagram ⋙ Radon_LC_CompHaus_functor p c ≅
+  X.fintype_diagram ⋙ real_measures.functor p ⋙ CompHausFiltPseuNormGrp₁.level.obj c :=
+nat_iso.of_components
+(λ T,
+{ hom := (X.Radon_LC_comparison p c).hom.app _,
+  inv := (X.Radon_LC_comparison p c).inv.app _,
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry })
+sorry
+
+def Radon_CompHaus_comparison (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  X.diagram ⋙ Radon_CompHaus_functor p c ≅
+  X.fintype_diagram ⋙ real_measures.functor p ⋙ CompHausFiltPseuNormGrp₁.level.obj c :=
+iso_whisker_left _ (Radon_CompHaus_functor_iso_Radon_LC_CompHaus_functor _ _) ≪≫
+Radon_LC_CompHaus_comparison _ _ _
+
+def Radon_iso_limit (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  CompHaus.of (X.Radon p c) ≅
+  limit (X.fintype_diagram ⋙ real_measures.functor p ⋙ CompHausFiltPseuNormGrp₁.level.obj c) :=
+(X.is_limit_Radon_CompHaus_cone p c).cone_point_unique_up_to_iso (limit.is_limit _) ≪≫
+has_limit.iso_of_nat_iso (Radon_CompHaus_comparison _ _ _)
+
+def Radon_iso_real_measures (X : Profinite.{0}) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  CompHaus.of (X.Radon p c) ≅
+  (CompHausFiltPseuNormGrp₁.level.obj c).obj
+  ((Profinite.extend (real_measures.functor p)).obj X) :=
+Radon_iso_limit _ _ _ ≪≫
+has_limit.iso_of_nat_iso (functor.associator _ _ _).symm ≪≫
+(limit.is_limit _).cone_point_unique_up_to_iso
+(is_limit_of_preserves ((CompHausFiltPseuNormGrp₁.level.obj c))
+  (limit.is_limit (X.fintype_diagram ⋙ real_measures.functor p)))
+
 end Profinite
