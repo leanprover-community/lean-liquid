@@ -1,5 +1,5 @@
 import examples.Radon.main
-import category_theory.limits.concrete_category
+import examples.Radon.png_reflects_limits
 
 open_locale nnreal big_operators classical
 
@@ -128,6 +128,7 @@ def is_limit_Radon_png_cone_map_level (c : ℝ≥0) :
   uniq' := sorry }
 
 def is_limit_Radon_png_cone : is_limit (X.Radon_png_cone p) :=
-sorry
+CompHausFiltPseuNormGrp₁.level_jointly_reflects_limits _ $
+λ c, is_limit_Radon_png_cone_map_level _ _ _
 
 end Profinite
