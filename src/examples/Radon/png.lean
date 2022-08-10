@@ -72,9 +72,96 @@ instance : comphaus_filtered_pseudo_normed_group (X.bdd_weak_dual p) :=
   continuous_cast_le := sorry,
   ..(infer_instance : pseudo_normed_group (X.bdd_weak_dual p)) }
 
-def Radon_png (X : Profinite.{0}) (p : ℝ≥0)
-  [fact (0 < p)] [fact (p ≤ 1)] : CompHausFiltPseuNormGrp₁ :=
+def Radon_png : CompHausFiltPseuNormGrp₁ :=
 { M := X.bdd_weak_dual p,
   exhaustive' := λ μ, μ.2 }
+
+def map_Radon_png {X Y : Profinite.{0}} (f : X ⟶ Y) :
+  X.Radon_png p ⟶ Y.Radon_png p :=
+{ to_fun := λ μ, ⟨weak_dual.comap f.comap μ.1, begin
+    obtain ⟨c,hc⟩ := μ.2,
+    use c,
+    apply weak_dual.bdd_comap _ hc,
+    apply_instance,
+  end⟩,
+  map_zero' := by { ext, refl },
+  map_add' := λ a b, by { ext, refl },
+  strict' := λ c μ hμ,
+    weak_dual.bdd_comap _ hμ _,
+  continuous' := sorry }
+
+def Radon_png_functor : Profinite.{0} ⥤ CompHausFiltPseuNormGrp₁ :=
+{ obj := λ X, X.Radon_png p,
+  map := λ X Y, map_Radon_png _,
+  map_id' := λ X, by { ext, dsimp [map_Radon_png, weak_dual.comap], congr' 1,
+    ext, refl },
+  map_comp' := λ X Y Z f g, by { ext, refl } }
+
+def Radon_png_cone : cone (X.diagram ⋙ Radon_png_functor p) :=
+(Radon_png_functor p).map_cone X.as_limit_cone
+
+def Radon_png_functor_level_iso_component (c : ℝ≥0) (X : Profinite.{0}) :
+  (CompHausFiltPseuNormGrp₁.level.obj c).obj (X.Radon_png p) ≅
+  (Radon_CompHaus_functor p c).obj X :=
+let e := (bdd_weak_dual_filtration_homeo X p c) in
+{ hom := e.to_continuous_map,
+  inv := e.symm.to_continuous_map,
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry }
+
+def Radon_png_functor_level_iso (c : ℝ≥0) :
+  Radon_png_functor p ⋙ CompHausFiltPseuNormGrp₁.level.obj c ≅
+  Radon_CompHaus_functor p c :=
+nat_iso.of_components
+(λ X, Radon_png_functor_level_iso_component _ _ _)
+(λ X Y f, by { ext, refl })
+
+def is_limit_Radon_png_cone_map_level (c : ℝ≥0) :
+  is_limit ((Radon_png_functor p ⋙
+    CompHausFiltPseuNormGrp₁.level.obj c).map_cone X.as_limit_cone) :=
+{ lift := λ S,
+    (X.is_limit_Radon_CompHaus_cone p c).lift
+    ⟨_, S.π ≫ whisker_left _ (Radon_png_functor_level_iso p c).hom⟩ ≫
+    (Radon_png_functor_level_iso p c).inv.app _,
+  fac' := sorry,
+  uniq' := sorry }
+
+def _root_.CompHausFiltPseuNormGrp₁.lvl
+  (X : CompHausFiltPseuNormGrp₁) (x : X) : ℝ≥0 :=
+(X.exhaustive x).some
+
+lemma _root_.CompHausFiltPseuNormGrp₁.lvl_spec
+  (X : CompHausFiltPseuNormGrp₁) (x : X) :
+  x ∈ pseudo_normed_group.filtration X (X.lvl x) :=
+(X.exhaustive x).some_spec
+
+def _root_.CompHausFiltPseuNormGrp₁.as_lvl
+  (X : CompHausFiltPseuNormGrp₁) (x : X) :
+  (CompHausFiltPseuNormGrp₁.level.obj (X.lvl x)).obj X :=
+⟨x, (X.lvl_spec x)⟩
+
+namespace is_limit_Radon_png_cone
+
+variables (S : cone (X.diagram ⋙ Radon_png_functor p))
+
+def lift_fun : S.X → X.Radon_png p :=
+λ s,
+let c := S.X.lvl s,
+    e := X.is_limit_Radon_png_cone_map_level p c in
+(e.lift ((CompHausFiltPseuNormGrp₁.level.obj c).map_cone S) (S.X.as_lvl s)).1
+
+def lift : S.X ⟶ X.Radon_png p :=
+{ to_fun := lift_fun X p S,
+  map_zero' := sorry,
+  map_add' := sorry,
+  strict' := sorry,
+  continuous' := sorry }
+
+end is_limit_Radon_png_cone
+
+def is_limit_Radon_png_cone : is_limit (X.Radon_png_cone p) :=
+{ lift := λ S, is_limit_Radon_png_cone.lift X p S,
+  fac' := sorry,
+  uniq' := sorry }
 
 end Profinite
