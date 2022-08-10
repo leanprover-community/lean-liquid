@@ -51,10 +51,98 @@ instance t2_space_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
 ⟨λ f g h, separated_by_continuous (X.Radon_LC_to_fun_continuous p c)
   $ (X.Radon_LC_to_fun_injective p c).ne h⟩
 
+def Radon_LC_comparison_component_equiv_aux (X : Profinite.{0}) (p : ℝ≥0)
+  (T : discrete_quotient X) :
+  weak_dual ℝ (locally_constant (X.diagram.obj T) ℝ) ≃
+  real_measures p (X.fintype_diagram.obj T) :=
+{ to_fun := λ μ t,
+    μ (clopens.indicator_LC $
+      discrete_quotient.fibre ⊥ (discrete_quotient.equiv_bot t)),
+  inv_fun := λ μ,
+  { to_fun := λ e, ∑ t : T, μ t * e t,
+    map_add' := sorry,
+    map_smul' := sorry,
+    cont := sorry },
+  left_inv := sorry,
+  right_inv := sorry }
+
+lemma bdd_LC_iff_comparison
+  (X : Profinite.{0}) (T : discrete_quotient X) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)]
+  (f : weak_dual ℝ (locally_constant (X.diagram.obj T) ℝ)) :
+  f.bdd_LC p c ↔
+  X.Radon_LC_comparison_component_equiv_aux p T f ∈
+    pseudo_normed_group.filtration (real_measures p (X.fintype_diagram.obj T)) c :=
+sorry
+
+def Radon_LC_comparison_component_equiv
+  (X : Profinite.{0}) (T : discrete_quotient X) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  Radon_LC (X.diagram.obj T) p c ≃
+  pseudo_normed_group.filtration (real_measures p (X.fintype_diagram.obj T)) c :=
+{ to_fun := λ μ, ⟨X.Radon_LC_comparison_component_equiv_aux p T μ.1,
+    begin
+      rw ← bdd_LC_iff_comparison, exact μ.2,
+    end⟩,
+  inv_fun := λ μ, ⟨(X.Radon_LC_comparison_component_equiv_aux p T).symm μ.1,
+    begin
+      have := μ.2,
+      rw ← (X.Radon_LC_comparison_component_equiv_aux p T).apply_symm_apply μ.val at this,
+      rw ← bdd_LC_iff_comparison at this,
+      exact this,
+    end⟩,
+  left_inv := begin
+    intros μ, ext1,
+    apply (X.Radon_LC_comparison_component_equiv_aux p T).symm_apply_apply,
+  end,
+  right_inv := begin
+    intros μ, ext1,
+    apply (X.Radon_LC_comparison_component_equiv_aux p T).apply_symm_apply,
+  end }
+
+lemma continuous_Radon_LC_comparison_component_equiv_symm
+  (X : Profinite.{0}) (T : discrete_quotient X) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  continuous (X.Radon_LC_comparison_component_equiv T p c).symm :=
+begin
+  apply continuous_subtype_mk,
+  apply weak_dual.continuous_of_continuous_eval,
+  intros y,
+  apply continuous_finset_sum,
+  rintros t -,
+  refine continuous.comp (continuous_mul_right (y t)) _,
+  refine continuous.comp (continuous_apply t) continuous_subtype_coe,
+end
+
+def Radon_LC_comparison_component_homeo
+  (X : Profinite.{0}) (T : discrete_quotient X) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  Radon_LC (X.diagram.obj T) p c ≃ₜ
+  pseudo_normed_group.filtration (real_measures p (X.fintype_diagram.obj T)) c :=
+{ continuous_to_fun := begin
+    rw continuous_iff_is_closed, intros S hS,
+    erw ← (Radon_LC_comparison_component_equiv _ _ _ _).symm.image_eq_preimage,
+    apply is_compact.is_closed,
+    apply hS.is_compact.image,
+    apply continuous_Radon_LC_comparison_component_equiv_symm,
+  end,
+  continuous_inv_fun := continuous_Radon_LC_comparison_component_equiv_symm _ _ _ _,
+  ..(X.Radon_LC_comparison_component_equiv T p c) }
+
+def Radon_LC_comparison_component_iso
+  (X : Profinite.{0}) (T : discrete_quotient X) (p c : ℝ≥0)
+  [fact (0 < p)] [fact (p ≤ 1)] :
+  Radon_LC (X.diagram.obj T) p c ≅
+  Top.of (pseudo_normed_group.filtration (real_measures p (X.fintype_diagram.obj T)) c) :=
+Top.iso_of_homeo $ Radon_LC_comparison_component_homeo _ _ _ _
+
 def Radon_LC_comparison (X : Profinite.{0}) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
   X.diagram ⋙ Radon_LC_functor p c ≅
   X.fintype_diagram ⋙ real_measures.functor p ⋙ CompHausFiltPseuNormGrp₁.level.obj c ⋙
-  CompHaus_to_Top := sorry
+  CompHaus_to_Top :=
+nat_iso.of_components
+(λ T, Radon_LC_comparison_component_iso _ _ _ _)
+sorry
 
 end Profinite
