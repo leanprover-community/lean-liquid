@@ -164,6 +164,10 @@ def homology_functor_iso [abelian C] {M : Type*} (c : complex_shape M) (i : M) :
 nat_iso.of_components (λ X, iso.refl _)
   (λ X Y f, by { ext, simpa only [iso.refl_hom, id_comp, comp_id], })
 
+lemma homology_functor_map_eq_id [abelian C] {K : short_complex C}
+  (φ : K ⟶ K) (hφ : φ.τ₂ = 𝟙 K.obj.Y) : homology_functor.map φ = 𝟙 _ :=
+sorry
+
 end short_complex
 
 namespace category_theory

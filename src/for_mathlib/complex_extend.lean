@@ -676,6 +676,7 @@ begin
   { exact 0, },
 end
 
+@[simps]
 def embed_short_complex_ι :
   embed e ⋙ short_complex.functor_homological_complex 𝓐 c₂ i₂ ⟶
   short_complex.functor_homological_complex 𝓐 c₁ i₁ :=
@@ -736,6 +737,7 @@ begin
   { exact 0, },
 end
 
+@[simps]
 def embed_short_complex_π :
   short_complex.functor_homological_complex 𝓐 c₁ i₁ ⟶
   embed e ⋙ short_complex.functor_homological_complex 𝓐 c₂ i₂ :=
@@ -750,18 +752,30 @@ begin
   sorry
 end
 
-/- stategy : similarly as with `embed_short_complex_ι` define
-a natural transformation `embed_short_complex_π` in the other direction,
-and show that they induce inverse isomorphisms. The key lemmas should
-be that if we have an endomorphism of a `short_complex` that is
-the identity in the middle, then the induced map on homology is
-the identity. -/
 def homology_embed_nat_iso  :
   embed e ⋙ homology_functor 𝓐 c₂ i₂ ≅ homology_functor 𝓐 c₁ i₁ :=
 { hom := embed_short_complex_ι 𝓐 e i₁ i₂ h₁₂ ◫ (𝟙 short_complex.homology_functor),
   inv := embed_short_complex_π 𝓐 e i₁ i₂ h₁₂ ◫ (𝟙 short_complex.homology_functor),
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry, }
+  hom_inv_id' := begin
+    ext K : 2,
+    simp only [nat_trans.comp_app, nat_trans.hcomp_id_app, nat_trans.id_app,
+      ← functor.map_comp],
+    apply short_complex.homology_functor_map_eq_id,
+    simp only [short_complex.comp_τ₂],
+    dsimp only [embed_short_complex_ι, embed_short_complex_π],
+    simpa only [short_complex.nat_trans_hom_mk_app_τ₂_eq,
+      iso.hom_inv_id_app],
+  end,
+  inv_hom_id' := begin
+    ext K : 2,
+    simp only [nat_trans.comp_app, nat_trans.hcomp_id_app, nat_trans.id_app,
+      ← functor.map_comp],
+    apply short_complex.homology_functor_map_eq_id,
+    simp only [short_complex.comp_τ₂],
+    dsimp only [embed_short_complex_ι, embed_short_complex_π],
+    simpa only [short_complex.nat_trans_hom_mk_app_τ₂_eq,
+      iso.inv_hom_id_app],
+  end, }
 
 end homology_comparison
 
