@@ -300,6 +300,23 @@ begin
   refl,
 end
 
+def embed_eval_is_zero_of_none (i' : ι') (hi' : e.r i' = none) :
+  is_zero (embed e ⋙ homological_complex.eval 𝒞 _ i') :=
+begin
+  rw functor.is_zero_iff,
+  intro X,
+  exact is_zero.of_iso (limits.is_zero_zero _) (embed.X_iso_of_none X hi'),
+end
+
+def embed_eval_iso_of_some (i' : ι') (i : ι) (hi' : e.r i' = some i) :
+  embed e ⋙ homological_complex.eval 𝒞 cι' i' ≅ homological_complex.eval 𝒞 cι i :=
+nat_iso.of_components (λ X, embed.X_iso_of_some X hi')
+  (λ X₁ X₂ f, begin
+    dsimp [embed, embed.map],
+    rw embed.f_of_some f hi',
+    simp only [category.assoc, iso.inv_hom_id, category.comp_id],
+  end)
+
 @[simp]
 lemma embed_nat_obj_down_up_succ
   (C : chain_complex 𝒞 ℕ) (i : ℕ) :
@@ -614,11 +631,53 @@ begin
 end
 -/
 
+variables (𝓐 : Type*) [category 𝓐] [abelian 𝓐] (e : c₁.embedding c₂)
+  (i₁ : ι₁) (i₂ : ι₂) (h₁₂ : e.f i₁ = i₂)
+include h₁₂
+
+def embed_short_complex_π₁_ι :
+  embed e ⋙ short_complex.functor_homological_complex 𝓐 c₂ i₂ ⋙ short_complex.π₁ ⟶
+  short_complex.functor_homological_complex 𝓐 c₁ i₁ ⋙ short_complex.π₁ :=
+begin
+  by_cases e.r (c₂.prev i₂) = some (c₁.prev i₁),
+  { exact (embed_eval_iso_of_some e _ _ h).hom, },
+  { exact 0, },
+end
+
+def embed_short_complex_π₂_iso :
+  embed e ⋙ short_complex.functor_homological_complex 𝓐 c₂ i₂ ⋙ short_complex.π₂ ≅
+  short_complex.functor_homological_complex 𝓐 c₁ i₁ ⋙ short_complex.π₂ :=
+embed_eval_iso_of_some e i₂ i₁ (by { rw [← h₁₂, e.r_f],})
+
+def embed_short_complex_π₃_ι :
+  embed e ⋙ short_complex.functor_homological_complex 𝓐 c₂ i₂ ⋙ short_complex.π₃ ⟶
+  short_complex.functor_homological_complex 𝓐 c₁ i₁ ⋙ short_complex.π₃ :=
+begin
+  by_cases e.r (c₂.next i₂) = some (c₁.next i₁),
+  { exact (embed_eval_iso_of_some e _ _ h).hom, },
+  { exact 0, },
+end
+
+def embed_short_complex_ι :
+  embed e ⋙ short_complex.functor_homological_complex 𝓐 c₂ i₂ ⟶
+  short_complex.functor_homological_complex 𝓐 c₁ i₁ :=
+short_complex.nat_trans_hom_mk
+    (embed_short_complex_π₁_ι 𝓐 e _ _ h₁₂)
+    (embed_short_complex_π₂_iso 𝓐 e _ _ h₁₂).hom
+    (embed_short_complex_π₃_ι 𝓐 e _ _ h₁₂)
+    sorry sorry
+
 def homology_embed_nat_iso (𝓐 : Type*) [category 𝓐] [abelian 𝓐]
 {c₁ : complex_shape ι₁} {c₂ : complex_shape ι₂} (e : c₁.embedding c₂) (he : e.c_iff)
   (i₁ : ι₁) (i₂ : ι₂) (h₁₂ : e.f i₁ = i₂) :
   embed e ⋙ homology_functor 𝓐 c₂ i₂ ≅ homology_functor 𝓐 c₁ i₁ :=
 begin
+/- stategy : similarly as with `embed_short_complex_ι` define
+a natural transformation `embed_short_complex_π` in the other direction,
+and show that they induce inverse isomorphisms. The key lemmas should
+be that if we have an endomorphism of a `short_complex` that is
+the identity in the middle, then the induced map on homology is
+the identity. -/
   calc embed e ⋙ homology_functor 𝓐 c₂ i₂ ≅
     embed e ⋙ (short_complex.functor_homological_complex 𝓐 c₂ i₂ ⋙
       short_complex.homology_functor) : _
