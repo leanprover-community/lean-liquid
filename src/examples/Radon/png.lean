@@ -1,4 +1,5 @@
 import examples.Radon.main
+import category_theory.limits.concrete_category
 
 open_locale nnreal big_operators classical
 
@@ -126,42 +127,7 @@ def is_limit_Radon_png_cone_map_level (c : ℝ≥0) :
   fac' := sorry,
   uniq' := sorry }
 
-def _root_.CompHausFiltPseuNormGrp₁.lvl
-  (X : CompHausFiltPseuNormGrp₁) (x : X) : ℝ≥0 :=
-(X.exhaustive x).some
-
-lemma _root_.CompHausFiltPseuNormGrp₁.lvl_spec
-  (X : CompHausFiltPseuNormGrp₁) (x : X) :
-  x ∈ pseudo_normed_group.filtration X (X.lvl x) :=
-(X.exhaustive x).some_spec
-
-def _root_.CompHausFiltPseuNormGrp₁.as_lvl
-  (X : CompHausFiltPseuNormGrp₁) (x : X) :
-  (CompHausFiltPseuNormGrp₁.level.obj (X.lvl x)).obj X :=
-⟨x, (X.lvl_spec x)⟩
-
-namespace is_limit_Radon_png_cone
-
-variables (S : cone (X.diagram ⋙ Radon_png_functor p))
-
-def lift_fun : S.X → X.Radon_png p :=
-λ s,
-let c := S.X.lvl s,
-    e := X.is_limit_Radon_png_cone_map_level p c in
-(e.lift ((CompHausFiltPseuNormGrp₁.level.obj c).map_cone S) (S.X.as_lvl s)).1
-
-def lift : S.X ⟶ X.Radon_png p :=
-{ to_fun := lift_fun X p S,
-  map_zero' := sorry,
-  map_add' := sorry,
-  strict' := sorry,
-  continuous' := sorry }
-
-end is_limit_Radon_png_cone
-
 def is_limit_Radon_png_cone : is_limit (X.Radon_png_cone p) :=
-{ lift := λ S, is_limit_Radon_png_cone.lift X p S,
-  fac' := sorry,
-  uniq' := sorry }
+sorry
 
 end Profinite
