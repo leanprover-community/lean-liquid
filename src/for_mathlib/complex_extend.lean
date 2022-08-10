@@ -323,6 +323,7 @@ begin
   exact is_zero.of_iso (limits.is_zero_zero _) (embed.X_iso_of_none X hi'),
 end
 
+@[simps]
 def embed_eval_iso_of_some (i' : ι') (i : ι) (hi' : e.r i' = some i) :
   embed e ⋙ homological_complex.eval 𝒞 cι' i' ≅ homological_complex.eval 𝒞 cι i :=
 nat_iso.of_components (λ X, embed.X_iso_of_some X hi')
@@ -686,7 +687,12 @@ begin
   ext X,
   dsimp,
   split_ifs,
-  { sorry, },
+  { subst h₁₂,
+    simp only [category.comp_id],
+    change ((embed e).obj X).d (c₂.prev (e.f i₁)) (e.f i₁) ≫ _ = _,
+    dsimp [embed, embed.obj],
+    simp only [embed.d_of_some_of_some X h (e.r_f i₁),
+      category.assoc, iso.inv_hom_id, category.comp_id], },
   { suffices : ((embed e).obj X).d_to i₂ = 0,
     { dsimp, simp only [this, zero_comp], },
     rcases h₂ : e.r (c₂.prev i₂) with _ | j,
