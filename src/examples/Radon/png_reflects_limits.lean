@@ -15,6 +15,8 @@ namespace CompHaus
 lemma comp_apply {X Y Z : CompHaus} (f : X ⟶ Y) (g : Y ⟶ Z) (x : X) :
   (f ≫ g) x = g (f x) := rfl
 
+lemma id_apply (X : CompHaus) (x : X) : (𝟙 X : X ⟶ X) x = x := rfl
+
 lemma continuous_of_is_limit (F : J ⥤ CompHaus.{u}) (C : cone F) (hC : is_limit C)
   (Y : Type u) [topological_space Y] (t : Y → C.X)
   (h : ∀ j, continuous (C.π.app j ∘ t)) : continuous t :=
@@ -216,6 +218,7 @@ def level_jointly_reflects_limits
     rw ← hm, refl,
   end }
 
+@[simps]
 def create_hom_from_level {X Y : CompHausFiltPseuNormGrp₁}
   (E : Π c, (level.obj c).obj X ⟶ (level.obj c).obj Y)
   (hE0 : (E (X.lvl 0) (X.as_lvl 0)).1 = 0)
@@ -254,6 +257,58 @@ def create_hom_from_level {X Y : CompHausFiltPseuNormGrp₁}
     simp only [← CompHaus.comp_apply, hE], refl,
   end }
 
+lemma create_iso_from_level_compat_aux {X Y : CompHausFiltPseuNormGrp₁}
+  (E : Π c, (level.obj c).obj X ≅ (level.obj c).obj Y)
+  (hE0 : ((E (X.lvl 0)).hom (X.as_lvl 0)).1 = 0)
+  (hEa : ∀ a b : X, ((E _).hom (X.as_lvl (a + b))).1 =
+    ((E _).hom (X.as_lvl a)).1 + ((E _).hom (X.as_lvl b)).1)
+  (hE : ∀ (c₁ c₂ : ℝ≥0) (i : c₁ ⟶ c₂),
+    (E _).hom ≫ (level.map i).app _ = (level.map i).app _ ≫ (E _).hom) :
+  ∀ (c₁ c₂ : ℝ≥0) (i : c₁ ⟶ c₂),
+    (E _).inv ≫ (level.map i).app _ = (level.map i).app _ ≫ (E _).inv :=
+begin
+  intros c₁ c₂ i, rw [iso.inv_comp_eq, ← category.assoc, iso.eq_comp_inv, hE],
+end
+
+lemma create_iso_from_level_zero_aux {X Y : CompHausFiltPseuNormGrp₁}
+  (E : Π c, (level.obj c).obj X ≅ (level.obj c).obj Y)
+  (hE0 : ((E (X.lvl 0)).hom (X.as_lvl 0)).1 = 0)
+  (hEa : ∀ a b : X, ((E _).hom (X.as_lvl (a + b))).1 =
+    ((E _).hom (X.as_lvl a)).1 + ((E _).hom (X.as_lvl b)).1)
+  (hE : ∀ (c₁ c₂ : ℝ≥0) (i : c₁ ⟶ c₂),
+    (E _).hom ≫ (level.map i).app _ = (level.map i).app _ ≫ (E _).hom) :
+  ((E (Y.lvl 0)).inv (Y.as_lvl 0)).1 = 0 :=
+begin
+  let x := (((E (Y.lvl 0)).inv) (Y.as_lvl 0)),
+  let c := Y.lvl 0 ⊔ X.lvl 0,
+  let i1 : Y.lvl 0 ⟶ c := hom_of_le le_sup_left,
+  let i2 : X.lvl 0 ⟶ c := hom_of_le le_sup_right,
+  change ((level.map i2).app _ _).val = ((level.map i1).app _ (Y.as_lvl 0)).val at hE0,
+  have hE0' := hE0,
+  replace hE0 : (((level.map i2).app Y) (((E (X.lvl 0)).hom) (X.as_lvl 0))) =
+    (((level.map i1).app Y) (Y.as_lvl 0)),
+  { ext1, exact hE0 },
+  apply_fun (E c).inv at hE0,
+  simp only [← CompHaus.comp_apply, hE, category.assoc, iso.hom_inv_id] at hE0,
+  apply_fun (λ e, e.val) at hE0,
+  change ((level.map i1).app _ x).val = ((level.map i2).app _ (X.as_lvl 0)).val,
+  dsimp only [x, ← CompHaus.comp_apply],
+  rw [create_iso_from_level_compat_aux, CompHaus.comp_apply],
+  exact hE0.symm,
+  assumption',
+end
+
+lemma create_iso_from_level_add_aux {X Y : CompHausFiltPseuNormGrp₁}
+  (E : Π c, (level.obj c).obj X ≅ (level.obj c).obj Y)
+  (hE0 : ((E (X.lvl 0)).hom (X.as_lvl 0)).1 = 0)
+  (hEa : ∀ a b : X, ((E _).hom (X.as_lvl (a + b))).1 =
+    ((E _).hom (X.as_lvl a)).1 + ((E _).hom (X.as_lvl b)).1)
+  (hE : ∀ (c₁ c₂ : ℝ≥0) (i : c₁ ⟶ c₂),
+    (E _).hom ≫ (level.map i).app _ = (level.map i).app _ ≫ (E _).hom) :
+  ∀ a b : Y, ((E _).inv (Y.as_lvl (a + b))).1 =
+    ((E _).inv (Y.as_lvl a)).1 + ((E _).inv (Y.as_lvl b)).1 :=
+sorry
+
 def create_iso_from_level {X Y : CompHausFiltPseuNormGrp₁}
   (E : Π c, (level.obj c).obj X ≅ (level.obj c).obj Y)
   (hE0 : ((E (X.lvl 0)).hom (X.as_lvl 0)).1 = 0)
@@ -264,8 +319,58 @@ def create_iso_from_level {X Y : CompHausFiltPseuNormGrp₁}
   X ≅ Y :=
 { hom := create_hom_from_level (λ c, (E c).hom) hE0 hEa hE,
   inv := create_hom_from_level (λ c, (E c).inv)
-    sorry sorry sorry,
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+    (create_iso_from_level_zero_aux _ hE0 hEa hE)
+    (create_iso_from_level_add_aux _ hE0 hEa hE)
+    (create_iso_from_level_compat_aux _ hE0 hEa hE),
+  hom_inv_id' := begin
+    ext1 t,
+    simp only [comp_apply, create_hom_from_level_to_fun, subtype.val_eq_coe, id_apply],
+    let s := (((E (X.lvl t)).hom) (X.as_lvl t)).val,
+    let c₁ := Y.lvl s,
+    let c₂ := X.lvl t,
+    let c := c₁ ⊔ c₂,
+    let i1 : c₁ ⟶ c := hom_of_le le_sup_left,
+    let i2 : c₂ ⟶ c := hom_of_le le_sup_right,
+    change ((level.map i1).app _ _).val = ((level.map i2).app _ (X.as_lvl t)).val,
+    simp only [← CompHaus.comp_apply],
+    rw create_iso_from_level_compat_aux,
+    any_goals { assumption },
+    simp only [CompHaus.comp_apply],
+    congr' 1,
+    apply_fun (E c).hom,
+    swap,
+    { intros x y h,
+      apply_fun (E c).inv at h,
+      simp only [← CompHaus.comp_apply, iso.hom_inv_id] at h,
+      exact h },
+    rw [← CompHaus.comp_apply, iso.inv_hom_id, CompHaus.id_apply],
+    rw [← CompHaus.comp_apply, ← hE],
+    refl,
+  end,
+  inv_hom_id' := begin
+    ext1 t,
+    simp only [comp_apply, create_hom_from_level_to_fun, subtype.val_eq_coe, id_apply],
+    let s := (((E (Y.lvl t)).inv) (Y.as_lvl t)).val,
+    let c₁ := X.lvl s,
+    let c₂ := Y.lvl t,
+    let c := c₁ ⊔ c₂,
+    let i1 : c₁ ⟶ c := hom_of_le le_sup_left,
+    let i2 : c₂ ⟶ c := hom_of_le le_sup_right,
+    change ((level.map i1).app _ _).val = ((level.map i2).app _ (Y.as_lvl t)).val,
+    simp only [← CompHaus.comp_apply],
+    rw hE,
+    simp only [CompHaus.comp_apply],
+    congr' 1,
+    apply_fun (E c).inv,
+    swap,
+    { intros x y h,
+      apply_fun (E c).hom at h,
+      simp only [← CompHaus.comp_apply, iso.inv_hom_id] at h,
+      exact h },
+    rw [← CompHaus.comp_apply, iso.hom_inv_id, CompHaus.id_apply],
+    rw [← CompHaus.comp_apply, ← create_iso_from_level_compat_aux],
+    any_goals { assumption },
+    refl,
+  end }
 
 end CompHausFiltPseuNormGrp₁
