@@ -62,32 +62,79 @@ variables (S : cone F)
 def lift_fun : S.X → C.X :=
 λ s, ((hC (S.X.lvl s)).lift ((level.obj _).map_cone S) (S.X.as_lvl s)).1
 
+lemma lift_fun_map_zero : lift_fun C hC S 0 = 0 :=
+begin
+  dsimp [lift_fun],
+  let a := ((hC (S.X.lvl 0)).lift ((level.obj (S.X.lvl 0)).map_cone S)) (S.X.as_lvl 0),
+  let b := (C.X.as_lvl 0),
+  let c₁ := S.X.lvl 0,
+  let c₂ := C.X.lvl 0,
+  let c := c₁ ⊔ c₂,
+  let i1 : c₁ ⟶ c := hom_of_le le_sup_left,
+  let i2 : c₂ ⟶ c := hom_of_le le_sup_right,
+  let e1 := (level.map i1).app C.X,
+  let e2 := (level.map i2).app C.X,
+  change (e1 a).1 = (e2 b).1, congr' 1,
+  apply concrete.is_limit_ext _ (hC c),
+  intros j, dsimp only [e1, e2, a, b, ← CompHaus.comp_apply],
+  simp only [category.assoc, level_cone_compatible, (hC (S.X.lvl 0)).fac_assoc],
+  ext1,
+  dsimp [CompHaus.comp_apply, level, as_lvl],
+  rw [(S.π.app j).map_zero, (C.π.app j).map_zero],
+end
+
+lemma fac_aux (c) (x) (j) :
+  C.π.app j ((hC c).lift ((level.obj c).map_cone S) x).1 =
+  S.π.app j x.1 :=
+begin
+  change
+    (((hC c).lift ((level.obj c).map_cone S) ≫
+      (level.obj c).map (C.π.app j)) x).1 = _,
+  erw (hC c).fac,
+  refl,
+end
+
+lemma lift_fun_map_add (x y) : lift_fun C hC S (x + y) =
+  lift_fun C hC S x + lift_fun C hC S y :=
+begin
+  dsimp [lift_fun],
+  let Axy := ((hC (S.X.lvl (x + y))).lift
+    ((level.obj (S.X.lvl (x + y))).map_cone S)) (S.X.as_lvl (x + y)),
+  let Ax := ((hC (S.X.lvl x)).lift
+    ((level.obj (S.X.lvl x)).map_cone S)) (S.X.as_lvl x),
+  let Ay := ((hC (S.X.lvl y)).lift
+    ((level.obj (S.X.lvl y)).map_cone S)) (S.X.as_lvl y),
+  let cxy := S.X.lvl (x + y),
+  let cx := S.X.lvl x,
+  let cy := S.X.lvl y,
+  let cc := cxy ⊔ (cx + cy),
+  let AA : (level.obj (cx + cy)).obj C.X :=
+    ⟨Ax.1 + Ay.1, pseudo_normed_group.add_mem_filtration Ax.2 Ay.2⟩,
+  let i1 : cxy ⟶ cc := hom_of_le le_sup_left,
+  let i2 : (cx + cy) ⟶ cc := hom_of_le le_sup_right,
+  let e1 := (level.map i1).app C.X,
+  let e2 := (level.map i2).app C.X,
+  change (e1 Axy).1 = (e2 AA).1, congr' 1,
+  apply concrete.is_limit_ext _ (hC cc), intros j,
+  dsimp only [e1, e2, Axy, ← CompHaus.comp_apply],
+  simp only [category.assoc, level_cone_compatible,
+    (hC (S.X.lvl (x + y))).fac_assoc],
+  ext1,
+  dsimp [CompHaus.comp_apply, level, as_lvl, AA],
+
+  rw [(S.π.app j).map_add, (C.π.app j).map_add],
+  congr' 1,
+  { dsimp only [Ax],
+    erw fac_aux, refl },
+  { dsimp only [Ay],
+    erw fac_aux, refl },
+end
+
 def lift : S.X ⟶ C.X :=
 { to_fun := lift_fun _ hC _,
-  map_zero' := by sorry ; begin
-    dsimp [lift_fun],
-    let a := ((hC (S.X.lvl 0)).lift ((level.obj (S.X.lvl 0)).map_cone S)) (S.X.as_lvl 0),
-    let b := (C.X.as_lvl 0),
-    let c₁ := S.X.lvl 0,
-    let c₂ := C.X.lvl 0,
-    let c := c₁ ⊔ c₂,
-    let i1 : c₁ ⟶ c := hom_of_le le_sup_left,
-    let i2 : c₂ ⟶ c := hom_of_le le_sup_right,
-    let e1 := (level.map i1).app C.X,
-    let e2 := (level.map i2).app C.X,
-    change (e1 a).1 = (e2 b).1, congr' 1,
-    apply concrete.is_limit_ext _ (hC c),
-    intros j, dsimp only [e1, e2, a, b, ← CompHaus.comp_apply],
-    simp only [category.assoc, level_cone_compatible, (hC (S.X.lvl 0)).fac_assoc],
-    ext1,
-    dsimp [CompHaus.comp_apply, level, as_lvl],
-    rw [(S.π.app j).map_zero, (C.π.app j).map_zero],
-  end,
-  map_add' := begin
-    sorry
-    -- similar to map_zero' above.
-  end,
-  strict' := by sorry ; begin
+  map_zero' := lift_fun_map_zero _ _ _,
+  map_add' := lift_fun_map_add _ _ _,
+  strict' := begin
     intros c x hx,
     let y : (level.obj c).obj S.X := ⟨x,hx⟩,
     let z := (hC c).lift ((level.obj c).map_cone S) y,
@@ -106,7 +153,7 @@ def lift : S.X ⟶ C.X :=
       (hC c).fac_assoc, (hC (S.X.lvl x)).fac_assoc],
     ext, refl,
   end,
-  continuous' := by sorry ; begin
+  continuous' := begin
     intros c,
     let t : _ → (level.obj c).obj C.X := _, change continuous t,
     suffices : ∀ j, continuous (((level.obj c).map (C.π.app j)) ∘ t),
@@ -140,7 +187,33 @@ def level_jointly_reflects_limits
   (hC : Π c : ℝ≥0, is_limit ((level.obj c).map_cone C)) :
   is_limit C :=
 { lift := λ S, level_jointly_reflects_limits.lift _ hC _,
-  fac' := sorry,
-  uniq' := sorry }
+  fac' := begin
+    intros S j,
+    ext1 t,
+    dsimp [level_jointly_reflects_limits.lift,
+      level_jointly_reflects_limits.lift_fun],
+    erw level_jointly_reflects_limits.fac_aux, refl,
+  end,
+  uniq' := begin
+    intros S m hm,
+    ext1 t,
+    dsimp [level_jointly_reflects_limits.lift,
+      level_jointly_reflects_limits.lift_fun],
+    let a :=
+      ((hC (S.X.lvl t)).lift ((level.obj (S.X.lvl t)).map_cone S)) (S.X.as_lvl t),
+    let c := C.X.lvl (m t),
+    let d := c ⊔ (S.X.lvl t),
+    let i1 : c ⟶ d := hom_of_le le_sup_left,
+    let i2 : (S.X.lvl t) ⟶ d := hom_of_le le_sup_right,
+    change ((level.map i1).app C.X (C.X.as_lvl (m t))).1 =
+      ((level.map i2).app C.X a).1,
+    congr' 1,
+    apply concrete.is_limit_ext _ (hC d), intros j,
+    specialize hm j,
+    ext1,
+    dsimp [level, as_lvl, a],
+    erw level_jointly_reflects_limits.fac_aux,
+    rw ← hm, refl,
+  end }
 
 end CompHausFiltPseuNormGrp₁
