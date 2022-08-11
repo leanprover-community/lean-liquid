@@ -153,7 +153,17 @@ def Radon_png_comparison :
   X.fintype_diagram ⋙ real_measures.functor p :=
 nat_iso.of_components
 (λ T, Radon_png_comparison_component _ _ _)
-sorry
+begin
+  intros S T f,
+  dsimp only [Radon_png_comparison_component, iso.trans_hom],
+  apply CompHausFiltPseuNormGrp₁.level_jointly_faithful,
+  intros c,
+  simp only [functor.map_comp],
+  simp_rw [CompHausFiltPseuNormGrp₁.level_create_iso_from_level.{0},
+    iso.trans_hom, nat_iso.app_hom, category.assoc],
+  erw ← (X.Radon_CompHaus_comparison p c).hom.naturality f,
+  refl,
+end
 
 def Radon_png_iso : X.Radon_png p ≅
   (Profinite.extend (real_measures.functor p)).obj X :=

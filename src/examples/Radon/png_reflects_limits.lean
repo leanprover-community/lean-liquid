@@ -472,4 +472,34 @@ def create_iso_from_level {X Y : CompHausFiltPseuNormGrp₁}
     refl,
   end }
 
+lemma level_create_iso_from_level {X Y : CompHausFiltPseuNormGrp₁}
+  (E : Π c, (level.obj c).obj X ≅ (level.obj c).obj Y)
+  (hE0 : ((E (X.lvl 0)).hom (X.as_lvl 0)).1 = 0)
+  (hEa : ∀ a b : X, ((E _).hom (X.as_lvl (a + b))).1 =
+    ((E _).hom (X.as_lvl a)).1 + ((E _).hom (X.as_lvl b)).1)
+  (hE : ∀ (c₁ c₂ : ℝ≥0) (i : c₁ ⟶ c₂),
+    (E _).hom ≫ (level.map i).app _ = (level.map i).app _ ≫ (E _).hom) (c) :
+  (level.obj c).map
+  (create_iso_from_level E hE0 hEa hE).hom = (E _).hom :=
+begin
+  ext t,
+  dsimp [create_iso_from_level, create_hom_from_level, level],
+  let d := X.lvl t.1 ⊔ c,
+  let i1 : X.lvl t.1 ⟶ d := hom_of_le le_sup_left,
+  let i2 : c ⟶ d := hom_of_le le_sup_right,
+  change ((level.map i1).app _ _).val =
+    ((level.map i2).app _ _).val,
+  congr' 1,
+  simp only [← CompHaus.comp_apply, hE], ext, refl
+end
+
+lemma level_jointly_faithful {X Y : CompHausFiltPseuNormGrp₁} (f g : X ⟶ Y)
+  (h : ∀ c, (level.obj c).map f = (level.obj c).map g) : f = g :=
+begin
+  ext t,
+  specialize h (X.lvl t),
+  apply_fun (λ e, (e (X.as_lvl t)).1) at h,
+  exact h
+end
+
 end CompHausFiltPseuNormGrp₁
