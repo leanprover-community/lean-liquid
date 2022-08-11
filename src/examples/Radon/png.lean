@@ -134,7 +134,7 @@ CompHausFiltPseuNormGrp₁.level_jointly_reflects_limits _ $
 def Radon_png_comparison_component (T : discrete_quotient X) :
   (X.diagram ⋙ Radon_png_functor p).obj T ≅
   (X.fintype_diagram ⋙ real_measures.functor p).obj T :=
-CompHausFiltPseuNormGrp₁.create_iso_from_level
+CompHausFiltPseuNormGrp₁.create_iso_from_level.{0}
 (λ c, Radon_png_functor_level_iso_component _ _ _ ≪≫
   (Radon_CompHaus_comparison _ _ _).app _) sorry sorry sorry
 
