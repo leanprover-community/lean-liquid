@@ -216,4 +216,56 @@ def level_jointly_reflects_limits
     rw ← hm, refl,
   end }
 
+def create_hom_from_level {X Y : CompHausFiltPseuNormGrp₁}
+  (E : Π c, (level.obj c).obj X ⟶ (level.obj c).obj Y)
+  (hE0 : (E (X.lvl 0) (X.as_lvl 0)).1 = 0)
+  (hEa : ∀ a b : X, (E _ (X.as_lvl (a + b))).1 =
+    (E _ (X.as_lvl a)).1 + (E _ (X.as_lvl b)).1)
+  (hE : ∀ (c₁ c₂ : ℝ≥0) (i : c₁ ⟶ c₂),
+    E _ ≫ (level.map i).app _ = (level.map i).app _ ≫ E _) :
+  X ⟶ Y :=
+{ to_fun := λ x, (E _ $ X.as_lvl x).1,
+  map_zero' := hE0,
+  map_add' := hEa,
+  strict' := begin
+    intros c x hx,
+    let y : (level.obj c).obj X := ⟨x,hx⟩,
+    suffices : ((E (X.lvl x)) (X.as_lvl x)).val = (E _ y).1,
+    { rw this, exact (E _ y).2, },
+    let d := c ⊔ X.lvl x,
+    let i1 : c ⟶ d := hom_of_le le_sup_left,
+    let i2 : X.lvl x ⟶ d := hom_of_le le_sup_right,
+    change ((level.map i2).app Y ((E (X.lvl x)) (X.as_lvl x))).1 =
+      ((level.map i1).app _ _).1,
+    congr' 1,
+    simp only [← CompHaus.comp_apply, hE],
+    refl,
+  end,
+  continuous' := begin
+    intros c,
+    let t := _, change continuous t,
+    convert (E c).continuous,
+    ext a,
+    let d := X.lvl a ⊔ c,
+    let i1 : X.lvl a ⟶ d := hom_of_le le_sup_left,
+    let i2 : c ⟶ d := hom_of_le le_sup_right,
+    change ((level.map i1).app _ (E _ (X.as_lvl a))).1 =
+      ((level.map i2).app _ (E _ a)).1,
+    simp only [← CompHaus.comp_apply, hE], refl,
+  end }
+
+def create_iso_from_level {X Y : CompHausFiltPseuNormGrp₁}
+  (E : Π c, (level.obj c).obj X ≅ (level.obj c).obj Y)
+  (hE0 : ((E (X.lvl 0)).hom (X.as_lvl 0)).1 = 0)
+  (hEa : ∀ a b : X, ((E _).hom (X.as_lvl (a + b))).1 =
+    ((E _).hom (X.as_lvl a)).1 + ((E _).hom (X.as_lvl b)).1)
+  (hE : ∀ (c₁ c₂ : ℝ≥0) (i : c₁ ⟶ c₂),
+    (E _).hom ≫ (level.map i).app _ = (level.map i).app _ ≫ (E _).hom) :
+  X ≅ Y :=
+{ hom := create_hom_from_level (λ c, (E c).hom) hE0 hEa hE,
+  inv := create_hom_from_level (λ c, (E c).inv)
+    sorry sorry sorry,
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry }
+
 end CompHausFiltPseuNormGrp₁

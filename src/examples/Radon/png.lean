@@ -131,4 +131,23 @@ def is_limit_Radon_png_cone : is_limit (X.Radon_png_cone p) :=
 CompHausFiltPseuNormGrp₁.level_jointly_reflects_limits _ $
 λ c, is_limit_Radon_png_cone_map_level _ _ _
 
+def Radon_png_comparison_component (T : discrete_quotient X) :
+  (X.diagram ⋙ Radon_png_functor p).obj T ≅
+  (X.fintype_diagram ⋙ real_measures.functor p).obj T :=
+CompHausFiltPseuNormGrp₁.create_iso_from_level
+(λ c, Radon_png_functor_level_iso_component _ _ _ ≪≫
+  (Radon_CompHaus_comparison _ _ _).app _) sorry sorry sorry
+
+def Radon_png_comparison :
+  X.diagram ⋙ Radon_png_functor p ≅
+  X.fintype_diagram ⋙ real_measures.functor p :=
+nat_iso.of_components
+(λ T, Radon_png_comparison_component _ _ _)
+sorry
+
+def Radon_png_iso : X.Radon_png p ≅
+  (Profinite.extend (real_measures.functor p)).obj X :=
+(X.is_limit_Radon_png_cone p).cone_point_unique_up_to_iso
+  (limit.is_limit _) ≪≫ has_limit.iso_of_nat_iso (X.Radon_png_comparison p)
+
 end Profinite
