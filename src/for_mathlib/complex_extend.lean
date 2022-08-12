@@ -677,7 +677,7 @@ begin
   { exact 0, },
 end
 
-@[simps]
+-- @[simps]
 def embed_short_complex_ι :
   embed e ⋙ short_complex.functor_homological_complex 𝓐 c₂ i₂ ⟶
   short_complex.functor_homological_complex 𝓐 c₁ i₁ :=
@@ -687,22 +687,22 @@ short_complex.nat_trans_hom_mk
   (embed_short_complex_π₃_ι 𝓐 e _ _ h₁₂)
 begin
   ext X,
-  dsimp,
+  subst h₁₂,
+  show (((embed e).obj X).d_to (e.f i₁) ≫ 𝟙 (((embed e).obj X).X (e.f i₁))) ≫ (embed.X_iso_of_some X _).hom =
+    (embed_short_complex_π₁_ι 𝓐 e i₁ (e.f i₁) _).app X ≫ X.d_to i₁ ≫ 𝟙 (X.X i₁),
+  simp only [embed_short_complex_π₁_ι, category.comp_id],
   split_ifs with h,
-  { subst h₁₂,
-    simp only [category.comp_id],
-    change ((embed e).obj X).d (c₂.prev (e.f i₁)) (e.f i₁) ≫ _ = _,
-    dsimp [embed, embed.obj],
+  { show embed.d X (e.r (c₂.prev (e.f i₁))) (e.r (e.f i₁)) ≫ (embed.X_iso_of_some X _).hom =
+      (embed.X_iso_of_some X h).hom ≫ X.d (c₁.prev i₁) i₁,
     simp only [embed.d_of_some_of_some X h (e.r_f i₁),
       category.assoc, iso.inv_hom_id, category.comp_id], },
-  { suffices : ((embed e).obj X).d_to i₂ = 0,
-    { dsimp, simp only [this, zero_comp], },
-    rcases h₂ : e.r (c₂.prev i₂) with _ | j,
+  { suffices : ((embed e).obj X).d_to (e.f i₁) = 0,
+    { simp only [this, nat_trans.app_zero, zero_comp], },
+    rcases h₂ : e.r (c₂.prev (e.f i₁)) with _ | j,
     { apply is_zero.eq_of_src,
       apply embed.X_is_zero_of_none,
       exact h₂, },
-    { subst h₁₂,
-      change embed.d X (e.r (c₂.prev (e.f i₁))) (e.r (e.f i₁)) = 0,
+    { show embed.d X (e.r (c₂.prev (e.f i₁))) (e.r (e.f i₁)) = 0,
       by_contra h',
       rcases embed.d_ne_zero _ _ _ h' with ⟨i, k, h₃, h₄, h₅⟩,
       rw e.r_f at h₄,
@@ -717,33 +717,22 @@ begin
 end
 begin
   ext X,
-  dsimp,
+  show (((embed e).obj X).d_from i₂ ≫ 𝟙 (((embed e).obj X).X_next i₂)) ≫ _ =
+    (embed.X_iso_of_some X _).hom ≫ X.d_from i₁ ≫ 𝟙 (X.X_next i₁),
+  dsimp only [embed_short_complex_π₃_ι],
+  subst h₁₂,
   split_ifs with h,
-  { subst h₁₂,
-    simp only [category.comp_id],
-    change ((embed e).obj X).d (e.f i₁) (c₂.next (e.f i₁)) ≫ _ = _,
-    dsimp [embed, embed.obj],
+  { simp only [category.comp_id],
+    show embed.d X (e.r (e.f i₁)) (e.r (c₂.next (e.f i₁))) ≫ (embed.X_iso_of_some X h).hom =
+      (embed.X_iso_of_some X _).hom ≫ X.d_from i₁,
     simp only [embed.d_of_some_of_some X (e.r_f i₁) h,
       category.assoc, iso.inv_hom_id, category.comp_id], },
-  { suffices : ((embed e).obj X).d_to i₂ = 0,
-    { dsimp, simp only [this, zero_comp], },
-    rcases h₂ : e.r (c₂.prev i₂) with _ | j,
-    { apply is_zero.eq_of_src,
-      apply embed.X_is_zero_of_none,
-      exact h₂, },
-    { subst h₁₂,
-      change embed.d X (e.r (c₂.prev (e.f i₁))) (e.r (e.f i₁)) = 0,
-      by_contra h',
-      rcases embed.d_ne_zero _ _ _ h' with ⟨i, k, h₃, h₄, h₅⟩,
-      rw e.r_f at h₄,
-      rw h₂ at h₃,
-      simp only at h₄ h₃,
-      substs h₃ h₄,
-      have h₅' : c₁.rel j i₁,
-      { by_contra h₅'',
-        exact h₅ (X.shape _ _ h₅''), },
-      rw c₁.prev_eq' h₅' at h,
-      exact h h₂, }, },
+  { suffices : X.d i₁ (c₁.next i₁) = 0,
+    { delta d_from, simp only [this, zero_comp, comp_zero, nat_trans.app_zero], },
+    apply X.shape,
+    rw e.eq_some at h,
+    contrapose! h,
+    rw c₂.next_eq' (e.c h) },
 end
 .
 
@@ -757,6 +746,7 @@ begin
   { exact 0, },
 end
 
+@[simp]
 def embed_short_complex_π₃_π :
   short_complex.functor_homological_complex 𝓐 c₁ i₁ ⋙ short_complex.π₃ ⟶
   embed e ⋙ short_complex.functor_homological_complex 𝓐 c₂ i₂ ⋙ short_complex.π₃ :=
@@ -775,10 +765,52 @@ short_complex.nat_trans_hom_mk
   (embed_short_complex_π₂_iso 𝓐 e _ _ h₁₂).inv
   (embed_short_complex_π₃_π 𝓐 e _ _ h₁₂)
 begin
-  sorry
+  ext X,
+  show (X.d_to i₁ ≫ 𝟙 (X.X i₁)) ≫ (embed.X_iso_of_some X _).inv =
+    _ ≫ ((embed e).obj X).d_to i₂ ≫ 𝟙 (((embed e).obj X).X i₂),
+  dsimp only [embed_short_complex_π₁_π],
+  subst h₁₂,
+  split_ifs with h,
+  { simp only [category.comp_id],
+    show X.d (c₁.prev i₁) i₁ ≫ (embed.X_iso_of_some X _).inv =
+      (embed.X_iso_of_some X h).inv ≫ embed.d X (e.r (c₂.prev (e.f i₁))) (e.r (e.f i₁)),
+    simp only [embed.d_of_some_of_some X h (e.r_f i₁), category.assoc, iso.inv_hom_id_assoc], },
+  { suffices : X.d (c₁.prev i₁) i₁ = 0,
+    { delta d_to, simp only [this, zero_comp, nat_trans.app_zero], },
+    apply X.shape,
+    rw e.eq_some at h,
+    contrapose! h,
+    rw c₂.prev_eq' (e.c h) },
 end
 begin
-  sorry
+  ext X,
+  show (X.d_from i₁ ≫ 𝟙 (X.X_next i₁)) ≫ _ =
+    (embed.X_iso_of_some X _).inv ≫ ((embed e).obj X).d_from i₂ ≫ 𝟙 (((embed e).obj X).X_next i₂),
+  dsimp only [embed_short_complex_π₃_π],
+  subst h₁₂,
+  split_ifs with h,
+  { simp only [category.comp_id],
+    show X.d i₁ (c₁.next i₁) ≫ (embed.X_iso_of_some X h).inv =
+      (embed.X_iso_of_some X _).inv ≫ embed.d X (e.r (e.f i₁)) (e.r (c₂.next (e.f i₁))),
+    simp only [embed.d_of_some_of_some X (e.r_f i₁) h, category.assoc, iso.inv_hom_id_assoc], },
+  { suffices : ((embed e).obj X).d_from (e.f i₁) = 0,
+    { simp only [this, nat_trans.app_zero, zero_comp, comp_zero], },
+    rcases h₂ : e.r (c₂.next (e.f i₁)) with _ | j,
+    { apply is_zero.eq_of_tgt,
+      apply embed.X_is_zero_of_none,
+      exact h₂, },
+    { show embed.d X (e.r (e.f i₁)) (e.r (c₂.next (e.f i₁))) = 0,
+      by_contra h',
+      rcases embed.d_ne_zero _ _ _ h' with ⟨i, k, h₃, h₄, h₅⟩,
+      rw e.r_f at h₃,
+      rw h₂ at h₄,
+      simp only at h₄ h₃,
+      substs h₃ h₄,
+      have h₅' : c₁.rel i₁ j,
+      { by_contra h₅'',
+        exact h₅ (X.shape _ _ h₅''), },
+      rw c₁.next_eq' h₅' at h,
+      exact h h₂, }, },
 end
 
 def homology_embed_nat_iso  :
