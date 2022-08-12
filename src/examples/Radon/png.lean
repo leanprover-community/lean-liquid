@@ -134,7 +134,17 @@ def map_Radon_png {X Y : Profinite.{0}} (f : X ⟶ Y) :
   map_add' := λ a b, by { ext, refl },
   strict' := λ c μ hμ,
     weak_dual.bdd_comap _ hμ _,
-  continuous' := sorry }
+  continuous' := begin
+    intros c,
+    rw continuous_induced_rng,
+    let i1 : pseudo_normed_group.filtration ↥(X.Radon_png p) c →
+      weak_dual _ _ := λ μ, μ.1.1,
+    let i2 : weak_dual ℝ C(↥X, ℝ) → weak_dual ℝ C(↥Y, ℝ) :=
+      weak_dual.comap (f.comap),
+    change continuous (i2 ∘ i1),
+    refine continuous.comp _ continuous_induced_dom,
+    refine continuous_linear_map.continuous _,
+  end }
 
 def Radon_png_functor : Profinite.{0} ⥤ CompHausFiltPseuNormGrp₁ :=
 { obj := λ X, X.Radon_png p,
