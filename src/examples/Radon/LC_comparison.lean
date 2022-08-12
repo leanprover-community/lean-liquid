@@ -88,9 +88,21 @@ def Radon_LC_comparison_component_equiv_aux (X : Profinite.{0}) (p : ℝ≥0)
       discrete_quotient.fibre ⊥ (discrete_quotient.equiv_bot t)),
   inv_fun := λ μ,
   { to_fun := λ e, ∑ t : T, μ t * e t,
-    map_add' := sorry,
-    map_smul' := sorry,
-    cont := sorry },
+    map_add' := begin
+      intros x y,
+      dsimp,
+      simp only [mul_add, finset.sum_add_distrib],
+    end,
+    map_smul' := begin
+      intros r e, dsimp,
+      rw finset.mul_sum,
+      simp_rw [← mul_assoc, mul_comm r],
+    end,
+    cont := begin
+      apply continuous_finset_sum, intros t ht,
+      refine continuous.comp (continuous_mul_left (μ t)) _,
+      sorry
+    end },
   left_inv := sorry,
   right_inv := sorry }
 
@@ -164,6 +176,13 @@ def Radon_LC_comparison_component_iso
   Top.of (pseudo_normed_group.filtration (real_measures p (X.fintype_diagram.obj T)) c) :=
 Top.iso_of_homeo $ Radon_LC_comparison_component_homeo _ _ _ _
 
+lemma Radon_LC_comparison_naturality_aux (X : Profinite.{0})
+  (S T : discrete_quotient X) (f : S ⟶ T) (t : T) (q : S) :
+  ((⊥ : discrete_quotient T).fibre (discrete_quotient.equiv_bot t)).indicator_LC
+    (X.fintype_diagram.map f q) =
+  ∑ i : S in finset.univ.filter (λ j, X.fintype_diagram.map f j = t),
+    ((⊥ : discrete_quotient S).fibre (discrete_quotient.equiv_bot i)).indicator_LC q := sorry
+
 def Radon_LC_comparison (X : Profinite.{0}) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
   X.diagram ⋙ Radon_LC_functor p c ≅
@@ -171,6 +190,24 @@ def Radon_LC_comparison (X : Profinite.{0}) (p c : ℝ≥0)
   CompHaus_to_Top :=
 nat_iso.of_components
 (λ T, Radon_LC_comparison_component_iso _ _ _ _)
-sorry
+begin
+  intros S T f,
+  ext a t,
+  dsimp [Radon_functor, Radon_LC_comparison_component_iso,
+    Radon_LC_comparison_component_homeo,
+    Radon_LC_comparison_component_equiv,
+    Radon_LC_comparison_component_equiv_aux,
+    Radon_LC_functor, real_measures.map_hom,
+    CompHausFiltPseuNormGrp₁.level,
+    map_Radon_LC, weak_dual.comap
+    ],
+  let aa : weak_dual ℝ (locally_constant S ℝ) := a.1,
+  erw ← aa.map_sum,
+  congr' 1,
+  ext q,
+  rw locally_constant.sum_apply,
+  dsimp [continuous_map.comap_LC],
+  convert Radon_LC_comparison_naturality_aux X S T f t q,
+end
 
 end Profinite
