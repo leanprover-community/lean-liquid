@@ -25,9 +25,11 @@ show add_comm_group (C(X,ℝ) →L[ℝ] ℝ), by apply_instance
 lemma bdd_add {ca cb} (a b : weak_dual ℝ C(X,ℝ)) (ha : a.bdd p ca) (hb : b.bdd p cb) :
   (a + b).bdd p (ca + cb) := sorry
 
-lemma bdd_zero : (0 : weak_dual ℝ C(X,ℝ)).bdd p 0 := sorry
+lemma bdd_zero : (0 : weak_dual ℝ C(X,ℝ)).bdd p 0 :=
+λ e, by { simp, right, refine ne_of_gt (fact.out _) }
 
-lemma bdd_neg {c} (a : weak_dual ℝ C(X,ℝ)) (ha : a.bdd p c) : (-a).bdd p c := sorry
+lemma bdd_neg {c} (a : weak_dual ℝ C(X,ℝ)) (ha : a.bdd p c) : (-a).bdd p c :=
+λ e, by { simpa using ha e }
 
 def bdd_weak_dual : add_subgroup (weak_dual ℝ C(X,ℝ)) :=
 { carrier := { μ | ∃ c, μ.bdd p c },
