@@ -62,8 +62,14 @@ def bdd_weak_dual_filtration_homeo (c : ℝ≥0) :
   inv_fun := λ μ, ⟨⟨μ.1, ⟨c, μ.2⟩⟩, μ.2⟩,
   left_inv := λ μ, by { ext, refl },
   right_inv := λ μ, by { ext, refl },
-  continuous_to_fun := sorry,
-  continuous_inv_fun := sorry }
+  continuous_to_fun := begin
+    apply continuous_subtype_mk,
+    exact continuous_induced_dom,
+  end,
+  continuous_inv_fun := begin
+    rw continuous_induced_rng,
+    exact continuous_subtype_coe
+  end }
 
 instance : comphaus_filtered_pseudo_normed_group (X.bdd_weak_dual p) :=
 { t2 := λ c, (X.bdd_weak_dual_filtration_homeo p c).symm.t2_space,
