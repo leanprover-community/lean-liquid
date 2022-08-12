@@ -162,8 +162,8 @@ def Radon_png_functor_level_iso_component (c : ℝ≥0) (X : Profinite.{0}) :
 let e := (bdd_weak_dual_filtration_homeo X p c) in
 { hom := e.to_continuous_map,
   inv := e.symm.to_continuous_map,
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+  hom_inv_id' := by { ext, refl },
+  inv_hom_id' := by { ext, refl } }
 
 def Radon_png_functor_level_iso (c : ℝ≥0) :
   Radon_png_functor p ⋙ CompHausFiltPseuNormGrp₁.level.obj c ≅
