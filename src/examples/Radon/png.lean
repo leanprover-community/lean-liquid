@@ -23,7 +23,19 @@ instance why_do_I_need_this : add_comm_group (weak_dual ℝ C(X,ℝ)) :=
 show add_comm_group (C(X,ℝ) →L[ℝ] ℝ), by apply_instance
 
 lemma bdd_add {ca cb} (a b : weak_dual ℝ C(X,ℝ)) (ha : a.bdd p ca) (hb : b.bdd p cb) :
-  (a + b).bdd p (ca + cb) := sorry
+  (a + b).bdd p (ca + cb) :=
+begin
+  intros e, dsimp,
+  refine le_trans _ (add_le_add (ha e) (hb e)),
+  rw ← finset.sum_add_distrib,
+  apply finset.sum_le_sum, rintros i -,
+  refine le_trans _ (nnreal.rpow_add_le_add_rpow _ _ _ _),
+  apply nnreal.rpow_le_rpow,
+  apply nnnorm_add_le,
+  exact_mod_cast (fact.out (0 ≤ p)),
+  exact_mod_cast (fact.out (0 < p)),
+  exact_mod_cast (fact.out (p ≤ 1)),
+end
 
 lemma bdd_zero : (0 : weak_dual ℝ C(X,ℝ)).bdd p 0 :=
 λ e, by { simp, right, refine ne_of_gt (fact.out _) }
