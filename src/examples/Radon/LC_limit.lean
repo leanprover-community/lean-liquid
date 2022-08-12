@@ -201,8 +201,18 @@ def Radon_LC_CompHaus_diagram (X : Profinite.{0}) (p c : ℝ≥0)
   discrete_quotient X ⥤ CompHaus.{0} :=
 { obj := λ T, CompHaus.of $ (X.diagram.obj T).Radon_LC p c,
   map := λ S T e, (Radon_LC_functor p c).map $ X.diagram.map e,
-  map_id' := sorry,
-  map_comp' := sorry }
+  map_id' := begin
+    intros T,
+    rw X.diagram.map_id,
+    rw (Radon_LC_functor p c).map_id,
+    refl,
+  end,
+  map_comp' := begin
+    intros S T W f g,
+    rw X.diagram.map_comp,
+    rw (Radon_LC_functor p c).map_comp,
+    refl,
+  end }
 
 instance compact_space_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
