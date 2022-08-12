@@ -34,13 +34,11 @@ def colimit_cocone.cocone : cocone F :=
         { dsimp,
           simp only [ι_colim_map, nat_trans.hcomp_app, φ₁₂_app, nat_trans.id_app, π₂_map,
             assoc],
-          erw [composable_morphisms.id_τ₂, id_comp],
-          refl, },
+          erw [composable_morphisms.id_τ₂, id_comp], },
         { dsimp,
           simp only [ι_colim_map, nat_trans.hcomp_app, φ₂₃_app, nat_trans.id_app, π₃_map,
             assoc],
-          erw [composable_morphisms.id_τ₃, id_comp],
-          refl, },
+          erw [composable_morphisms.id_τ₃, id_comp], },
       end,
       naturality' := λ i j f, begin
         ext,
@@ -173,6 +171,7 @@ instance zero_preserves_colimits_of_shape {D : Type*} [category D]:
     apply is_zero_zero,
   end, }⟩⟩
 
+/-
 lemma functor_homological_complex_π₁_iso_zero (i : M) (h : c.prev i = none) :
   functor_homological_complex C c i ⋙ π₁ ≅ 0 :=
 begin
@@ -192,6 +191,7 @@ begin
   apply is_zero.eq_of_src,
   exact is_zero.of_iso (is_zero_zero _) (X.X_next_iso_zero h),
 end
+-/
 
 lemma functor_homological_complex_π₁_iso_eval (i j : M) (hij : c.rel j i) :
   functor_homological_complex C c i ⋙ π₁ ≅ homological_complex.eval C c j :=
@@ -212,18 +212,8 @@ end)
 instance (i : M) [has_colimits_of_shape J C] :
   preserves_colimits_of_shape J (short_complex.functor_homological_complex C c i) :=
 begin
-  apply preserves_colimits_of_shape_of_projections,
-  { rcases h : c.prev i with _ | ⟨j, hij⟩,
-    { exact preserves_colimits_of_shape_of_nat_iso
-        (functor_homological_complex_π₁_iso_zero i h).symm, },
-    { exact preserves_colimits_of_shape_of_nat_iso
-        (functor_homological_complex_π₁_iso_eval i j hij).symm, }, },
-  { exact (infer_instance : preserves_colimits_of_shape J (homological_complex.eval C c i)), },
-  { rcases h : c.next i with _ | ⟨j, hij⟩,
-    { exact preserves_colimits_of_shape_of_nat_iso
-        (functor_homological_complex_π₃_iso_zero i h).symm, },
-    { exact preserves_colimits_of_shape_of_nat_iso
-        (functor_homological_complex_π₃_iso_eval i j hij).symm, }, },
+  apply preserves_colimits_of_shape_of_projections;
+  { exact (infer_instance : preserves_colimits_of_shape J (homological_complex.eval C c _)), },
 end
 
 end functor_homological_complex
@@ -278,10 +268,10 @@ begin
     dsimp, erw [id_comp, comp_id], refl, },
   { refine colim.map_iso (nat_iso.of_components (λ j, iso.refl _) (λ i j f, _)),
     dsimp, erw [id_comp, comp_id], refl, },
-  { ext, dsimp, simp only [colimit.ι_map_assoc, colimit.ι_map, nat_iso.of_components.hom_app,
+  { ext, dsimp, simp only [colimit.ι_map_assoc, colimit.ι_map, nat_iso.of_components_hom_app,
       iso.refl_hom, id_comp, ι_colim_map, nat_trans.hcomp_app, φ₁₂_app, nat_trans.id_app,
       π₂_map, assoc], erw id_comp, refl, },
-  { ext, dsimp, simp only [colimit.ι_map_assoc, colimit.ι_map, nat_iso.of_components.hom_app,
+  { ext, dsimp, simp only [colimit.ι_map_assoc, colimit.ι_map, nat_iso.of_components_hom_app,
       iso.refl_hom, id_comp, ι_colim_map, nat_trans.hcomp_app, φ₂₃_app, nat_trans.id_app,
       π₃_map, assoc], erw id_comp, refl, },
 end
@@ -319,7 +309,7 @@ lemma preserves : preserves_colimit (F₀ F) short_complex.homology_functor :=
   congr' 1,
   ext1,
   all_goals
-  { dsimp [e₂], simp only [colimit.ι_map, nat_iso.of_components.hom_app,
+  { dsimp [e₂], simp only [colimit.ι_map, nat_iso.of_components_hom_app,
       iso.refl_hom, id_comp], },
 end⟩
 
