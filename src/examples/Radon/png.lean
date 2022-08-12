@@ -179,8 +179,21 @@ def is_limit_Radon_png_cone_map_level (c : ℝ≥0) :
     (X.is_limit_Radon_CompHaus_cone p c).lift
     ⟨_, S.π ≫ whisker_left _ (Radon_png_functor_level_iso p c).hom⟩ ≫
     (Radon_png_functor_level_iso p c).inv.app _,
-  fac' := sorry,
-  uniq' := sorry }
+  fac' := begin
+    intros S j,
+    erw [category.assoc, ← nat_trans.naturality,
+      (X.is_limit_Radon_CompHaus_cone p c).fac_assoc],
+    dsimp, simp only [category.assoc, iso.hom_inv_id_app],
+    erw category.comp_id,
+  end,
+  uniq' := begin
+    intros S m hm,
+    rw [← nat_iso.app_inv, iso.eq_comp_inv],
+    apply (X.is_limit_Radon_CompHaus_cone p c).hom_ext, intros j,
+    erw (X.is_limit_Radon_CompHaus_cone p c).fac,
+    dsimp, rw ← hm, dsimp, simp only [category.assoc],
+    erw ← nat_trans.naturality,
+  end }
 
 def is_limit_Radon_png_cone : is_limit (X.Radon_png_cone p) :=
 CompHausFiltPseuNormGrp₁.level_jointly_reflects_limits _ $
