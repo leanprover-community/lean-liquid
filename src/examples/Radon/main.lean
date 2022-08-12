@@ -252,9 +252,15 @@ nat_iso.of_components
 (λ X,
 { hom := (Radon_functor_iso_Radon_LC_functor p c).hom.app X,
   inv := (Radon_functor_iso_Radon_LC_functor p c).inv.app X,
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry })
-sorry
+  hom_inv_id' := begin
+    erw [← nat_trans.comp_app, iso.hom_inv_id], refl,
+  end,
+  inv_hom_id' := begin
+    erw [← nat_trans.comp_app, iso.inv_hom_id], refl,
+  end })
+begin
+  intros, ext, refl,
+end
 
 def Radon_CompHaus_cone (X : Profinite.{0}) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
@@ -268,8 +274,21 @@ def is_limit_Radon_CompHaus_cone (X : Profinite.{0}) (p c : ℝ≥0)
     (X.is_limit_Radon_LC_CompHaus_cone p c).lift
     ⟨S.X, S.π ≫ whisker_left _ (Radon_CompHaus_functor_iso_Radon_LC_CompHaus_functor p c).hom⟩ ≫
     (Radon_CompHaus_functor_iso_Radon_LC_CompHaus_functor p c).inv.app _,
-  fac' := sorry,
-  uniq' := sorry }
+  fac' := begin
+    intros S j,
+    erw [category.assoc, ← nat_trans.naturality,
+      (X.is_limit_Radon_LC_CompHaus_cone p c).fac_assoc,
+      ← nat_iso.app_inv, iso.comp_inv_eq], refl,
+  end,
+  uniq' := begin
+    intros S m hm,
+    rw [← nat_iso.app_inv, iso.eq_comp_inv],
+    apply (X.is_limit_Radon_LC_CompHaus_cone p c).hom_ext, intros j,
+    erw (X.is_limit_Radon_LC_CompHaus_cone p c).fac,
+    dsimp, rw ← hm,
+    simp only [category.assoc],
+    erw ← nat_trans.naturality,
+  end }
 
 def Radon_LC_CompHaus_comparison (X : Profinite.{0}) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
@@ -279,9 +298,16 @@ nat_iso.of_components
 (λ T,
 { hom := (X.Radon_LC_comparison p c).hom.app _,
   inv := (X.Radon_LC_comparison p c).inv.app _,
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry })
-sorry
+  hom_inv_id' := begin
+    erw [← nat_trans.comp_app, iso.hom_inv_id], refl,
+  end,
+  inv_hom_id' := begin
+    erw [← nat_trans.comp_app, iso.inv_hom_id], refl,
+  end })
+begin
+  intros S T i, dsimp,
+  erw ((X.Radon_LC_comparison p c).hom).naturality, refl,
+end
 
 def Radon_CompHaus_comparison (X : Profinite.{0}) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
