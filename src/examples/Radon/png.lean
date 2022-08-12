@@ -76,9 +76,46 @@ def bdd_weak_dual_filtration_homeo (c : ℝ≥0) :
 instance : comphaus_filtered_pseudo_normed_group (X.bdd_weak_dual p) :=
 { t2 := λ c, (X.bdd_weak_dual_filtration_homeo p c).symm.t2_space,
   compact := λ c, (X.bdd_weak_dual_filtration_homeo p c).symm.compact_space,
-  continuous_add' := sorry,
-  continuous_neg' := sorry,
-  continuous_cast_le := sorry,
+  continuous_add' := begin
+    intros c₁ c₂,
+    rw continuous_induced_rng,
+    let i1 :
+      (pseudo_normed_group.filtration ↥(X.bdd_weak_dual p) c₁) ×
+      (pseudo_normed_group.filtration ↥(X.bdd_weak_dual p) c₂) →
+      weak_dual ℝ C(X,ℝ) × weak_dual ℝ C(X,ℝ) :=
+      prod.map (λ μ, μ.1.1) (λ μ, μ.1.1),
+    let i2 :
+      weak_dual ℝ C(X,ℝ) × weak_dual ℝ C(X,ℝ) → weak_dual ℝ C(X,ℝ) :=
+      (λ a, a.1 + a.2),
+    change continuous (i2 ∘ i1),
+    apply continuous.comp,
+    exact continuous_add,
+    refine continuous.prod_map _ _,
+    exact continuous_induced_dom,
+    exact continuous_induced_dom,
+  end,
+  continuous_neg' := begin
+    intros c,
+    rw continuous_induced_rng,
+    let i1 :
+      (pseudo_normed_group.filtration ↥(X.bdd_weak_dual p) c) →
+      weak_dual ℝ C(X,ℝ) := λ μ, μ.1.1,
+    let i2 : weak_dual ℝ C(X,ℝ) → weak_dual ℝ C(X,ℝ) := λ μ, -μ,
+    change continuous (i2 ∘ i1),
+    apply continuous.comp,
+    apply weak_dual.continuous_of_continuous_eval,
+    intros f,
+    dsimp [i2],
+    have : (λ (a : weak_dual ℝ C(↥X, ℝ)), -a f) =
+      (λ (a : weak_dual ℝ C(↥X, ℝ)), a (-f)), by { ext, simp },
+    rw this, apply weak_dual.eval_continuous,
+    exact continuous_induced_dom,
+  end,
+  continuous_cast_le := begin
+    introsI c₁ c₂ h,
+    rw continuous_induced_rng,
+    exact continuous_induced_dom,
+  end,
   ..(infer_instance : pseudo_normed_group (X.bdd_weak_dual p)) }
 
 def Radon_png : CompHausFiltPseuNormGrp₁ :=
