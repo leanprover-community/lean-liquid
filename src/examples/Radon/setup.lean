@@ -20,12 +20,12 @@ local attribute [instance]
   locally_constant.pseudo_metric_space
 
 lemma real.pow_nnnorm_sum_le
-  {ι : Type*} [fintype ι] (r : ι → ℝ)
+  {ι : Type*} (S : finset ι) (r : ι → ℝ)
   (p : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] :
-  ∥ ∑ i, r i ∥₊^(p : ℝ) ≤ ∑ i, ∥ r i ∥₊^(p : ℝ) :=
+  ∥ ∑ i in S, r i ∥₊^(p : ℝ) ≤ ∑ i in S, ∥ r i ∥₊^(p : ℝ) :=
 begin
   refine finset.le_sum_of_subadditive (λ x : ℝ, ∥ x ∥₊^(p : ℝ)) _ _
-    (finset.univ : finset ι) r,
+    S r,
   { simp only [nnnorm_zero, nnreal.rpow_eq_zero_iff, eq_self_iff_true, ne.def,
       nnreal.coe_eq_zero, true_and],
     exact ne_of_gt (fact.out _) },

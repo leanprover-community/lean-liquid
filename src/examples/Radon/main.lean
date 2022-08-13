@@ -156,7 +156,7 @@ begin
     nth_rewrite 0 e.eq_sum,
 
     simp_rw [γ.map_sum, γ.map_smul],
-    refine le_trans (real.pow_nnnorm_sum_le _ _) _,
+    refine le_trans (real.pow_nnnorm_sum_le _ _ _) _,
 
     apply finset.sum_le_sum, rintros x -,
     rw [smul_eq_mul, nnnorm_mul, nnreal.mul_rpow],

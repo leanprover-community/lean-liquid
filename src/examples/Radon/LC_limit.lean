@@ -72,7 +72,7 @@ begin
   rw [mul_comm, finset.mul_sum],
   nth_rewrite 0 e.eq_sum,
   simp_rw [linear_map.map_sum, linear_map.map_smul],
-  refine le_trans (real.pow_nnnorm_sum_le _ _) _,
+  refine le_trans (real.pow_nnnorm_sum_le _ _ _) _,
   have : ∑ (x : (⊥ : discrete_quotient e.discrete_quotient)),
     ∥e∥₊ ^ (p : ℝ) * ∥(((S.π.app e.discrete_quotient) t).val)
     ((⊥ : discrete_quotient e.discrete_quotient).fibre x).indicator_LC∥₊ ^ (p : ℝ) =

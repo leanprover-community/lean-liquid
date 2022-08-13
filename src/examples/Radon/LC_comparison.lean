@@ -141,7 +141,57 @@ lemma bdd_LC_iff_comparison
   f.bdd_LC p c ↔
   X.Radon_LC_comparison_component_equiv_aux p T f ∈
     pseudo_normed_group.filtration (real_measures p (X.fintype_diagram.obj T)) c :=
-sorry
+begin
+  split,
+  { intros h, change ∑ (t : T), _ ≤ _, specialize h ⊥,
+    convert h using 1,
+    fapply finset.sum_bij',
+    { intros t _, exact discrete_quotient.equiv_bot t, },
+    { intros, exact finset.mem_univ _ },
+    { intros t _, congr, },
+    { intros t _, exact discrete_quotient.equiv_bot.symm t, },
+    { intros, exact finset.mem_univ _ },
+    { intros, apply equiv.apply_symm_apply },
+    { intros, exact discrete_quotient.equiv_bot.apply_symm_apply _, } },
+  { intros h E, change ∑ (e : E), _ ≤ _,
+    change ∑ (t : T), _ ≤ _ at h,
+    refine le_trans _ h,
+    have :
+      ∀ e : E, ∥ f (E.fibre e).indicator_LC ∥₊^(p : ℝ) ≤
+        ∑ t in finset.univ.filter (λ t : T, E.proj t = e),
+          ∥ f (E.fibre (E.proj t)).indicator_LC ∥₊^(p : ℝ),
+    { intros e,
+      refine le_trans _ (real.pow_nnnorm_sum_le _ _ _),
+      sorry,
+    },
+    have : ∑ (e : ↥E), ∥ f (E.fibre e).indicator_LC∥₊ ^ ↑p ≤
+      ∑ e : E, ∑ t in finset.univ.filter (λ t : T, E.proj t = e),
+          ∥ f (E.fibre (E.proj t)).indicator_LC ∥₊^(p : ℝ),
+    { sorry },
+    refine le_trans this _,
+    rw ← finset.sum_bUnion,
+    swap,
+    { intros a ha b hb h t ht, dsimp at ht,
+      rw [finset.mem_inter, finset.mem_filter, finset.mem_filter] at ht,
+      dsimp, simp only [finset.not_mem_empty], apply h,
+      rw [← ht.1.2, ht.2.2] },
+    have :
+      finset.univ.bUnion (λ (x : ↥E), finset.filter (λ (t : ↥T), E.proj t = x)
+      finset.univ) = finset.univ,
+    { rw finset.eq_univ_iff_forall,
+      intros x,
+      rw finset.mem_bUnion,
+      refine ⟨E.proj x, finset.mem_univ _, _⟩,
+      rw finset.mem_filter,
+      refine ⟨finset.mem_univ _, rfl⟩ },
+    rw this,
+    apply finset.sum_le_sum,
+    intros t _,
+    refine le_of_eq _, congr' 3, ext a,
+
+    sorry
+  },
+end
 
 def Radon_LC_comparison_component_equiv
   (X : Profinite.{0}) (T : discrete_quotient X) (p c : ℝ≥0)
