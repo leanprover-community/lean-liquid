@@ -155,7 +155,7 @@ namespace discrete_quotient
 def fibre {X : Type*} [topological_space X] (T : discrete_quotient X)
   (t : T) : clopens X :=
 { carrier := T.proj ⁻¹' {t},
-  clopen' := sorry }
+  clopen' := fiber_clopen T {t} }
 
 def equiv_bot {X : Type*} [topological_space X] [discrete_topology X] :
   X ≃ (⊥ : discrete_quotient X) :=
