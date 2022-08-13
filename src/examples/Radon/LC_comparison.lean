@@ -101,7 +101,7 @@ def Radon_LC_comparison_component_equiv_aux (X : Profinite.{0}) (p : ℝ≥0)
     cont := begin
       apply continuous_finset_sum, intros t ht,
       refine continuous.comp (continuous_mul_left (μ t)) _,
-      sorry
+      apply locally_constant.continuous_eval,
     end },
   left_inv := sorry,
   right_inv := sorry }

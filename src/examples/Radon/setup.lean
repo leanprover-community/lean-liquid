@@ -60,6 +60,25 @@ begin
   use x, refl,
 end
 
+def linear_eval (X : Type*)
+  [topological_space X] [compact_space X] [t2_space X] (x : X) :
+  locally_constant X ℝ →ₗ[ℝ] ℝ :=
+{ to_fun := λ e, e x,
+  map_add' := λ f g, rfl,
+  map_smul' := λ r f, rfl }
+
+
+lemma continuous_eval (X : Type*)
+  [topological_space X] [compact_space X] [t2_space X] (x : X) :
+  continuous (λ e : locally_constant X ℝ, e x) :=
+begin
+  change continuous (linear_eval X x),
+  let E := linear_map.mk_continuous_of_exists_bound (linear_eval X x) _,
+  swap,
+  use 1, intros e, rw one_mul, apply nnnorm_apply_le_nnnorm,
+  exact E.continuous
+end
+
 end locally_constant
 
 namespace topological_space.clopens
