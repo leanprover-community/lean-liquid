@@ -154,6 +154,8 @@ begin
     { intros, apply equiv.apply_symm_apply },
     { intros, exact discrete_quotient.equiv_bot.apply_symm_apply _, } },
   { intros h E, change ∑ (e : E), _ ≤ _,
+    sorry
+    /- I may have taken a small wrong turn near the end of this comment block...
     change ∑ (t : T), _ ≤ _ at h,
     refine le_trans _ h,
     have :
@@ -161,13 +163,15 @@ begin
         ∑ t in finset.univ.filter (λ t : T, E.proj t = e),
           ∥ f (E.fibre (E.proj t)).indicator_LC ∥₊^(p : ℝ),
     { intros e,
-      refine le_trans _ (real.pow_nnnorm_sum_le _ _ _),
-      sorry,
-    },
+      refine le_trans (le_of_eq _) (real.pow_nnnorm_sum_le _ _ _), congr' 2,
+      rw ← f.map_sum, congr' 1, ext (q : T), rw locally_constant.sum_apply,
+      by_cases E.proj q = e,
+      { sorry },
+      { sorry } },
     have : ∑ (e : ↥E), ∥ f (E.fibre e).indicator_LC∥₊ ^ ↑p ≤
       ∑ e : E, ∑ t in finset.univ.filter (λ t : T, E.proj t = e),
           ∥ f (E.fibre (E.proj t)).indicator_LC ∥₊^(p : ℝ),
-    { sorry },
+    { apply finset.sum_le_sum, intros i _, apply this },
     refine le_trans this _,
     rw ← finset.sum_bUnion,
     swap,
@@ -188,8 +192,13 @@ begin
     apply finset.sum_le_sum,
     intros t _,
     refine le_of_eq _, congr' 3, ext a,
-
-    sorry
+    change ite _ _ _ = ite _ _ _,
+    congr' 1,
+    dsimp [discrete_quotient.fibre], ext,
+    split,
+    { intros h, apply quotient.sound', change _ = _, exact h },
+    { sorry }
+    -/
   },
 end
 
