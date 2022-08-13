@@ -181,7 +181,46 @@ lemma Radon_LC_comparison_naturality_aux (X : Profinite.{0})
   ((⊥ : discrete_quotient T).fibre (discrete_quotient.equiv_bot t)).indicator_LC
     (X.fintype_diagram.map f q) =
   ∑ i : S in finset.univ.filter (λ j, X.fintype_diagram.map f j = t),
-    ((⊥ : discrete_quotient S).fibre (discrete_quotient.equiv_bot i)).indicator_LC q := sorry
+    ((⊥ : discrete_quotient S).fibre (discrete_quotient.equiv_bot i)).indicator_LC q :=
+begin
+  by_cases H : (X.fintype_diagram.map f q = t),
+  { rw @finset.sum_eq_single ℝ S _
+      (finset.filter (λ (j : (X.fintype_diagram.obj S).α),
+        X.fintype_diagram.map f j = t) finset.univ)
+      (λ i, ((⊥ : discrete_quotient S).fibre
+        (discrete_quotient.equiv_bot i)).indicator_LC q) q _ _,
+    { dsimp [clopens.indicator_LC, set.indicator, discrete_quotient.fibre],
+      erw if_pos rfl,
+      rw if_pos, congr' 1 },
+    { intros s hs hsq, rw finset.mem_filter at hs,
+      dsimp [clopens.indicator_LC, set.indicator, discrete_quotient.fibre],
+      rw if_neg,
+      contrapose! hsq,
+      apply_fun discrete_quotient.equiv_bot.symm at hsq,
+      rw equiv.symm_apply_apply at hsq,
+      erw equiv.symm_apply_apply at hsq,
+      exact hsq.symm },
+    { intros hq,
+      erw finset.mem_filter at hq,
+      push_neg at hq, specialize hq (finset.mem_univ _),
+      exact false.elim (hq H) } },
+  { change ite _ _ _ = _, rw if_neg,
+    { symmetry, apply finset.sum_eq_zero,
+      intros s hs, rw finset.mem_filter at hs, replace hs := hs.2,
+      change ite _ _ _ = _, rw if_neg,
+      contrapose! H,
+      dsimp [discrete_quotient.fibre] at H,
+      apply_fun discrete_quotient.equiv_bot.symm at H,
+      rw equiv.symm_apply_apply at H,
+      erw equiv.symm_apply_apply at H,
+      rw H, exact hs },
+    { contrapose! H,
+      dsimp [discrete_quotient.fibre] at H,
+      apply_fun discrete_quotient.equiv_bot.symm at H,
+      rw equiv.symm_apply_apply at H,
+      erw equiv.symm_apply_apply at H,
+      exact H } },
+end
 
 def Radon_LC_comparison (X : Profinite.{0}) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
