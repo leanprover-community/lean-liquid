@@ -103,8 +103,36 @@ def Radon_LC_comparison_component_equiv_aux (X : Profinite.{0}) (p : ℝ≥0)
       refine continuous.comp (continuous_mul_left (μ t)) _,
       apply locally_constant.continuous_eval,
     end },
-  left_inv := sorry,
-  right_inv := sorry }
+  left_inv := begin
+    intros μ, ext t, dsimp,
+    haveI : fintype (X.diagram.obj T),
+    { show fintype T, by apply_instance },
+    conv_rhs { rw t.eq_sum_of_fintype },
+    rw μ.map_sum,
+    apply finset.sum_congr, convert rfl,
+    intros t ht,
+    rw [μ.map_smul, mul_comm], change _ = _ * _,
+    congr' 3, ext w, change _ = _ ↔ _ = _,
+    split,
+    { intros h, apply_fun discrete_quotient.equiv_bot.symm at h,
+      erw discrete_quotient.equiv_bot.symm_apply_apply at h,
+      rw discrete_quotient.equiv_bot.symm_apply_apply at h,
+      exact h },
+    { intros h, rw h, refl, }
+  end,
+  right_inv := begin
+    intros μ, ext (t : T), dsimp,
+    rw finset.sum_eq_single t,
+    { change _ * ite _ _ _ = _, rw if_pos, erw mul_one,
+      change _ = _, refl },
+    { intros s _ hs, change _ * ite _ _ _ = _, rw [if_neg, mul_zero],
+      change _ ≠ _, contrapose! hs,
+      apply_fun discrete_quotient.equiv_bot.symm at hs,
+      erw discrete_quotient.equiv_bot.symm_apply_apply at hs,
+      rw discrete_quotient.equiv_bot.symm_apply_apply at hs,
+      exact hs },
+    { intros h, exact false.elim (h (finset.mem_univ _)) },
+  end }
 
 lemma bdd_LC_iff_comparison
   (X : Profinite.{0}) (T : discrete_quotient X) (p c : ℝ≥0)

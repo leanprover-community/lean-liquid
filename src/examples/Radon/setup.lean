@@ -231,6 +231,30 @@ begin
   exact ht.symm,
 end
 
+def topological_space.clopens.singleton {X : Type*}
+  [topological_space X] [discrete_topology X] (x : X) :
+  clopens X :=
+{ carrier := {x},
+  clopen' := by tidy }
+
+lemma locally_constant.eq_sum_of_fintype {X : Type*} [fintype X]
+  [topological_space X] [discrete_topology X]
+  (e : locally_constant X ℝ) :
+  e =
+  ∑ t : X, e t • (topological_space.clopens.singleton t).indicator_LC :=
+begin
+  ext t,
+  rw locally_constant.sum_apply,
+  rw finset.sum_eq_single t,
+  { change _ = _ • ite _ _ _,
+    rw [if_pos, smul_eq_mul], erw mul_one,
+    change _ = _, refl },
+  { intros x _ hx,
+    change _ • ite _ _ _ = _,
+    rw [if_neg, smul_zero], change _ ≠ _, exact hx.symm },
+  { intros h, exfalso, apply h, exact finset.mem_univ _ }
+end
+
 def continuous_map.comap {X Y : Type*}
   [topological_space X] [topological_space Y]
   (f : C(X,Y)) : C(Y,ℝ) →L[ℝ] C(X,ℝ) :=
