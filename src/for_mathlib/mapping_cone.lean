@@ -156,7 +156,11 @@ def cone.map : cone f ⟶ cone f' :=
       dsimp at this,
       rw [reassoc_of this],
       subst r,
-      simpa [prev_d, d_next, ← add_assoc] using add_comm _ _ },
+      delta d_from from_next to_prev d_to,
+      simp only [X_eq_to_iso_refl, category.comp_id, add_monoid_hom.mk'_apply],
+      -- generalize hj : (complex_shape.up ℤ).next (i + 1) = j,
+      -- simpa [prev_d, d_next, ← add_assoc] using add_comm _ _
+      sorry },
     { simp }
   end }
 
