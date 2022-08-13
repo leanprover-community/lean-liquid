@@ -114,10 +114,33 @@ def indicator {X : Type*} [topological_space X] (U : clopens X) :
 { to_fun := set.indicator U 1,
   continuous_to_fun := indicator_continuous _ _ continuous_one }
 
+lemma indicator_one_inverse_image {X : Type*} (U : set X) (s : set ℝ) :
+  (U.indicator 1 ⁻¹' s) = set.univ ∨ (U.indicator 1 ⁻¹' s) = U ∨
+  (U.indicator 1 ⁻¹' s) = Uᶜ ∨ (U.indicator 1 ⁻¹' s) = ∅ :=
+begin
+  by_cases s1 : (1 : ℝ) ∈ s;
+  by_cases s0 : (0 : ℝ) ∈ s,
+  work_on_goal 1 { refine or.inl _},
+  work_on_goal 2 { refine or.inr (or.inl _) },
+  work_on_goal 3 { refine or.inr (or.inr (or.inl _)) },
+  work_on_goal 4 { refine or.inr (or.inr (or.inr _)) },
+  all_goals
+  { ext x,
+    by_cases xU : x ∈ U,
+    { simp only [xU, s1, set.mem_preimage, set.indicator_of_mem, pi.one_apply, set.mem_compl_eq,
+        not_true, set.mem_univ, set.mem_empty_eq] },
+    { simp only [xU, s0, set.mem_preimage, set.indicator_of_not_mem, not_false_iff,
+      set.mem_compl_eq, set.mem_univ, set.mem_empty_eq] } }
+end
+
 def indicator_LC {X : Type*} [topological_space X] (U : clopens X) :
   locally_constant X ℝ :=
 { to_fun := set.indicator U 1,
-  is_locally_constant := sorry }
+  is_locally_constant := λ s, begin
+    rcases indicator_one_inverse_image ↑U s with h | h | h | h;
+    rw h,
+    exacts [is_open_univ, U.clopen.is_open, (Uᶜ).clopen.is_open, is_open_empty]
+  end }
 
 lemma indicator_apply {X : Type*} [topological_space X] (U : clopens X) (x) :
   U.indicator x = if x ∈ U then 1 else 0 := rfl
@@ -132,7 +155,7 @@ namespace discrete_quotient
 def fibre {X : Type*} [topological_space X] (T : discrete_quotient X)
   (t : T) : clopens X :=
 { carrier := T.proj ⁻¹' {t},
-  clopen' := sorry }
+  clopen' := fiber_clopen T {t} }
 
 def equiv_bot {X : Type*} [topological_space X] [discrete_topology X] :
   X ≃ (⊥ : discrete_quotient X) :=
