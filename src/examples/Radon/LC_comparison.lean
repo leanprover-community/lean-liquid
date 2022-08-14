@@ -14,34 +14,29 @@ local attribute [instance]
 
 namespace Profinite
 
-def Radon_LC_to_fun (X : Profinite.{0}) (p c : ℝ≥0)
-  [fact (0 < p)] [fact (p ≤ 1)] :
+def Radon_LC_to_fun (X : Profinite.{0}) (p c : ℝ≥0) :
   X.Radon_LC p c → locally_constant X ℝ → ℝ :=
 λ μ, μ.1
 
-def Radon_to_fun (X : Profinite.{0}) (p c : ℝ≥0)
-  [fact (0 < p)] [fact (p ≤ 1)] :
+def Radon_to_fun (X : Profinite.{0}) (p c : ℝ≥0) :
   X.Radon p c → C(X,ℝ) → ℝ :=
 λ μ, μ.1
 
-lemma Radon_LC_to_fun_injective (X : Profinite.{0}) (p c : ℝ≥0)
-  [fact (0 < p)] [fact (p ≤ 1)] :
+lemma Radon_LC_to_fun_injective (X : Profinite.{0}) (p c : ℝ≥0) :
   function.injective (X.Radon_LC_to_fun p c) :=
 begin
   intros a b h, ext x : 2,
   exact congr_fun h x
 end
 
-lemma Radon_to_fun_injective (X : Profinite.{0}) (p c : ℝ≥0)
-  [fact (0 < p)] [fact (p ≤ 1)] :
+lemma Radon_to_fun_injective (X : Profinite.{0}) (p c : ℝ≥0) :
   function.injective (X.Radon_to_fun p c) :=
 begin
   intros a b h, ext x : 2,
   exact congr_fun h x
 end
 
-lemma Radon_LC_to_fun_continuous (X : Profinite.{0}) (p c : ℝ≥0)
-  [fact (0 < p)] [fact (p ≤ 1)] :
+lemma Radon_LC_to_fun_continuous (X : Profinite.{0}) (p c : ℝ≥0) :
   continuous (X.Radon_LC_to_fun p c) :=
 begin
   apply continuous_pi,
@@ -49,8 +44,7 @@ begin
   refine continuous.comp (weak_dual.eval_continuous f) (continuous_subtype_coe),
 end
 
-lemma Radon_to_fun_continuous (X : Profinite.{0}) (p c : ℝ≥0)
-  [fact (0 < p)] [fact (p ≤ 1)] :
+lemma Radon_to_fun_continuous (X : Profinite.{0}) (p c : ℝ≥0) :
   continuous (X.Radon_to_fun p c) :=
 begin
   apply continuous_pi,
