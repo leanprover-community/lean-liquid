@@ -61,14 +61,12 @@ begin
   apply_instance
 end
 
-instance t2_space_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
-  [fact (0 < p)] [fact (p ≤ 1)] :
+instance t2_space_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0) :
   t2_space (X.Radon_LC p c) :=
 ⟨λ f g h, separated_by_continuous (X.Radon_LC_to_fun_continuous p c)
   $ (X.Radon_LC_to_fun_injective p c).ne h⟩
 
-instance t2_space_Radon (X : Profinite.{0}) (p c : ℝ≥0)
-  [fact (0 < p)] [fact (p ≤ 1)] :
+instance t2_space_Radon (X : Profinite.{0}) (p c : ℝ≥0) :
   t2_space (X.Radon p c) :=
 ⟨λ f g h, separated_by_continuous (X.Radon_to_fun_continuous p c)
   $ (X.Radon_to_fun_injective p c).ne h⟩
@@ -344,3 +342,4 @@ begin
 end
 
 end Profinite
+#lint
