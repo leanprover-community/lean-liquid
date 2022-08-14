@@ -330,7 +330,13 @@ function among spaces of continuous maps. -/
 def continuous_map.comap_LC {X Y : Type*} [topological_space X] [compact_space X]
   [topological_space Y] [compact_space Y]
   (f : C(X,Y)) : locally_constant Y ℝ →L[ℝ] locally_constant X ℝ :=
-{ cont := begin
+{ to_fun := λ g,
+  { to_fun := g ∘ f,
+    is_locally_constant := λ S,
+      by { rw set.preimage_comp, apply is_open.preimage f.2, apply g.2, } },
+  map_add' := λ _ _, rfl,
+  map_smul' := λ _ _, rfl,
+  cont := begin
     apply (f.comap_LC_linear_map.mk_continuous_of_exists_bound _).continuous,
     use 1, intros e, rw one_mul,
     by_cases (is_empty X),
@@ -342,8 +348,7 @@ def continuous_map.comap_LC {X Y : Type*} [topological_space X] [compact_space X
     use ∥ e (f x) ∥, use x, refl,
     rintros b ⟨x,rfl⟩, dsimp,
     exact_mod_cast locally_constant.nnnorm_apply_le_nnnorm _ e (f x),
-  end,
-  ..(continuous_map.comap_LC_linear_map f) }
+  end }
 
 /--  Given a compact topological space `X`, the inclusion of locally constant functions on `X` into
 the space of all continuous functions is a continuous `ℝ`-linear map. -/
