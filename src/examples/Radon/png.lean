@@ -17,7 +17,18 @@ local attribute [instance]
 namespace Profinite
 
 variables (X : Profinite.{0}) (p : ℝ≥0)
-  [fact (0 < p)] [fact (p ≤ 1)]
+
+lemma bdd_neg {c} (a : weak_dual ℝ C(X,ℝ)) (ha : a.bdd p c) : (-a).bdd p c :=
+λ e, by { simpa using ha e }
+
+section p_pos
+variables [fact (0 < p)]
+
+section p_le_one
+variables [fact (p ≤ 1)]
+
+lemma bdd_zero : (0 : weak_dual ℝ C(X,ℝ)).bdd p 0 :=
+λ e, by { simp, right, refine ne_of_gt (fact.out _) }
 
 instance why_do_I_need_this : add_comm_group (weak_dual ℝ C(X,ℝ)) :=
 show add_comm_group (C(X,ℝ) →L[ℝ] ℝ), by apply_instance
@@ -36,12 +47,6 @@ begin
   exact_mod_cast (fact.out (0 < p)),
   exact_mod_cast (fact.out (p ≤ 1)),
 end
-
-lemma bdd_zero : (0 : weak_dual ℝ C(X,ℝ)).bdd p 0 :=
-λ e, by { simp, right, refine ne_of_gt (fact.out _) }
-
-lemma bdd_neg {c} (a : weak_dual ℝ C(X,ℝ)) (ha : a.bdd p c) : (-a).bdd p c :=
-λ e, by { simpa using ha e }
 
 def bdd_weak_dual : add_subgroup (weak_dual ℝ C(X,ℝ)) :=
 { carrier := { μ | ∃ c, μ.bdd p c },
@@ -248,5 +253,9 @@ def Radon_png_iso : X.Radon_png p ≅
   (Profinite.extend (real_measures.functor p)).obj X :=
 (X.is_limit_Radon_png_cone p).cone_point_unique_up_to_iso
   (limit.is_limit _) ≪≫ has_limit.iso_of_nat_iso (X.Radon_png_comparison p)
+
+end p_le_one
+
+end p_pos
 
 end Profinite
