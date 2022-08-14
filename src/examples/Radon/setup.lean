@@ -60,6 +60,8 @@ begin
   use x, refl,
 end
 
+/--  The evaluation map at a point of a topological space, bundled as a linear map from
+locally constant functions to the real numbers. -/
 def linear_eval (X : Type*)
   [topological_space X] (x : X) :
   locally_constant X ℝ →ₗ[ℝ] ℝ :=
@@ -109,6 +111,7 @@ begin
       intro, assumption, } }
 end
 
+/--  The indicator function on clopen sets are continuous functions. -/
 def indicator {X : Type*} [topological_space X] (U : clopens X) :
   C(X,ℝ) :=
 { to_fun := set.indicator U 1,
@@ -133,6 +136,7 @@ begin
       set.mem_compl_eq, set.mem_univ, set.mem_empty_eq] } }
 end
 
+/--  The indicator function of a clopen set, bundled as a locally constant function. -/
 def indicator_LC {X : Type*} [topological_space X] (U : clopens X) :
   locally_constant X ℝ :=
 { to_fun := set.indicator U 1,
