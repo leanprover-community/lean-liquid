@@ -17,6 +17,8 @@ local attribute [instance]
 namespace Profinite
 
 variables (X : Profinite.{0}) (p : ℝ≥0)
+instance why_do_I_need_this : add_comm_group (weak_dual ℝ C(X,ℝ)) :=
+show add_comm_group (C(X,ℝ) →L[ℝ] ℝ), by apply_instance
 
 lemma bdd_neg {c} (a : weak_dual ℝ C(X,ℝ)) (ha : a.bdd p c) : (-a).bdd p c :=
 λ e, by { simpa using ha e }
@@ -24,14 +26,11 @@ lemma bdd_neg {c} (a : weak_dual ℝ C(X,ℝ)) (ha : a.bdd p c) : (-a).bdd p c :
 section p_pos
 variables [fact (0 < p)]
 
-section p_le_one
-variables [fact (p ≤ 1)]
-
 lemma bdd_zero : (0 : weak_dual ℝ C(X,ℝ)).bdd p 0 :=
 λ e, by { simp, right, refine ne_of_gt (fact.out _) }
 
-instance why_do_I_need_this : add_comm_group (weak_dual ℝ C(X,ℝ)) :=
-show add_comm_group (C(X,ℝ) →L[ℝ] ℝ), by apply_instance
+section p_le_one
+variables [fact (p ≤ 1)]
 
 lemma bdd_add {ca cb} (a b : weak_dual ℝ C(X,ℝ)) (ha : a.bdd p ca) (hb : b.bdd p cb) :
   (a + b).bdd p (ca + cb) :=
