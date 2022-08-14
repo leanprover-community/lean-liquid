@@ -15,17 +15,17 @@ local attribute [instance]
 namespace Profinite
 
 @[derive topological_space]
-def Radon (X : Profinite.{0}) (p c : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] :
+def Radon (X : Profinite.{0}) (p c : ℝ≥0) :
   Top.{0} :=
 Top.of { μ : weak_dual ℝ C(X,ℝ) // μ.bdd p c }
 
 @[derive topological_space]
-def Radon_LC (X : Profinite.{0}) (p c : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] :
+def Radon_LC (X : Profinite.{0}) (p c : ℝ≥0) :
   Top.{0} :=
 Top.of { μ : weak_dual ℝ (locally_constant X ℝ) // μ.bdd_LC p c }
 
 def map_Radon {X Y : Profinite.{0}} (f : X ⟶ Y)
-  (p c : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] :
+  (p c : ℝ≥0) [fact (0 < p)] :
   X.Radon p c ⟶ Y.Radon p c :=
 { to_fun := λ μ, ⟨weak_dual.comap f.comap μ.1,
     weak_dual.bdd_comap _ μ.2 _⟩,
@@ -36,7 +36,7 @@ def map_Radon {X Y : Profinite.{0}} (f : X ⟶ Y)
   end }
 
 def map_Radon_LC {X Y : Profinite.{0}} (f : X ⟶ Y)
-  (p c : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] :
+  (p c : ℝ≥0) [fact (0 < p)] :
   X.Radon_LC p c ⟶ Y.Radon_LC p c :=
 { to_fun := λ μ, ⟨weak_dual.comap f.comap_LC μ.1,
     weak_dual.bdd_LC_comap _ μ.2 _⟩,
@@ -46,7 +46,7 @@ def map_Radon_LC {X Y : Profinite.{0}} (f : X ⟶ Y)
     exact continuous_linear_map.continuous _,
   end }
 
-def Radon_functor (p c : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] :
+def Radon_functor (p c : ℝ≥0) [fact (0 < p)] :
   Profinite.{0} ⥤ Top.{0} :=
 { obj := λ X, X.Radon p c,
   map := λ X Y f, map_Radon f _ _,
@@ -54,7 +54,7 @@ def Radon_functor (p c : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] :
     ext, refl },
   map_comp' := λ X Y Z f g, by { ext, refl } }
 
-def Radon_LC_functor (p c : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] :
+def Radon_LC_functor (p c : ℝ≥0) [fact (0 < p)] :
   Profinite.{0} ⥤ Top.{0} :=
 { obj := λ X, X.Radon_LC p c,
   map := λ X Y f, map_Radon_LC f _ _,
