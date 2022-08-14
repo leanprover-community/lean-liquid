@@ -397,7 +397,7 @@ begin
     assumption' }
 end
 
-def create_iso_from_level {X Y : CompHausFiltPseuNormGrp₁}
+def create_iso_from_level {X Y : CompHausFiltPseuNormGrp₁.{u}}
   (E : Π c, (level.obj c).obj X ≅ (level.obj c).obj Y)
   (hE0 : ((E (X.lvl 0)).hom (X.as_lvl 0)).1 = 0)
   (hEa : ∀ a b : X, ((E _).hom (X.as_lvl (a + b))).1 =
