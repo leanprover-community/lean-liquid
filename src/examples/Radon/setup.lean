@@ -286,6 +286,17 @@ def continuous_map.comap {X Y : Type*}
   map_smul' := λ _ _, rfl,
   cont := by refine continuous_map.continuous_comp_left f }
 
+def continuous_map.comap_LC_linear_map {X Y : Type*}
+  [topological_space X] [compact_space X] [t2_space X]
+  [topological_space Y] [compact_space Y] [t2_space Y]
+  (f : C(X,Y)) : locally_constant Y ℝ →ₗ[ℝ] locally_constant X ℝ :=
+{ to_fun := λ g,
+  { to_fun := g ∘ f,
+    is_locally_constant := λ S,
+      by { rw set.preimage_comp, apply is_open.preimage f.2, apply g.2, } },
+  map_add' := λ _ _, rfl,
+  map_smul' := λ _ _, rfl }
+
 def continuous_map.comap_LC {X Y : Type*}
   [topological_space X] [compact_space X] [t2_space X]
   [topological_space Y] [compact_space Y] [t2_space Y]
@@ -296,7 +307,20 @@ def continuous_map.comap_LC {X Y : Type*}
       by { rw set.preimage_comp, apply is_open.preimage f.2, apply g.2, } },
   map_add' := λ _ _, rfl,
   map_smul' := λ _ _, rfl,
-  cont := sorry }
+  cont := begin
+    apply (f.comap_LC_linear_map.mk_continuous_of_exists_bound _).continuous,
+    use 1, intros e, rw one_mul,
+    by_cases (is_empty X),
+    { have : (f.comap_LC_linear_map) e = 0, ext x, exact h.elim x, rw this,
+      simp },
+    change Sup _ ≤ _,
+    apply cSup_le,
+    simp only [not_is_empty_iff] at h, obtain ⟨x⟩ := h,
+    use ∥ e (f x) ∥, use x, refl,
+    rintros b ⟨x,rfl⟩, dsimp,
+    exact_mod_cast locally_constant.nnnorm_apply_le_nnnorm _ e (f x),
+  end,
+  ..(continuous_map.comap_LC_linear_map f) }
 
 def lc_to_c (X : Type*)
   [topological_space X] [compact_space X] [t2_space X] :
