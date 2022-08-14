@@ -140,7 +140,6 @@ def map_Radon_png {X Y : Profinite.{0}} (f : X ⟶ Y) :
     obtain ⟨c,hc⟩ := μ.2,
     use c,
     apply weak_dual.bdd_comap _ hc,
-    apply_instance,
   end⟩,
   map_zero' := by { ext, refl },
   map_add' := λ a b, by { ext, refl },
