@@ -41,7 +41,7 @@ end
 namespace locally_constant
 
 instance normed_space (X : Type*)
-  [topological_space X] [compact_space X] [t2_space X] :
+  [topological_space X] [compact_space X] :
   normed_space ℝ (locally_constant X ℝ) :=
 { norm_smul_le := λ a f, by simpa only [norm_def, coe_smul, pi.smul_apply, algebra.id.smul_eq_mul,
     real.norm_eq_abs, abs_mul, mul_comm (abs a)] using
@@ -49,7 +49,7 @@ instance normed_space (X : Type*)
   ..(infer_instance : module ℝ _) }
 
 lemma nnnorm_apply_le_nnnorm (X : Type*)
-  [topological_space X] [compact_space X] [t2_space X]
+  [topological_space X] [compact_space X]
   (e : locally_constant X ℝ) (x : X) :
   ∥ e x ∥₊ ≤ ∥ e ∥₊ :=
 begin
@@ -61,7 +61,7 @@ begin
 end
 
 def linear_eval (X : Type*)
-  [topological_space X] [compact_space X] [t2_space X] (x : X) :
+  [topological_space X] (x : X) :
   locally_constant X ℝ →ₗ[ℝ] ℝ :=
 { to_fun := λ e, e x,
   map_add' := λ f g, rfl,
@@ -69,7 +69,7 @@ def linear_eval (X : Type*)
 
 
 lemma continuous_eval (X : Type*)
-  [topological_space X] [compact_space X] [t2_space X] (x : X) :
+  [topological_space X] [compact_space X] (x : X) :
   continuous (λ e : locally_constant X ℝ, e x) :=
 begin
   change continuous (linear_eval X x),
@@ -162,7 +162,7 @@ def equiv_bot {X : Type*} [topological_space X] [discrete_topology X] :
 equiv.of_bijective (discrete_quotient.proj _)
 ⟨λ x y h, quotient.exact' h, discrete_quotient.proj_surjective _⟩
 
-lemma mem_fibre_iff {X : Type*} [topological_space X] [compact_space X] [t2_space X]
+lemma mem_fibre_iff {X : Type*} [topological_space X]
   (T : discrete_quotient X) (a : T) (b : X) :
   T.proj b ∈ discrete_quotient.fibre _ (equiv_bot a) ↔
   b ∈ discrete_quotient.fibre T a :=
@@ -174,7 +174,7 @@ begin
   simp,
 end
 
-lemma mem_fibre_iff' {X : Type*} [topological_space X] [compact_space X] [t2_space X]
+lemma mem_fibre_iff' {X : Type*} [topological_space X]
   (T : discrete_quotient X) (a : (⊥ : discrete_quotient T)) (b : X) :
   T.proj b ∈ discrete_quotient.fibre _ a ↔
   b ∈ discrete_quotient.fibre T (equiv_bot.symm a) :=
@@ -225,7 +225,7 @@ begin
   rw [ee.map_sum, finset.sum_apply],
 end
 
-lemma locally_constant.eq_sum {X : Type*} [topological_space X] [compact_space X] [t2_space X]
+lemma locally_constant.eq_sum {X : Type*} [topological_space X] [compact_space X]
   (e : locally_constant X ℝ) :
   e = ∑ t : e.discrete_quotient,
     e.locally_constant_lift t • (e.discrete_quotient.fibre t).indicator_LC :=
@@ -286,9 +286,7 @@ def continuous_map.comap {X Y : Type*}
   map_smul' := λ _ _, rfl,
   cont := by refine continuous_map.continuous_comp_left f }
 
-def continuous_map.comap_LC_linear_map {X Y : Type*}
-  [topological_space X] [compact_space X] [t2_space X]
-  [topological_space Y] [compact_space Y] [t2_space Y]
+def continuous_map.comap_LC_linear_map {X Y : Type*} [topological_space X] [topological_space Y]
   (f : C(X,Y)) : locally_constant Y ℝ →ₗ[ℝ] locally_constant X ℝ :=
 { to_fun := λ g,
   { to_fun := g ∘ f,
@@ -298,8 +296,8 @@ def continuous_map.comap_LC_linear_map {X Y : Type*}
   map_smul' := λ _ _, rfl }
 
 def continuous_map.comap_LC {X Y : Type*}
-  [topological_space X] [compact_space X] [t2_space X]
-  [topological_space Y] [compact_space Y] [t2_space Y]
+  [topological_space X] [compact_space X]
+  [topological_space Y] [compact_space Y]
   (f : C(X,Y)) : locally_constant Y ℝ →L[ℝ] locally_constant X ℝ :=
 { to_fun := λ g,
   { to_fun := g ∘ f,
@@ -323,7 +321,7 @@ def continuous_map.comap_LC {X Y : Type*}
   ..(continuous_map.comap_LC_linear_map f) }
 
 def lc_to_c (X : Type*)
-  [topological_space X] [compact_space X] [t2_space X] :
+  [topological_space X] [compact_space X] :
   locally_constant X ℝ →L[ℝ] C(X,ℝ) :=
 { to_fun := λ f, f.to_continuous_map,
   map_add' := λ _ _, rfl,
@@ -364,8 +362,8 @@ def bdd_LC {X : Type*} [topological_space X] [compact_space X]
   ∑ t : T, ∥ μ (T.fibre t).indicator_LC ∥₊^(p : ℝ) ≤ c
 
 lemma bdd_LC_comap {X Y : Type*} {p c : ℝ≥0} [fact (0 < p)]
-  [topological_space X] [compact_space X] [t2_space X]
-  [topological_space Y] [compact_space Y] [t2_space Y]
+  [topological_space X] [compact_space X]
+  [topological_space Y] [compact_space Y]
   (μ : weak_dual ℝ (locally_constant X ℝ)) (hμ : μ.bdd_LC p c) (f : C(X,Y)) :
   (weak_dual.comap f.comap_LC μ).bdd_LC p c :=
 begin
@@ -412,8 +410,8 @@ begin
 end
 
 lemma bdd_comap {X Y : Type*} {p c : ℝ≥0} [fact (0 < p)]
-  [topological_space X] [compact_space X] [t2_space X]
-  [topological_space Y] [compact_space Y] [t2_space Y]
+  [topological_space X] [compact_space X]
+  [topological_space Y] [compact_space Y]
   (μ : weak_dual ℝ C(X,ℝ)) (hμ : μ.bdd p c) (f : C(X,Y)) :
   (weak_dual.comap f.comap μ).bdd p c :=
 λ t, by apply bdd_LC_comap (comap (lc_to_c X) μ) hμ f t
