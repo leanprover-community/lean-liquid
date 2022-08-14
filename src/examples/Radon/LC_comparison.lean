@@ -154,52 +154,65 @@ begin
     { intros, apply equiv.apply_symm_apply },
     { intros, exact discrete_quotient.equiv_bot.apply_symm_apply _, } },
   { intros h E, change ∑ (e : E), _ ≤ _,
-    sorry
-    /- I may have taken a small wrong turn near the end of this comment block...
     change ∑ (t : T), _ ≤ _ at h,
+    dsimp [Radon_LC_comparison_component_equiv_aux] at h,
     refine le_trans _ h,
-    have :
-      ∀ e : E, ∥ f (E.fibre e).indicator_LC ∥₊^(p : ℝ) ≤
-        ∑ t in finset.univ.filter (λ t : T, E.proj t = e),
-          ∥ f (E.fibre (E.proj t)).indicator_LC ∥₊^(p : ℝ),
+    have : ∀ e : E,
+      (E.fibre e).indicator_LC =
+      ∑ t in finset.univ.filter (λ t : T, E.proj t = e),
+        ((⊥ : discrete_quotient T).fibre
+        (discrete_quotient.equiv_bot t)).indicator_LC,
     { intros e,
-      refine le_trans (le_of_eq _) (real.pow_nnnorm_sum_le _ _ _), congr' 2,
-      rw ← f.map_sum, congr' 1, ext (q : T), rw locally_constant.sum_apply,
-      by_cases E.proj q = e,
-      { sorry },
-      { sorry } },
-    have : ∑ (e : ↥E), ∥ f (E.fibre e).indicator_LC∥₊ ^ ↑p ≤
-      ∑ e : E, ∑ t in finset.univ.filter (λ t : T, E.proj t = e),
-          ∥ f (E.fibre (E.proj t)).indicator_LC ∥₊^(p : ℝ),
-    { apply finset.sum_le_sum, intros i _, apply this },
-    refine le_trans this _,
-    rw ← finset.sum_bUnion,
-    swap,
-    { intros a ha b hb h t ht, dsimp at ht,
-      rw [finset.mem_inter, finset.mem_filter, finset.mem_filter] at ht,
-      dsimp, simp only [finset.not_mem_empty], apply h,
-      rw [← ht.1.2, ht.2.2] },
-    have :
-      finset.univ.bUnion (λ (x : ↥E), finset.filter (λ (t : ↥T), E.proj t = x)
-      finset.univ) = finset.univ,
+      ext (q : T), rw locally_constant.sum_apply,
+      change ite (_ = _) (1 : ℝ) 0 = _, split_ifs with hh hh,
+      { rw finset.sum_eq_single q,
+        change _ = ite (_ = _) (1 : ℝ) _, erw if_pos rfl,
+        { intros t ht hh,
+          change ite (_ = _) _ (0 : ℝ) = 0, rw if_neg,
+          contrapose! hh,
+          rw finset.mem_filter at ht,
+          apply_fun discrete_quotient.equiv_bot.symm at hh,
+          erw discrete_quotient.equiv_bot.symm_apply_apply at hh,
+          rw discrete_quotient.equiv_bot.symm_apply_apply at hh,
+          exact hh.symm },
+        { intros h, refine false.elim (h _), rw finset.mem_filter,
+          refine ⟨finset.mem_univ _, hh⟩ } },
+      { symmetry, apply finset.sum_eq_zero,
+        intros t ht, rw finset.mem_filter at ht,
+        change ite (_ = _) _ (0 : ℝ) = 0, rw if_neg,
+        contrapose! hh,
+        apply_fun discrete_quotient.equiv_bot.symm at hh,
+        erw discrete_quotient.equiv_bot.symm_apply_apply at hh,
+        rw discrete_quotient.equiv_bot.symm_apply_apply at hh,
+        rw hh,
+        exact ht.2 } },
+    simp_rw [this, f.map_sum], clear this,
+    have : ∑ (x : ↥E),
+      ∥∑ (i : ↥T) in
+        finset.filter (λ (t : ↥T), E.proj t = x) finset.univ,
+        f ((⊥ : discrete_quotient T).fibre
+          (discrete_quotient.equiv_bot i)).indicator_LC∥₊^(p : ℝ) ≤
+      ∑ (x : E), ∑ (i : T) in finset.filter (λ (t : ↥T), E.proj t = x) finset.univ,
+        ∥ f ((⊥ : discrete_quotient T).fibre
+          (discrete_quotient.equiv_bot i)).indicator_LC∥₊^(p : ℝ),
+    { apply finset.sum_le_sum,
+      intros e _,
+      apply real.pow_nnnorm_sum_le },
+    refine le_trans this _, clear this,
+    erw ← finset.sum_bUnion,
+    have : finset.univ.bUnion (λ (x : ↥E), finset.filter (λ (t : ↥T), E.proj t = x) finset.univ) =
+      finset.univ,
     { rw finset.eq_univ_iff_forall,
-      intros x,
+      intros t,
       rw finset.mem_bUnion,
-      refine ⟨E.proj x, finset.mem_univ _, _⟩,
+      refine ⟨E.proj t, finset.mem_univ _, _⟩,
       rw finset.mem_filter,
       refine ⟨finset.mem_univ _, rfl⟩ },
     rw this,
-    apply finset.sum_le_sum,
-    intros t _,
-    refine le_of_eq _, congr' 3, ext a,
-    change ite _ _ _ = ite _ _ _,
-    congr' 1,
-    dsimp [discrete_quotient.fibre], ext,
-    split,
-    { intros h, apply quotient.sound', change _ = _, exact h },
-    { sorry }
-    -/
-  },
+    intros a ha b hb hh q, dsimp, rw finset.mem_inter, rintros ⟨h1,h2⟩,
+    simp only [finset.not_mem_empty], apply hh,
+    rw finset.mem_filter at h1 h2,
+    rw [← h1.2, h2.2] },
 end
 
 def Radon_LC_comparison_component_equiv
