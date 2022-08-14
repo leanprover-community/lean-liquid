@@ -14,13 +14,13 @@ local attribute [instance]
 
 namespace Profinite
 
-def Radon_LC_cone (X : Profinite.{0}) (p c : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] :
+def Radon_LC_cone (X : Profinite.{0}) (p c : ℝ≥0) [fact (0 < p)] :
   cone (X.diagram ⋙ Radon_LC_functor p c) :=
 (Radon_LC_functor p c).map_cone X.as_limit_cone
 
 namespace is_limit_Radon_LC_cone
 
-variables (X : Profinite.{0}) (p c : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)]
+variables (X : Profinite.{0}) (p c : ℝ≥0) [fact (0 < p)]
 
 def linear_map (S : cone (X.diagram ⋙ Radon_LC_functor p c)) (t : S.X) :
   locally_constant X ℝ →ₗ[ℝ] ℝ :=
@@ -52,6 +52,8 @@ def linear_map (S : cone (X.diagram ⋙ Radon_LC_functor p c)) (t : S.X) :
     erw ← ((S.π.app W) t).1.map_smul, congr' 1,
     ext ⟨⟩, refl
   end }
+
+variables [fact (p ≤ 1)]
 
 def weak_dual (S : cone (X.diagram ⋙ Radon_LC_functor p c)) (t : S.X) :
   weak_dual ℝ (locally_constant X ℝ) :=
