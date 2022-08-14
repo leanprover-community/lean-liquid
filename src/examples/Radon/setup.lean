@@ -156,11 +156,17 @@ end topological_space.clopens
 
 namespace discrete_quotient
 
+/--  Given a discrete topological space `T` that is a quotient of a topological space `X`, and
+an element `t : T`, `fiber T t` is the clopen subset of `X` that is the inverse image of `t` under
+the quotient map `X → T`. -/
 def fibre {X : Type*} [topological_space X] (T : discrete_quotient X)
   (t : T) : clopens X :=
 { carrier := T.proj ⁻¹' {t},
   clopen' := fiber_clopen T {t} }
 
+/--  When the topological space `X` is discrete, `equiv_bot` is the equivalence between `X` and the
+bottom element of the discrete quotients of `X`.  In other words, the identity map from `X` to
+itself *is*  a discrete quotient and `equiv_bot` is this bijection. -/
 def equiv_bot {X : Type*} [topological_space X] [discrete_topology X] :
   X ≃ (⊥ : discrete_quotient X) :=
 equiv.of_bijective (discrete_quotient.proj _)
@@ -187,6 +193,10 @@ begin
   simp,
 end
 
+/--  Given a continuous (`hf`), surjective (`hf'`) function `f : X → Y` between topological spaces
+`X` and `Y`, and a discrete quotient `T` of `Y`, `comap_equiv f hf hf' T` is the bijection between
+between the  comap of `T` along `f` and `T` itself.
+-/
 def comap_equiv {X Y : Type*} [topological_space X] [topological_space Y]
   (f : X → Y) (hf : continuous f) (hf' : function.surjective f)
   (T : discrete_quotient Y) :
@@ -258,6 +268,8 @@ begin
   exact ht.symm,
 end
 
+/--  Given a point `x : X` is a discrete topological space `X`,
+`topological_space.clopens.singleton x` is the point `x`, bundled as a clopen subset of `X`. -/
 def topological_space.clopens.singleton {X : Type*}
   [topological_space X] [discrete_topology X] (x : X) :
   clopens X :=
@@ -282,14 +294,23 @@ begin
   { intros h, exfalso, apply h, exact finset.mem_univ _ }
 end
 
-def continuous_map.comap {X Y : Type*}
-  [topological_space X] [topological_space Y]
+/--  Given a continuous function `f : X → Y` between topological spaces `X` and `Y`,
+`continuous_map.comap f` is the `ℝ`-linear pre-composition with `f` as a function from
+the `ℝ`-valued continuous functions on `Y` to the `ℝ`-valued continuous functions on `X`. -/
+def continuous_map.comap {X Y : Type*} [topological_space X] [topological_space Y]
   (f : C(X,Y)) : C(Y,ℝ) →L[ℝ] C(X,ℝ) :=
 { to_fun := λ g, g.comp f,
   map_add' := λ _ _, rfl,
   map_smul' := λ _ _, rfl,
   cont := by refine continuous_map.continuous_comp_left f }
 
+/--  Given a continuous function `f : X → Y` between topological spaces `X` and `Y`,
+`continuous_map.comap_LC_linear_map f` is the `ℝ`-linear pre-composition with `f` as a function from
+the locally constant `ℝ`-valued continuous functions on `Y` to the locally constant `ℝ`-valued
+continuous functions on `X`.
+
+`continuous_map.comap_LC` is similar, except that it also bundles continuity of the resulting
+function among spaces of continuous maps. -/
 def continuous_map.comap_LC_linear_map {X Y : Type*} [topological_space X] [topological_space Y]
   (f : C(X,Y)) : locally_constant Y ℝ →ₗ[ℝ] locally_constant X ℝ :=
 { to_fun := λ g,
@@ -299,17 +320,17 @@ def continuous_map.comap_LC_linear_map {X Y : Type*} [topological_space X] [topo
   map_add' := λ _ _, rfl,
   map_smul' := λ _ _, rfl }
 
-def continuous_map.comap_LC {X Y : Type*}
-  [topological_space X] [compact_space X]
+/--  Given a continuous function `f : X → Y` between topological spaces `X` and `Y`,
+`continuous_map.comap_LC_linear_map f` is the `ℝ`-linear pre-composition with `f` as a *continuous*
+function from the locally constant `ℝ`-valued continuous functions on `Y` to the locally constant
+`ℝ`-valued continuous functions on `X`.
+
+`continuous_map.comap_LC_linear_map` is similar, but does not bundle continuity of the resulting
+function among spaces of continuous maps. -/
+def continuous_map.comap_LC {X Y : Type*} [topological_space X] [compact_space X]
   [topological_space Y] [compact_space Y]
   (f : C(X,Y)) : locally_constant Y ℝ →L[ℝ] locally_constant X ℝ :=
-{ to_fun := λ g,
-  { to_fun := g ∘ f,
-    is_locally_constant := λ S,
-      by { rw set.preimage_comp, apply is_open.preimage f.2, apply g.2, } },
-  map_add' := λ _ _, rfl,
-  map_smul' := λ _ _, rfl,
-  cont := begin
+{ cont := begin
     apply (f.comap_LC_linear_map.mk_continuous_of_exists_bound _).continuous,
     use 1, intros e, rw one_mul,
     by_cases (is_empty X),
@@ -324,8 +345,9 @@ def continuous_map.comap_LC {X Y : Type*}
   end,
   ..(continuous_map.comap_LC_linear_map f) }
 
-def lc_to_c (X : Type*)
-  [topological_space X] [compact_space X] :
+/--  Given a compact topological space `X`, the inclusion of locally constant functions on `X` into
+the space of all continuous functions is a continuous `ℝ`-linear map. -/
+def lc_to_c (X : Type*) [topological_space X] [compact_space X] :
   locally_constant X ℝ →L[ℝ] C(X,ℝ) :=
 { to_fun := λ f, f.to_continuous_map,
   map_add' := λ _ _, rfl,
@@ -341,6 +363,9 @@ def lc_to_c (X : Type*)
 
 namespace weak_dual
 
+/--  Given topological `ℝ`-vector spaces `A` and `B` and a continuous, `ℝ`-linear map `f : A → B`
+between them, `comap f` is the pre-composition with `f` as a continuous, `ℝ`-linear map between
+the weak `ℝ`-linear dual of `B` to the weak `ℝ`-linear dual of `A`. -/
 def comap {A B : Type*}
   [add_comm_group A] [module ℝ A] [topological_space A]
   [add_comm_group B] [module ℝ B] [topological_space B]
@@ -355,11 +380,27 @@ def comap {A B : Type*}
     apply weak_dual.eval_continuous,
   end }
 
+/--  Given a compact topological space `X`, an element `μ` in the weak, `ℝ`-linear dual of the
+continuous functions on `X`, and two non-negative real numbers `p` and `c`, `bdd μ p c` is the
+statement that the sum of the `p`-th powers of the absolute values of the measures of all the
+clopen subsets of `X` is bounded above by `c`.
+
+See the actual definition for what "all the clopen subsets" really means!
+
+`bdd_LC` is similar, but uses the dual of locally constant functions.  -/
 def bdd {X : Type*} [topological_space X] [compact_space X]
   (μ : weak_dual ℝ C(X,ℝ)) (p c : ℝ≥0) : Prop :=
 ∀ (T : discrete_quotient X),
   ∑ t : T, ∥ μ (T.fibre t).indicator ∥₊^(p : ℝ) ≤ c
 
+/--  Given a compact topological space `X`, an element `μ` in the weak, `ℝ`-linear dual of the
+locally constant functions on `X`, and two non-negative real numbers `p` and `c`, `bdd μ p c` is the
+statement that the sum of the `p`-th powers of the absolute values of the measures of all the
+clopen subsets of `X` is bounded above by `c`.
+
+See the actual definition for what "all the clopen subsets" really means!
+
+`bdd` is similar, but uses the dual of continuous functions.  -/
 def bdd_LC {X : Type*} [topological_space X] [compact_space X]
   (μ : weak_dual ℝ (locally_constant X ℝ)) (p c : ℝ≥0) : Prop :=
 ∀ (T : discrete_quotient X),
@@ -391,11 +432,10 @@ begin
     dsimp [comap], convert μ.map_zero,
     ext t,
     dsimp [continuous_map.comap_LC, topological_space.clopens.indicator_LC_apply],
-    rw if_neg,
+    apply if_neg,
     contrapose! hx,
     rw finset.mem_image,
-    refine ⟨discrete_quotient.proj _ t, finset.mem_univ _, hx⟩,
-  },
+    refine ⟨discrete_quotient.proj _ t, finset.mem_univ _, hx⟩ },
   rw this, clear this, symmetry,
   fapply finset.sum_bij,
   { intros a _, exact ι a },
