@@ -265,12 +265,9 @@ def create_hom_from_level {X Y : CompHausFiltPseuNormGrp₁}
       ((level.map i2).app _ (E _ a)).1,
     simp only [← CompHaus.comp_apply, hE], refl,
   end }
-
+.
 lemma create_iso_from_level_compat_aux {X Y : CompHausFiltPseuNormGrp₁}
   (E : Π c, (level.obj c).obj X ≅ (level.obj c).obj Y)
-  (hE0 : ((E (X.lvl 0)).hom (X.as_lvl 0)).1 = 0)
-  (hEa : ∀ a b : X, ((E _).hom (X.as_lvl (a + b))).1 =
-    ((E _).hom (X.as_lvl a)).1 + ((E _).hom (X.as_lvl b)).1)
   (hE : ∀ (c₁ c₂ : ℝ≥0) (i : c₁ ⟶ c₂),
     (E _).hom ≫ (level.map i).app _ = (level.map i).app _ ≫ (E _).hom) :
   ∀ (c₁ c₂ : ℝ≥0) (i : c₁ ⟶ c₂),
@@ -282,8 +279,6 @@ end
 lemma create_iso_from_level_zero_aux {X Y : CompHausFiltPseuNormGrp₁}
   (E : Π c, (level.obj c).obj X ≅ (level.obj c).obj Y)
   (hE0 : ((E (X.lvl 0)).hom (X.as_lvl 0)).1 = 0)
-  (hEa : ∀ a b : X, ((E _).hom (X.as_lvl (a + b))).1 =
-    ((E _).hom (X.as_lvl a)).1 + ((E _).hom (X.as_lvl b)).1)
   (hE : ∀ (c₁ c₂ : ℝ≥0) (i : c₁ ⟶ c₂),
     (E _).hom ≫ (level.map i).app _ = (level.map i).app _ ≫ (E _).hom) :
   ((E (Y.lvl 0)).inv (Y.as_lvl 0)).1 = 0 :=
@@ -312,12 +307,7 @@ def as_lvl_add (X : CompHausFiltPseuNormGrp₁)
 ⟨a+b, pseudo_normed_group.add_mem_filtration (X.lvl_spec a) (X.lvl_spec b)⟩
 
 lemma create_iso_from_level_add_aux_aux {X Y : CompHausFiltPseuNormGrp₁}
-  (E : Π c, (level.obj c).obj X ≅ (level.obj c).obj Y)
-  (hE0 : ((E (X.lvl 0)).hom (X.as_lvl 0)).1 = 0)
-  (hEa : ∀ a b : X, ((E _).hom (X.as_lvl (a + b))).1 =
-    ((E _).hom (X.as_lvl a)).1 + ((E _).hom (X.as_lvl b)).1)
-  (hE : ∀ (c₁ c₂ : ℝ≥0) (i : c₁ ⟶ c₂),
-    (E _).hom ≫ (level.map i).app _ = (level.map i).app _ ≫ (E _).hom) :
+  (E : Π c, (level.obj c).obj X ≅ (level.obj c).obj Y) :
   ∀ (a b : X) (c : ℝ≥0)
     (h1 : X.lvl (a + b) ⟶ c)
     (h2 : X.lvl a + X.lvl b ⟶  c),
@@ -329,7 +319,6 @@ end
 
 lemma create_iso_from_level_add_aux {X Y : CompHausFiltPseuNormGrp₁}
   (E : Π c, (level.obj c).obj X ≅ (level.obj c).obj Y)
-  (hE0 : ((E (X.lvl 0)).hom (X.as_lvl 0)).1 = 0)
   (hEa : ∀ a b : X, ((E _).hom (X.as_lvl (a + b))).1 =
     ((E _).hom (X.as_lvl a)).1 + ((E _).hom (X.as_lvl b)).1)
   (hE : ∀ (c₁ c₂ : ℝ≥0) (i : c₁ ⟶ c₂),
@@ -418,9 +407,9 @@ def create_iso_from_level {X Y : CompHausFiltPseuNormGrp₁}
   X ≅ Y :=
 { hom := create_hom_from_level (λ c, (E c).hom) hE0 hEa hE,
   inv := create_hom_from_level (λ c, (E c).inv)
-    (create_iso_from_level_zero_aux _ hE0 hEa hE)
-    (create_iso_from_level_add_aux _ hE0 hEa hE)
-    (create_iso_from_level_compat_aux _ hE0 hEa hE),
+    (create_iso_from_level_zero_aux _ hE0 hE)
+    (create_iso_from_level_add_aux _ hEa hE)
+    (create_iso_from_level_compat_aux _ hE),
   hom_inv_id' := begin
     ext1 t,
     simp only [comp_apply, create_hom_from_level_to_fun, subtype.val_eq_coe, id_apply],
