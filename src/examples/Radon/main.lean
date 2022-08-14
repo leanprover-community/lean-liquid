@@ -41,8 +41,7 @@ def weak_dual_C_equiv_LC (X : Profinite.{0}) :
   end,
   ..(X.weak_dual_C_to_LC) }
 
-def Radon_to_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
-  [fact (0 < p)] [fact (p ≤ 1)]:
+def Radon_to_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0) :
   X.Radon p c ⟶ X.Radon_LC p c :=
 { to_fun := λ μ, ⟨weak_dual_C_to_LC _ μ.1, μ.2⟩,
   continuous_to_fun := begin
@@ -51,8 +50,7 @@ def Radon_to_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
     exact continuous_linear_map.continuous _,
   end }
 
-def Radon_LC_to_Radon (X : Profinite.{0}) (p c : ℝ≥0)
-  [fact (0 < p)] [fact (p ≤ 1)]:
+def Radon_LC_to_Radon (X : Profinite.{0}) (p c : ℝ≥0) :
   X.Radon_LC p c → X.Radon p c :=
 λ μ, ⟨weak_dual_LC_to_C _ μ.1, begin
     change (weak_dual_C_to_LC _ (weak_dual_LC_to_C _ μ.1)).bdd_LC p c,
@@ -60,8 +58,7 @@ def Radon_LC_to_Radon (X : Profinite.{0}) (p c : ℝ≥0)
     exact μ.2,
   end⟩
 
-def Radon_LC_to_weak_dual (X : Profinite.{0}) (p c : ℝ≥0)
-  [fact (0 < p)] [fact (p ≤ 1)] :
+def Radon_LC_to_weak_dual (X : Profinite.{0}) (p c : ℝ≥0) :
   X.Radon_LC p c → weak_dual ℝ (locally_constant X ℝ) := subtype.val
 
 def weak_dual_LC_to_fun (X : Profinite.{0}) :
@@ -93,8 +90,7 @@ begin
   exact continuous_subtype_coe,
 end
 
-def Radon_to_weak_dual (X : Profinite.{0}) (p c : ℝ≥0)
-  [fact (0 < p)] [fact (p ≤ 1)] :
+def Radon_to_weak_dual (X : Profinite.{0}) (p c : ℝ≥0) :
   X.Radon p c → weak_dual ℝ C(X,ℝ) := subtype.val
 
 lemma Radon_closed_embedding (X : Profinite.{0}) (p c : ℝ≥0)
@@ -184,8 +180,7 @@ begin
   exact (X.Radon_closed_embedding p c).closed_range,
 end
 
-def Radon_equiv_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
-  [fact (0 < p)] [fact (p ≤ 1)] :
+def Radon_equiv_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0) :
   X.Radon p c ≃ X.Radon_LC p c :=
 { to_fun := X.Radon_to_Radon_LC p c,
   inv_fun := X.Radon_LC_to_Radon p c,
@@ -198,8 +193,7 @@ def Radon_equiv_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
     apply X.weak_dual_C_equiv_LC.apply_symm_apply,
   end }
 
-lemma continuous_Radon_equiv_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
-  [fact (0 < p)] [fact (p ≤ 1)] :
+lemma continuous_Radon_equiv_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0) :
   continuous (X.Radon_equiv_Radon_LC p c) :=
 continuous_map.continuous _
 
