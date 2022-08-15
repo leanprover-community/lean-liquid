@@ -14,6 +14,10 @@ local attribute [instance]
 
 namespace Profinite
 
+/--
+This is the cone which will exhibit `X.Radon_LC p c` as the limit of `T.Radon_LC p c`
+where `T` varies over the discrete quotients of `X`.
+-/
 def Radon_LC_cone (X : Profinite.{0}) (p c : ℝ≥0) [fact (0 < p)] :
   cone (X.diagram ⋙ Radon_LC_functor p c) :=
 (Radon_LC_functor p c).map_cone X.as_limit_cone
@@ -22,6 +26,7 @@ namespace is_limit_Radon_LC_cone
 
 variables (X : Profinite.{0}) (p c : ℝ≥0) [fact (0 < p)]
 
+/-- An auxiliary definition to be used in the constructions below. -/
 def linear_map (S : cone (X.diagram ⋙ Radon_LC_functor p c)) (t : S.X) :
   locally_constant X ℝ →ₗ[ℝ] ℝ :=
 { to_fun := λ e, (S.π.app e.discrete_quotient t).1 e.locally_constant_lift,
@@ -55,6 +60,7 @@ def linear_map (S : cone (X.diagram ⋙ Radon_LC_functor p c)) (t : S.X) :
 
 variables [fact (p ≤ 1)]
 
+/-- An auxiliary definition to be used in the constructions below. -/
 def weak_dual (S : cone (X.diagram ⋙ Radon_LC_functor p c)) (t : S.X) :
   weak_dual ℝ (locally_constant X ℝ) :=
 linear_map.mk_continuous_of_exists_bound (linear_map X p c S t)
@@ -114,6 +120,7 @@ begin
   apply locally_constant.nnnorm_apply_le_nnnorm,
 end
 
+/-- An auxiliary definition to be used in the constructions below. -/
 def Radon_LC (S : cone (X.diagram ⋙ Radon_LC_functor p c)) (t : S.X) :
   X.Radon_LC p c :=
 { val := weak_dual X p c S t,
@@ -154,6 +161,7 @@ end
 
 end is_limit_Radon_LC_cone
 
+/-- `X.Radon_LC_cone p c` is a limit cone, as promised. -/
 def is_limit_Radon_LC_cone (X : Profinite.{0}) (p c : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] :
   is_limit (X.Radon_LC_cone p c) :=
 { lift := λ S, ⟨is_limit_Radon_LC_cone.Radon_LC X p c S,
@@ -198,6 +206,7 @@ begin
   exact e.symm.compact_space,
 end
 
+/-- An auxiliary definition to be used in the constructions below. -/
 def Radon_LC_CompHaus_diagram (X : Profinite.{0}) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
   discrete_quotient X ⥤ CompHaus.{0} :=
@@ -234,6 +243,7 @@ begin
   exact e.compact_space,
 end
 
+/-- An auxiliary definition to be used in the constructions below. -/
 def Radon_LC_CompHaus_functor (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
   Profinite.{0} ⥤ CompHaus.{0} :=
@@ -242,10 +252,20 @@ def Radon_LC_CompHaus_functor (p c : ℝ≥0)
   map_id' := (Radon_LC_functor p c).map_id,
   map_comp' := λ X Y Z f g, (Radon_LC_functor p c).map_comp f g }
 
+/--
+This is the cone which will exhibit `X.Radon_LC p c` as the limit of `T.Radon_LC p c`
+where `T` varies over the discrete quotients of `X`.
+This is a variant of `X.Radon_LC_cone` taking values in `CompHaus` as opposed to `Top`.
+-/
 def Radon_LC_CompHaus_cone (X : Profinite.{0}) (p c : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] :
   cone (X.diagram ⋙ Radon_LC_CompHaus_functor p c) :=
 (Radon_LC_CompHaus_functor p c).map_cone X.as_limit_cone
 
+/--
+`X.Radon_LC_CompHaus_cone p c` is a limit cone, as promised.
+This is another key construction which will be used in the main comparison between
+Radon measures and `ℳ_p`.
+-/
 def is_limit_Radon_LC_CompHaus_cone (X : Profinite.{0}) (p c : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] :
   is_limit (X.Radon_LC_CompHaus_cone p c) :=
 begin
