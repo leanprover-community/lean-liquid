@@ -28,7 +28,7 @@ tactic.extract_facts >>
 `[norm_cast at *,
   simp only [← nnreal.coe_lt_coe, ← nnreal.coe_le_coe] at *,
   refine fact.mk _,
-  linarith]
+  linarith] <|> `[apply_instance]
 end
 
 localized "notation `ℳ_{` p' `}` S := (@real_measures.condensed p' _ (by fact_arith)).obj S"
