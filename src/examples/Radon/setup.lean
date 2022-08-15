@@ -228,8 +228,6 @@ begin
 end
 
 end discrete_quotient
-.
-set_option profiler true
 
 lemma locally_constant.sum_apply {ι X Y : Type*} [topological_space X] [add_comm_monoid Y]
   (f : ι → locally_constant X Y) (S : finset ι) (t : X) :
@@ -252,9 +250,8 @@ begin
       (e.locally_constant_lift) x • ((e.discrete_quotient.fibre x).indicator_LC) t =
     ∑ x in { e.discrete_quotient.proj t },
       (e.locally_constant_lift) x • ((e.discrete_quotient.fibre x).indicator_LC) t,
-  { rw this,
-    simp only [algebra.id.smul_eq_mul, finset.sum_singleton],
-    change _ = e t * _, symmetry, convert mul_one _,
+  { simp_rw [this, algebra.id.smul_eq_mul, finset.sum_singleton],
+    convert (mul_one _).symm,
     rw [topological_space.clopens.indicator_LC_apply, if_pos],
     change e.discrete_quotient.proj t ∈ _, simp, -- clopens is missing some `mem_mk` lemma...
   },
