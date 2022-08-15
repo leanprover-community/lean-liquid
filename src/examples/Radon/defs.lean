@@ -14,16 +14,29 @@ local attribute [instance]
 
 namespace Profinite
 
+/--
+The space of signed `p`-Radon measures on `X`, bounded by `c`.
+-/
 @[derive topological_space]
 def Radon (X : Profinite.{0}) (p c : ℝ≥0) :
   Top.{0} :=
 Top.of { μ : weak_dual ℝ C(X,ℝ) // μ.bdd p c }
 
+/--
+The space of signed `p`-Radon measures on `X`, bounded by `c`.
+This is a variant of `Radon` which uses the dual of locally constant functions
+as opposed to continuous functions, to be used an an auxiliary declaration in the
+constructions below.
+-/
 @[derive topological_space]
 def Radon_LC (X : Profinite.{0}) (p c : ℝ≥0) :
   Top.{0} :=
 Top.of { μ : weak_dual ℝ (locally_constant X ℝ) // μ.bdd_LC p c }
 
+/--
+A continuous map `X → Y` induces a map between spaces of `p`-Radon measures
+with a given bound.
+-/
 def map_Radon {X Y : Profinite.{0}} (f : X ⟶ Y)
   (p c : ℝ≥0) [fact (0 < p)] :
   X.Radon p c ⟶ Y.Radon p c :=
@@ -35,6 +48,10 @@ def map_Radon {X Y : Profinite.{0}} (f : X ⟶ Y)
     exact continuous_linear_map.continuous _,
   end }
 
+/--
+A continuous map `X → Y` induces a map between spaces of `p`-Radon measures
+with a given bound. (This is the locally constant variant.)
+-/
 def map_Radon_LC {X Y : Profinite.{0}} (f : X ⟶ Y)
   (p c : ℝ≥0) [fact (0 < p)] :
   X.Radon_LC p c ⟶ Y.Radon_LC p c :=
@@ -46,6 +63,10 @@ def map_Radon_LC {X Y : Profinite.{0}} (f : X ⟶ Y)
     exact continuous_linear_map.continuous _,
   end }
 
+/--
+The functor sending a topological space to the space of `p`-Radon
+measures bounded by `c`.
+-/
 def Radon_functor (p c : ℝ≥0) [fact (0 < p)] :
   Profinite.{0} ⥤ Top.{0} :=
 { obj := λ X, X.Radon p c,
@@ -54,6 +75,10 @@ def Radon_functor (p c : ℝ≥0) [fact (0 < p)] :
     ext, refl },
   map_comp' := λ X Y Z f g, by { ext, refl } }
 
+/--
+The functor sending a topological space to the space of `p`-Radon
+measures bounded by `c`. This is the locally constant variant.
+-/
 def Radon_LC_functor (p c : ℝ≥0) [fact (0 < p)] :
   Profinite.{0} ⥤ Top.{0} :=
 { obj := λ X, X.Radon_LC p c,
@@ -64,6 +89,10 @@ def Radon_LC_functor (p c : ℝ≥0) [fact (0 < p)] :
 
 .
 
+
+/--
+An auxiliary definition to be used in the constructions below.
+-/
 def weak_dual_C_to_LC (X : Profinite.{0}) :
   weak_dual ℝ C(X,ℝ) →L[ℝ] weak_dual ℝ (locally_constant X ℝ) :=
 weak_dual.comap $ lc_to_c _
@@ -77,6 +106,9 @@ begin
   exact (locally_constant.pkg X ℝ).dense.prod_map (locally_constant.pkg X ℝ).dense
 end
 
+/--
+An auxiliary definition to be used in the constructions below.
+-/
 def weak_dual_LC_to_C (X : Profinite.{0}) :
   weak_dual ℝ (locally_constant X ℝ) →ₗ[ℝ] weak_dual ℝ C(X,ℝ) :=
 { to_fun := λ f,
