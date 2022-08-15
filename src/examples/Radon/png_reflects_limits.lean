@@ -202,8 +202,8 @@ def lift : S.X ⟶ C.X :=
 { to_fun      := lift_fun _ hC _,
   map_zero'   := lift_fun_map_zero _ _ _,
   map_add'    := lift_fun_map_add _ _ _,
-  strict'     := λ c x hx, lift_strict _ _ _ _ _ hx,
-  continuous' := λ c, lift_continuous _ _ _ _ }
+  strict'     := lift_strict _ _ _,
+  continuous' := lift_continuous _ _ _ }
 
 end level_jointly_reflects_limits
 
