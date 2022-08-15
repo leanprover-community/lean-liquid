@@ -24,14 +24,15 @@ begin
   let CC := CompHaus_to_Top.map_cone C,
   let hCC : is_limit CC := is_limit_of_preserves CompHaus_to_Top hC,
   let E : cone (F ⋙ CompHaus_to_Top) := ⟨Top.of Y, λ j, ⟨_,h j⟩, _⟩,
-  convert (hCC.lift E).continuous,
-  ext1 a,
-  apply concrete.is_limit_ext _ hCC, intros j,
-  change _ = (hCC.lift E ≫ CC.π.app j) _,
-  rw hCC.fac, refl,
-  intros i j f, ext, dsimp,
-  change _ = (C.π.app _ ≫ F.map _) _,
-  rw C.w,
+  { convert (hCC.lift E).continuous,
+    ext1 a,
+    apply concrete.is_limit_ext _ hCC, intros j,
+    change _ = (hCC.lift E ≫ CC.π.app j) _,
+    rw hCC.fac, refl },
+  { intros i j f, ext,
+    change _ = (C.π.app _ ≫ F.map _) _,
+    rw C.w,
+    refl }
 end
 
 lemma injective_of_is_iso {X Y : CompHaus} (f : X ⟶ Y) [is_iso f] :
