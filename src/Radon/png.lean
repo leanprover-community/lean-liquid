@@ -1,5 +1,5 @@
-import examples.Radon.main
-import examples.Radon.png_reflects_limits
+import Radon.main
+import Radon.png_reflects_limits
 
 open_locale nnreal big_operators classical
 

@@ -1,4 +1,4 @@
-import examples.Radon.defs
+import Radon.defs
 
 open_locale nnreal big_operators classical
 

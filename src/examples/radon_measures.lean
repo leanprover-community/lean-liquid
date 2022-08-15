@@ -1,5 +1,5 @@
-import examples.Radon.png
 import challenge
+import Radon.png
 import data.setoid.partition
 
 /-!

@@ -1,4 +1,4 @@
-import examples.Radon.LC_comparison
+import Radon.LC_comparison
 
 open_locale nnreal big_operators classical
 

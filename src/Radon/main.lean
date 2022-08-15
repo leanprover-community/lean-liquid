@@ -1,4 +1,4 @@
-import examples.Radon.LC_limit
+import Radon.LC_limit
 import analysis.normed_space.weak_dual
 
 open_locale nnreal big_operators classical
