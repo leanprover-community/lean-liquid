@@ -228,6 +228,8 @@ begin
 end
 
 end discrete_quotient
+.
+set_option profiler true
 
 lemma locally_constant.sum_apply {ι X Y : Type*} [topological_space X] [add_comm_monoid Y]
   (f : ι → locally_constant X Y) (S : finset ι) (t : X) :
@@ -263,8 +265,7 @@ begin
   rw [topological_space.clopens.indicator_LC_apply, if_neg],
   contrapose! ht,
   change e.discrete_quotient.proj t ∈ _ at ht,
-  simp only [finset.mem_singleton, set.mem_singleton_iff] at ht ⊢,
-  exact ht.symm,
+  exact finset.mem_singleton.mpr (set.mem_singleton_iff.mp ht).symm,
 end
 
 /--  Given a point `x : X` is a discrete topological space `X`,
@@ -426,7 +427,7 @@ begin
   let S₁ := _, change S₁ = _,
   have : S₁ = ∑ t in finset.univ.image ι,
     ∥ ((comap f.comap_LC) μ) (T.fibre t).indicator_LC ∥₊ ^ (p : ℝ),
-  { symmetry, apply finset.sum_subset, simp,
+  { symmetry, apply finset.sum_subset, simp only [finset.subset_univ],
     intros x _ hx,
     --simp only [finset.mem_image, finset.mem_univ, exists_true_left, not_exists] at hx,
     suffices : ((comap f.comap_LC) μ) (T.fibre x).indicator_LC = 0,
@@ -436,7 +437,7 @@ begin
     -- the `change` below is faster than `dsimp [comap]`
     change μ ((f.comap_LC) (T.fibre x).indicator_LC) = 0,
     convert μ.map_zero,
-    ext t,
+    refine locally_constant.ext (λ t, _),
     dsimp only [continuous_map.comap_LC, topological_space.clopens.indicator_LC_apply],
     apply if_neg,
     contrapose! hx,
@@ -446,13 +447,9 @@ begin
   fapply finset.sum_bij,
   { intros a _, exact ι a },
   { intros, dsimp, erw finset.mem_image, refine ⟨a, finset.mem_univ _, rfl⟩ },
-  { intros a ha, congr' 2,
-    dsimp [comap],
-    congr' 1,
-    ext t,
-    erw topological_space.clopens.indicator_LC_apply,
-    erw topological_space.clopens.indicator_LC_apply,
-    rw discrete_quotient.comap_mem_fibre_iff },
+  { intros a ha,
+    congrm ∥ μ ⟨(λ t, ite _ _ _), _⟩ ∥₊ ^ ↑p,
+    rw [set_like.mem_coe, set_like.mem_coe, ← discrete_quotient.comap_mem_fibre_iff] },
   { intros a₁ a₂ h₁ h₂ hh, apply hι, exact hh },
   { rintros b hb,
     rw finset.mem_image at hb,
