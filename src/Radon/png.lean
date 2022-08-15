@@ -223,7 +223,7 @@ def is_limit_Radon_png_cone_map_level (c : ℝ≥0) :
     erw ← nat_trans.naturality,
   end }
 
-/-- As promised, `X.Radon_png p` is a limir cone. -/
+/-- As promised, `X.Radon_png p` is a limit cone. -/
 def is_limit_Radon_png_cone : is_limit (X.Radon_png_cone p) :=
 CompHausFiltPseuNormGrp₁.level_jointly_reflects_limits _ $
 λ c, is_limit_Radon_png_cone_map_level _ _ _

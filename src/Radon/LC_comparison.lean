@@ -75,7 +75,7 @@ instance t2_space_Radon (X : Profinite.{0}) (p c : ℝ≥0) :
 ⟨λ f g h, separated_by_continuous (X.Radon_to_fun_continuous p c)
   $ (X.Radon_to_fun_injective p c).ne h⟩
 
-/-- An auxiliary definition to be used in the consturctions below. -/
+/-- An auxiliary definition to be used in the constructions below. -/
 def Radon_LC_comparison_component_equiv_aux (X : Profinite.{0}) (p : ℝ≥0)
   (T : discrete_quotient X) :
   weak_dual ℝ (locally_constant (X.diagram.obj T) ℝ) ≃
@@ -212,7 +212,7 @@ begin
     rw [← h1.2, h2.2] },
 end
 
-/-- An auxiliary definition to be used in the consturctions below. -/
+/-- An auxiliary definition to be used in the constructions below. -/
 def Radon_LC_comparison_component_equiv
   (X : Profinite.{0}) (T : discrete_quotient X) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
@@ -252,7 +252,7 @@ begin
   refine continuous.comp (continuous_apply t) continuous_subtype_coe,
 end
 
-/-- An auxiliary definition to be used in the consturctions below. -/
+/-- An auxiliary definition to be used in the constructions below. -/
 def Radon_LC_comparison_component_homeo
   (X : Profinite.{0}) (T : discrete_quotient X) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
@@ -268,7 +268,7 @@ def Radon_LC_comparison_component_homeo
   continuous_inv_fun := continuous_Radon_LC_comparison_component_equiv_symm _ _ _ _,
   ..(X.Radon_LC_comparison_component_equiv T p c) }
 
-/-- An auxiliary definition to be used in the consturctions below. -/
+/-- An auxiliary definition to be used in the constructions below. -/
 def Radon_LC_comparison_component_iso
   (X : Profinite.{0}) (T : discrete_quotient X) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
