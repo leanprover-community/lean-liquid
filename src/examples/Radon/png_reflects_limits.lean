@@ -76,7 +76,7 @@ def lift_fun : S.X → C.X :=
 
 lemma lift_fun_map_zero : lift_fun C hC S 0 = 0 :=
 begin
-  dsimp [lift_fun],
+  --dsimp [lift_fun],  -- slows down the proof
   let a := ((hC (S.X.lvl 0)).lift ((level.obj (S.X.lvl 0)).map_cone S)) (S.X.as_lvl 0),
   let b := (C.X.as_lvl 0),
   let c₁ := S.X.lvl 0,
@@ -91,7 +91,7 @@ begin
   intros j, dsimp only [e1, e2, a, b, ← CompHaus.comp_apply],
   simp only [category.assoc, level_cone_compatible, (hC (S.X.lvl 0)).fac_assoc],
   ext1,
-  dsimp [CompHaus.comp_apply, level, as_lvl],
+  change (S.π.app j) 0 = (C.π.app j) 0, -- was `dsimp [CompHaus.comp_apply, level, as_lvl],`
   rw [(S.π.app j).map_zero, (C.π.app j).map_zero],
 end
 
