@@ -28,13 +28,10 @@ tactic.extract_facts >>
 `[norm_cast at *,
   simp only [← nnreal.coe_lt_coe, ← nnreal.coe_le_coe] at *,
   refine fact.mk _,
-  linarith]
+  linarith] <|> `[apply_instance]
 end
 
-meta def tactic.interactive.fact_arith₂ :=
-tactic.interactive.fact_arith <|> `[apply_instance]
-
-localized "notation `ℳ_{` p' `}` S := (@real_measures.condensed p' _ (by fact_arith₂)).obj S"
+localized "notation `ℳ_{` p' `}` S := (@real_measures.condensed p' _ (by fact_arith)).obj S"
   in liquid_tensor_experiment
 
 abbreviation liquid_tensor_experiment.Ext (i : ℤ) (A B : Condensed.{u} Ab.{u+1}) :=
