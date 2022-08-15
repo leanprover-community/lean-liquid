@@ -144,56 +144,67 @@ begin
     erw fac_aux, refl },
 end
 
+/- Lemmas `lift_strict` and `lift_continuous` separately compile *much* faster than when they are
+embedded in `CompHausFiltPseuNormGrp₁.level_jointly_reflects_limits.lift`. -/
+lemma lift_strict (c : ℝ≥0) (x : S.X) (hx : x ∈ pseudo_normed_group.filtration S.X c) :
+  lift_fun C hC S x ∈ pseudo_normed_group.filtration C.X c :=
+begin
+  let y : (level.obj c).obj S.X := ⟨x,hx⟩,
+  let z := (hC c).lift ((level.obj c).map_cone S) y,
+  let a := ((hC (S.X.lvl x)).lift ((level.obj (S.X.lvl x)).map_cone S)) (S.X.as_lvl x),
+  suffices : a.1 = z.1,
+  { dsimp only [lift_fun], rw this, exact z.2, },
+  let cc := c ⊔ S.X.lvl x,
+  let i1 : c ⟶ cc := hom_of_le le_sup_left,
+  let i2 : S.X.lvl x ⟶ cc := hom_of_le le_sup_right,
+  suffices : (level.map i1).app _ z = (level.map i2).app _ a,
+  { apply_fun (λ e, e.1) at this, exact this.symm },
+  dsimp [a,z],
+  apply concrete.is_limit_ext _ (hC cc),
+  intros j,
+  simp only [← CompHaus.comp_apply, category.assoc, level_cone_compatible,
+    (hC c).fac_assoc, (hC (S.X.lvl x)).fac_assoc],
+  ext, refl,
+end
+
+/- Lemmas `lift_strict` and `lift_continuous` separately compile *much* faster than when they are
+embedded in `CompHausFiltPseuNormGrp₁.level_jointly_reflects_limits.lift`. -/
+lemma lift_continuous (c : ℝ≥0) [small_category J] {F : J ⥤ CompHausFiltPseuNormGrp₁}
+  (C : cone F) (hC : Π (c : ℝ≥0), is_limit ((level.obj c).map_cone C)) (S : cone F) :
+  continuous (pseudo_normed_group.level (lift_fun C hC S) (lift_strict C hC S) c) :=
+begin
+  let t : _ → (level.obj c).obj C.X := _, change continuous t,
+  suffices : ∀ j, continuous (((level.obj c).map (C.π.app j)) ∘ t),
+  { exact CompHaus.continuous_of_is_limit (F ⋙ level.obj c)
+      ((level.obj c).map_cone C) (hC c) _ _ this },
+  intros j,
+  convert ((level.obj c).map (S.π.app j)).continuous,
+  ext1 a,
+  let cc : ℝ≥0 := c ⊔ (S.X.lvl a),
+  let i1 : c ⟶ cc := hom_of_le le_sup_left,
+  let i2 : (S.X.lvl a) ⟶ cc := hom_of_le le_sup_right,
+  apply_fun ((level.map i1).app _), swap,
+  { intros x y h, ext1, apply_fun (λ e, e.1) at h, exact h },
+  simp only [← CompHaus.comp_apply],
+  simp only [nat_trans.naturality],
+  dsimp [t],
+  generalize_proofs hh,
+  let q := ((level.map i1).app C.X) (pseudo_normed_group.level (lift_fun C hC S) hh c a),
+  have : q = ((level.map i2).app C.X)
+    (((hC (S.X.lvl a)).lift ((level.obj (S.X.lvl a)).map_cone S)) (S.X.as_lvl a)), refl,
+  dsimp only [q] at this,
+  simp only [this, ← CompHaus.comp_apply, category.assoc],
+  erw level_cone_compatible,
+  rw (hC (S.X.lvl a)).fac_assoc,
+  ext, refl,
+end
+
 def lift : S.X ⟶ C.X :=
-{ to_fun := lift_fun _ hC _,
-  map_zero' := lift_fun_map_zero _ _ _,
-  map_add' := lift_fun_map_add _ _ _,
-  strict' := begin
-    intros c x hx,
-    let y : (level.obj c).obj S.X := ⟨x,hx⟩,
-    let z := (hC c).lift ((level.obj c).map_cone S) y,
-    let a := ((hC (S.X.lvl x)).lift ((level.obj (S.X.lvl x)).map_cone S)) (S.X.as_lvl x),
-    suffices : a.1 = z.1,
-    { dsimp only [lift_fun], rw this, exact z.2, },
-    let cc := c ⊔ S.X.lvl x,
-    let i1 : c ⟶ cc := hom_of_le le_sup_left,
-    let i2 : S.X.lvl x ⟶ cc := hom_of_le le_sup_right,
-    suffices : (level.map i1).app _ z = (level.map i2).app _ a,
-    { apply_fun (λ e, e.1) at this, exact this.symm },
-    dsimp [a,z],
-    apply concrete.is_limit_ext _ (hC cc),
-    intros j,
-    simp only [← CompHaus.comp_apply, category.assoc, level_cone_compatible,
-      (hC c).fac_assoc, (hC (S.X.lvl x)).fac_assoc],
-    ext, refl,
-  end,
-  continuous' := begin
-    intros c,
-    let t : _ → (level.obj c).obj C.X := _, change continuous t,
-    suffices : ∀ j, continuous (((level.obj c).map (C.π.app j)) ∘ t),
-    { exact CompHaus.continuous_of_is_limit (F ⋙ level.obj c)
-        ((level.obj c).map_cone C) (hC c) _ _ this },
-    intros j,
-    convert ((level.obj c).map (S.π.app j)).continuous,
-    ext1 a,
-    let cc : ℝ≥0 := c ⊔ (S.X.lvl a),
-    let i1 : c ⟶ cc := hom_of_le le_sup_left,
-    let i2 : (S.X.lvl a) ⟶ cc := hom_of_le le_sup_right,
-    apply_fun ((level.map i1).app _), swap,
-    { intros x y h, ext1, apply_fun (λ e, e.1) at h, exact h },
-    simp only [← CompHaus.comp_apply],
-    simp only [nat_trans.naturality],
-    dsimp [t],
-    generalize_proofs hh,
-    let q := ((level.map i1).app C.X) (pseudo_normed_group.level (lift_fun C hC S) hh c a),
-    have : q = ((level.map i2).app C.X)
-      (((hC (S.X.lvl a)).lift ((level.obj (S.X.lvl a)).map_cone S)) (S.X.as_lvl a)), refl,
-    dsimp only [q] at this,
-    simp only [this, ← CompHaus.comp_apply, category.assoc],
-    erw level_cone_compatible,
-    rw (hC (S.X.lvl a)).fac_assoc,
-    ext, refl,
-  end }
+{ to_fun      := lift_fun _ hC _,
+  map_zero'   := lift_fun_map_zero _ _ _,
+  map_add'    := lift_fun_map_add _ _ _,
+  strict'     := λ c x hx, lift_strict _ _ _ _ _ hx,
+  continuous' := λ c, lift_continuous _ _ _ _ }
 
 end level_jointly_reflects_limits
 
