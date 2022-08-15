@@ -31,7 +31,10 @@ tactic.extract_facts >>
   linarith]
 end
 
-localized "notation `ℳ_{` p' `}` S := (@real_measures.condensed p' _ (by fact_arith)).obj S"
+meta def tactic.interactive.fact_arith₂ :=
+ tactic.interactive.fact_arith <|> `[apply_instance]
+
+localized "notation `ℳ_{` p' `}` S := (@real_measures.condensed p' _ (by fact_arith₂)).obj S"
   in liquid_tensor_experiment
 
 abbreviation liquid_tensor_experiment.Ext (i : ℤ) (A B : Condensed.{u} Ab.{u+1}) :=
