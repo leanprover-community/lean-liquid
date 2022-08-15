@@ -281,7 +281,7 @@ def create_hom_from_level {X Y : CompHausFiltPseuNormGrp₁}
       ((level.map i2).app _ (E _ a)).1,
     simp only [← CompHaus.comp_apply, hE], refl,
   end }
-.
+
 lemma create_iso_from_level_compat_aux {X Y : CompHausFiltPseuNormGrp₁}
   (E : Π c, (level.obj c).obj X ≅ (level.obj c).obj Y)
   (hE : ∀ (c₁ c₂ : ℝ≥0) (i : c₁ ⟶ c₂),
@@ -353,8 +353,7 @@ begin
   let i2 : c₂ ⟶ c := hom_of_le le_sup_right,
   change ((level.map i1).app _ _).val = ((level.map i2).app _ $ X.as_lvl_add a' b').val,
   congr' 1,
-  rw [← CompHaus.comp_apply, create_iso_from_level_compat_aux],
-  any_goals { assumption },
+  rw [← CompHaus.comp_apply, create_iso_from_level_compat_aux _ hE],
   apply_fun (E _).hom,
   swap, { apply CompHaus.injective_of_is_iso },
   simp only [← CompHaus.comp_apply, category.assoc, iso.inv_hom_id],
@@ -376,11 +375,12 @@ begin
   rw this, clear this,
   simp_rw [← CompHaus.comp_apply, ← hE, CompHaus.comp_apply],
   ext1,
-  dsimp [level],
-  simp only [← subtype.val_eq_coe],
-  rw hEa a' b',
-  conv_lhs { dsimp [as_lvl] },
-  congr' 1,
+--  `show` replaces the `slower `dsimp [level]`
+  show ↑(Y.as_lvl _) = ↑(((E (X.lvl (a' + b'))).hom) (X.as_lvl (a' + b'))),
+--  show replaces the slower `conv_lhs { dsimp [as_lvl] }`
+  show a + b = _,
+  rw [← subtype.val_eq_coe, hEa a' b'],
+  congrm _ + _,
   { let d₁ := Y.lvl a,
     let d₂ := X.lvl a',
     let d := d₁ ⊔ d₂,
@@ -395,7 +395,7 @@ begin
     simp_rw [← CompHaus.comp_apply, category.assoc, iso.hom_inv_id],
     rw ← create_iso_from_level_compat_aux,
     ext, refl,
-    assumption' },
+    assumption },
   { let d₁ := Y.lvl b,
     let d₂ := X.lvl b',
     let d := d₁ ⊔ d₂,
@@ -410,7 +410,7 @@ begin
     simp_rw [← CompHaus.comp_apply, category.assoc, iso.hom_inv_id],
     rw ← create_iso_from_level_compat_aux,
     ext, refl,
-    assumption' }
+    assumption }
 end
 
 def create_iso_from_level {X Y : CompHausFiltPseuNormGrp₁.{u}}
@@ -488,7 +488,9 @@ lemma level_create_iso_from_level {X Y : CompHausFiltPseuNormGrp₁}
   (create_iso_from_level E hE0 hEa hE).hom = (E _).hom :=
 begin
   ext t,
-  dsimp [create_iso_from_level, create_hom_from_level, level],
+  --  `dsimp [create_iso_from_level, create_hom_from_level, level],` -- changes the goal to
+  -- ⊢ ↑(⇑((E (X.lvl ↑t)).hom) (X.as_lvl ↑t)) = ↑(⇑((E c).hom) t)
+  -- but is not needed and slows down the proof.
   let d := X.lvl t.1 ⊔ c,
   let i1 : X.lvl t.1 ⟶ d := hom_of_le le_sup_left,
   let i2 : c ⟶ d := hom_of_le le_sup_right,
