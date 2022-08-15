@@ -6,6 +6,7 @@ import analysis.special_functions.pow
 import topology.algebra.module.weak_dual
 import analysis.mean_inequalities_pow
 import real_measures.condensed
+import for_mathlib.is_locally_constant
 
 open_locale nnreal big_operators classical
 
@@ -460,5 +461,39 @@ lemma bdd_comap {X Y : Type*} {p c : ℝ≥0} [fact (0 < p)]
   (μ : weak_dual ℝ C(X,ℝ)) (hμ : μ.bdd p c) (f : C(X,Y)) :
   (weak_dual.comap f.comap μ).bdd p c :=
 λ t, by apply bdd_LC_comap (comap (lc_to_c X) μ) hμ f t
+
+lemma bdd_iff_indexed_parition (S : Profinite.{0}) (μ : weak_dual ℝ C(S,ℝ)) (p c : ℝ≥0) :
+  μ.bdd p c ↔
+  ∀ (ι : Fintype.{0}) (e : ι → set S)
+    (I : indexed_partition e) (he : ∀ i, is_clopen (e i)),
+    ∑ i : ι, ∥ μ.1 (topological_space.clopens.indicator ⟨e i, he i⟩) ∥₊^(p : ℝ) ≤ c :=
+begin
+  split,
+  { intros hμ ι e I he,
+    let T : discrete_quotient S := indexed_partition.discrete_quotient I he,
+    let ee : ι ≃ T := indexed_partition.discrete_quotient_equiv he I,
+    specialize hμ T,
+    convert hμ using 1,
+    fapply finset.sum_bij',
+    { intros i _, exact ee i, },
+    { intros, exact finset.mem_univ _ },
+    { intros a ha, congr' 4,
+      ext1, change _ = T.proj ⁻¹' _,
+      rw indexed_partition.discrete_quotient_fiber,
+      erw ee.symm_apply_apply,
+      refl },
+    { intros t ht, exact ee.symm t },
+    { intros, exact finset.mem_univ _ },
+    { intros, exact ee.symm_apply_apply _ },
+    { intros, exact ee.apply_symm_apply _ } },
+  { intros hμ T,
+    refine hμ (Fintype.of T) (λ t, T.proj ⁻¹' {t}) _ (λ t, (T.fibre t).2),
+    fapply indexed_partition.mk',
+    { intros i j hij a ha, simp only [set.bot_eq_empty, set.mem_empty_eq], apply hij,
+      simp only [set.inf_eq_inter, set.mem_inter_eq, set.mem_preimage, set.mem_singleton_iff] at ha,
+      rw [← ha.1, ha.2] },
+    { rintros (t : T), obtain ⟨t,rfl⟩ := T.proj_surjective t, use t, change _ = _, refl, },
+    { intros s, use T.proj s, change _ = _, refl } }
+end
 
 end weak_dual

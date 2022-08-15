@@ -74,40 +74,6 @@ Any element of `S.Radon_png p` induces a continuous linear map from `C(S,ℝ)` t
 example (S : Profinite.{0}) (μ : S.Radon_png p) : C(S,ℝ) →L[ℝ] ℝ :=
 μ.1
 
-lemma auxiliary_lemma (S : Profinite.{0}) (μ : weak_dual ℝ C(S,ℝ)) (p c : ℝ≥0) :
-  μ.bdd p c ↔
-  ∀ (ι : Fintype.{0}) (e : ι → set S)
-    (I : indexed_partition e) (he : ∀ i, is_clopen (e i)),
-    ∑ i : ι, ∥ μ.1 (clopens.indicator ⟨e i, he i⟩) ∥₊^(p : ℝ) ≤ c :=
-begin
-  split,
-  { intros hμ ι e I he,
-    let T : discrete_quotient S := indexed_partition.discrete_quotient I he,
-    let ee : ι ≃ T := indexed_partition.discrete_quotient_equiv he I,
-    specialize hμ T,
-    convert hμ using 1,
-    fapply finset.sum_bij',
-    { intros i _, exact ee i, },
-    { intros, exact finset.mem_univ _ },
-    { intros a ha, congr' 4,
-      ext1, change _ = T.proj ⁻¹' _,
-      rw indexed_partition.discrete_quotient_fiber,
-      erw ee.symm_apply_apply,
-      refl },
-    { intros t ht, exact ee.symm t },
-    { intros, exact finset.mem_univ _ },
-    { intros, exact ee.symm_apply_apply _ },
-    { intros, exact ee.apply_symm_apply _ } },
-  { intros hμ T,
-    refine hμ (Fintype.of T) (λ t, T.proj ⁻¹' {t}) _ (λ t, (T.fibre t).2),
-    fapply indexed_partition.mk',
-    { intros i j hij a ha, simp only [set.bot_eq_empty, set.mem_empty_eq], apply hij,
-      simp only [set.inf_eq_inter, set.mem_inter_eq, set.mem_preimage, set.mem_singleton_iff] at ha,
-      rw [← ha.1, ha.2] },
-    { rintros (t : T), obtain ⟨t,rfl⟩ := T.proj_surjective t, use t, change _ = _, refl, },
-    { intros s, use T.proj s, change _ = _, refl } }
-end
-
 /-
 If `μ : S.Radon_png p`, then there exists a nonnegative real `c` such that for all partitions of
 `S` into clopens `S = U_1 ∪ ⋯ ∪ U_n`, letting `I_i` denote the indicator function of `U_i`, one has
@@ -121,7 +87,7 @@ example (S : Profinite.{0}) (μ : S.Radon_png p) :
 begin
   obtain ⟨c,hc⟩ := μ.2,
   use c,
-  rwa auxiliary_lemma at hc,
+  rwa weak_dual.bdd_iff_indexed_parition at hc,
 end
 
 /-- Conversely, if we are given a continuous linear map `C(S,ℝ) → ℝ` and a nonnegative real `c`
@@ -133,8 +99,8 @@ example (S : Profinite.{0}) (μ : C(S,ℝ) →L[ℝ] ℝ) (c : ℝ≥0)
       (I : indexed_partition e) (he : ∀ i, is_clopen (e i)),
       ∑ i : ι, ∥ μ (clopens.indicator ⟨e i, he i⟩) ∥₊^(p : ℝ) ≤ c) :
   filtration (S.Radon_png p) c :=
-{ val := ⟨μ,c, by { rw auxiliary_lemma, assumption }⟩,
-  property := by { erw ← auxiliary_lemma at h, assumption } }
+{ val := ⟨μ,c, by { rw weak_dual.bdd_iff_indexed_parition, assumption }⟩,
+  property := by { erw ← weak_dual.bdd_iff_indexed_parition at h, assumption } }
 
 /-- The canonical embedding of `S.Radon_png p` into the weak dual of `C(S,ℝ)`. -/
 def embedding_into_the_weak_dual (S : Profinite.{0}) :
