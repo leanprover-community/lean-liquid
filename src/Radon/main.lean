@@ -44,7 +44,7 @@ def weak_dual_C_equiv_LC (X : Profinite.{0}) :
   end,
   ..(X.weak_dual_C_to_LC) }
 
-/-- An axiliary definition to be used in the constructions below. -/
+/-- An auxiliary definition to be used in the constructions below. -/
 def Radon_to_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0) :
   X.Radon p c ⟶ X.Radon_LC p c :=
 { to_fun := λ μ, ⟨weak_dual_C_to_LC _ μ.1, μ.2⟩,
@@ -54,7 +54,7 @@ def Radon_to_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0) :
     exact continuous_linear_map.continuous _,
   end }
 
-/-- An axiliary definition to be used in the constructions below. -/
+/-- An auxiliary definition to be used in the constructions below. -/
 def Radon_LC_to_Radon (X : Profinite.{0}) (p c : ℝ≥0) :
   X.Radon_LC p c → X.Radon p c :=
 λ μ, ⟨weak_dual_LC_to_C _ μ.1, begin
@@ -63,11 +63,11 @@ def Radon_LC_to_Radon (X : Profinite.{0}) (p c : ℝ≥0) :
     exact μ.2,
   end⟩
 
-/-- An axiliary definition to be used in the constructions below. -/
+/-- An auxiliary definition to be used in the constructions below. -/
 def Radon_LC_to_weak_dual (X : Profinite.{0}) (p c : ℝ≥0) :
   X.Radon_LC p c → weak_dual ℝ (locally_constant X ℝ) := subtype.val
 
-/-- An axiliary definition to be used in the constructions below. -/
+/-- An auxiliary definition to be used in the constructions below. -/
 def weak_dual_LC_to_fun (X : Profinite.{0}) :
   weak_dual ℝ (locally_constant X ℝ) → locally_constant X ℝ → ℝ := λ μ x, μ x
 
@@ -97,7 +97,7 @@ begin
   exact continuous_subtype_coe,
 end
 
-/-- An axiliary definition to be used in the constructions below. -/
+/-- An auxiliary definition to be used in the constructions below. -/
 def Radon_to_weak_dual (X : Profinite.{0}) (p c : ℝ≥0) :
   X.Radon p c → weak_dual ℝ C(X,ℝ) := subtype.val
 
@@ -183,7 +183,7 @@ begin
   exact (X.Radon_closed_embedding p c).closed_range,
 end
 
-/-- An axiliary definition to be used in the constructions below. -/
+/-- An auxiliary definition to be used in the constructions below. -/
 def Radon_equiv_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0) :
   X.Radon p c ≃ X.Radon_LC p c :=
 { to_fun := X.Radon_to_Radon_LC p c,
@@ -214,7 +214,7 @@ begin
   exact continuous_map.continuous _,
 end
 
-/-- An axiliary definition to be used in the constructions below. -/
+/-- An auxiliary definition to be used in the constructions below. -/
 def Radon_homeomorph_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
   X.Radon p c ≃ₜ X.Radon_LC p c :=
@@ -222,7 +222,7 @@ def Radon_homeomorph_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
   continuous_inv_fun := continuous_Radon_equiv_Radon_LC_symm _ _ _,
   ..(X.Radon_equiv_Radon_LC p c) }
 
-/-- An axiliary definition to be used in the constructions below. -/
+/-- An auxiliary definition to be used in the constructions below. -/
 def Radon_iso_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
   X.Radon p c ≅ X.Radon_LC p c :=

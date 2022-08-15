@@ -325,10 +325,10 @@ begin
   dsimp only [x, ← CompHaus.comp_apply],
   rw [create_iso_from_level_compat_aux, CompHaus.comp_apply],
   exact hE0.symm,
-  assumption',
+  assumption,
 end
 
-/-- An axiliary definition to be used in the construtions below. -/
+/-- An auxiliary definition to be used in the constructions below. -/
 def as_lvl_add (X : CompHausFiltPseuNormGrp₁)
   (a b : X) : (level.obj (X.lvl a + X.lvl b)).obj X :=
 ⟨a+b, pseudo_normed_group.add_mem_filtration (X.lvl_spec a) (X.lvl_spec b)⟩
