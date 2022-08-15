@@ -47,7 +47,7 @@ begin
     (nnreal.coe_le_coe.mpr (fact.out _)).trans nnreal.coe_one.le),
   refine nnreal.rpow_le_rpow _ (le_of_lt _),
   apply nnnorm_add_le,
-  repeat {exact nnreal.coe_pos.mpr (fact.out _)},
+  repeat { exact nnreal.coe_pos.mpr (fact.out _) },
 end
 
 /-- An auxiliary definition to be used in the constructions below. -/
