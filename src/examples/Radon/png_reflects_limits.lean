@@ -166,11 +166,10 @@ begin
     (hC c).fac_assoc, (hC (S.X.lvl x)).fac_assoc],
   ext, refl,
 end
-
+.
 /- Lemmas `lift_strict` and `lift_continuous` separately compile *much* faster than when they are
 embedded in `CompHausFiltPseuNormGrp₁.level_jointly_reflects_limits.lift`. -/
-lemma lift_continuous (c : ℝ≥0) [small_category J] {F : J ⥤ CompHausFiltPseuNormGrp₁}
-  (C : cone F) (hC : Π (c : ℝ≥0), is_limit ((level.obj c).map_cone C)) (S : cone F) :
+lemma lift_continuous (c : ℝ≥0) :
   continuous (pseudo_normed_group.level (lift_fun C hC S) (lift_strict C hC S) c) :=
 begin
   let t : _ → (level.obj c).obj C.X := _, change continuous t,
