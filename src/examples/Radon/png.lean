@@ -13,7 +13,6 @@ local attribute [instance]
   locally_constant.seminormed_add_comm_group
   locally_constant.pseudo_metric_space
 
-set_option profiler true
 namespace Profinite
 
 variables (X : Profinite.{0}) (p : ℝ≥0)
@@ -38,16 +37,17 @@ variables [fact (p ≤ 1)]
 lemma bdd_add {ca cb} (a b : weak_dual ℝ C(X,ℝ)) (ha : a.bdd p ca) (hb : b.bdd p cb) :
   (a + b).bdd p (ca + cb) :=
 begin
-  intros e, dsimp,
+  intros e,
+  --  `dsimp` is unneeded and slowly changes the goal to
+  -- `∑ (t : ↥e), ∥⇑a (e.fibre t).indicator + ⇑b (e.fibre t).indicator∥₊ ^ ↑p ≤ ca + cb`,
   refine le_trans _ (add_le_add (ha e) (hb e)),
   rw ← finset.sum_add_distrib,
   apply finset.sum_le_sum, rintros i -,
-  refine le_trans _ (nnreal.rpow_add_le_add_rpow _ _ _ _),
-  apply nnreal.rpow_le_rpow,
+  refine le_trans _ (nnreal.rpow_add_le_add_rpow _ _ _ $
+    (nnreal.coe_le_coe.mpr (fact.out _)).trans nnreal.coe_one.le),
+  refine nnreal.rpow_le_rpow _ (le_of_lt _),
   apply nnnorm_add_le,
-  exact_mod_cast (fact.out (0 ≤ p)),
-  exact_mod_cast (fact.out (0 < p)),
-  exact_mod_cast (fact.out (p ≤ 1)),
+  repeat {exact nnreal.coe_pos.mpr (fact.out _)},
 end
 
 def bdd_weak_dual : add_subgroup (weak_dual ℝ C(X,ℝ)) :=
