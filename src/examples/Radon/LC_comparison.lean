@@ -14,10 +14,14 @@ local attribute [instance]
 
 namespace Profinite
 
+/-- Consider an element of `X.Radon_LC p c` as a function on the
+type of locally constant functions. -/
 def Radon_LC_to_fun (X : Profinite.{0}) (p c : ℝ≥0) :
   X.Radon_LC p c → locally_constant X ℝ → ℝ :=
 λ μ, μ.1
 
+/-- Consider an element of `X.Radon p c` as a function on the
+type of continuous functions. -/
 def Radon_to_fun (X : Profinite.{0}) (p c : ℝ≥0) :
   X.Radon p c → C(X,ℝ) → ℝ :=
 λ μ, μ.1
@@ -71,6 +75,7 @@ instance t2_space_Radon (X : Profinite.{0}) (p c : ℝ≥0) :
 ⟨λ f g h, separated_by_continuous (X.Radon_to_fun_continuous p c)
   $ (X.Radon_to_fun_injective p c).ne h⟩
 
+/-- An auxiliary definition to be used in the consturctions below. -/
 def Radon_LC_comparison_component_equiv_aux (X : Profinite.{0}) (p : ℝ≥0)
   (T : discrete_quotient X) :
   weak_dual ℝ (locally_constant (X.diagram.obj T) ℝ) ≃
@@ -207,6 +212,7 @@ begin
     rw [← h1.2, h2.2] },
 end
 
+/-- An auxiliary definition to be used in the consturctions below. -/
 def Radon_LC_comparison_component_equiv
   (X : Profinite.{0}) (T : discrete_quotient X) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
@@ -246,6 +252,7 @@ begin
   refine continuous.comp (continuous_apply t) continuous_subtype_coe,
 end
 
+/-- An auxiliary definition to be used in the consturctions below. -/
 def Radon_LC_comparison_component_homeo
   (X : Profinite.{0}) (T : discrete_quotient X) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
@@ -261,6 +268,7 @@ def Radon_LC_comparison_component_homeo
   continuous_inv_fun := continuous_Radon_LC_comparison_component_equiv_symm _ _ _ _,
   ..(X.Radon_LC_comparison_component_equiv T p c) }
 
+/-- An auxiliary definition to be used in the consturctions below. -/
 def Radon_LC_comparison_component_iso
   (X : Profinite.{0}) (T : discrete_quotient X) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
@@ -314,6 +322,10 @@ begin
       exact H } },
 end
 
+/-- The restriction of `Radon_LC_functor` to the discrete quotients of a profinite set `X`
+is isomorphic to the `c`-th level of the restriction of `real_measures.functor p`.
+This is one of the key isomorphisms used in the comparison between Radon measures and `ℳ_p`.
+ -/
 def Radon_LC_comparison (X : Profinite.{0}) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
   X.diagram ⋙ Radon_LC_functor p c ≅

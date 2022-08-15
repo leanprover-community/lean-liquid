@@ -50,6 +50,7 @@ begin
   repeat { exact nnreal.coe_pos.mpr (fact.out _) },
 end
 
+/-- An auxiliary definition to be used in the constructions below. -/
 def bdd_weak_dual : add_subgroup (weak_dual ℝ C(X,ℝ)) :=
 { carrier := { μ | ∃ c, μ.bdd p c },
   add_mem' := λ a b ha hb, begin
@@ -76,6 +77,7 @@ instance topological_space_bdd_weak_dual_filtration (c : ℝ≥0) :
   topological_space (pseudo_normed_group.filtration (X.bdd_weak_dual p) c) :=
 topological_space.induced (λ μ, μ.1.1) infer_instance
 
+/-- An auxiliary definition to be used in the constructions below. -/
 def bdd_weak_dual_filtration_homeo (c : ℝ≥0) :
   (pseudo_normed_group.filtration (X.bdd_weak_dual p) c) ≃ₜ
   X.Radon p c :=
@@ -137,10 +139,12 @@ instance : comphaus_filtered_pseudo_normed_group (X.bdd_weak_dual p) :=
   end,
   ..(infer_instance : pseudo_normed_group (X.bdd_weak_dual p)) }
 
+/-- The space of `p`-Radon measures on `X`, as a CompHaus-ly filtered pseudo normed group`. -/
 def Radon_png : CompHausFiltPseuNormGrp₁ :=
 { M := X.bdd_weak_dual p,
   exhaustive' := λ μ, μ.2 }
 
+/-- A continuous map of profinite spaces induces a morphism between `Radon_png p`. -/
 def map_Radon_png {X Y : Profinite.{0}} (f : X ⟶ Y) :
   X.Radon_png p ⟶ Y.Radon_png p :=
 { to_fun := λ μ, ⟨weak_dual.comap f.comap μ.1, begin
@@ -164,6 +168,7 @@ def map_Radon_png {X Y : Profinite.{0}} (f : X ⟶ Y) :
     refine continuous_linear_map.continuous _,
   end }
 
+/-- A functorial version of `Radon_png`. -/
 def Radon_png_functor : Profinite.{0} ⥤ CompHausFiltPseuNormGrp₁ :=
 { obj := λ X, X.Radon_png p,
   map := λ X Y, map_Radon_png _,
@@ -171,9 +176,12 @@ def Radon_png_functor : Profinite.{0} ⥤ CompHausFiltPseuNormGrp₁ :=
     ext, refl },
   map_comp' := λ X Y Z f g, by { ext, refl } }
 
+/-- The cone exhibiting `X.Radon_png p` as a limit of `T.Radon_png p` as
+`T` varies over the discrete quotients of `X`. -/
 def Radon_png_cone : cone (X.diagram ⋙ Radon_png_functor p) :=
 (Radon_png_functor p).map_cone X.as_limit_cone
 
+/-- An auxiliary definition to be used in the constructions below. -/
 def Radon_png_functor_level_iso_component (c : ℝ≥0) (X : Profinite.{0}) :
   (CompHausFiltPseuNormGrp₁.level.obj c).obj (X.Radon_png p) ≅
   (Radon_CompHaus_functor p c).obj X :=
@@ -183,6 +191,7 @@ let e := (bdd_weak_dual_filtration_homeo X p c) in
   hom_inv_id' := by { ext, refl },
   inv_hom_id' := by { ext, refl } }
 
+/-- An auxiliary definition to be used in the constructions below. -/
 def Radon_png_functor_level_iso (c : ℝ≥0) :
   Radon_png_functor p ⋙ CompHausFiltPseuNormGrp₁.level.obj c ≅
   Radon_CompHaus_functor p c :=
@@ -190,6 +199,7 @@ nat_iso.of_components
 (λ X, Radon_png_functor_level_iso_component _ _ _)
 (λ X Y f, by { ext, refl })
 
+/-- An auxiliary definition to be used in the constructions below. -/
 def is_limit_Radon_png_cone_map_level (c : ℝ≥0) :
   is_limit ((Radon_png_functor p ⋙
     CompHausFiltPseuNormGrp₁.level.obj c).map_cone X.as_limit_cone) :=
@@ -213,10 +223,12 @@ def is_limit_Radon_png_cone_map_level (c : ℝ≥0) :
     erw ← nat_trans.naturality,
   end }
 
+/-- As promised, `X.Radon_png p` is a limir cone. -/
 def is_limit_Radon_png_cone : is_limit (X.Radon_png_cone p) :=
 CompHausFiltPseuNormGrp₁.level_jointly_reflects_limits _ $
 λ c, is_limit_Radon_png_cone_map_level _ _ _
 
+/-- An auxiliary definition to be used in the constructions below. -/
 def Radon_png_comparison_component (T : discrete_quotient X) :
   (X.diagram ⋙ Radon_png_functor p).obj T ≅
   (X.fintype_diagram ⋙ real_measures.functor p).obj T :=
@@ -234,6 +246,7 @@ end begin
   ext, refl, -- ;-D
 end
 
+/-- An auxiliary definition to be used in the constructions below. -/
 def Radon_png_comparison :
   X.diagram ⋙ Radon_png_functor p ≅
   X.fintype_diagram ⋙ real_measures.functor p :=
@@ -251,6 +264,12 @@ begin
   refl,
 end
 
+/-- The CompHaus-ly filtered pseudno normed group of signed `p`-Radon measures on `X`
+is isomorphic to the limit of `real_measures p T` as `T` varies over
+the discrete quotients of `X`.
+
+This is the final key isomorphism needed for the comparison of Raon measures and
+`ℳ_p(X)`. -/
 def Radon_png_iso : X.Radon_png p ≅
   (Profinite.extend (real_measures.functor p)).obj X :=
 (X.is_limit_Radon_png_cone p).cone_point_unique_up_to_iso

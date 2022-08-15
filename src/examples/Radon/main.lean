@@ -15,6 +15,8 @@ local attribute [instance]
 
 namespace Profinite
 
+/-- The weak dual of `C(X,ℝ)` is linearly equivalent to
+the weak dual of `locally_constant X ℝ`. -/
 def weak_dual_C_equiv_LC (X : Profinite.{0}) :
   weak_dual ℝ C(X,ℝ) ≃ₗ[ℝ] weak_dual ℝ (locally_constant X ℝ) :=
 { inv_fun := X.weak_dual_LC_to_C,
@@ -42,6 +44,7 @@ def weak_dual_C_equiv_LC (X : Profinite.{0}) :
   end,
   ..(X.weak_dual_C_to_LC) }
 
+/-- An axiliary definition to be used in the constructions below. -/
 def Radon_to_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0) :
   X.Radon p c ⟶ X.Radon_LC p c :=
 { to_fun := λ μ, ⟨weak_dual_C_to_LC _ μ.1, μ.2⟩,
@@ -51,6 +54,7 @@ def Radon_to_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0) :
     exact continuous_linear_map.continuous _,
   end }
 
+/-- An axiliary definition to be used in the constructions below. -/
 def Radon_LC_to_Radon (X : Profinite.{0}) (p c : ℝ≥0) :
   X.Radon_LC p c → X.Radon p c :=
 λ μ, ⟨weak_dual_LC_to_C _ μ.1, begin
@@ -59,9 +63,11 @@ def Radon_LC_to_Radon (X : Profinite.{0}) (p c : ℝ≥0) :
     exact μ.2,
   end⟩
 
+/-- An axiliary definition to be used in the constructions below. -/
 def Radon_LC_to_weak_dual (X : Profinite.{0}) (p c : ℝ≥0) :
   X.Radon_LC p c → weak_dual ℝ (locally_constant X ℝ) := subtype.val
 
+/-- An axiliary definition to be used in the constructions below. -/
 def weak_dual_LC_to_fun (X : Profinite.{0}) :
   weak_dual ℝ (locally_constant X ℝ) → locally_constant X ℝ → ℝ := λ μ x, μ x
 
@@ -91,6 +97,7 @@ begin
   exact continuous_subtype_coe,
 end
 
+/-- An axiliary definition to be used in the constructions below. -/
 def Radon_to_weak_dual (X : Profinite.{0}) (p c : ℝ≥0) :
   X.Radon p c → weak_dual ℝ C(X,ℝ) := subtype.val
 
@@ -176,6 +183,7 @@ begin
   exact (X.Radon_closed_embedding p c).closed_range,
 end
 
+/-- An axiliary definition to be used in the constructions below. -/
 def Radon_equiv_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0) :
   X.Radon p c ≃ X.Radon_LC p c :=
 { to_fun := X.Radon_to_Radon_LC p c,
@@ -206,6 +214,7 @@ begin
   exact continuous_map.continuous _,
 end
 
+/-- An axiliary definition to be used in the constructions below. -/
 def Radon_homeomorph_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
   X.Radon p c ≃ₜ X.Radon_LC p c :=
@@ -213,11 +222,13 @@ def Radon_homeomorph_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
   continuous_inv_fun := continuous_Radon_equiv_Radon_LC_symm _ _ _,
   ..(X.Radon_equiv_Radon_LC p c) }
 
+/-- An axiliary definition to be used in the constructions below. -/
 def Radon_iso_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
   X.Radon p c ≅ X.Radon_LC p c :=
 Top.iso_of_homeo (X.Radon_homeomorph_Radon_LC p c)
 
+/-- The functor `X ↦ X.Radon p c` is isomorphic to its locally constant variant. -/
 def Radon_functor_iso_Radon_LC_functor (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
   Radon_functor p c ≅ Radon_LC_functor p c :=
@@ -227,6 +238,7 @@ begin
   intros X Y f, ext, refl,
 end
 
+/-- A `CompHaus` variant of `Radon_functor`. -/
 def Radon_CompHaus_functor (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
   Profinite.{0} ⥤ CompHaus.{0} :=
@@ -235,6 +247,8 @@ def Radon_CompHaus_functor (p c : ℝ≥0)
   map_id' := (Radon_functor p c).map_id,
   map_comp' := λ _ _ _ f g, (Radon_functor p c).map_comp f g }
 
+/-- The functor `X ↦ X.Radon p c` is isomorphic to its locally constant variant.
+This is a variant taking values in `CompHaus` as opposed to `Top`. -/
 def Radon_CompHaus_functor_iso_Radon_LC_CompHaus_functor (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
   Radon_CompHaus_functor p c ≅ Radon_LC_CompHaus_functor p c :=
@@ -252,11 +266,14 @@ begin
   intros, ext, refl,
 end
 
+/-- The cone exhibiting `X.Radon p c` as the limit of `T.Radon p c` where
+`T` varies over the discrete quotients of `X`. -/
 def Radon_CompHaus_cone (X : Profinite.{0}) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
   cone (X.diagram ⋙ Radon_CompHaus_functor p c) :=
 (Radon_CompHaus_functor p c).map_cone X.as_limit_cone
 
+/-- X.Radon_CompHaus_cone p c` is a limit cone, as promised. -/
 def is_limit_Radon_CompHaus_cone (X : Profinite.{0}) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
   is_limit (X.Radon_CompHaus_cone p c) :=
@@ -280,6 +297,8 @@ def is_limit_Radon_CompHaus_cone (X : Profinite.{0}) (p c : ℝ≥0)
     erw ← nat_trans.naturality,
   end }
 
+/-- The comparison between `Radon_LC` and `real_measures p` taking
+values in `CompHaus` instead of `Top`, and restricted to the discrete quotients of `X`. -/
 def Radon_LC_CompHaus_comparison (X : Profinite.{0}) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
   X.diagram ⋙ Radon_LC_CompHaus_functor p c ≅
@@ -299,6 +318,8 @@ begin
   erw ((X.Radon_LC_comparison p c).hom).naturality, refl,
 end
 
+/-- The comparison between `Radon` and `real_measures p`
+restricted to the discrete quotients of `X`. -/
 def Radon_CompHaus_comparison (X : Profinite.{0}) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
   X.diagram ⋙ Radon_CompHaus_functor p c ≅
@@ -306,6 +327,7 @@ def Radon_CompHaus_comparison (X : Profinite.{0}) (p c : ℝ≥0)
 iso_whisker_left _ (Radon_CompHaus_functor_iso_Radon_LC_CompHaus_functor _ _) ≪≫
 Radon_LC_CompHaus_comparison _ _ _
 
+/-- An auxiliary definition to be used in the constructions below. -/
 def Radon_iso_limit (X : Profinite.{0}) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
   CompHaus.of (X.Radon p c) ≅
@@ -313,6 +335,9 @@ def Radon_iso_limit (X : Profinite.{0}) (p c : ℝ≥0)
 (X.is_limit_Radon_CompHaus_cone p c).cone_point_unique_up_to_iso (limit.is_limit _) ≪≫
 has_limit.iso_of_nat_iso (Radon_CompHaus_comparison _ _ _)
 
+/-- The compact Hausdorff space `X.Radon p c` is isomorphic to the limit of
+`real_measures p T` as `T` varies over the discrete quotients of `X`.
+-/
 def Radon_iso_real_measures (X : Profinite.{0}) (p c : ℝ≥0)
   [fact (0 < p)] [fact (p ≤ 1)] :
   CompHaus.of (X.Radon p c) ≅
