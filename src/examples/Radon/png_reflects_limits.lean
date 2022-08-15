@@ -50,6 +50,8 @@ namespace CompHausFiltPseuNormGrp₁
 
 noncomputable theory
 
+/-- A choice of level for some element of an exhaustive
+CompHausly filtered pseudo normed group. -/
 def lvl (X : CompHausFiltPseuNormGrp₁) (x : X) : ℝ≥0 :=
 (X.exhaustive x).some
 
@@ -57,6 +59,8 @@ lemma lvl_spec (X : CompHausFiltPseuNormGrp₁) (x : X) :
   x ∈ pseudo_normed_group.filtration X (X.lvl x) :=
 (X.exhaustive x).some_spec
 
+/-- Consider an element of an exhaustive CompHausly filtered pseudo normed group
+as an element of its chosen level. -/
 def as_lvl (X : CompHausFiltPseuNormGrp₁) (x : X) :
   (level.obj (X.lvl x)).obj X :=
 ⟨x, (X.lvl_spec x)⟩
@@ -71,6 +75,7 @@ namespace level_jointly_reflects_limits
 variables (hC : Π c : ℝ≥0, is_limit ((level.obj c).map_cone C))
 variables (S : cone F)
 
+/-- An auxiliary definition to be used in the constructions below. -/
 def lift_fun : S.X → C.X :=
 λ s, ((hC (S.X.lvl s)).lift ((level.obj _).map_cone S) (S.X.as_lvl s)).1
 
@@ -198,6 +203,7 @@ begin
   ext, refl,
 end
 
+/-- An auxiliary definition to be used in the constructions below. -/
 def lift : S.X ⟶ C.X :=
 { to_fun      := lift_fun _ hC _,
   map_zero'   := lift_fun_map_zero _ _ _,
@@ -207,6 +213,10 @@ def lift : S.X ⟶ C.X :=
 
 end level_jointly_reflects_limits
 
+/--
+If `C` is a cone taking values in `CompHausFiltPseuNormGrp₁` such that
+the restriction to all the levels is a limit cone, then `C` is a limit cone.
+-/
 def level_jointly_reflects_limits
   (hC : Π c : ℝ≥0, is_limit ((level.obj c).map_cone C)) :
   is_limit C :=
@@ -242,6 +252,7 @@ def level_jointly_reflects_limits
     rw ← hm, refl,
   end }
 
+/-- Create a moprhism in `CompHausFiltPseuNormGrp₁` levelwise. -/
 @[simps]
 def create_hom_from_level {X Y : CompHausFiltPseuNormGrp₁}
   (E : Π c, (level.obj c).obj X ⟶ (level.obj c).obj Y)
@@ -317,6 +328,7 @@ begin
   assumption',
 end
 
+/-- An axiliary definition to be used in the construtions below. -/
 def as_lvl_add (X : CompHausFiltPseuNormGrp₁)
   (a b : X) : (level.obj (X.lvl a + X.lvl b)).obj X :=
 ⟨a+b, pseudo_normed_group.add_mem_filtration (X.lvl_spec a) (X.lvl_spec b)⟩
@@ -412,6 +424,7 @@ begin
     assumption }
 end
 
+/-- Create an isomoprhism in `CompHausFiltPseuNormGrp₁` levelwise. -/
 def create_iso_from_level {X Y : CompHausFiltPseuNormGrp₁.{u}}
   (E : Π c, (level.obj c).obj X ≅ (level.obj c).obj Y)
   (hE0 : ((E (X.lvl 0)).hom (X.as_lvl 0)).1 = 0)
