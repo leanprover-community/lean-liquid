@@ -1,6 +1,5 @@
 import challenge
 import Radon.png
-import data.setoid.partition
 
 /-!
 In this file we explain how the condensed abelian group `ℳ_{p} S`, for a profinite set `S`,
