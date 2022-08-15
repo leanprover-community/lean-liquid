@@ -215,15 +215,17 @@ def level_jointly_reflects_limits
   fac' := begin
     intros S j,
     ext1 t,
-    dsimp [level_jointly_reflects_limits.lift,
-      level_jointly_reflects_limits.lift_fun],
+    -- `show` replaces the slower
+    -- `dsimp [level_jointly_reflects_limits.lift, level_jointly_reflects_limits.lift_fun],`
+    show (C.π.app j) _ = _,
     erw level_jointly_reflects_limits.fac_aux, refl,
   end,
   uniq' := begin
     intros S m hm,
     ext1 t,
-    dsimp [level_jointly_reflects_limits.lift,
-      level_jointly_reflects_limits.lift_fun],
+    --  `dsimp [level_jointly_reflects_limits.lift, level_jointly_reflects_limits.lift_fun],`
+    --  commented as it slows down the proof.  changes the goal to
+    -- ⊢ m t = ((hC (S.X.lvl t)).lift ((level.obj (S.X.lvl t)).map_cone S)) (S.X.as_lvl t)
     let a :=
       ((hC (S.X.lvl t)).lift ((level.obj (S.X.lvl t)).map_cone S)) (S.X.as_lvl t),
     let c := C.X.lvl (m t),
@@ -232,12 +234,12 @@ def level_jointly_reflects_limits
     let i2 : (S.X.lvl t) ⟶ d := hom_of_le le_sup_right,
     change ((level.map i1).app C.X (C.X.as_lvl (m t))).1 =
       ((level.map i2).app C.X a).1,
-    congr' 1,
+    congrm (subtype.val _),
     apply concrete.is_limit_ext _ (hC d), intros j,
     specialize hm j,
     ext1,
-    dsimp [level, as_lvl, a],
-    erw level_jointly_reflects_limits.fac_aux,
+    show (C.π.app j) (m t) = (C.π.app j) _, --  `show` replaces a slow `dsimp [level, as_lvl, a]`
+    erw [level_jointly_reflects_limits.fac_aux],
     rw ← hm, refl,
   end }
 
