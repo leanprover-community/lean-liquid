@@ -76,7 +76,8 @@ def lift_fun : S.X → C.X :=
 
 lemma lift_fun_map_zero : lift_fun C hC S 0 = 0 :=
 begin
-  --dsimp [lift_fun],  -- slows down the proof
+  --dsimp [lift_fun],  -- slows down the proof.  changes to goal to
+  -- ⊢ ((hC (S.X.lvl 0)).lift ((level.obj (S.X.lvl 0)).map_cone S)) (S.X.as_lvl 0) = 0
   let a := ((hC (S.X.lvl 0)).lift ((level.obj (S.X.lvl 0)).map_cone S)) (S.X.as_lvl 0),
   let b := (C.X.as_lvl 0),
   let c₁ := S.X.lvl 0,
@@ -109,7 +110,8 @@ end
 lemma lift_fun_map_add (x y) : lift_fun C hC S (x + y) =
   lift_fun C hC S x + lift_fun C hC S y :=
 begin
-  dsimp [lift_fun],
+  --dsimp [lift_fun],  -- slows down the proof.  changes the goal to
+  -- ⊢ ((hC (S.X.lvl 0)).lift ((level.obj (S.X.lvl 0)).map_cone S)) (S.X.as_lvl 0) = 0
   let Axy := ((hC (S.X.lvl (x + y))).lift
     ((level.obj (S.X.lvl (x + y))).map_cone S)) (S.X.as_lvl (x + y)),
   let Ax := ((hC (S.X.lvl x)).lift
@@ -128,8 +130,8 @@ begin
   let e2 := (level.map i2).app C.X,
   change (e1 Axy).1 = (e2 AA).1, congr' 1,
   apply concrete.is_limit_ext _ (hC cc), intros j,
-  dsimp only [e1, e2, Axy, ← CompHaus.comp_apply],
-  simp only [category.assoc, level_cone_compatible,
+--  dsimp only [e1, e2, Axy, ← CompHaus.comp_apply],
+  simp only [e1, e2, Axy, ← CompHaus.comp_apply, category.assoc, level_cone_compatible,
     (hC (S.X.lvl (x + y))).fac_assoc],
   ext1,
   dsimp [CompHaus.comp_apply, level, as_lvl, AA],
