@@ -13,7 +13,7 @@ local attribute [instance]
   locally_constant.seminormed_add_comm_group
   locally_constant.pseudo_metric_space
 
-
+set_option profiler true
 namespace Profinite
 
 variables (X : Profinite.{0}) (p : ℝ≥0)
@@ -21,13 +21,16 @@ instance why_do_I_need_this : add_comm_group (weak_dual ℝ C(X,ℝ)) :=
 show add_comm_group (C(X,ℝ) →L[ℝ] ℝ), by apply_instance
 
 lemma bdd_neg {c} (a : weak_dual ℝ C(X,ℝ)) (ha : a.bdd p c) : (-a).bdd p c :=
-λ e, by { simpa using ha e }
+λ e, by simpa only [continuous_linear_map.neg_apply, nnnorm_neg] using ha e
 
 section p_pos
 variables [fact (0 < p)]
 
 lemma bdd_zero : (0 : weak_dual ℝ C(X,ℝ)).bdd p 0 :=
-λ e, by { simp, right, refine ne_of_gt (fact.out _) }
+λ e, by {
+  refine (finset.sum_eq_zero (λ x hx, _)).le,
+  rw [continuous_linear_map.zero_apply, nnnorm_zero],
+  exact nnreal.rpow_eq_zero_iff.mpr ⟨rfl, (nnreal.coe_pos.mpr (fact.out _)).ne'⟩ }
 
 section p_le_one
 variables [fact (p ≤ 1)]
