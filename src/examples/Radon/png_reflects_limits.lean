@@ -166,7 +166,7 @@ begin
     (hC c).fac_assoc, (hC (S.X.lvl x)).fac_assoc],
   ext, refl,
 end
-.
+
 /- Lemmas `lift_strict` and `lift_continuous` separately compile *much* faster than when they are
 embedded in `CompHausFiltPseuNormGrp₁.level_jointly_reflects_limits.lift`. -/
 lemma lift_continuous (c : ℝ≥0) :
