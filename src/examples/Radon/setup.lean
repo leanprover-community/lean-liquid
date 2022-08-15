@@ -274,7 +274,7 @@ def topological_space.clopens.singleton {X : Type*}
   [topological_space X] [discrete_topology X] (x : X) :
   clopens X :=
 { carrier := {x},
-  clopen' := by tidy }
+  clopen' := is_clopen_discrete {x} }
 
 lemma locally_constant.eq_sum_of_fintype {X : Type*} [fintype X]
   [topological_space X] [discrete_topology X]
