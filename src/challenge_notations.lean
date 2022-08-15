@@ -32,7 +32,7 @@ tactic.extract_facts >>
 end
 
 meta def tactic.interactive.fact_arith₂ :=
- tactic.interactive.fact_arith <|> `[apply_instance]
+tactic.interactive.fact_arith <|> `[apply_instance]
 
 localized "notation `ℳ_{` p' `}` S := (@real_measures.condensed p' _ (by fact_arith₂)).obj S"
   in liquid_tensor_experiment
