@@ -87,8 +87,6 @@ def Radon_LC_functor (p c : ℝ≥0) [fact (0 < p)] :
     by { ext, dsimp [map_Radon_LC, weak_dual.comap], congr' 1, ext, refl },
   map_comp' := λ X Y Z f g, by { ext, refl } }
 
-.
-
 
 /--
 An auxiliary definition to be used in the constructions below.

@@ -56,8 +56,8 @@ CHFPNG₁_to_CHFPNGₑₗ
 example (X : CompHausFiltPseuNormGrp₁) :
   (CHFPNG₁_to_CHFPNGₑₗ.obj X : Type*) = X := rfl
 
-/- The condensed abelian group `ℳ_p(S)` is isomorphic to the condensed abelian group assocaited
-to the CompHaus-ly filtered pseudo n ormed group `S.Radon_png p`.
+/- The condensed abelian group `ℳ_p(S)` is isomorphic to the condensed abelian group associated
+to the CompHaus-ly filtered pseudo normed group `S.Radon_png p`.
 In the examples below, we explain how `S.Radon_png p` is related to Radon measures.
 -/
 example (S : Profinite.{0}) :
