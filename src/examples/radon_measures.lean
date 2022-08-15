@@ -78,7 +78,7 @@ lemma auxiliary_lemma (S : Profinite.{0}) (μ : weak_dual ℝ C(S,ℝ)) (p c : �
   μ.bdd p c ↔
   ∀ (ι : Fintype.{0}) (e : ι → set S)
     (I : indexed_partition e) (he : ∀ i, is_clopen (e i)),
-    ∑ i : ι, ∥ μ.1 (topological_space.clopens.indicator ⟨e i, he i⟩) ∥₊^(p : ℝ) ≤ c :=
+    ∑ i : ι, ∥ μ.1 (clopens.indicator ⟨e i, he i⟩) ∥₊^(p : ℝ) ≤ c :=
 begin
   split,
   { intros hμ ι e I he,
@@ -102,8 +102,51 @@ begin
     refine hμ (Fintype.of T) (λ t, T.proj ⁻¹' {t}) _ (λ t, (T.fibre t).2),
     fapply indexed_partition.mk',
     { intros i j hij a ha, simp only [set.bot_eq_empty, set.mem_empty_eq], apply hij,
-      squeeze_simp at ha,
-    },
-
-  }
+      simp only [set.inf_eq_inter, set.mem_inter_eq, set.mem_preimage, set.mem_singleton_iff] at ha,
+      rw [← ha.1, ha.2] },
+    { rintros (t : T), obtain ⟨t,rfl⟩ := T.proj_surjective t, use t, change _ = _, refl, },
+    { intros s, use T.proj s, change _ = _, refl } }
 end
+
+/-
+If `μ : S.Radon_png p`, then there exists a nonnegative real `c` such that for all partitions of
+`S` into clopens `S = U_1 ∪ ⋯ ∪ U_n`, letting `I_i` denote the indicator function of `U_i`, one has
+`∑ i, ∥ μ (I_i) ∥^p ≤ c`.
+-/
+example (S : Profinite.{0}) (μ : S.Radon_png p) :
+  ∃ c : ℝ≥0,
+  ∀ (ι : Fintype.{0}) (e : ι → set S)
+    (I : indexed_partition e) (he : ∀ i, is_clopen (e i)),
+    ∑ i : ι, ∥ μ.1 (clopens.indicator ⟨e i, he i⟩) ∥₊^(p : ℝ) ≤ c :=
+begin
+  obtain ⟨c,hc⟩ := μ.2,
+  use c,
+  rwa auxiliary_lemma at hc,
+end
+
+/-- Conversely, if we are given a continuous linear map `C(S,ℝ) → ℝ` and a nonnegative real `c`
+satisfying the inequality appearing in the example above, then we may construct an element of
+the `c`-th term of the filtration of `S.Radon_png p`.
+-/
+example (S : Profinite.{0}) (μ : C(S,ℝ) →L[ℝ] ℝ) (c : ℝ≥0)
+  (h : ∀ (ι : Fintype.{0}) (e : ι → set S)
+      (I : indexed_partition e) (he : ∀ i, is_clopen (e i)),
+      ∑ i : ι, ∥ μ (clopens.indicator ⟨e i, he i⟩) ∥₊^(p : ℝ) ≤ c) :
+  filtration (S.Radon_png p) c :=
+{ val := ⟨μ,c, by { rw auxiliary_lemma, assumption }⟩,
+  property := by { erw ← auxiliary_lemma at h, assumption } }
+
+/-- The canonical embedding of `S.Radon_png p` into the weak dual of `C(S,ℝ)`. -/
+def embedding_into_the_weak_dual (S : Profinite.{0}) :
+  S.Radon_png p → weak_dual ℝ C(S,ℝ) := λ μ, μ.1
+
+/-- The topology of the `c`-th term of the filtration of `S.Radon_png p` is induced
+by the weak topology on the set of continuous linear map `C(S,ℝ) → ℝ`. -/
+example (S : Profinite.{0}) (c : ℝ≥0) :
+  inducing (λ μ : filtration (S.Radon_png p) c, embedding_into_the_weak_dual p S μ) := ⟨rfl⟩
+
+/-- The group structure on `S.Radon_png p` is also induced by the weak dual. -/
+example (S : Profinite.{0}) (F G : S.Radon_png p) :
+  embedding_into_the_weak_dual p S (F + G) =
+  embedding_into_the_weak_dual p S F +
+  embedding_into_the_weak_dual p S G := rfl
