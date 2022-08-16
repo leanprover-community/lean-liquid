@@ -55,7 +55,7 @@ localized "attribute [instance] pBanach.has_coe_to_fun_condensed_eval" in
 
 /-- Notation hack for LTE examples. -/
 def bounded_homotopy_category_coe_to_fun
-  {A : Type*} [category A] [abelian A] [enough_projectives A] :
+  {A : Type*} [category A] [abelian A] :
   has_coe A (bounded_homotopy_category A) :=
 ⟨λ X, (bounded_homotopy_category.single _ 0).obj X⟩
 
