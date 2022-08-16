@@ -51,3 +51,21 @@ def pBanach.has_coe_to_fun_condensed_eval (V : pBanach.{0} p) (S : Profinite.{0}
 
 localized "attribute [instance] pBanach.has_coe_to_fun_condensed_eval" in
   liquid_tensor_experiment
+
+def bounded_homotopy_category_coe_to_fun
+  {A : Type*} [category A] [abelian A] [enough_projectives A] :
+  has_coe A (bounded_homotopy_category A) :=
+⟨λ X, (bounded_homotopy_category.single _ 0).obj X⟩
+
+def functor_coe_to_fun {C D : Type*} [category C] [category D] :
+  has_coe_to_fun (C ⥤ D) (λ _, C → D) := ⟨λ F, F.obj⟩
+
+def CHPNG_coe_to_fun (X : CompHausFiltPseuNormGrp.{0}) (S : Profinite.{0}) :
+  has_coe_to_fun
+  (Γ_ (CompHausFiltPseuNormGrp.to_Condensed.obj X) S)
+  (λ f, S → X) :=
+⟨λ f s, f.down.val s⟩
+
+localized "attribute [instance] bounded_homotopy_category_coe_to_fun" in liquid_tensor_experiment
+localized "attribute [instance] functor_coe_to_fun" in liquid_tensor_experiment
+localized "attribute [instance] CHPNG_coe_to_fun" in liquid_tensor_experiment

@@ -1,4 +1,4 @@
-import challenge
+import challenge_notations
 import Radon.png
 
 /-!
@@ -27,7 +27,7 @@ For technical reasons related to size issues in topos theory,
 we need to bump to a higher universe using `ulift`.
 -/
 example (X : CompHausFiltPseuNormGrp.{0}) (S : Profinite.{0}) :
-(Γ_ (CompHausFiltPseuNormGrp.to_Condensed.obj X) S : Type 1) =
+(Γ_ (CompHausFiltPseuNormGrp.to_Condensed X) S : Type 1) =
 (ulift.{1}  -- universe bump
   { f : S → X |  -- the set of all functions `S → X` such that...
     ∃ (c : ℝ≥0)  -- there exists a non-negative real `c`,
@@ -41,8 +41,8 @@ The group structure on the `S`-sections of the condensed abelian group associate
 `X : CompHausFiltPseuNormGrp` is the obvious one.
 -/
 example (X : CompHausFiltPseuNormGrp.{0}) (S : Profinite.{0})
-  (f g : Γ_ (CompHausFiltPseuNormGrp.to_Condensed.obj X) S) (s : S) :
-  (f + g).down.val s = f.down.val s + g.down.val s := rfl
+  (f g : Γ_ (CompHausFiltPseuNormGrp.to_Condensed X) S) (s : S) :
+  (f + g) s = f s + g s := rfl
 
 /-
 The category `CompHausFiltPseuNormGrp₁` is similar to that of
@@ -54,7 +54,7 @@ example : CompHausFiltPseuNormGrp₁ ⥤ CompHausFiltPseuNormGrp :=
 CHFPNG₁_to_CHFPNGₑₗ
 
 example (X : CompHausFiltPseuNormGrp₁) :
-  (CHFPNG₁_to_CHFPNGₑₗ.obj X : Type*) = X := rfl
+  (CHFPNG₁_to_CHFPNGₑₗ X : Type*) = X := rfl
 
 /- The condensed abelian group `ℳ_p(S)` is isomorphic to the condensed abelian group associated
 to the CompHaus-ly filtered pseudo normed group `S.Radon_png p`.
@@ -62,8 +62,7 @@ In the examples below, we explain how `S.Radon_png p` is related to Radon measur
 -/
 example (S : Profinite.{0}) :
   (ℳ_{p} S) ≅
-  CompHausFiltPseuNormGrp.to_Condensed.obj
-  (CHFPNG₁_to_CHFPNGₑₗ.obj $ S.Radon_png p) :=
+  CompHausFiltPseuNormGrp.to_Condensed (CHFPNG₁_to_CHFPNGₑₗ (S.Radon_png p)) :=
 CompHausFiltPseuNormGrp.to_Condensed.map_iso $
 CHFPNG₁_to_CHFPNGₑₗ.map_iso $ (S.Radon_png_iso p).symm
 
@@ -103,12 +102,18 @@ example (S : Profinite.{0}) (μ : C(S,ℝ) →L[ℝ] ℝ) (c : ℝ≥0)
 
 /-- The canonical embedding of `S.Radon_png p` into the weak dual of `C(S,ℝ)`. -/
 def embedding_into_the_weak_dual (S : Profinite.{0}) :
-  S.Radon_png p → weak_dual ℝ C(S,ℝ) := λ μ, μ.1
+  S.Radon_png p ↪ weak_dual ℝ C(S,ℝ) := ⟨λ μ, μ.1, λ x y h, subtype.ext h⟩
+
+/-- The canonical embedding from the `c`-th term of the filtration of `S.Radon_png p` into
+the `S.Radon_png p` itself. -/
+def filtration_embedding (S : Profinite.{0}) (c : ℝ≥0) :
+  filtration (S.Radon_png p) c ↪ S.Radon_png p := ⟨λ μ, μ.1, λ x y h, subtype.ext h⟩
 
 /-- The topology of the `c`-th term of the filtration of `S.Radon_png p` is induced
 by the weak topology on the set of continuous linear map `C(S,ℝ) → ℝ`. -/
 example (S : Profinite.{0}) (c : ℝ≥0) :
-  inducing (λ μ : filtration (S.Radon_png p) c, embedding_into_the_weak_dual p S μ) := ⟨rfl⟩
+  inducing ((embedding_into_the_weak_dual p S) ∘ (filtration_embedding p S c)) :=
+inducing.mk rfl
 
 /-- The group structure on `S.Radon_png p` is also induced by the weak dual. -/
 example (S : Profinite.{0}) (F G : S.Radon_png p) :
