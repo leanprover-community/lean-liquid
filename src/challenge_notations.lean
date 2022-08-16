@@ -4,6 +4,7 @@ import condensed.projective_resolution
 import for_mathlib.Profinite.extend
 import for_mathlib.abelian_category
 import for_mathlib.derived.K_projective
+import Radon.png
 
 open_locale nnreal
 open opposite category_theory
@@ -66,6 +67,11 @@ def CHPNG_coe_to_fun (X : CompHausFiltPseuNormGrp.{0}) (S : Profinite.{0}) :
   (λ f, S → X) :=
 ⟨λ f s, f.down.val s⟩
 
+def Radon_coe_to_fun (S : Profinite.{0}) (p : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] :
+  has_coe_to_fun (S.Radon_png p) (λ f, C(S,ℝ) → ℝ) :=
+⟨λ μ, μ.1⟩
+
 localized "attribute [instance] bounded_homotopy_category_coe_to_fun" in liquid_tensor_experiment
 localized "attribute [instance] functor_coe_to_fun" in liquid_tensor_experiment
 localized "attribute [instance] CHPNG_coe_to_fun" in liquid_tensor_experiment
+localized "attribute [instance] Radon_coe_to_fun" in liquid_tensor_experiment

@@ -81,7 +81,7 @@ example (S : Profinite.{0}) (μ : S.Radon_png p) :
   ∃ c : ℝ≥0,
   ∀ (ι : Fintype.{0}) (e : ι → set S)
     (I : indexed_partition e) (he : ∀ i, is_clopen (e i)),
-    ∑ i : ι, ∥ μ.1 (clopens.indicator ⟨e i, he i⟩) ∥₊^(p : ℝ) ≤ c :=
+    ∑ i : ι, ∥ μ (clopens.indicator ⟨e i, he i⟩) ∥₊^(p : ℝ) ≤ c :=
 begin
   obtain ⟨c,hc⟩ := μ.2,
   use c,

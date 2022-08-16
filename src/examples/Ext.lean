@@ -28,7 +28,7 @@ example (Y : 𝓐) : 𝓐ᵒᵖ ⥤δ Ab.{v} := Ext_δ_functor 𝓐 Y
 /-- The `n-th` component of this delta functor. -/
 example (n : ℕ) (Y : 𝓐) : 𝓐ᵒᵖ ⥤ Ab.{v} := Ext_δ_functor 𝓐 Y n
 example (n : ℕ) (X Y : 𝓐) :
-  (Ext_δ_functor 𝓐 Y n) (op X) = ((Ext' n) (op X)) Y :=
+  (Ext_δ_functor 𝓐 Y n) (op X) = Ext' n (op X) Y :=
 rfl
 
 /- The functor from `𝓐` to the bounded above homotopy category,
@@ -45,11 +45,11 @@ example (X : 𝓐) : (X : bounded_homotopy_category 𝓐) = (single _ 0) X := rf
 We have to manually tell Lean that a coercion is involved in this case using `↑`.
 -/
 example (n : ℕ) (X Y : 𝓐) :
-  (Ext' n (op X)) Y =
-  (Ext n (op ↑X)) ↑Y := rfl
+  Ext' n (op X) Y =
+  Ext n (op ↑X) ↑Y := rfl
 
 /-- `Ext' 0 (-, B) ≅ Hom(-,B)` -/
-example (X Y : 𝓐) : (Ext' 0 (op X)) Y ≅ AddCommGroup.of (X ⟶ Y) :=
+example (X Y : 𝓐) : Ext' 0 (op X) Y ≅ AddCommGroup.of (X ⟶ Y) :=
 (Ext'_zero_flip_iso _ _).app _
 
 /-- Any natural transformation `Hom(-,B) ⟶ F 0` to the zeroth-component of some
@@ -79,7 +79,7 @@ namespace AddCommGroup
 
 /-- An explicit computation: `Ext^1(ℤ/n,ℤ/n) = ℤ/n`. -/
 example (n : ℕ) (hn : n ≠ 0) :
-  (Ext' 1 (op $ of $ zmod n)).obj (of $ zmod n) ≅ of (zmod n) :=
+  Ext' 1 (op $ of $ zmod n) (of $ zmod n) ≅ of (zmod n) :=
 begin
   refine Ext'_iso (op $ of $ zmod n) (of $ zmod n) 1 (zmod_resolution n) (zmod_resolution_pi n)
     (zmod_resolution_is_resolution n hn) ≪≫
