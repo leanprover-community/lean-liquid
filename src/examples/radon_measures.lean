@@ -8,7 +8,7 @@ is related to the space of signed `p`-Radon measures on `S`.
 
 noncomputable theory
 
-open_locale liquid_tensor_experiment nnreal zero_object big_operators
+open_locale liquid_tensor_experiment nnreal zero_object big_operators classical
 open liquid_tensor_experiment category_theory category_theory.limits
   opposite pseudo_normed_group topological_space
 
@@ -69,8 +69,14 @@ CHFPNG₁_to_CHFPNGₑₗ.map_iso $ (S.Radon_png_iso p).symm
 /-
 Any element of `S.Radon_png p` induces a continuous linear map from `C(S,ℝ)` to `ℝ`.
 -/
-example (S : Profinite.{0}) (μ : S.Radon_png p) : C(S,ℝ) →L[ℝ] ℝ :=
-μ.1
+example (S : Profinite.{0}) (μ : S.Radon_png p) : C(S,ℝ) →L[ℝ] ℝ := μ.1
+example (S : Profinite.{0}) (μ : S.Radon_png p) (f : C(S,ℝ)) : μ f = μ.1 f := rfl
+
+/-
+The indicator function on a clopen set behaves as expected.
+-/
+example (S : Profinite.{0}) (C : set S) (hC : is_clopen C) (s : S) :
+  clopens.indicator ⟨C,hC⟩ s = if s ∈ C then 1 else 0 := rfl
 
 /-
 If `μ : S.Radon_png p`, then there exists a nonnegative real `c` such that for all partitions of
