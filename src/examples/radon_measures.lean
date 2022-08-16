@@ -1,5 +1,4 @@
 import challenge_notations
-import Radon.png
 
 /-!
 In this file we explain how the condensed abelian group `ℳ_{p} S`, for a profinite set `S`,
