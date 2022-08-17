@@ -148,8 +148,8 @@ def cone.map : cone f ⟶ cone f' :=
     apply category_theory.limits.biprod.hom_ext;
       simp only [biprod.lift_desc, add_zero, preadditive.comp_neg, category.assoc,
         comp_zero, biprod.lift_fst, biprod.lift_snd]; ext,
-    { simp },
-    { simp },
+    { simp only [preadditive.comp_neg, biprod.inl_desc_assoc, hom.comm, preadditive.neg_comp] },
+    { simp only [preadditive.comp_neg, biprod.inr_desc_assoc, zero_comp, neg_zero] },
     { simp only [X_eq_to_iso_f, preadditive.comp_add, biprod.inl_desc_assoc, category.assoc,
         preadditive.neg_comp],
       have := comm.comm (i+1),
@@ -158,10 +158,14 @@ def cone.map : cone f ⟶ cone f' :=
       subst r,
       delta d_from from_next to_prev d_to,
       simp only [X_eq_to_iso_refl, category.comp_id, add_monoid_hom.mk'_apply],
-      -- generalize hj : (complex_shape.up ℤ).next (i + 1) = j,
-      -- simpa [prev_d, d_next, ← add_assoc] using add_comm _ _
-      sorry },
-    { simp }
+      have aux₁ : (complex_shape.up ℤ).next (i + 1) = i + 1 + 1,
+      { simp only [cochain_complex.next] },
+      have aux₂ : i = (complex_shape.up ℤ).prev (i + 1),
+      { simp only [cochain_complex.prev, add_tsub_cancel_right], },
+      rw ← aux₁,
+      simp only [←add_assoc, add_left_neg, zero_add, add_comm (i₁.f (i + 1) ≫ f'.f (i + 1)), add_left_inj],
+      congr' 2, },
+    { simp only [preadditive.comp_add, biprod.inr_desc_assoc, zero_comp, hom.comm] }
   end }
 
 @[simp, reassoc]
