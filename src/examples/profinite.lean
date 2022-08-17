@@ -31,7 +31,7 @@ example (X : Type)
   [t2_space X]
   [totally_disconnected_space X] :
   Profinite.{0} :=
-  Profinite.of X
+Profinite.of X
 
 /-
 The morphisms in the category of profinite sets are just continuous maps.
