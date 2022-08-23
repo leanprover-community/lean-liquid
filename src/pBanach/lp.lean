@@ -99,12 +99,30 @@ def has_p_norm : has_p_norm (lp_type p) p :=
 
 instance : normed_add_comm_group (lp_type p) :=
 normed_add_comm_group.of_core _
-{ norm_eq_zero_iff := sorry,
+{ norm_eq_zero_iff := begin
+    intros f, dsimp, split,
+    { intros hf,
+      ext n, suffices : | f n |^(p : ℝ) = 0,
+      { rw real.rpow_eq_zero_iff_of_nonneg at this,
+        simpa using this.1,
+        apply abs_nonneg },
+      refine le_antisymm (le_trans _ (le_of_eq hf)) _,
+      { apply le_tsum (lp_type.summable f) n,
+        intros m hm, dsimp,
+        apply real.rpow_nonneg_of_nonneg,
+        exact abs_nonneg _, },
+      { apply real.rpow_nonneg_of_nonneg, apply abs_nonneg } },
+    { intros hf, rw hf,
+      simp only [lp.coe_fn_zero, pi.zero_apply, abs_zero],
+      rw real.zero_rpow, simp only [tsum_zero],
+      refine ne_of_gt _,
+      exact_mod_cast (fact.out (0 < p)) }
+  end,
   triangle := λ f g, has_p_norm.triangle has_p_norm f g,
   norm_neg := λ f, by { dsimp, simp } }
 
 instance : has_continuous_smul ℝ (lp_type p) :=
-{ continuous_smul := sorry }
+sorry
 
 instance : complete_space (lp_type p) :=
 sorry
