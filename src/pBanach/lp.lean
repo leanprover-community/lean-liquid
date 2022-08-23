@@ -37,15 +37,37 @@ end
 
 variables [fact (p ≤ 1)]
 
+lemma lp_type.triangle (f g : lp_type p) :
+  ∥ f + g ∥ ≤ ∥ f ∥ + ∥ g ∥ :=
+begin
+  dsimp,
+  have : ∀ n, |f n + g n| ^ (p : ℝ) ≤ | f n | ^(p : ℝ) + |g n|^(p : ℝ),
+  { intros n,
+    suffices : ∥f n + g n∥₊ ^ (p : ℝ) ≤ ∥ f n ∥₊ ^(p : ℝ) + ∥ g n ∥₊^(p : ℝ),
+    { exact_mod_cast this },
+    refine le_trans _ (nnreal.rpow_add_le_add_rpow _ _ _ _),
+    apply nnreal.rpow_le_rpow, apply nnnorm_add_le,
+    refine (le_of_lt _), any_goals { exact_mod_cast (fact.out (0 < p)) },
+    exact_mod_cast (fact.out (p ≤ 1)) },
+  refine le_trans (tsum_le_tsum this _ _) (le_of_eq _),
+  { have hh := lp_type.summable (f + g), dsimp at hh, exact hh },
+  { apply summable.add,
+    exact lp_type.summable f,
+    exact lp_type.summable g },
+  apply tsum_add,
+  exact lp_type.summable f,
+  exact lp_type.summable g,
+end
+
 instance : pseudo_metric_space (lp_type p) :=
 { dist := λ f g, ∥ f - g ∥,
-  dist_self := by sorry ; begin
+  dist_self := begin
     have : (p : ℝ) ≠ (0 : ℝ),
     { refine ne_of_gt _, exact_mod_cast (fact.out (0 < p)) },
     intros f, dsimp,
     simp only [abs_zero, sub_self, real.zero_rpow this, tsum_zero],
   end,
-  dist_comm := by sorry ; begin
+  dist_comm := begin
     intros f g, dsimp,
     have : ∀ n, | f n - g n | = | g n - f n |,
     { intros n,
@@ -54,25 +76,9 @@ instance : pseudo_metric_space (lp_type p) :=
   end,
   dist_triangle := begin
     intros f g h,
-    dsimp,
-    have : ∀ n, |f n - h n| ^ (p : ℝ) ≤ | f n - g n | ^ (p : ℝ) + | g n - h n | ^ (p : ℝ),
-    { intros n,
-      suffices : ∥f n - h n∥₊ ^ (p : ℝ) ≤ ∥ f n - g n ∥₊ ^ (p : ℝ) + ∥ g n - h n ∥₊ ^ (p : ℝ),
-      { exact_mod_cast this },
-      refine le_trans _ (nnreal.rpow_add_le_add_rpow (∥f n - g n∥₊) (∥g n - h n∥₊) _ _),
-      apply nnreal.rpow_le_rpow,
-      rw (show (f n - h n = (f n - g n) + (g n - h n)), by abel), apply nnnorm_add_le,
-      refine (le_of_lt _), any_goals { exact_mod_cast (fact.out (0 < p)) },
-      exact_mod_cast (fact.out (p ≤ 1)) },
-    have := tsum_le_tsum this _ _,
-    refine le_trans this (le_of_eq _),
-    apply tsum_add,
-    { have hh := lp_type.summable (f - g), dsimp at hh, exact hh },
-    { have hh := lp_type.summable (g - h), dsimp at hh, exact hh },
-    { have hh := lp_type.summable (f - h), dsimp at hh, exact hh },
-    { apply summable.add,
-      have hh := lp_type.summable (f - g), dsimp at hh, exact hh,
-      have hh := lp_type.summable (g - h), dsimp at hh, exact hh }
+    have := lp_type.triangle (f - g) (g - h),
+    rw (show f - g + (g - h) = f - h, by abel) at this,
+    exact this,
   end }
 
 def has_p_norm : has_p_norm (lp_type p) p :=
@@ -85,39 +91,22 @@ def has_p_norm : has_p_norm (lp_type p) p :=
     rw tsum_mul_left,
   end,
   triangle := begin
-    --TODO: pull out into a separate lemma so that it can be used above in `dist_triangle` as well.
-    intros f g, dsimp,
-    have : ∀ n, |f n + g n| ^ (p : ℝ) ≤ | f n | ^(p : ℝ) + |g n|^(p : ℝ),
-    { intros n,
-      suffices : ∥f n + g n∥₊ ^ (p : ℝ) ≤ ∥ f n ∥₊ ^(p : ℝ) + ∥ g n ∥₊^(p : ℝ),
-      { exact_mod_cast this },
-      refine le_trans _ (nnreal.rpow_add_le_add_rpow _ _ _ _),
-      apply nnreal.rpow_le_rpow, apply nnnorm_add_le,
-      refine (le_of_lt _), any_goals { exact_mod_cast (fact.out (0 < p)) },
-      exact_mod_cast (fact.out (p ≤ 1)) },
-    refine le_trans (tsum_le_tsum this _ _) (le_of_eq _),
-    { have hh := lp_type.summable (f + g), dsimp at hh, exact hh },
-    { apply summable.add,
-      exact lp_type.summable f,
-      exact lp_type.summable g },
-    apply tsum_add,
-    exact lp_type.summable f,
-    exact lp_type.summable g,
+    intros f g, apply lp_type.triangle,
   end,
   uniformity := rfl,
-  ..(infer_instance : has_norm (lp_type p)) }
+  ..(infer_instance : has_norm (lp_type p)) } .
 
-instance : topological_add_group (lp_type p) :=
-{ continuous_add := sorry,
-  continuous_neg := sorry }
+
+instance : normed_add_comm_group (lp_type p) :=
+normed_add_comm_group.of_core _
+{ norm_eq_zero_iff := sorry,
+  triangle := λ f g, has_p_norm.triangle has_p_norm f g,
+  norm_neg := λ f, by { dsimp, simp } }
 
 instance : has_continuous_smul ℝ (lp_type p) :=
 { continuous_smul := sorry }
 
 instance : complete_space (lp_type p) :=
-sorry
-
-instance : separated_space (lp_type p) :=
 sorry
 
 lemma p_banach : p_banach (lp_type p) p :=
