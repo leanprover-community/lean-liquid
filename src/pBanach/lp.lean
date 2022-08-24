@@ -390,7 +390,7 @@ def lp (p : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] : pBanach p :=
 { V := lp_type p,
   p_banach' := p_banach p }
 
-instance [fact (0 < p)] [fact (p ≤ 1)] : nontrivial (pBanach.lp p) :=
+instance : nontrivial (pBanach.lp p) :=
 nontrivial.mk $
 ⟨0,⟨λ i, if i = 0 then 1 else 0, begin
   change ite _ _ _, rw if_neg, rw if_neg,
