@@ -75,7 +75,7 @@ pBanach.lp p
 example [fact (0 < p)] [fact (p ≤ 1)] (f : pBanach.lp p) : ℕ → ℝ :=
 λ i, f i
 
-/-- Given an element of `pBanach.lp p`, the sum `∑' n, | f n |^p` exists. -/
+/-- Given an element of `pBanach.lp p`, the infinite sum `∑' n, | f n |^p` exists. -/
 example [fact (0 < p)] [fact (p ≤ 1)] (f : pBanach.lp p) :
   summable (λ n, | f n |^(p : ℝ)) :=
 pBanach.lp_type.summable f
