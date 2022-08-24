@@ -98,3 +98,5 @@ example [fact (0 < p)] [fact (p ≤ 1)] (f : ℕ → ℝ) (hf : summable (λ n, 
     exact ennreal.coe_ne_top,
     exact (ne_of_gt $ by exact_mod_cast (fact.out (0 < p))),
   end }
+
+example [fact (0 < p)] [fact (p ≤ 1)] : nontrivial (pBanach.lp p) := infer_instance

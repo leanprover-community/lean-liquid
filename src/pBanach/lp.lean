@@ -390,4 +390,29 @@ def lp (p : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] : pBanach p :=
 { V := lp_type p,
   p_banach' := p_banach p }
 
+instance [fact (0 < p)] [fact (p ≤ 1)] : nontrivial (pBanach.lp p) :=
+nontrivial.mk $
+⟨0,⟨λ i, if i = 0 then 1 else 0, begin
+  change ite _ _ _, rw if_neg, rw if_neg,
+  use 1, intros S hS, dsimp,
+  simp only [filter.mem_at_top_sets, ge_iff_le, finset.le_eq_subset, set.mem_preimage],
+  use {0}, intros T hT,
+  suffices : T.sum (λ (i : ℕ), |ite (i = 0) (1 : ℝ) 0| ^ ↑p) = 1,
+  { rw this, exact mem_of_mem_nhds hS },
+  have : (λ (i : ℕ), |ite (i = 0) (1 : ℝ) 0| ^ (p : ℝ)) =
+    (λ i, if i = 0 then 1 else 0),
+  { ext ⟨_|i⟩, simp, simp, rw real.zero_rpow, apply ne_of_gt, exact_mod_cast (fact.out (0 < p)) },
+  erw [this, finset.sum_dite], simp,
+  have : finset.filter (λ (x : ℕ), x ∈ T ∧ x = 0) (finset.filter (λ (x : ℕ), x = 0) T) = {0},
+  { ext, simp, intros ha, apply hT, rw ha, simp, },
+  rw this, simp,
+  exact ennreal.coe_ne_top,
+  apply ne_of_gt,
+  exact_mod_cast (fact.out (0 < p))
+end⟩, λ c, begin
+  apply_fun (λ t, t 0) at c,
+  change (0 : ℝ) = (1 : ℝ) at c,
+  exact zero_ne_one c,
+end⟩
+
 end pBanach
