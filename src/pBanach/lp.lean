@@ -121,6 +121,126 @@ normed_add_comm_group.of_core _
   triangle := λ f g, has_p_norm.triangle (has_p_norm p) f g,
   norm_neg := λ f, by { dsimp, simp } }
 
+.
+
+lemma has_continuous_smul_δ_aux₁ (A ε : ℝ) (hA : 0 ≤ A) (hε : 0 < ε) :
+  ∃ (δ : ℝ) (hδ : 0 < δ), A * δ < ε :=
+begin
+  --TODO: Golf!
+  by_cases hhA : A = 0,
+  { use 1, split, linarith, simp [hhA], assumption },
+  use ε/(2 * A), split,
+  have : ε / (2 * A) = (2 * A)⁻¹ * ε, by field_simp, rw this, clear this,
+  apply mul_pos,
+  simp only [mul_inv_rev, zero_lt_mul_right, inv_pos, zero_lt_bit0, zero_lt_one],
+  exact (ne.symm hhA).lt_of_le hA, assumption,
+  rw (show A * (ε / (2 * A)) = ε/2, by { field_simp, ring }), linarith,
+end
+
+lemma has_continuous_smul_δ_aux₂ (ε : ℝ) (hε : 0 < ε) :
+  ∃ (δ : ℝ) (hδ : 0 < δ), δ^((p : ℝ) + 1) < ε :=
+begin
+  --TODO: Golf!
+  use (ε/2)^(1/((p : ℝ)+1)), split,
+  { apply real.rpow_pos_of_pos, linarith },
+  { rw ← real.rpow_mul,
+    have : 1 / ((p : ℝ) + 1) * (p + 1) = 1,
+    { have : (p : ℝ)+1 ≠ 0,
+      { apply ne_of_gt,
+        have : 0 < (p : ℝ) := by exact_mod_cast (fact.out (0 < p)),
+        linarith },
+      field_simp },
+    rw [this, real.rpow_one], linarith, linarith, }
+end
+
+lemma has_continuous_smul_δ_aux₃ (B ε : ℝ) (hB : 0 ≤ B) (hε : 0 < ε) :
+  ∃ (δ : ℝ) (hδ : 0 < δ), δ^(p : ℝ) * B < ε :=
+begin
+  --TODO: Golf!
+  by_cases hhB : B = 0,
+  { use 1, split, simp, simp [hhB], assumption },
+  use (ε/(2 * B))^(1/(p : ℝ)),
+  split,
+  { apply real.rpow_pos_of_pos,
+    have : ε / (2 * B) = (2 * B)⁻¹ * ε, by field_simp, rw this, clear this,
+    apply mul_pos,
+    simp only [mul_inv_rev, zero_lt_mul_right, inv_pos, zero_lt_bit0, zero_lt_one],
+    exact (ne.symm hhB).lt_of_le hB, assumption },
+  { rw ← real.rpow_mul,
+    have : 1 / (p : ℝ) * p = 1,
+    { have : (p : ℝ) ≠ 0,
+      { apply ne_of_gt, exact_mod_cast (fact.out (0 < p)) },
+      field_simp },
+    rw [this, real.rpow_one],
+    rw (show ε / (2 * B) * B = ε/2, by field_simp; ring), linarith,
+    have : ε / (2 * B) = (2 * B)⁻¹ * ε, by field_simp, rw this, clear this,
+    apply mul_nonneg,
+    simp only [mul_inv_rev, zero_le_mul_right, inv_pos, zero_lt_bit0, zero_lt_one, inv_nonneg],
+    assumption,
+    exact (le_of_lt hε) }
+end
+
+lemma has_continuous_smul_δ_aux (A B ε : ℝ) (hA : 0 ≤ A) (hB : 0 ≤ B) (hε : 0 < ε) :
+  ∃ (δ : ℝ) (hδ : 0 < δ), A * δ + δ^(p : ℝ) * (δ + B) < ε :=
+begin
+  --TODO: Golf!
+  have hh : 0 < ε/3, by linarith,
+  obtain ⟨δ₁,hδ₁,Hδ₁⟩ := has_continuous_smul_δ_aux₁ A _ hA hh,
+  obtain ⟨δ₂,hδ₂,Hδ₂⟩ := has_continuous_smul_δ_aux₂ p _ hh,
+  obtain ⟨δ₃,hδ₃,Hδ₃⟩ := has_continuous_smul_δ_aux₃ p B _ hB hh,
+  refine ⟨δ₁ ⊓ δ₂ ⊓ δ₃,_,_⟩,
+  { rw lt_inf_iff,
+    split,
+    rw lt_inf_iff,
+    split,
+    assumption' },
+  { rw mul_add,
+    have : ε = ε/3 + ε/3 + ε/3, { field_simp, ring },
+    rw this, clear this,
+    simp only [← add_assoc],
+    apply add_lt_add,
+    apply add_lt_add,
+    { refine lt_of_le_of_lt _ Hδ₁,
+      apply mul_le_mul (le_refl _),
+      rw inf_assoc,
+      apply inf_le_left,
+      rw le_inf_iff, split,
+      rw le_inf_iff, split,
+      all_goals { assumption <|> { apply le_of_lt, assumption } } },
+    { have : (δ₁ ⊓ δ₂ ⊓ δ₃) ^ (p : ℝ) * (δ₁ ⊓ δ₂ ⊓ δ₃) =
+        (δ₁ ⊓ δ₂ ⊓ δ₃) ^ ((p : ℝ) + 1),
+      { rw [real.rpow_add, real.rpow_one],
+        rw lt_inf_iff, split,
+        rw lt_inf_iff, split,
+        assumption' },
+      rw this, clear this,
+      refine lt_of_le_of_lt _ Hδ₂,
+      apply real.rpow_le_rpow,
+      rw le_inf_iff, split,
+      rw le_inf_iff, split,
+      { apply le_of_lt, assumption },
+      { apply le_of_lt, assumption },
+      { apply le_of_lt, assumption },
+      rw [inf_comm, ← inf_assoc], exact inf_le_right,
+      have : 0 < (p : ℝ) := by exact_mod_cast (fact.out (0 < p)),
+      linarith },
+    { refine lt_of_le_of_lt _ Hδ₃,
+      apply mul_le_mul,
+      { apply real.rpow_le_rpow,
+        rw le_inf_iff, split,
+        rw le_inf_iff, split,
+        { apply le_of_lt, assumption },
+        { apply le_of_lt, assumption },
+        { apply le_of_lt, assumption },
+        exact inf_le_right,
+        apply le_of_lt,
+        exact_mod_cast (fact.out (0 < p)) },
+      { exact le_refl _ },
+      { assumption },
+      { apply real.rpow_nonneg_of_nonneg, apply le_of_lt, assumption } } }
+end
+
+
 instance : has_continuous_smul ℝ (lp_type p) :=
 begin
   constructor,
@@ -128,7 +248,10 @@ begin
   rintros ⟨a,f⟩ ε hε,
   obtain ⟨δ,hδ,Hδ⟩ : ∃ (δ : ℝ) (hδ : 0 < δ),
     |a|^(p : ℝ) * δ + δ^(p : ℝ) * (δ + ∥ f ∥) < ε,
-  { sorry },
+  { apply has_continuous_smul_δ_aux,
+    apply real.rpow_nonneg_of_nonneg, exact abs_nonneg _,
+    exact norm_nonneg _,
+    exact hε },
   refine ⟨δ,hδ,_⟩,
   rintros ⟨b,g⟩ (h : max _ _ < _), dsimp only [has_dist.dist] at h ⊢,
   refine lt_trans _ Hδ,
@@ -137,7 +260,34 @@ begin
   { refine le_trans (le_of_eq _) (norm_add_le _ _),
     congr' 1, abel },
   refine lt_of_le_of_lt this _, clear this,
-  sorry,
+  apply add_lt_add_of_le_of_lt,
+  { rw [← smul_sub, (has_p_norm p).norm_smul a (f - g)],
+    apply mul_le_mul, exact le_refl _,
+    rw [← neg_neg (f - g), norm_neg, neg_sub],
+    refine le_trans (le_max_right _ _) (le_of_lt h),
+    exact norm_nonneg (f - g),
+    apply real.rpow_nonneg_of_nonneg, exact abs_nonneg _ },
+  { rw [← sub_smul, (has_p_norm p).norm_smul (a - b) g, smul_eq_mul],
+    apply mul_lt_mul',
+    { apply real.rpow_le_rpow,
+      exact abs_nonneg _,
+      refine le_trans _ (le_of_lt h),
+      rw [← neg_neg (a - b), abs_neg, neg_sub],
+      exact le_max_left _ _,
+      refine le_of_lt (by exact_mod_cast (fact.out (0 < p))) },
+    { rw (show g = (g - f) + f, by abel),
+      refine lt_of_le_of_lt (norm_add_le _ _) _,
+      refine add_lt_add_of_lt_of_le _ (le_refl _),
+      refine lt_of_le_of_lt (le_max_right _ _) h },
+    { exact norm_nonneg _ },
+    { have : (0 : ℝ) = 0^(p : ℝ),
+      { rw real.zero_rpow,
+        refine ne_of_gt (by exact_mod_cast (fact.out (0 < p))) },
+      rw this, clear this,
+      apply real.rpow_lt_rpow,
+      exact le_refl _,
+      exact hδ,
+      exact_mod_cast (fact.out (0 < p)) } }
 end
 
 instance : complete_space (lp_type p) :=
