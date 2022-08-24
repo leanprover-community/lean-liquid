@@ -403,14 +403,14 @@ nontrivial.mk $
     (λ i, if i = 0 then 1 else 0),
   { ext ⟨_|i⟩, simp, simp, rw real.zero_rpow, apply ne_of_gt, exact_mod_cast (fact.out (0 < p)) },
   erw [this, finset.sum_dite], simp,
-  have : finset.filter (λ (x : ℕ), x ∈ T ∧ x = 0) (finset.filter (λ (x : ℕ), x = 0) T) = {0},
+  have : finset.filter (λ (x : ℕ), x = 0) T = {0},
   { ext, simp, intros ha, apply hT, rw ha, simp, },
   rw this, simp,
   exact ennreal.coe_ne_top,
   apply ne_of_gt,
   exact_mod_cast (fact.out (0 < p))
 end⟩, λ c, begin
-  apply_fun (λ t, t 0) at c,
+  apply_fun (λ t, t.1 0) at c,
   change (0 : ℝ) = (1 : ℝ) at c,
   exact zero_ne_one c,
 end⟩
