@@ -335,6 +335,24 @@ begin
   refine (sum_rpow_le_norm _ (F k) s).trans _, assumption,
 end
 
+lemma norm_le_of_forall_sum_le (f : lp_type p) (C)
+  (hf : ∀ s : finset ℕ, ∑ i in s, | f i |^(p : ℝ) ≤ C) :
+  ∥ f ∥ ≤ C :=
+begin
+  apply tsum_le_of_sum_le, exact lp_type.summable f, assumption
+end
+
+lemma norm_le_of_tendsto {C : ℝ} (F : ℕ → lp_type p)
+  (hCF : ∀ᶠ k in filter.at_top, ∥F k∥ ≤ C) (f : lp_type p)
+  (hf : filter.tendsto (λ j i, F j i) (filter.at_top : filter ℕ) (𝓝 (λ i, f i))) :
+  ∥f∥ ≤ C :=
+begin
+  obtain ⟨i, hi⟩ := hCF.exists,
+  have hC : 0 ≤ C := (norm_nonneg _).trans hi,
+  apply norm_le_of_forall_sum_le,
+  apply sum_rpow_le_of_tendsto, exact hCF, exact hf,
+end
+
 instance : complete_space (lp_type p) :=
 begin
   apply metric.complete_of_cauchy_seq_tendsto,
@@ -350,7 +368,14 @@ begin
   refine ⟨⟨f,hf'⟩, _⟩,
   rw metric.nhds_basis_closed_ball.tendsto_right_iff,
   intros ε hε,
-  sorry
+  have hε' : {p : (lp_type p) × (lp_type p) | ∥p.1 - p.2∥ < ε} ∈ 𝓤 (lp_type p),
+  { exact normed_add_comm_group.uniformity_basis_dist.mem_of_mem hε },
+  refine (hu.eventually_eventually hε').mono _, clear hε',
+  rintros n (hn : ∀ᶠ j in filter.at_top, ∥ u n - u j ∥ < _),
+  apply norm_le_of_tendsto,
+  apply hn.mono, intros j hj, exact hj.le,
+  rw tendsto_pi_nhds, intros k,
+  exact (hf.apply k).const_sub (u n k),
 end
 
 lemma p_banach : p_banach (lp_type p) p :=
