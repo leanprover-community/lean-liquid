@@ -8,6 +8,7 @@ noncomputable theory
 
 namespace pBanach
 
+/-- The type of sequences `ℕ → ℝ` where `∑' n, |f n|^p` converges. -/
 @[derive (module ℝ)]
 def lp_type (p : ℝ≥0) := lp (λ n : ℕ, ℝ) p
 
@@ -82,6 +83,7 @@ instance : pseudo_metric_space (lp_type p) :=
   end }
 
 variable (p)
+/-- The p-norm structure on `lp_type p`. -/
 def has_p_norm : has_p_norm (lp_type p) p :=
 { norm_smul := begin
     intros a f, dsimp,
@@ -137,7 +139,7 @@ begin
   rw (show A * (ε / (2 * A)) = ε/2, by { field_simp, ring }), linarith,
 end
 
-lemma has_continuous_smul_δ_aux₂ (ε : ℝ) (hε : 0 < ε) :
+lemma has_continuous_smul_δ_aux₂ (p : ℝ≥0) [fact (0 < p)] (ε : ℝ) (hε : 0 < ε) :
   ∃ (δ : ℝ) (hδ : 0 < δ), δ^((p : ℝ) + 1) < ε :=
 begin
   --TODO: Golf!
@@ -153,7 +155,7 @@ begin
     rw [this, real.rpow_one], linarith, linarith, }
 end
 
-lemma has_continuous_smul_δ_aux₃ (B ε : ℝ) (hB : 0 ≤ B) (hε : 0 < ε) :
+lemma has_continuous_smul_δ_aux₃  (p : ℝ≥0) [fact (0 < p)] (B ε : ℝ) (hB : 0 ≤ B) (hε : 0 < ε) :
   ∃ (δ : ℝ) (hδ : 0 < δ), δ^(p : ℝ) * B < ε :=
 begin
   --TODO: Golf!
@@ -180,7 +182,8 @@ begin
     exact (le_of_lt hε) }
 end
 
-lemma has_continuous_smul_δ_aux (A B ε : ℝ) (hA : 0 ≤ A) (hB : 0 ≤ B) (hε : 0 < ε) :
+lemma has_continuous_smul_δ_aux  (p : ℝ≥0) [fact (0 < p)]
+  (A B ε : ℝ) (hA : 0 ≤ A) (hB : 0 ≤ B) (hε : 0 < ε) :
   ∃ (δ : ℝ) (hδ : 0 < δ), A * δ + δ^(p : ℝ) * (δ + B) < ε :=
 begin
   --TODO: Golf!
@@ -308,7 +311,7 @@ begin
   intros j _, apply real.rpow_nonneg_of_nonneg, exact abs_nonneg _,
 end
 
-lemma sum_rpow_le_norm (F : lp_type p) (S : finset ℕ) :
+lemma sum_rpow_le_norm  (p : ℝ≥0) [fact (0 < p)] (F : lp_type p) (S : finset ℕ) :
   ∑ i in S, | F i |^(p : ℝ) ≤ ∥ F ∥ :=
 begin
   apply sum_le_tsum,
@@ -316,7 +319,7 @@ begin
   exact lp_type.summable _,
 end
 
-lemma sum_rpow_le_of_tendsto
+lemma sum_rpow_le_of_tendsto (p : ℝ≥0) [fact (0 < p)]
   {C : ℝ} {F : ℕ → lp_type p} (hCF : ∀ᶠ k in filter.at_top, ∥F k∥ ≤ C)
   {f : ℕ → ℝ} (hf : filter.tendsto (λ i j, F i j) (filter.at_top : filter ℕ) (𝓝 f))
   (s : finset ℕ) :
@@ -335,22 +338,23 @@ begin
   refine (sum_rpow_le_norm _ (F k) s).trans _, assumption,
 end
 
-lemma norm_le_of_forall_sum_le (f : lp_type p) (C)
+lemma norm_le_of_forall_sum_le  (p : ℝ≥0) [fact (0 < p)] (f : lp_type p) (C)
   (hf : ∀ s : finset ℕ, ∑ i in s, | f i |^(p : ℝ) ≤ C) :
   ∥ f ∥ ≤ C :=
 begin
   apply tsum_le_of_sum_le, exact lp_type.summable f, assumption
 end
 
-lemma norm_le_of_tendsto {C : ℝ} (F : ℕ → lp_type p)
+lemma norm_le_of_tendsto (p : ℝ≥0) [fact (0 < p)] {C : ℝ} (F : ℕ → lp_type p)
   (hCF : ∀ᶠ k in filter.at_top, ∥F k∥ ≤ C) (f : lp_type p)
   (hf : filter.tendsto (λ j i, F j i) (filter.at_top : filter ℕ) (𝓝 (λ i, f i))) :
   ∥f∥ ≤ C :=
 begin
   obtain ⟨i, hi⟩ := hCF.exists,
-  have hC : 0 ≤ C := (norm_nonneg _).trans hi,
+  have hC : 0 ≤ C := le_trans _ hi,
   apply norm_le_of_forall_sum_le,
   apply sum_rpow_le_of_tendsto, exact hCF, exact hf,
+  apply tsum_nonneg, intros _, apply real.rpow_nonneg_of_nonneg, exact abs_nonneg _,
 end
 
 instance : complete_space (lp_type p) :=
@@ -381,6 +385,7 @@ end
 lemma p_banach : p_banach (lp_type p) p :=
 { exists_p_norm := nonempty.intro $ has_p_norm p }
 
+/-- The `lp` space of sequences `ℕ → ℝ`, as an element of `pBanach p`. -/
 def lp (p : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] : pBanach p :=
 { V := lp_type p,
   p_banach' := p_banach p }
