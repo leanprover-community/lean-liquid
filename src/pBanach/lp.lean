@@ -144,7 +144,7 @@ instance : complete_space (lp_type p) :=
 sorry
 
 lemma p_banach : p_banach (lp_type p) p :=
-{ exists_p_norm := nonempty.intro $ has_p_norm }
+{ exists_p_norm := nonempty.intro $ has_p_norm p }
 
 def lp (p : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] : pBanach p :=
 { V := lp_type p,
