@@ -2,7 +2,7 @@ import analysis.normed_space.lp_space
 import topology.instances.real
 import banach
 
-open_locale nnreal big_operators
+open_locale nnreal big_operators uniformity topological_space
 
 noncomputable theory
 
@@ -290,8 +290,36 @@ begin
       exact_mod_cast (fact.out (0 < p)) } }
 end
 
+lemma uniform_continuous_coe :
+  uniform_continuous (λ f n, f n : lp_type p → ℕ → ℝ) :=
+begin
+  rw uniform_continuous_pi, intros i,
+  rw normed_add_comm_group.uniformity_basis_dist.uniform_continuous_iff
+    normed_add_comm_group.uniformity_basis_dist,
+  intros ε hε, dsimp,
+  refine ⟨ε^(p : ℝ), _, _⟩,
+  { apply real.rpow_pos_of_pos, assumption },
+  rintros f g (hfg : ∥f - g∥ < ε^_),
+  suffices : |f i - g i|^(p : ℝ) < ε^(p : ℝ),
+  { rw real.rpow_lt_rpow_iff at this, assumption, exact abs_nonneg _, exact le_of_lt hε,
+    exact_mod_cast (fact.out (0 < p)) },
+  refine lt_of_le_of_lt _ hfg,
+  apply le_tsum (lp_type.summable (f - g)) i,
+  intros j _, apply real.rpow_nonneg_of_nonneg, exact abs_nonneg _,
+end
+
 instance : complete_space (lp_type p) :=
-sorry
+begin
+  apply metric.complete_of_cauchy_seq_tendsto,
+  intros u hu,
+  obtain ⟨f, hf⟩ := cauchy_seq_tendsto_of_complete
+    ((uniform_continuous_coe p).comp_cauchy_seq hu),
+  have hf' : mem_ℓp f p, sorry,
+  refine ⟨⟨f,hf'⟩, _⟩,
+  rw metric.nhds_basis_closed_ball.tendsto_right_iff,
+  intros ε hε,
+  sorry
+end
 
 lemma p_banach : p_banach (lp_type p) p :=
 { exists_p_norm := nonempty.intro $ has_p_norm p }
