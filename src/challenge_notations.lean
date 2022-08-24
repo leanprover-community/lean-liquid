@@ -5,6 +5,7 @@ import for_mathlib.Profinite.extend
 import for_mathlib.abelian_category
 import for_mathlib.derived.K_projective
 import Radon.png
+import pBanach.lp
 
 open_locale nnreal
 open opposite category_theory
@@ -79,3 +80,9 @@ localized "attribute [instance] bounded_homotopy_category_coe_to_fun" in liquid_
 localized "attribute [instance] functor_coe_to_fun" in liquid_tensor_experiment
 localized "attribute [instance] CHPNG_coe_to_fun" in liquid_tensor_experiment
 localized "attribute [instance] Radon_coe_to_fun" in liquid_tensor_experiment
+
+def pBanach_lp_coe_to_fun {p : ℝ≥0} [fact (0 < p)] [fact (p ≤ 1)] :
+  has_coe_to_fun (pBanach.lp p) (λ f, ℕ → ℝ) :=
+⟨λ (f : pBanach.lp_type p) n, f n⟩
+
+localized "attribute [instance] pBanach_lp_coe_to_fun" in liquid_tensor_experiment
