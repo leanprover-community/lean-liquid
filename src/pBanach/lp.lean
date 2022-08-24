@@ -81,6 +81,7 @@ instance : pseudo_metric_space (lp_type p) :=
     exact this,
   end }
 
+variable (p)
 def has_p_norm : has_p_norm (lp_type p) p :=
 { norm_smul := begin
     intros a f, dsimp,
@@ -95,7 +96,6 @@ def has_p_norm : has_p_norm (lp_type p) p :=
   end,
   uniformity := rfl,
   ..(infer_instance : has_norm (lp_type p)) } .
-
 
 instance : normed_add_comm_group (lp_type p) :=
 normed_add_comm_group.of_core _
@@ -118,11 +118,27 @@ normed_add_comm_group.of_core _
       refine ne_of_gt _,
       exact_mod_cast (fact.out (0 < p)) }
   end,
-  triangle := λ f g, has_p_norm.triangle has_p_norm f g,
+  triangle := λ f g, has_p_norm.triangle (has_p_norm p) f g,
   norm_neg := λ f, by { dsimp, simp } }
 
 instance : has_continuous_smul ℝ (lp_type p) :=
-sorry
+begin
+  constructor,
+  rw metric.continuous_iff,
+  rintros ⟨a,f⟩ ε hε,
+  obtain ⟨δ,hδ,Hδ⟩ : ∃ (δ : ℝ) (hδ : 0 < δ),
+    |a|^(p : ℝ) * δ + δ^(p : ℝ) * (δ + ∥ f ∥) < ε,
+  { sorry },
+  refine ⟨δ,hδ,_⟩,
+  rintros ⟨b,g⟩ (h : max _ _ < _), dsimp only [has_dist.dist] at h ⊢,
+  refine lt_trans _ Hδ,
+  rw [← norm_neg, neg_sub],
+  have : ∥a • f - b • g∥ ≤ ∥ a • f - a • g ∥ + ∥ a • g - b • g ∥,
+  { refine le_trans (le_of_eq _) (norm_add_le _ _),
+    congr' 1, abel },
+  refine lt_of_le_of_lt this _, clear this,
+  sorry,
+end
 
 instance : complete_space (lp_type p) :=
 sorry
