@@ -66,3 +66,35 @@ example (f : S → V) (hf : continuous f) : C(S,V) := ⟨f,hf⟩
 
 /- The group operation on `Γ_ V S` is pointwise addition, as expected. -/
 example (f g : Γ_ V S) (s : S) : (f + g) s = f s + g s := rfl
+
+/-- An example of a p-Banach space. -/
+example [fact (0 < p)] [fact (p ≤ 1)] : pBanach p :=
+pBanach.lp p
+
+/-- Elements of `pBanach.lp p` can be considered as functions `ℕ → ℝ`. -/
+example [fact (0 < p)] [fact (p ≤ 1)] (f : pBanach.lp p) : ℕ → ℝ :=
+λ i, f i
+
+/-- Given an element of `pBanach.lp p`, the sum `∑' n, | f n |^p` exists. -/
+example [fact (0 < p)] [fact (p ≤ 1)] (f : pBanach.lp p) :
+  summable (λ n, | f n |^(p : ℝ)) :=
+pBanach.lp_type.summable f
+
+/-- The ℝ-module structure behaves as expected. -/
+example [fact (0 < p)] [fact (p ≤ 1)] (f g : pBanach.lp p) (n : ℕ) :
+  (f + g) n = f n + g n := rfl
+
+example [fact (0 < p)] [fact (p ≤ 1)] (a : ℝ) (f : pBanach.lp p) (n : ℕ) :
+  (a • f) n = a * f n := rfl
+
+/-- Conversely, we can construct elements of `pBanach.lp p` using sequences where the
+  sum above exists. -/
+example [fact (0 < p)] [fact (p ≤ 1)] (f : ℕ → ℝ) (hf : summable (λ n, | f n |^(p : ℝ))) :
+  pBanach.lp p :=
+{ val := f,
+  property := begin
+    change ite _ _ _,
+    rw if_neg, rw if_neg, assumption,
+    exact ennreal.coe_ne_top,
+    exact (ne_of_gt $ by exact_mod_cast (fact.out (0 < p))),
+  end }
