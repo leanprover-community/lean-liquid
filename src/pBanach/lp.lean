@@ -308,13 +308,45 @@ begin
   intros j _, apply real.rpow_nonneg_of_nonneg, exact abs_nonneg _,
 end
 
+lemma sum_rpow_le_norm (F : lp_type p) (S : finset ℕ) :
+  ∑ i in S, | F i |^(p : ℝ) ≤ ∥ F ∥ :=
+begin
+  apply sum_le_tsum,
+  intros i hi, apply real.rpow_nonneg_of_nonneg, exact abs_nonneg _,
+  exact lp_type.summable _,
+end
+
+lemma sum_rpow_le_of_tendsto
+  {C : ℝ} {F : ℕ → lp_type p} (hCF : ∀ᶠ k in filter.at_top, ∥F k∥ ≤ C)
+  {f : ℕ → ℝ} (hf : filter.tendsto (λ i j, F i j) (filter.at_top : filter ℕ) (𝓝 f))
+  (s : finset ℕ) :
+  ∑ i in s, |f i| ^ (p : ℝ) ≤ C :=
+begin
+  let G : (Π a, ℝ) → ℝ := λ f, ∑ a in s, ∥f a∥ ^ (p : ℝ),
+  have hG : continuous G,
+  { refine continuous_finset_sum s _,
+    intros a ha,
+    have : continuous (λ f : Π a, ℝ, f a):= continuous_apply a,
+    refine this.norm.rpow_const (_),
+    intros _, right, apply le_of_lt, exact_mod_cast (fact.out (0 < p)) },
+  refine le_of_tendsto (hG.continuous_at.tendsto.comp hf) _,
+  refine hCF.mono _,
+  intros k hCFk,
+  refine (sum_rpow_le_norm _ (F k) s).trans _, assumption,
+end
+
 instance : complete_space (lp_type p) :=
 begin
   apply metric.complete_of_cauchy_seq_tendsto,
   intros u hu,
   obtain ⟨f, hf⟩ := cauchy_seq_tendsto_of_complete
     ((uniform_continuous_coe p).comp_cauchy_seq hu),
-  have hf' : mem_ℓp f p, sorry,
+  have hf' : mem_ℓp f p,
+  { obtain ⟨C,hC,H⟩ := hu.bounded_range.exists_pos_norm_le,
+    replace H : ∀ n, ∥ u n ∥ ≤ C := λ n, H _ ⟨n,rfl⟩,
+    apply mem_ℓp_gen', swap, use C,
+    intros S, simp only [real.norm_eq_abs, ennreal.coe_to_real],
+    apply sum_rpow_le_of_tendsto, apply filter.eventually_of_forall, exact H, assumption },
   refine ⟨⟨f,hf'⟩, _⟩,
   rw metric.nhds_basis_closed_ball.tendsto_right_iff,
   intros ε hε,
