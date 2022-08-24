@@ -29,7 +29,7 @@ example : separated_space V := infer_instance
 We may *choose* a norm on the p-Banach space satisfying some properties
 which will be discussed below.
 
-NOTE: This is really *choice* that must be made, and we make this choice only within
+NOTE: This is really a *choice* that must be made, and we make this choice only within
 the present section.
 -/
 def pBanach.has_norm : has_norm V :=
@@ -38,11 +38,11 @@ def pBanach.has_norm : has_norm V :=
 /- We tell the typeclass system to use the norm chosen above. -/
 local attribute [instance] pBanach.has_norm
 
-/- The chosen norm on $V$ is a $p$-norm: it scales via the rule $∥rv∥ = |r|^p * ∥v∥$ -/
+/- The chosen norm on $V$ is a $p$-norm: it scales via the rule $∥rv∥ = |r|^p * ∥v∥$. -/
 example (r : ℝ) (v : V) : ∥r • v∥ = |r|^(p : ℝ) * ∥v∥ :=
 (p_banach.exists_p_norm V.p_banach').some.norm_smul r v
 
-/- The chosen norm on $V$ satisfies the triangle inequality -/
+/- The chosen norm on $V$ satisfies the triangle inequality. -/
 example (v w : V) : ∥v + w∥ ≤ ∥v∥ + ∥w∥ :=
 (p_banach.exists_p_norm V.p_banach').some.triangle v w
 
