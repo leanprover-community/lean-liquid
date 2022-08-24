@@ -148,6 +148,6 @@ lemma p_banach : p_banach (lp_type p) p :=
 
 def lp (p : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] : pBanach p :=
 { V := lp_type p,
-  p_banach' := p_banach }
+  p_banach' := p_banach p }
 
 end pBanach
