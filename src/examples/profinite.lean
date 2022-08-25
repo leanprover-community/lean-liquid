@@ -74,7 +74,7 @@ begin
   { introsI H α _, exact H ⟨α⟩ }
 end
 
-/- object of `Condensed.{0} Ab.{1}` are indeed just sheaves in `proetale_topology`. -/
+/- The objects of `Condensed.{0} Ab.{1}` are indeed just sheaves in `proetale_topology`. -/
 example (F : Condensed.{0} Ab.{1}) : Profinite.{0}ᵒᵖ ⥤ Ab.{1} := F.1
 example (F : Condensed.{0} Ab.{1}) : presheaf.is_sheaf proetale_topology F.1 := F.2
 
