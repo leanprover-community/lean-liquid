@@ -1,6 +1,3 @@
-import challenge_notations
-import challenge_prerequisites
-
 import algebra.order.complete_field -- the theory of complete linearly ordered fields.
 
 /-!
