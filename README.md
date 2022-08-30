@@ -17,16 +17,17 @@ The formal system which we are using as a target system is Lean's dependent type
 
 ## Brief overview of the project
 
-Our interpretation of the blog post and TeX file was that the challenge was to formalise `Analytic 9.1` (i.e. Theorem 9.1 of the pdf) in Lean. We chose to use Lean 3 because of the advanced state of its classical mathematics library `mathlib`, an essential ingredient.
+The challenge in the blog post is to formalise its `Theorem 1.1`, a variant of `Analytic 9.1` (i.e. Theorem 9.1 of [`Analytic.pdf`](https://www.math.uni-bonn.de/people/scholze/Analytic.pdf)) in Lean.
+We chose to use Lean 3 because of the advanced state of its classical mathematics library `mathlib`, an essential ingredient.
 
 When the project started, it was immediately noticed that there was a "sub-boss" in the form of `Analytic 9.4`, a far more technical theorem involving a completely different class of objects and which Scholze was claiming was a sufficiently powerful stepping stone. The project then split intwo two sub-projects:
-"Prove `9.4`" and "Prove that `9.4` implies `9.1`".
+"Prove `Analytic 9.4`" and "Prove that `Analytic 9.4` implies `Theorem 1.1`".
 
 An important intermediate achievement was the completion of a [blueprint](https://leanprover-community.github.io/liquid/) for the proof of `9.4` and the related `9.5`. The blueprint was a guide which was comprehensible to mathematicians who had no Lean training, whilst also being a visual guide to where progress was needed during the formalisation process.
 
 The preliminary announcement of a proof of Theorem 9.4 was made on 28th May 2021, by Johan Commelin and his team from the Lean prover community.
 The second half of the project was [completed](https://leanprover-community.github.io/blog/posts/lte-final/) on 14th July 2022.
-Together, the two components give a formal verification of Theorem 9.1 of [`Analytic.pdf`](https://www.math.uni-bonn.de/people/scholze/Analytic.pdf).
+Together, the two components give a formal verification of Theorem 1.1 of the blogpost.
 
 ## The formal statement of `Analytic 9.4`.
 
@@ -42,7 +43,7 @@ theorem first_target :
 See [`src/liquid.lean`](https://github.com/leanprover-community/lean-liquid/blob/master/src/liquid.lean#40)
 for details on how to read this statement.
 
-## The formal statement of `Analytic 9.1`.
+## The formal statement of `Theorem 1.1`.
 
 The statement can be found in [`src/challenge.lean`](https://github.com/leanprover-community/lean-liquid/blob/master/src/challenge.lean#L28)
 
