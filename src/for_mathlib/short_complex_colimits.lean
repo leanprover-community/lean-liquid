@@ -171,28 +171,6 @@ instance zero_preserves_colimits_of_shape {D : Type*} [category D]:
     apply is_zero_zero,
   end, }⟩⟩
 
-/-
-lemma functor_homological_complex_π₁_iso_zero (i : M) (h : c.prev i = none) :
-  functor_homological_complex C c i ⋙ π₁ ≅ 0 :=
-begin
-  refine is_zero.iso _ (is_zero_zero _),
-  rw is_zero.iff_id_eq_zero,
-  ext X,
-  apply is_zero.eq_of_src,
-  exact is_zero.of_iso (is_zero_zero _) (X.X_prev_iso_zero h),
-end
-
-lemma functor_homological_complex_π₃_iso_zero (i : M) (h : c.next i = none) :
-  functor_homological_complex C c i ⋙ π₃ ≅ 0 :=
-begin
-  refine is_zero.iso _ (is_zero_zero _),
-  rw is_zero.iff_id_eq_zero,
-  ext X,
-  apply is_zero.eq_of_src,
-  exact is_zero.of_iso (is_zero_zero _) (X.X_next_iso_zero h),
-end
--/
-
 lemma functor_homological_complex_π₁_iso_eval (i j : M) (hij : c.rel j i) :
   functor_homological_complex C c i ⋙ π₁ ≅ homological_complex.eval C c j :=
 nat_iso.of_components (λ X, X.X_prev_iso hij)
