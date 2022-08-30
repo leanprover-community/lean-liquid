@@ -106,26 +106,13 @@ There are two pieces of functionality that help a lot when browsing through Lean
   If the Goal window is not open,
   you can open it by clicking on one of the icons in the top right hand corner.
 
-### Organization of the project
+### Important files in the project
 
 * All the Lean code (the juicy stuff) is contained in the directory `src/`.
-* The file `challenge.lean` contains the statement of the main theorem.
-* The ingredients that go into the theorem statement are defined in several other files.
-  The most important pieces are:
-  - `breen_deligne/basic.lean` contains an axiomatic definition
-    of the data describing a Breen--Deligne resolution.
-    It does *not* contain a formal proof of the Breen--Deligne resolution.
-    At some point we may formalize Breen--Deligne resolutions,
-    but this is not part of our first target.
-  - `system_of_complexes/` contains the definition of a system of complexes
-    of seminormed groups indexed by nonnegative real numbers.
-    It also contains the definition of `is_bounded_exact`,
-    which is the exactness condition claimed in the main theorem.
-  - `Lbar/*.lean` contains a definition of the spaces ![](svg/VhatLbar.svg)
-    and how they fit together in the system of complexes
-    that occurs in the statement of the theorem.
-
-TODO: add a brief overview of the contents of other directories.
+* The file `src/challenge.lean` contains the statement of the main theorem.
+* The file `src/liquid.lean` contains the statement of the first target (the first half of the project).
+* The directory `src/examples/` contains Lean files that explain the main ingredients in the statement of the main theorem.
+  These files should form convincing evidence that we did not make a mistake in formalizing any of these concepts.
 
 ## Brief note on type theory
 
