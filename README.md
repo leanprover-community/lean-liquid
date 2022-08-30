@@ -113,6 +113,7 @@ There are two pieces of functionality that help a lot when browsing through Lean
 * The file `src/liquid.lean` contains the statement of the first target (the first half of the project).
 * The directory `src/examples/` contains Lean files that explain the main ingredients in the statement of the main theorem.
   These files should form convincing evidence that we did not make a mistake in formalizing the necessary definitions.
+* The directory `src/for_mathlib/` contains preliminary material that is gradually being moved to mathlib, the main library of mathematics for Lean.
 
 ## Brief note on type theory
 
