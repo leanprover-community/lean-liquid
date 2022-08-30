@@ -26,7 +26,7 @@ An important intermediate achievement was the completion of a [blueprint](https:
 
 The preliminary announcement of a proof of Theorem 9.4 was made on 28th May 2021, by Johan Commelin and his team from the Lean prover community.
 The second half of the project was [completed](https://leanprover-community.github.io/blog/posts/lte-final/) on 14th July 2022.
-Together, the two components give a formal verification of Theorem 9.1.
+Together, the two components give a formal verification of Theorem 9.1 of [`Analytic.pdf`](https://www.math.uni-bonn.de/people/scholze/Analytic.pdf).
 
 ## The formal statement of `Analytic 9.4`.
 
@@ -112,7 +112,7 @@ There are two pieces of functionality that help a lot when browsing through Lean
 * The file `src/challenge.lean` contains the statement of the main theorem.
 * The file `src/liquid.lean` contains the statement of the first target (the first half of the project).
 * The directory `src/examples/` contains Lean files that explain the main ingredients in the statement of the main theorem.
-  These files should form convincing evidence that we did not make a mistake in formalizing any of these concepts.
+  These files should form convincing evidence that we did not make a mistake in formalizing the necessary definitions.
 
 ## Brief note on type theory
 
