@@ -39,24 +39,6 @@ homological_complex.eval _ c (c.prev i)
 def next_functor (i : M) : homological_complex C c ⥤ C :=
 homological_complex.eval _ c (c.next i)
 
-/-
-def prev_functor_is_zero (i : M) (h : c.prev i = i) : is_zero (prev_functor C c i) :=
-begin
-  rw is_zero.iff_id_eq_zero,
-  ext X,
-  apply is_zero.eq_of_src,
-  exact is_zero.of_iso (limits.is_zero_zero C) _,
-end
-
-def next_functor_is_zero (i : M) (h : c.next i = none) : is_zero (next_functor C c i) :=
-begin
-  rw is_zero.iff_id_eq_zero,
-  ext X,
-  apply is_zero.eq_of_src,
-  exact is_zero.of_iso (limits.is_zero_zero C) (X.X_next_iso_zero h),
-end
--/
-
 def prev_functor_iso_eval (i j : M) (hij : c.rel j i) :
   prev_functor C c i ≅ homological_complex.eval C c j :=
 nat_iso.of_components
