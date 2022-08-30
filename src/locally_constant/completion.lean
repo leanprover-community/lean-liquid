@@ -139,7 +139,7 @@ nat_iso.of_components
     delta LCC SemiNormedGroup.LCC,
     simp only [add_equiv.to_AddCommGroup_iso_hom, category_theory.comp_apply,
       add_equiv.coe_to_add_monoid_hom, add_equiv.apply_eq_iff_eq,
-      functor.comp_map, curry.obj_obj_map, uncurry.obj_map,
+      functor.comp_map, curry_obj_obj_map, uncurry_obj_map,
       category_theory.functor.map_id, nat_trans.id_app,
       SemiNormedGroup.LocallyConstant_obj_map,
       SemiNormedGroup.Completion_map],

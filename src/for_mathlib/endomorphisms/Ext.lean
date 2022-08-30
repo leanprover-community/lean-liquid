@@ -455,9 +455,6 @@ def congr_single_functor {p q : ℤ} (h : p = q) :
 
 variable {𝓐}
 
-def _root_.category_theory.functor.congr_map {C D : Type*} [category C] [category D]
-  (F : C ⥤ D) {X Y : C} {f g : X ⟶ Y} (h : f = g) : F.map f = F.map g := by rw h
-
 @[reassoc]
 lemma preadditive_yoneda_bifunctor_comm {C : Type*} [category C] [preadditive C]
   {X₁ X₂ : C} {Y₁ Y₂ : Cᵒᵖ} (f : X₁ ⟶ X₂) (g : Y₁ ⟶ Y₂) :

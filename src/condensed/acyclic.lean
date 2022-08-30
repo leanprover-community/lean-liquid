@@ -489,15 +489,12 @@ lemma cochain_complex.mono_of_is_zero_homology_0
   (C : cochain_complex 𝓐 ℕ) (h : is_zero $ C.homology 0) :
   mono (C.d 0 1) :=
 begin
-  delta homological_complex.homology at h,
-  simp only [homological_complex.d_to_eq_zero, cochain_complex.prev_nat_zero, eq_self_iff_true] at h,
-  have f := homology_iso_cokernel_lift (C.d_to 0) (C.d_from 0) (by simp),
-  simp only [homological_complex.d_to_eq_zero, cochain_complex.prev_nat_zero, eq_self_iff_true,
-    kernel.lift_zero] at f,
-  replace f := f ≪≫ limits.cokernel_zero_iso_target,
-  simp_rw [C.d_from_eq (show (complex_shape.up ℕ).rel 0 1, by simp)] at f h,
-  exact preadditive.mono_of_kernel_zero (is_zero.eq_of_src (is_zero.of_iso h
-    (f ≪≫ (kernel_comp_mono _ _)).symm) _ _)
+  replace h := exact_of_homology_is_zero h,
+  rw [C.d_from_eq (show (complex_shape.up ℕ).rel 0 1, by simp), exact_comp_iso] at h,
+  refine mono_of_exact_of_eq_zero _ _ _ _ _ h _,
+  rw homological_complex.d_to_eq_zero,
+  simp only [cochain_complex.prev_nat_zero, complex_shape.up_rel,
+      nat.one_ne_zero, not_false_iff],
 end
 
 lemma acyclic_of_exact.induction_step_ex₃

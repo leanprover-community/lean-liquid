@@ -34,14 +34,16 @@ def homotopy.to_single [decidable_eq ι] [decidable_rel c.rel] {X : homological_
     swap, { apply is_zero.eq_of_tgt, dsimp, rw if_neg hki, exact is_zero_zero _ },
     subst hki,
     rw [← d_next_eq_d_from_from_next, ← prev_d_eq_to_prev_d_to,
-      d_next_eq _ r, dif_pos r],
-    rw [d_next_eq _ r, dif_pos r, dif_pos rfl, H, X.X_eq_to_iso_refl, category.id_comp],
+      d_next_eq _ r, dif_pos r, dif_pos rfl, X.X_eq_to_iso_refl, category.id_comp, H],
     nth_rewrite_lhs 0 ← add_monoid.add_zero (X.d k j ≫ h ≫ eq_to_hom _),
     congr,
-    delta prev_d,
-    rcases c.prev k with (_|⟨i, _⟩); dsimp,
-    { refl },
-    { rw comp_zero, refl }
+    by_cases aux : c.rel (c.prev k) k,
+    { rw [prev_d_eq _ aux, dif_pos aux],
+      by_cases hk : c.prev k = k,
+      { rw [dif_pos hk, eq_comm], apply comp_zero },
+      { rw [dif_neg hk, zero_comp], refl, } },
+    { delta prev_d, dsimp only [add_monoid_hom.mk'_apply],
+      rw [dif_neg aux, zero_comp], refl }
   end }
 
 lemma homotopic_to_single_iff [decidable_eq ι] {X : homological_complex C c}
@@ -58,8 +60,8 @@ begin
   have := h.comm i,
   rw [d_next_eq _ r] at this,
   convert this,
-  delta prev_d,
-  rcases c.prev i with (_|⟨j, _⟩); dsimp; simp
+  delta prev_d, dsimp only [add_monoid_hom.mk'_apply],
+  rw eq_comm, apply comp_zero,
 end
 
 instance : decidable_rel (complex_shape.up ℤ).rel :=
@@ -435,15 +437,7 @@ begin
   { intros i j hij, rw [h.zero, unop_zero], exact hij },
   { intros i,
     conv_rhs { congr, rw add_comm, },
-    convert congr_arg quiver.hom.unop (h.comm i),
-    { dsimp [op_equiv, prev_d, d_next],
-      have hi := (complex_shape.up ℤ).next_eq_some (show i+1=i+1, by refl),
-      have hi' := (complex_shape.up ℤ).symm.prev_eq_some (show i+1=i+1, by refl),
-      simpa only [hi, hi'], },
-    { dsimp [op_equiv, prev_d, d_next],
-      have hi := (complex_shape.up ℤ).prev_eq_some (show i-1+1=i, by linarith),
-      have hi' := (complex_shape.up ℤ).symm.next_eq_some (show i-1+1=i, by linarith),
-      simpa only [hi, hi'], }, },
+    exact congr_arg quiver.hom.unop (h.comm i), },
 end
 
 def map_hom_complex_homology

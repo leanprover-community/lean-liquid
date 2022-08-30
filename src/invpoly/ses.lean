@@ -105,7 +105,7 @@ begin
   apply_fun (λ φ, φ s) at hf,
   simp only [Tinv2_nat_trans, Tinv_nat_trans, nat_trans.app_nsmul, nat_trans.id_app, sub_apply,
     nat_trans.app_sub, comphaus_filtered_pseudo_normed_group_hom.sub_apply,
-    pi.nsmul_apply, comphaus_filtered_pseudo_normed_group_hom.nsmul_apply,
+    pi.smul_apply, comphaus_filtered_pseudo_normed_group_hom.nsmul_apply,
     pi.sub_apply, pi.zero_apply] at hf,
   simp only [pi.zero_apply, polynomial.coeff_zero],
   induction n with n ih,
