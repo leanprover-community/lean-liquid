@@ -29,7 +29,7 @@ example : separated_space V := infer_instance
 We may *choose* a norm on the p-Banach space satisfying some properties
 which will be discussed below.
 
-NOTE: This is really *choice* that must be made, and we make this choice only within
+NOTE: This is really a *choice* that must be made, and we make this choice only within
 the present section.
 -/
 def pBanach.has_norm : has_norm V :=
@@ -38,11 +38,11 @@ def pBanach.has_norm : has_norm V :=
 /- We tell the typeclass system to use the norm chosen above. -/
 local attribute [instance] pBanach.has_norm
 
-/- The chosen norm on $V$ is a $p$-norm: it scales via the rule $∥rv∥ = |r|^p * ∥v∥$ -/
+/- The chosen norm on $V$ is a $p$-norm: it scales via the rule $∥rv∥ = |r|^p * ∥v∥$. -/
 example (r : ℝ) (v : V) : ∥r • v∥ = |r|^(p : ℝ) * ∥v∥ :=
 (p_banach.exists_p_norm V.p_banach').some.norm_smul r v
 
-/- The chosen norm on $V$ satisfies the triangle inequality -/
+/- The chosen norm on $V$ satisfies the triangle inequality. -/
 example (v w : V) : ∥v + w∥ ≤ ∥v∥ + ∥w∥ :=
 (p_banach.exists_p_norm V.p_banach').some.triangle v w
 
@@ -66,3 +66,38 @@ example (f : S → V) (hf : continuous f) : C(S,V) := ⟨f,hf⟩
 
 /- The group operation on `Γ_ V S` is pointwise addition, as expected. -/
 example (f g : Γ_ V S) (s : S) : (f + g) s = f s + g s := rfl
+
+/-- An example of a p-Banach space. -/
+example [fact (0 < p)] [fact (p ≤ 1)] : pBanach p :=
+pBanach.lp p
+
+/-- Elements of `pBanach.lp p` can be considered as functions `ℕ → ℝ`. -/
+example [fact (0 < p)] [fact (p ≤ 1)] (f : pBanach.lp p) : ℕ → ℝ :=
+λ i, f i
+
+/-- Given an element of `pBanach.lp p`, the infinite sum `∑' n, | f n |^p` exists. -/
+example [fact (0 < p)] [fact (p ≤ 1)] (f : pBanach.lp p) :
+  summable (λ n, | f n |^(p : ℝ)) :=
+pBanach.lp_type.summable f
+
+/-- The ℝ-module structure behaves as expected. -/
+example [fact (0 < p)] [fact (p ≤ 1)] (f g : pBanach.lp p) (n : ℕ) :
+  (f + g) n = f n + g n := rfl
+
+example [fact (0 < p)] [fact (p ≤ 1)] (a : ℝ) (f : pBanach.lp p) (n : ℕ) :
+  (a • f) n = a * f n := rfl
+
+/-- Conversely, we can construct elements of `pBanach.lp p` using sequences where the
+  sum above exists. -/
+example [fact (0 < p)] [fact (p ≤ 1)] (f : ℕ → ℝ) (hf : summable (λ n, | f n |^(p : ℝ))) :
+  pBanach.lp p :=
+{ val := f,
+  property := begin
+    change ite _ _ _,
+    rw if_neg, rw if_neg, assumption,
+    exact ennreal.coe_ne_top,
+    exact (ne_of_gt $ by exact_mod_cast (fact.out (0 < p))),
+  end }
+
+/-- `pBanach.lp p` is nontrivial. -/
+example [fact (0 < p)] [fact (p ≤ 1)] : nontrivial (pBanach.lp p) := infer_instance
