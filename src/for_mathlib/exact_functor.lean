@@ -209,7 +209,7 @@ def naturality_homology_nat_iso_app (S : short_complex A) :
     F.homology_nat_iso.hom.app S ≫
       short_complex.homology_functor.map (φ.map_short_complex.app S) :=
 begin
-  let h := (homology_iso_datum.tautological' S.val.f S.val.g S.zero),
+  let h := (homology_iso_datum.tautological' S.obj.f S.obj.g S.zero),
   simpa [← cancel_epi (h.apply_exact_functor F).iso.hom, iso.hom_inv_id_assoc]
     using (h.map_nat_trans φ).homology_map_eq.symm,
 end
