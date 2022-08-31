@@ -169,7 +169,7 @@ lemma homology_zero_of_eval
 begin
   rw ← chain_complex.epi_and_exact_iff_zero_homology',
   split,
-  { apply_with nat_trans.epi_app_of_epi { instances := ff },
+  { apply_with nat_trans.epi_of_epi_app { instances := ff },
     intros X,
     specialize h X,
     rw ← chain_complex.epi_and_exact_iff_zero_homology' at h,

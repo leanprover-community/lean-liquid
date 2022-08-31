@@ -34,7 +34,7 @@ begin
   constructor,
   intros α X Y f hf,
   let t := _, change mono t,
-  rw category_theory.nat_trans.mono_iff_app_mono,
+  rw category_theory.nat_trans.mono_iff_mono_app,
   intros c,
   let eX : (∐ λ (a : α), X a).obj c ≅ (∐ λ (a : α), (X a).obj c) :=
     (is_colimit_of_preserves ((evaluation _ _).obj c)
@@ -49,7 +49,7 @@ begin
   haveI : mono tt,
   { dsimp [tt],
     apply AB4.cond, intros a, specialize hf a,
-    rw category_theory.nat_trans.mono_iff_app_mono at hf,
+    rw category_theory.nat_trans.mono_iff_mono_app at hf,
     apply hf },
   suffices : t.app c = eX.hom ≫ tt ≫ eY.inv,
   { rw this, apply_instance },

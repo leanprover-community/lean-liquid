@@ -301,7 +301,7 @@ begin
   refine ⟨F₁, F₀, _, _, f.to_add_monoid_hom, g.to_add_monoid_hom, _⟩,
   { dsimp [F₁, F],
     exact submodule.free_of_pid_of_free, },
-  { exact module.free.finsupp.free ℤ },
+  { exact module.free.finsupp _ _ _ },
   { apply_with short_exact.mk {instances:=ff},
     { rw AddCommGroup.mono_iff_injective, apply subtype.val_injective },
     { rw AddCommGroup.epi_iff_surjective, apply finsupp.total_id_surjective },
