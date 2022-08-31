@@ -315,7 +315,7 @@ begin
   refl,
 end
 
-def embed_eval_is_zero_of_none (i' : ι') (hi' : e.r i' = none) :
+lemma embed_eval_is_zero_of_none (i' : ι') (hi' : e.r i' = none) :
   is_zero (embed e ⋙ homological_complex.eval 𝒞 _ i') :=
 begin
   rw functor.is_zero_iff,
@@ -648,8 +648,7 @@ end
 -/
 
 variables (𝓐 : Type*) [category 𝓐] [abelian 𝓐] (e : c₁.embedding c₂)
-  (i₁ : ι₁) (i₂ : ι₂) (h₁₂ : e.f i₁ = i₂)
-include h₁₂
+  (i₁ : ι₁) (i₂ : ι₂)
 
 @[simp]
 def embed_short_complex_π₁_ι :
@@ -662,7 +661,7 @@ begin
 end
 
 @[simp]
-def embed_short_complex_π₂_iso :
+def embed_short_complex_π₂_iso (h₁₂ : e.f i₁ = i₂) :
   embed e ⋙ short_complex.functor_homological_complex 𝓐 c₂ i₂ ⋙ short_complex.π₂ ≅
   short_complex.functor_homological_complex 𝓐 c₁ i₁ ⋙ short_complex.π₂ :=
 embed_eval_iso_of_some e i₂ i₁ (by { rw [← h₁₂, e.r_f],})
@@ -678,18 +677,18 @@ begin
 end
 
 -- @[simps]
-def embed_short_complex_ι :
+def embed_short_complex_ι (h₁₂ : e.f i₁ = i₂) :
   embed e ⋙ short_complex.functor_homological_complex 𝓐 c₂ i₂ ⟶
   short_complex.functor_homological_complex 𝓐 c₁ i₁ :=
 short_complex.nat_trans_hom_mk
-  (embed_short_complex_π₁_ι 𝓐 e _ _ h₁₂)
+  (embed_short_complex_π₁_ι 𝓐 e _ _)
   (embed_short_complex_π₂_iso 𝓐 e _ _ h₁₂).hom
-  (embed_short_complex_π₃_ι 𝓐 e _ _ h₁₂)
+  (embed_short_complex_π₃_ι 𝓐 e _ _)
 begin
   ext X,
   subst h₁₂,
   show (((embed e).obj X).d_to (e.f i₁) ≫ 𝟙 (((embed e).obj X).X (e.f i₁))) ≫ (embed.X_iso_of_some X _).hom =
-    (embed_short_complex_π₁_ι 𝓐 e i₁ (e.f i₁) _).app X ≫ X.d_to i₁ ≫ 𝟙 (X.X i₁),
+    (embed_short_complex_π₁_ι 𝓐 e i₁ (e.f i₁)).app X ≫ X.d_to i₁ ≫ 𝟙 (X.X i₁),
   simp only [embed_short_complex_π₁_ι, category.comp_id],
   split_ifs with h,
   { show embed.d X (e.r (c₂.prev (e.f i₁))) (e.r (e.f i₁)) ≫ (embed.X_iso_of_some X _).hom =
@@ -757,13 +756,13 @@ begin
 end
 
 @[simps]
-def embed_short_complex_π :
+def embed_short_complex_π (h₁₂ : e.f i₁ = i₂) :
   short_complex.functor_homological_complex 𝓐 c₁ i₁ ⟶
   embed e ⋙ short_complex.functor_homological_complex 𝓐 c₂ i₂ :=
 short_complex.nat_trans_hom_mk
-  (embed_short_complex_π₁_π 𝓐 e _ _ h₁₂)
+  (embed_short_complex_π₁_π 𝓐 e _ _)
   (embed_short_complex_π₂_iso 𝓐 e _ _ h₁₂).inv
-  (embed_short_complex_π₃_π 𝓐 e _ _ h₁₂)
+  (embed_short_complex_π₃_π 𝓐 e _ _)
 begin
   ext X,
   show (X.d_to i₁ ≫ 𝟙 (X.X i₁)) ≫ (embed.X_iso_of_some X _).inv =
@@ -813,7 +812,7 @@ begin
       exact h h₂, }, },
 end
 
-def homology_embed_nat_iso  :
+def homology_embed_nat_iso (h₁₂ : e.f i₁ = i₂) :
   embed e ⋙ homology_functor 𝓐 c₂ i₂ ≅ homology_functor 𝓐 c₁ i₁ :=
 { hom := embed_short_complex_ι 𝓐 e i₁ i₂ h₁₂ ◫ (𝟙 short_complex.homology_functor),
   inv := embed_short_complex_π 𝓐 e i₁ i₂ h₁₂ ◫ (𝟙 short_complex.homology_functor),

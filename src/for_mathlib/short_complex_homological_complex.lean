@@ -28,7 +28,7 @@ end category_theory
 
 namespace homological_complex
 
-variables (C : Type*) [category C] [has_zero_morphisms C] [has_zero_object C]
+variables (C : Type*) [category C] [has_zero_morphisms C]
   {M : Type*} (c : complex_shape M)
 
 @[simps]

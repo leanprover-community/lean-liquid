@@ -40,7 +40,7 @@ open category_theory
 
 namespace homological_complex
 
-variables [has_zero_morphisms C] [has_zero_object C] {M : Type*} {c : complex_shape M}
+variables [has_zero_morphisms C] {M : Type*} {c : complex_shape M}
 
 lemma prev_id (X : homological_complex C c) (i : M) : hom.prev (𝟙 X) i = 𝟙 (X.X_prev i) := rfl
 

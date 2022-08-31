@@ -8,7 +8,6 @@ universes v
 open category_theory category_theory.limits
 
 variables {C D : Type*} [category C] [category D]
-variables [has_zero_object C] [has_zero_object D]
 variables {M : Type*} {c : complex_shape M}
 
 namespace category_theory

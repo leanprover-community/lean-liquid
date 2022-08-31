@@ -244,7 +244,7 @@ is_iso_of_op (cokernel.desc f g h.w)
 -- move
 lemma sq_from_epi_of_epi {ι : Type*} {V : Type*} [_inst_1 : category V] [_inst_2 : abelian V]
   {c : complex_shape ι}
-  {C₁ C₂ : homological_complex V c} [_inst_3 : has_zero_object V] (φ : C₁.hom C₂) (i : ι)
+  {C₁ C₂ : homological_complex V c} (φ : C₁.hom C₂) (i : ι)
   (h2 : is_zero (C₂.X_next i)) [epi (φ.f i)] :
 epi (homological_complex.hom.sq_from φ i) :=
 ⟨begin

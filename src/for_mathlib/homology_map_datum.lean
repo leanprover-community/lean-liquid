@@ -119,7 +119,7 @@ end homology_map_datum
 
 namespace short_complex
 
-lemma homology_functor_map_eq_id [abelian C] {K : short_complex C}
+lemma homology_functor_map_eq_id {K : short_complex C}
   (φ : K ⟶ K) (hφ : φ.τ₂ = 𝟙 K.obj.Y) : homology_functor.map φ = 𝟙 _ :=
 begin
   let μ : homology_map_datum φ (homology_iso_datum.tautological' _ _ K.2)

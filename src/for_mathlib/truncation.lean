@@ -286,7 +286,7 @@ by simp [ι_succ, map_of_le]
 
 --move
 lemma _root_.homological_complex.d_from_eq_d_comp_X_next_iso_inv {ι V : Type*} [category V]
-  [has_zero_morphisms V] {c : complex_shape ι} (C : homological_complex V c) [has_zero_object V]
+  [has_zero_morphisms V] {c : complex_shape ι} (C : homological_complex V c)
     {i j : ι} (r : c.rel i j) :
   C.d_from i = C.d i j ≫ (C.X_next_iso r).inv :=
 by simp [C.d_from_eq r]

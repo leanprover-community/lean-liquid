@@ -35,7 +35,7 @@ def contracting_homotopy' : homotopy (𝟙 (f.conerve M).to_cocomplex) 0 :=
       simp only [eq_self_iff_true, dif_pos, eq_to_hom_refl, category.id_comp, add_zero], },
   end }
 
-variables [has_equalizers N] [has_cokernels N] [has_images N] [has_image_maps N] [has_zero_object N]
+variables [has_equalizers N] [has_cokernels N] [has_images N] [has_image_maps N]
 
 lemma conerve_to_cocomplex_homology_is_zero (i : ℕ) :
   is_zero ((f.conerve M).to_cocomplex.homology i) :=
