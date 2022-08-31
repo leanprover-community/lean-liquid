@@ -17,23 +17,6 @@ variables (C)
 @[derive category]
 def short_complex [has_zero_morphisms C] := full_subcategory $ λ S : composable_morphisms C, S.zero
 
-variables {C}
-
-namespace category_theory
-
-namespace arrow
-
-namespace hom
-
-lemma congr_left {f g : arrow C} {φ₁ φ₂ : f ⟶ g} (h : φ₁ = φ₂) : φ₁.left = φ₂.left := by rw h
-lemma congr_right {f g : arrow C} {φ₁ φ₂ : f ⟶ g} (h : φ₁ = φ₂) : φ₁.right = φ₂.right := by rw h
-
-end hom
-
-end arrow
-
-end category_theory
-
 end
 
 open category_theory

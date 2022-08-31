@@ -368,15 +368,13 @@ def homeo_box_ϖ : (box S c) ≃ₜ Π (s : S), (filtration (ℳ ϖ) c) :=
     apply continuous_pi,
     intro s,
     dsimp only [equiv_box_ϖ, seval_ℳ],
-    refine continuous.subtype_mk (λ (x : box p S c), equiv_box_ϖ._proof_3 p S c x s)
-      (continuous_pi (λ (i : ↥(Fintype.of punit)), _)),
+    refine continuous.subtype_mk (continuous_pi $ λ i, _) _,
     exact continuous_pi_iff.mp continuous_induced_dom s,
   end,
   continuous_inv_fun :=
   begin
     dsimp only [equiv_box_ϖ, seval_ℳ],
-    refine continuous.subtype_mk (λ (x : ↥S → ↥(filtration (real_measures p (Fintype.of punit)) c)),
-      equiv_box_ϖ._proof_4 p S c x) _,
+    refine continuous.subtype_mk _ _,
     apply continuous_pi,
     intro s,
     have h : continuous (λ (a : S → (filtration (ℳ ϖ) c)), (a s).val)
@@ -509,9 +507,9 @@ begin
   { intro b,
     rw [norm_mul, mul_pow, mul_comm ((2⁻¹ : ℝ) ^ b.1) _, ← mul_assoc],
     rw [norm_pow, norm_inv, real.norm_two ],
-    apply (mul_le_mul_right _).mpr,
-    apply mem_filtration_le_monomial p c F,
-    simp only [one_div, inv_pos, pow_pos, zero_lt_bit0, zero_lt_one] },
+    refine (mul_le_mul_right _).mpr _,
+    { simp only [one_div, inv_pos, pow_pos, zero_lt_bit0, zero_lt_one] },
+    { apply mem_filtration_le_monomial p c F } },
   swap,
   { by_cases hc : (c : ℝ) ≠ 0,
     { rw [← summable_mul_left_iff hc],

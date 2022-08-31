@@ -174,7 +174,7 @@ begin
     have hmn : n = m := by { rw hm, exact int.eq_nat_abs_of_zero_le hn },
     rw hmn,
     norm_cast,
-    apply pow_le_pow_of_le, clear hn hmn hm m n,
+    apply pow_le_pow_of_le_left', clear hn hmn hm m n,
     apply nnreal.le_self_rpow' (two_inv_lt_one.le),
     norm_cast,
     exact fact.out _,
