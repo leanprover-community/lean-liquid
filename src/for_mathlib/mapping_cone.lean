@@ -290,7 +290,7 @@ def cone.lift_of_null_homotopic (h : homotopy (f ≫ g) 0) : A ⟶ cone g⟦(-1 
   cone.map (h.trans (homotopy.of_eq (comp_zero.symm : 0 = 0 ≫ 0))).symm)
 
 @[simps]
-def of_termwise_split_mono [H : ∀ i, split_mono (f.f i)] : B ⟶ B' :=
+def of_termwise_split_mono (H : ∀ i, split_mono (f.f i)) : B ⟶ B' :=
 { f := λ i, i₂.f i - (H i).retraction ≫ comm.hom i (i-1) ≫ B'.d (i-1) i -
     B.d i (i+1) ≫ (H (i+1)).retraction ≫ comm.hom (i+1) i,
   comm' := λ i j (r : i + 1 = j), by { subst r, simp only [d_comp_d, sub_zero, category.assoc,
@@ -298,8 +298,8 @@ def of_termwise_split_mono [H : ∀ i, split_mono (f.f i)] : B ⟶ B' :=
     d_comp_d_assoc], congr; ring } }
 
 @[simp, reassoc]
-lemma of_termwise_split_mono_commutes [H : ∀ i, split_mono (f.f i)] :
-  f ≫ of_termwise_split_mono comm = i₁ ≫ f' :=
+lemma of_termwise_split_mono_commutes (H : ∀ i, split_mono (f.f i)) :
+  f ≫ of_termwise_split_mono comm H = i₁ ≫ f' :=
 begin
   ext i,
   dsimp,
@@ -314,8 +314,8 @@ begin
   simp [add_right_comm]
 end
 
-def of_termwise_split_mono_homotopy [H : ∀ i, split_mono (f.f i)] :
-  homotopy i₂ (of_termwise_split_mono comm)  :=
+def of_termwise_split_mono_homotopy (H : ∀ i, split_mono (f.f i)) :
+  homotopy i₂ (of_termwise_split_mono comm H)  :=
 { hom := λ i j, (H i).retraction ≫ comm.hom i j,
   zero' := λ _ _ r, by rw [comm.zero _ _ r, comp_zero],
   comm := λ i, begin
@@ -324,7 +324,7 @@ def of_termwise_split_mono_homotopy [H : ∀ i, split_mono (f.f i)] :
   end }
 
 @[simps]
-def of_termwise_split_epi [H : ∀ i, split_epi (f'.f i)] : A ⟶ A' :=
+def of_termwise_split_epi (H : ∀ i, split_epi (f'.f i)) : A ⟶ A' :=
 { f := λ i, i₁.f i + comm.hom i (i-1) ≫ (H (i-1)).section_ ≫ A'.d (i-1) i +
     A.d i (i+1) ≫ comm.hom (i+1) i ≫ (H i).section_,
   comm' := λ i j (r : i + 1 = j), by { subst r, simp only [add_zero, d_comp_d, preadditive.comp_add,
@@ -332,8 +332,8 @@ def of_termwise_split_epi [H : ∀ i, split_epi (f'.f i)] : A ⟶ A' :=
     d_comp_d_assoc], congr; ring } }
 
 @[simp, reassoc]
-lemma of_termwise_split_epi_commutes [H : ∀ i, split_epi (f'.f i)] :
-  of_termwise_split_epi comm ≫ f' = f ≫ i₂ :=
+lemma of_termwise_split_epi_commutes (H : ∀ i, split_epi (f'.f i)) :
+  of_termwise_split_epi comm H ≫ f' = f ≫ i₂ :=
 begin
   ext i,
   dsimp,
@@ -348,8 +348,8 @@ begin
   rw [add_comm, add_comm (i₁.f i ≫ f'.f i), ← add_assoc, category.comp_id]
 end
 
-def of_termwise_split_epi_homotopy [H : ∀ i, split_epi (f'.f i)] :
-  homotopy (of_termwise_split_epi comm) i₁ :=
+def of_termwise_split_epi_homotopy (H : ∀ i, split_epi (f'.f i)) :
+  homotopy (of_termwise_split_epi comm H) i₁ :=
 { hom := λ i j, comm.hom i j ≫ (H j).section_,
   zero' := λ _ _ r, by rw [comm.zero _ _ r, zero_comp],
   comm := λ i, begin
@@ -415,7 +415,8 @@ def termwise_split_mono_desc_section (f : A ⟶ B) :
       X_eq_to_iso_d, X_eq_to_iso_trans, X_eq_to_iso_refl],
   end }
 
-instance (f : A ⟶ B) (i : ℤ) : split_mono ((termwise_split_mono_lift f).f i) :=
+def termwise_split_mono_lift_split_mono (f : A ⟶ B) (i : ℤ) :
+  split_mono ((termwise_split_mono_lift f).f i) :=
 { retraction := biprod.snd ≫ biprod.snd, id' := by simp [cone.in] }
 
 -- generalize to epi
@@ -504,7 +505,8 @@ def termwise_split_epi_retraction_lift (f : A ⟶ B) :
     all_goals { refl }
   end }
 
-instance (f : A ⟶ B) (i : ℤ) : split_epi ((termwise_split_epi_desc f).f i) :=
+def termwise_split_epi_desc_split_epi (f : A ⟶ B) (i : ℤ) :
+  split_epi ((termwise_split_epi_desc f).f i) :=
 { section_ := (B.X_eq_to_iso $ eq_add_neg_of_add_eq rfl).hom ≫ biprod.inl ≫ biprod.inr,
   id' := by { dsimp, simp [cone.out] } }
 
@@ -612,19 +614,19 @@ A - f → B - g → C
 -/
 def comp_null_homotopic_of_row_split_exact : homotopy (b' ≫ b) 0 :=
 begin
-  haveI := λ i, (H₂ i).split_epi,
-  haveI := λ i, (H₂ i).split_mono,
+  have H1 := λ i, (H₂ i).split_epi,
+  have H2 := λ i, (H₂ i).split_mono,
   have aux := λ i, (H₂ i).short_exact.3,
   let h₁' := (h₂.trans (homotopy.of_eq (comp_zero : 𝟙 _ ≫ 0 = 0).symm)).symm,
   let h₂' := (h₃.trans $ homotopy.of_eq (zero_comp : 0 ≫ 𝟙 _ = 0).symm),
-  refine ((of_termwise_split_epi_homotopy h₁').symm.comp
-    (of_termwise_split_mono_homotopy h₂')).trans (homotopy.of_eq _),
+  refine ((of_termwise_split_epi_homotopy h₁' H1).symm.comp
+    (of_termwise_split_mono_homotopy h₂' H2)).trans (homotopy.of_eq _),
   apply hom.ext,
   apply funext,
   intro i,
   exact comp_eq_zero_of_exact (f.f i) (g.f i) (aux i)
-    (congr_f ((of_termwise_split_epi_commutes h₁').trans comp_zero) i)
-    (congr_f ((of_termwise_split_mono_commutes h₂').trans zero_comp) i)
+    (congr_f ((of_termwise_split_epi_commutes h₁' H1).trans comp_zero) i)
+    (congr_f ((of_termwise_split_mono_commutes h₂' H2).trans zero_comp) i)
 end
 
 end
@@ -738,17 +740,17 @@ def termwise_split_to_cone (h : ∀ i, splitting (f.f i) (g.f i)) :
 { f := λ i, biprod.lift (-(connecting_hom f g h).f i) ((h i).section),
   comm' := begin
     rintro i j (rfl : i + 1 = j),
-    haveI := λ i, (h i).split_epi,
-    haveI := λ i, (h i).split_mono,
+    have He := λ i, (h i).split_epi,
+    have Hm := λ i, (h i).split_mono,
     ext,
     { dsimp [cone.d],
       rw ← cancel_epi (g.f _),
       { simp [g.comm, splitting.π_section_eq_id_sub_assoc] },
-      { apply_instance } },
+      { exact (He _).epi } },
     { dsimp [cone.d],
       rw ← cancel_epi (g.f _),
       { simp [splitting.π_section_eq_id_sub_assoc, splitting.π_section_eq_id_sub] },
-      { apply_instance } },
+      { exact (Hm _).mono } },
   end }
 
 @[simps]

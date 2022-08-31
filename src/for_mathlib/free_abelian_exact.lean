@@ -192,7 +192,7 @@ lemma exact_σπ_induction (a : free_abelian_group A) (ha : free_abelian_group.l
   ∃ x, free_abelian_group.σπ A x = a :=
 begin
   induction n with n ih generalizing a,
-  { simp only [nat.le_zero_iff, norm_eq_zero_iff] at hn, subst a, exact ⟨0, _root_.map_zero _⟩ },
+  { simp only [le_zero_iff, norm_eq_zero_iff] at hn, subst a, exact ⟨0, _root_.map_zero _⟩ },
   erw [nat.le_add_one_iff] at hn, cases hn with hn hn, { exact ih a ha hn },
   cases n,
   { rw [norm_eq_one_iff] at hn, rcases hn with ⟨a, (rfl|rfl)⟩,
