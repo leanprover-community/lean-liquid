@@ -205,7 +205,7 @@ begin
     apply add_lt_add,
     apply add_lt_add,
     { refine lt_of_le_of_lt _ Hδ₁,
-      apply mul_le_mul (le_refl _),
+      refine mul_le_mul (le_refl _) _ _ _,
       rw inf_assoc,
       apply inf_le_left,
       rw le_inf_iff, split,

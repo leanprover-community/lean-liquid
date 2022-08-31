@@ -123,7 +123,7 @@ add_monoid_hom.mk'
 begin
   intros f g,
   simp only [matrix.kronecker_add, matrix.reindex_linear_equiv_apply,
-    matrix.reindex_apply, matrix.minor_add, dmatrix.add_apply],
+    matrix.reindex_apply, matrix.submatrix_add, dmatrix.add_apply],
 end
 
 lemma mul_apply (N : ℕ) (f : basic_universal_map m n) :
@@ -139,7 +139,7 @@ begin
   rw function.funext_iff at H,
   specialize H (fin_prod_fin_equiv (⟨0, hN⟩, j)),
   dsimp only [basic_universal_map.mul, matrix.kronecker_map, add_monoid_hom.mk'_apply,
-    matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.minor_apply] at H,
+    matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.submatrix_apply] at H,
   simpa only [one_mul, equiv.symm_apply_apply, matrix.one_apply_eq] using H,
 end
 
@@ -218,7 +218,7 @@ begin
   ℕ _   (equiv.punit_prod (fin n)) (equiv.punit_prod (fin m)))
     ((1 : matrix punit.{1} punit.{1} ℤ) ⊗ₖ f),
   { ext i j,
-    simp only [matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.minor_apply,
+    simp only [matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.submatrix_apply,
       equiv.punit_prod_symm_apply, matrix.kronecker, matrix.kronecker_apply,
       matrix.one_apply_eq, one_mul] },
   conv_rhs { rw this },
@@ -268,9 +268,9 @@ begin
   rw [matrix.reindex_linear_equiv_mul, ← matrix.mul_kronecker_mul, matrix.one_mul,
     matrix.mul_one, matrix.mul_reindex_linear_equiv_one],
   simp only [matrix.reindex_linear_equiv_apply, matrix.reindex_apply, function.comp.right_id,
-    matrix.minor_minor, equiv.refl_symm, equiv.coe_refl],
+    matrix.submatrix_submatrix, equiv.refl_symm, equiv.coe_refl],
   ext x y,
-  dsimp [matrix.minor, - fin_prod_fin_equiv_symm_apply],
+  dsimp [matrix.submatrix, - fin_prod_fin_equiv_symm_apply],
   rw [matrix.one_apply, matrix.one_apply],
   simp only [mul_boole, mul_ite, mul_zero, equiv.symm_apply_apply, mul_one],
   congr' 2,

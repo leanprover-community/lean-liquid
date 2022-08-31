@@ -465,7 +465,7 @@ begin
       [rw biprod.lift_fst, rw biprod.lift_snd];
       rw [biproduct.lift_π, biproduct.lift_π, biproduct.lift_π,
         biproduct.ι_π, basic_universal_map.mul_apply, matrix.reindex_linear_equiv_apply,
-        matrix.reindex_apply, matrix.minor_apply,
+        matrix.reindex_apply, matrix.submatrix_apply,
         matrix.kronecker_map, equiv.symm_apply_apply, equiv.symm_apply_apply];
       simp only [dite_eq_ite, equiv.apply_eq_iff_eq, and_true, prod.mk.inj_iff,
         eq_self_iff_true, eq_to_hom_refl, matrix.one_apply,
@@ -526,7 +526,7 @@ begin
   dsimp only [basic_universal_map.eval_Pow_app],
   rw [biproduct.matrix_π, biproduct.matrix_π, biproduct.ι_desc, biproduct.ι_desc],
   dsimp only [basic_universal_map.proj, basic_universal_map.proj_aux,
-    matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.minor,
+    matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.submatrix,
     matrix.kronecker_map, matrix.of_apply],
   simp only [ite_mul, ite_smul, one_mul, one_smul, zero_mul, zero_smul, matrix.one_apply],
   rw [← ite_and],

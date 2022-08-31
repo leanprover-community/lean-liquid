@@ -152,7 +152,7 @@ def Radon_LC (S : cone (X.diagram ⋙ Radon_LC_functor p c)) (t : S.X) :
 lemma continuous_Radon_LC (S : cone (X.diagram ⋙ Radon_LC_functor p c)) :
   continuous (Radon_LC X p c S) :=
 begin
-  apply continuous_subtype_mk,
+  apply continuous.subtype_mk,
   apply weak_dual.continuous_of_continuous_eval,
   intros e, dsimp [weak_dual, linear_map],
   refine continuous.comp (weak_dual.eval_continuous _) _,

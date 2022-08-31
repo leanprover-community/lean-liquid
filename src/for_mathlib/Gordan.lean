@@ -1,7 +1,7 @@
-import topology.continuous_function.algebra
 import data.int.interval
-import ring_theory.finiteness
 import linear_algebra.free_module.finite.basic
+import ring_theory.finiteness
+import topology.continuous_function.algebra
 
 import for_mathlib.nnrat
 import for_mathlib.rational_cones
@@ -16,8 +16,7 @@ universe u
 variables {Λ : Type u} [add_comm_group Λ]
 variable {ι : Type*}
 
-open_locale big_operators
-open_locale nnreal
+open_locale big_operators nnrat
 
 def explicit_dual_set (l : ι → Λ) : submodule ℕ (Λ →+ ℤ) :=
 { carrier := {x | ∀ i, 0 ≤ x (l i)},
@@ -92,7 +91,8 @@ variables {α : Type*}
 def to_rational_point : (α → ℤ) →ₗ[ℤ] (α → ℚ) :=
 { to_fun := λ f x, f x,
   map_add' := λ f g, by { ext1 x, simp only [int.cast_add, pi.add_apply] },
-  map_smul' := λ m f, by { ext1 x, simp only [zsmul_eq_mul, pi.mul_apply, int.cast_mul, ring_hom.eq_int_cast, int.cast_id, mul_eq_mul_right_iff, int.cast_eq_zero], left, refl } }
+  map_smul' := λ m f, by { ext1 x, simp only [zsmul_eq_mul, pi.mul_apply, int.cast_mul, eq_int_cast,
+    mul_eq_mul_right_iff, int.cast_eq_zero], left, refl } }
 
 @[simp] lemma to_rational_point_apply (x : α → ℤ) (i : α) :
   to_rational_point x i = x i := rfl

@@ -339,7 +339,8 @@ end
 instance {C D : Type*} [category C] [category D] {F : C ⥤ D}
   {G : D ⥤ C} (adj : F ⊣ G) [faithful G] (X : D) : epi (adj.counit.app X) :=
 begin
-  haveI : split_epi (G.map (adj.counit.app X)) := ⟨_, adj.right_triangle_components⟩,
+  have H : split_epi (G.map (adj.counit.app X)) := ⟨_, adj.right_triangle_components⟩,
+  haveI := H.epi,
   exact G.epi_of_epi_map infer_instance
 end
 
@@ -405,7 +406,8 @@ def zmod_resolution_pi :
       simp only [chain_complex.mk'_d_1_0, add_monoid_hom.coe_smul, pi.smul_apply, id_apply,
         nsmul_one, int.coe_nat_bit0, int.coe_nat_succ, int.coe_nat_zero, zero_add, int.cast_bit0,
         int.cast_one, map_nsmul],
-      simp only [ring_hom.coe_add_monoid_hom, ring_hom.eq_int_cast, int.cast_one, nsmul_one, zmod.nat_cast_self], },
+      simp only [ring_hom.coe_add_monoid_hom, eq_int_cast,
+        int.cast_one, nsmul_one, zmod.nat_cast_self] },
     { exact comp_zero.trans comp_zero.symm }
   end }
 

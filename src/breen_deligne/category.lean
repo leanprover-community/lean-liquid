@@ -80,7 +80,7 @@ def mul_functor (N : ℕ) : FreeMat ⥤ FreeMat :=
   begin
     dsimp [basic_universal_map.mul, basic_universal_map.id],
     ext i j,
-    simp only [matrix.one_kronecker_one, matrix.minor_apply, matrix.one_apply,
+    simp only [matrix.one_kronecker_one, matrix.submatrix_apply, matrix.one_apply,
       equiv.apply_eq_iff_eq, eq_self_iff_true],
   end,
   map_comp' := λ l m n f g, mul_comp _ _ _ }

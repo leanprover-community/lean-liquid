@@ -188,7 +188,7 @@ begin
       rw ← this,
       apply (K.map e).map_Tinv },
     have : continuous G,
-    { apply continuous_subtype_mk,
+    { apply continuous.subtype_mk,
       apply continuous_pi,
       intros i,
       let G1 : cone_point_type_filt (K ⋙ PFPNGT₁_to_PFPNG₁ₑₗ _ ⋙ PFPNG₁_to_CHFPNG₁ₑₗ) c →

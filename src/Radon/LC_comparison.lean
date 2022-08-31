@@ -243,7 +243,7 @@ lemma continuous_Radon_LC_comparison_component_equiv_symm
   [fact (0 < p)] [fact (p ≤ 1)] :
   continuous (X.Radon_LC_comparison_component_equiv T p c).symm :=
 begin
-  apply continuous_subtype_mk,
+  apply continuous.subtype_mk,
   apply weak_dual.continuous_of_continuous_eval,
   intros y,
   apply continuous_finset_sum,

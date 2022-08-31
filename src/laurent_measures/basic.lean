@@ -600,7 +600,7 @@ begin
   { intros hf A, continuity },
   { intros h,
     rw ← (laurent_measures_bdd_homeo r S c).comp_continuous_iff,
-    apply continuous_subtype_mk,
+    apply continuous.subtype_mk,
     apply continuous_pi,
     intros A,
     apply h }

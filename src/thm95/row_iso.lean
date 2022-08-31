@@ -312,7 +312,7 @@ begin
     function.uncurry, equiv.prod_comm_symm, equiv.prod_comm_apply, prod.fst_swap, prod.snd_swap],
   rw [← fin_prod_fin_equiv.sum_comp], swap, { apply_instance },
   simp only [basic_universal_map.proj,
-    matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.minor_apply,
+    matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.submatrix_apply,
     equiv.punit_prod_symm_apply, matrix.kronecker, matrix.one_apply,
     basic_universal_map.proj_aux, equiv.symm_apply_apply,
     boole_mul, ← ite_and, @eq_comm _ i, boole_mul, matrix.kronecker_map, subtype.val_eq_coe],

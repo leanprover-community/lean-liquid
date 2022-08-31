@@ -20,14 +20,14 @@ lemma split_epi_of_is_zero {X Y : V} (f : X ⟶ Y) (h : is_zero Y) : split_epi f
 ⟨0, by simp [is_zero_iff_id_eq_zero.mp h]⟩
 
 lemma epi_of_is_zero {X Y : V} (f : X ⟶ Y) (h : is_zero Y) : epi f :=
-@@split_epi.epi _ _ (split_epi_of_is_zero f h)
+@@split_epi.epi _ (split_epi_of_is_zero f h)
 
 noncomputable
 lemma split_mono_of_is_zero {X Y : V} (f : X ⟶ Y) (h : is_zero X) : split_mono f :=
 ⟨0, by simp [is_zero_iff_id_eq_zero.mp h]⟩
 
 lemma mono_of_is_zero_object {X Y : V} (f : X ⟶ Y) (h : is_zero X) : mono f :=
-@@split_mono.mono _ _ (split_mono_of_is_zero f h)
+@@split_mono.mono _ (split_mono_of_is_zero f h)
 
 lemma is_iso_of_is_zero {X Y : V} (f : X ⟶ Y)
   (h₁ : is_zero X) (h₂ : is_zero Y) : is_iso f :=

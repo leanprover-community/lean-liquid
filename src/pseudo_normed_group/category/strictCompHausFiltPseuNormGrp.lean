@@ -145,7 +145,7 @@ def add' {c₁ c₂} (x : cone_point_type_filt G c₁) (y : cone_point_type_filt
 
 lemma continuous_neg {c} : continuous (λ x : cone_point_type_filt G c, - x) :=
 begin
-  apply continuous_subtype_mk,
+  apply continuous.subtype_mk,
   apply continuous_pi,
   intros j,
   change continuous ((λ x, -x) ∘ (λ a : cone_point_type_filt G c, (a j))),
@@ -157,7 +157,7 @@ end
 lemma continuous_add' {c1 c2} :
   continuous (λ t : cone_point_type_filt G c1 × cone_point_type_filt G c2, t.1.add' t.2) :=
 begin
-  apply continuous_subtype_mk,
+  apply continuous.subtype_mk,
   apply continuous_pi,
   intros j,
   let A : cone_point_type_filt G c1 × cone_point_type_filt G c2 →
@@ -658,7 +658,7 @@ def limit_cone_lift (D : cone G) : D.X ⟶ cone_point G :=
       simp only [cone_point_type_filt.trans_apply, coe_cast_le, coe_cast_le'],
       refl },
     rw this,
-    apply continuous_subtype_mk,
+    apply continuous.subtype_mk,
     apply continuous_pi,
     intros j,
     dsimp,

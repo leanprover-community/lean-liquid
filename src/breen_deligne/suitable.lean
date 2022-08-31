@@ -230,7 +230,7 @@ begin
   calc _ ≤ 1 * c : mul_le_mul' (le_of_eq _) le_rfl
      ... = c : one_mul c,
   dsimp only [mul_mul_inv],
-  simp only [matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.minor_apply,
+  simp only [matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.submatrix_apply,
     matrix.one_apply, equiv.eq_symm_apply],
   rw [finset.sum_eq_single, if_pos rfl, int.nat_abs_one, nat.cast_one],
   { rintro j - hj,
@@ -557,7 +557,7 @@ instance hom_pow'_suitable_strict
 begin
   dsimp [hom_pow'],
   refine @universal_map.suitable.comp _ _ _ _ _ _ c _ _ (id _),
-  refine @universal_map.mul_suitable _ _ _ _ _ (id _) _ _,
+  refine @universal_map.mul_suitable _ _ _ _ _ (id _) _ ⟨two_pos⟩,
   apply_assumption
 end
 
@@ -571,6 +571,7 @@ begin
   refine @universal_map.suitable.comp _ _ _ _ _ _ (c * 2⁻¹) _ (id _) (id _),
   { apply universal_map.sum_two_suitable },
   { rw [← mul_assoc, mul_right_comm],
+    haveI : fact (0 < 2) := ⟨two_pos⟩,
     apply universal_map.mul_suitable }
 end
 
