@@ -368,14 +368,14 @@ def homeo_box_ϖ : (box S c) ≃ₜ Π (s : S), (filtration (ℳ ϖ) c) :=
     apply continuous_pi,
     intro s,
     dsimp only [equiv_box_ϖ, seval_ℳ],
-    refine continuous_subtype_mk (λ (x : box p S c), equiv_box_ϖ._proof_3 p S c x s)
+    refine continuous.subtype_mk (λ (x : box p S c), equiv_box_ϖ._proof_3 p S c x s)
       (continuous_pi (λ (i : ↥(Fintype.of punit)), _)),
     exact continuous_pi_iff.mp continuous_induced_dom s,
   end,
   continuous_inv_fun :=
   begin
     dsimp only [equiv_box_ϖ, seval_ℳ],
-    refine continuous_subtype_mk (λ (x : ↥S → ↥(filtration (real_measures p (Fintype.of punit)) c)),
+    refine continuous.subtype_mk (λ (x : ↥S → ↥(filtration (real_measures p (Fintype.of punit)) c)),
       equiv_box_ϖ._proof_4 p S c x) _,
     apply continuous_pi,
     intro s,

@@ -88,7 +88,7 @@ begin
   refine @universal_map.suitable_add _ _ _ _ _ _ (id _) (id _),
   { refine @universal_map.suitable.comp
       _ _ _ _ _ _ (κ' i * κ i) _ _ (id _),
-    refine @universal_map.mul_suitable _ _ _ _ _ (id _) _ _,
+    refine @universal_map.mul_suitable _ _ _ _ _ (id _) _ ⟨two_pos⟩,
     refine (homotopy_pow'_suitable N).le _ _ _ _ _ le_rfl,
     calc rescale_constants κ (2 ^ (N + 1)) j
         = κ j * (2⁻¹ * (2 ^ N)⁻¹) : by simp only [rescale_constants, pow_succ, mul_inv]
@@ -115,7 +115,7 @@ begin
   { dsimp [data.pow'_iso_mul, data.mul_one_iso, FreeMat.one_mul_iso],
     -- jmc: I don't understand why TC doesn't find the following instance...
     exact @universal_map.suitable_of _ _ _ _ _ (basic_universal_map.one_mul_hom_suitable _), },
-  { dsimp [data.pow'_iso_mul],
+  { dsimp [data.pow'_iso_mul], haveI : fact (0 < 2) := ⟨two_pos⟩,
     resetI,
     refine @universal_map.suitable.comp _ _ _ _ _ _ c _ (id _) (id _),
     { apply_instance },

@@ -88,9 +88,7 @@ begin
     dsimp [ε],
     field_simp,
     apply one_div_le_one_div_of_le;
-    norm_num [hK', pow_succ],
-    calc (2 : ℝ)^j = 1*2^j : (one_mul _).symm
-       ... ≤ 2*2^j : mul_le_mul_of_nonneg_right one_le_two (pow_nonneg zero_le_two _) },
+    norm_num [hK', pow_succ], },
   have seq : ∀ j : ℕ, ∃ w : C (k*c) i, ∥res x - C.d i (i+1) w∥ ≤ ε j,
   { intro j,
     specialize hC (k*c) ⟨hc₀kc⟩ _ hi (res x) (ε j) (ε_pos j),

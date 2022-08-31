@@ -86,7 +86,7 @@ def bdd_weak_dual_filtration_homeo (c : ℝ≥0) :
   left_inv := λ μ, by { ext, refl },
   right_inv := λ μ, by { ext, refl },
   continuous_to_fun := begin
-    apply continuous_subtype_mk,
+    apply continuous.subtype_mk,
     exact continuous_induced_dom,
   end,
   continuous_inv_fun := begin

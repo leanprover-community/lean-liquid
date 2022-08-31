@@ -278,7 +278,7 @@ def homeo_filtration_ϖ_ball (c : ℝ≥0) : filtration (ℳ p ϖ) c ≃ₜ clos
   (c ^ (p⁻¹ : ℝ) : ℝ≥0) :=
 { to_equiv := equiv_filtration_ϖ_ball c,
   continuous_to_fun := begin
-    refine continuous_subtype_mk (λ (x : {F // ∥F∥₊ ≤ c}), equiv_filtration_ϖ_ball._proof_1 c x) _,
+    refine continuous.subtype_mk (λ (x : {F // ∥F∥₊ ≤ c}), equiv_filtration_ϖ_ball._proof_1 c x) _,
     exact continuous.comp (continuous_apply punit.star) continuous_subtype_coe,
   end,
   continuous_inv_fun := begin

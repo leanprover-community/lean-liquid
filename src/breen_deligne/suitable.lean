@@ -557,7 +557,7 @@ instance hom_pow'_suitable_strict
 begin
   dsimp [hom_pow'],
   refine @universal_map.suitable.comp _ _ _ _ _ _ c _ _ (id _),
-  refine @universal_map.mul_suitable _ _ _ _ _ (id _) _ _,
+  refine @universal_map.mul_suitable _ _ _ _ _ (id _) _ ⟨two_pos⟩,
   apply_assumption
 end
 
@@ -571,6 +571,7 @@ begin
   refine @universal_map.suitable.comp _ _ _ _ _ _ (c * 2⁻¹) _ (id _) (id _),
   { apply universal_map.sum_two_suitable },
   { rw [← mul_assoc, mul_right_comm],
+    haveI : fact (0 < 2) := ⟨two_pos⟩,
     apply universal_map.mul_suitable }
 end
 

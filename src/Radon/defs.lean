@@ -43,7 +43,7 @@ def map_Radon {X Y : Profinite.{0}} (f : X ⟶ Y)
 { to_fun := λ μ, ⟨weak_dual.comap f.comap μ.1,
     weak_dual.bdd_comap _ μ.2 _⟩,
   continuous_to_fun := begin
-    apply continuous_subtype_mk,
+    apply continuous.subtype_mk,
     refine continuous.comp _ continuous_subtype_coe,
     exact continuous_linear_map.continuous _,
   end }
@@ -58,7 +58,7 @@ def map_Radon_LC {X Y : Profinite.{0}} (f : X ⟶ Y)
 { to_fun := λ μ, ⟨weak_dual.comap f.comap_LC μ.1,
     weak_dual.bdd_LC_comap _ μ.2 _⟩,
   continuous_to_fun := begin
-    apply continuous_subtype_mk,
+    apply continuous.subtype_mk,
     refine continuous.comp _ continuous_subtype_coe,
     exact continuous_linear_map.continuous _,
   end }

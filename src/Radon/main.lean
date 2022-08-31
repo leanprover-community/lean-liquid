@@ -49,7 +49,7 @@ def Radon_to_Radon_LC (X : Profinite.{0}) (p c : ℝ≥0) :
   X.Radon p c ⟶ X.Radon_LC p c :=
 { to_fun := λ μ, ⟨weak_dual_C_to_LC _ μ.1, μ.2⟩,
   continuous_to_fun := begin
-    apply continuous_subtype_mk,
+    apply continuous.subtype_mk,
     refine continuous.comp _ continuous_subtype_coe,
     exact continuous_linear_map.continuous _,
   end }
