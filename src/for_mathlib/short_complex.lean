@@ -201,15 +201,13 @@ namespace short_complex
 
 variable {C}
 
-def functor_homological_complex_map [preadditive C] [has_zero_object C]
-  [preadditive D] [has_zero_object D] (F : C ⥤ D) [F.additive]
+def functor_homological_complex_map [preadditive C] [preadditive D] (F : C ⥤ D) [F.additive]
   {M : Type*} (c : complex_shape M) (i : M) :
 short_complex.functor_homological_complex C c i ⋙ F.map_short_complex ≅
 F.map_homological_complex c ⋙ short_complex.functor_homological_complex D c i :=
 iso.refl _
 
-variables [preadditive C] [has_zero_object C]
-  [preadditive D] [has_zero_object D] {F G : C ⥤ D} [functor.additive F] [functor.additive G]
+variables [preadditive C] [preadditive D] {F G : C ⥤ D} [functor.additive F] [functor.additive G]
   {M : Type*} (c : complex_shape M) (i : M) (φ : F ⟶ G) (X : homological_complex C c)
 
 lemma nat_trans.map_short_complex_app :

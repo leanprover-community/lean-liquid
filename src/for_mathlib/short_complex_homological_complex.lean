@@ -55,8 +55,7 @@ end homological_complex
 
 namespace short_complex
 
-variables (C : Type*) [category C] [has_zero_morphisms C] [has_zero_object C]
-  {M : Type*} (c : complex_shape M)
+variables (C : Type*) [category C] [has_zero_morphisms C] {M : Type*} (c : complex_shape M)
 
 def functor_homological_complex_π₁_iso_prev_functor (i : M) :
   functor_homological_complex C c i ⋙ π₁ ≅ homological_complex.prev_functor C c i := by refl
