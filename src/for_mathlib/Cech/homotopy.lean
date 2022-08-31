@@ -77,7 +77,7 @@ def covariant_contracting_homotopy' : homotopy (𝟙 (f.nerve M).to_complex) 0 :
       rw add_comm },
   end }
 
-variables [has_equalizers N] [has_cokernels N] [has_images N] [has_image_maps N] [has_zero_object N]
+variables [has_equalizers N] [has_cokernels N] [has_images N] [has_image_maps N]
 
 lemma nerve_to_complex_homology_is_zero (i : ℕ) :
   is_zero ((f.nerve M).to_complex.homology i) :=

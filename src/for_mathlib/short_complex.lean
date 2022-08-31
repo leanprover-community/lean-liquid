@@ -138,7 +138,7 @@ def homology_functor [abelian C] : short_complex C ⥤ C :=
 variable (C)
 
 @[simps]
-def functor_homological_complex [has_zero_morphisms C] [has_zero_object C]
+def functor_homological_complex [has_zero_morphisms C]
   {M : Type*} (c : complex_shape M) (i : M) :
   homological_complex C c ⥤ short_complex C :=
 { obj := λ X, mk (X.d_to i) (X.d_from i) (X.d_to_comp_d_from i),

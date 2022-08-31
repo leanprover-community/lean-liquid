@@ -65,7 +65,7 @@ def category_theory.functor.map_homological_complex_X_prev (F : C ⥤ D) [F.addi
 iso.refl _
 
 lemma category_theory.functor.map_homological_complex_X_prev_eq (F : C ⥤ D) [F.additive]
-  (X : homological_complex C c) {i j : ι} :
+  (X : homological_complex C c) {i : ι} :
   F.map_homological_complex_X_prev X i = iso.refl _ := rfl
 
 noncomputable
@@ -75,7 +75,7 @@ def category_theory.functor.map_homological_complex_X_next (F : C ⥤ D) [F.addi
 iso.refl _
 
 lemma category_theory.functor.map_homological_complex_X_next_eq (F : C ⥤ D) [F.additive]
-  (X : homological_complex C c) {i j : ι} :
+  (X : homological_complex C c) {i : ι} :
   F.map_homological_complex_X_next X i = iso.refl _ := rfl
 
 lemma category_theory.functor.map_homological_complex_d_from (F : C ⥤ D) [F.additive]

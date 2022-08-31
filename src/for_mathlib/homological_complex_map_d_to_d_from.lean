@@ -20,8 +20,7 @@ variables (F : C ⥤ D) [functor.additive F] (X Y : homological_complex C c)
 def obj_X_prev (i : M) : F.obj (X.X_prev i) ≅ ((F.map_homological_complex c).obj X).X_prev i :=
 iso.refl _
 
-lemma obj_X_prev_hom_eq (j i : M) (hij : c.rel j i) :
-  (F.obj_X_prev X i).hom = 𝟙 _ := rfl
+lemma obj_X_prev_hom_eq (j i : M) : (F.obj_X_prev X i).hom = 𝟙 _ := rfl
 
 lemma map_prev_iso_hom (j i : M) (hij : c.rel j i) :
   F.map (X.X_prev_iso hij).hom = (((F.map_homological_complex c).obj X).X_prev_iso hij).hom :=
@@ -31,8 +30,7 @@ def obj_X_next {M : Type*} {c : complex_shape M} (X : homological_complex C c) (
   F.obj (X.X_next i) ≅ ((F.map_homological_complex c).obj X).X_next i :=
 iso.refl _
 
-lemma obj_X_next_hom_eq (i j : M) (hij : c.rel i j) :
-  (F.obj_X_next X i).hom = 𝟙 _ := rfl
+lemma obj_X_next_hom_eq (i j : M) : (F.obj_X_next X i).hom = 𝟙 _ := rfl
 
 lemma map_next_iso_inv (i j : M) (hij : c.rel i j) :
   F.map (X.X_next_iso hij).inv = (((F.map_homological_complex c).obj X).X_next_iso hij).inv :=
