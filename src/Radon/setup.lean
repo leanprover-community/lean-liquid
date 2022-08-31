@@ -32,7 +32,7 @@ begin
     exact ne_of_gt (fact.out _) },
   { intros x y,
     dsimp,
-    refine le_trans _ (nnreal.rpow_add_le_add_rpow _ _ (nnreal.coe_pos.mpr (fact.out _)) _),
+    refine le_trans _ (nnreal.rpow_add_le_add_rpow _ _ (nnreal.coe_pos.mpr (fact.out _)).le _),
     rw nnreal.rpow_le_rpow_iff (nnreal.coe_pos.mpr (fact.out _) : 0 < ↑p),
     apply nnnorm_add_le,
     exact (nnreal.coe_le_coe.mpr (fact.out _)).trans nnreal.coe_one.le }

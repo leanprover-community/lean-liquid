@@ -366,7 +366,7 @@ begin
     homological_complex.comp_f, homological_complex.comp_f],
   dsimp only [BD_system_map_app_app, BD_map_app_f, data.sum_f, data.system_map, data.complex,
     data.complex₂_map_f, mul_system_iso, system_rescale_iso, complex_rescale_iso, mul_complex_iso],
-  erw [nat_iso.of_components.hom_app, nat_iso.of_components.inv_app],
+  erw [nat_iso.of_components_hom_app, nat_iso.of_components_inv_app],
   dsimp only [homological_complex.hom.iso_of_components_hom_f,
     homological_complex.hom.iso_of_components_inv_f],
   dsimp only [CLCFPTinv₂, universal_map.eval_CLCFPTinv₂, CLCTinv.map_iso_hom, CLCTinv.map_iso_inv,

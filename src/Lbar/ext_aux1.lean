@@ -277,8 +277,7 @@ Ext_compute_with_acyclic _ _ (ExtQprime_iso_aux_system_aux r' BD κ M V c) _ ≪
 begin
   refine (homology_functor _ _ (-n:ℤ)).map_iso
     (embed_hom_complex_nat_iso _ _) ≪≫ _,
-  refine (homological_complex.homology_embed_nat_iso _
-    complex_shape.embedding.nat_up_int_down nat_up_int_down_c_iff
+  refine (homological_complex.homology_embed_nat_iso _ complex_shape.embedding.nat_up_int_down
     n (-n) (by { cases n; refl })).app _ ≪≫ (homology_functor _ _ _).map_iso _,
   refine hom_complex_QprimeFP_nat_iso_aux_system r' BD κ M V c
 end

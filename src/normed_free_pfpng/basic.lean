@@ -37,17 +37,17 @@ by { change ∑ _, _ = _, simp only [pi.zero_apply, nnnorm_zero, finset.sum_cons
 @[simp] lemma nnnorm_neg (f : normed_free_pfpng p S) : ∥(-f)∥₊ = ∥f∥₊ :=
 by { change ∑ _, _ = _, simpa }
 
-lemma nnnorm_add [fact (0 < p)] [fact (p ≤ 1)]
+lemma nnnorm_add [fact (0 ≤ p)] [fact (p ≤ 1)]
   (f₁ f₂ : normed_free_pfpng p S) : ∥f₁ + f₂∥₊ ≤ ∥f₁∥₊ + ∥f₂∥₊ :=
 begin
   change ∑ _, _ ≤ ∑ _, _ + ∑ _, _,
   rw ← finset.sum_add_distrib,
   apply finset.sum_le_sum,
   intros s _,
-  have h0p : 0 < p := fact.out _,
+  have h0p : 0 ≤ p := fact.out _,
   have hp1 : p ≤ 1 := fact.out _,
   calc ∥(f₁ + f₂) s∥₊ ^ ↑p
-      ≤ (∥f₁ s∥₊ + ∥f₂ s∥₊) ^ ↑p : nnreal.rpow_le_rpow (nnnorm_add_le _ _) h0p.le
+      ≤ (∥f₁ s∥₊ + ∥f₂ s∥₊) ^ ↑p : nnreal.rpow_le_rpow (nnnorm_add_le _ _) h0p
   ... ≤ ∥f₁ s∥₊ ^ ↑p + ∥f₂ s∥₊ ^ ↑p : nnreal.rpow_add_le_add_rpow _ _ h0p hp1,
 end
 

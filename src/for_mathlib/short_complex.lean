@@ -15,7 +15,7 @@ variables (C)
 
 /- Category of complexes `X ⟶ Y ⟶ Z` -/
 @[derive category]
-def short_complex [has_zero_morphisms C] := { S : composable_morphisms C // S.zero }
+def short_complex [has_zero_morphisms C] := full_subcategory $ λ S : composable_morphisms C, S.zero
 
 variables {C}
 
@@ -40,35 +40,17 @@ open category_theory
 
 namespace homological_complex
 
-variables [has_zero_morphisms C] [has_zero_object C] {M : Type*} {c : complex_shape M}
+variables [has_zero_morphisms C] {M : Type*} {c : complex_shape M}
 
-lemma prev_id (X : homological_complex C c) (i : M) : hom.prev (𝟙 X) i = 𝟙 (X.X_prev i) :=
-begin
-  rcases h : c.prev i with _ | ⟨j,w⟩,
-  { rw homological_complex.prev_eq_zero' _ i h,
-    symmetry,
-    rw ← limits.is_zero.iff_id_eq_zero,
-    exact limits.is_zero.of_iso (limits.is_zero_zero _)
-      (homological_complex.X_prev_iso_zero X h), },
-  { rw homological_complex.hom.prev_eq _ w,
-    simp only [homological_complex.hom.prev_eq _ w,
-      homological_complex.id_f, id_comp, iso.hom_inv_id], },
-end
+lemma prev_id (X : homological_complex C c) (i : M) : hom.prev (𝟙 X) i = 𝟙 (X.X_prev i) := rfl
 
-lemma next_id (X : homological_complex C c) (i : M) : hom.next (𝟙 X) i = 𝟙 (X.X_next i) :=
-arrow.hom.congr_right (hom.sq_from_id X i)
+lemma next_id (X : homological_complex C c) (i : M) : hom.next (𝟙 X) i = 𝟙 (X.X_next i) := rfl
 
 lemma prev_comp {X Y Z : homological_complex C c} (f : X ⟶ Y) (g : Y ⟶ Z)
-  (i : M) : hom.prev (f ≫ g) i = hom.prev f i ≫ hom.prev g i :=
-begin
-  rcases h : c.prev i with _ | ⟨j,w⟩,
-  { simp only [homological_complex.prev_eq_zero' _ i h, comp_zero], },
-  { simp only [homological_complex.hom.prev_eq _ w, comp_f, assoc, iso.inv_hom_id_assoc], },
-end
+  (i : M) : hom.prev (f ≫ g) i = hom.prev f i ≫ hom.prev g i := rfl
 
 lemma next_comp {X Y Z : homological_complex C c} (f : X ⟶ Y) (g : Y ⟶ Z)
-  (i : M) : hom.next (f ≫ g) i = hom.next f i ≫ hom.next g i :=
-arrow.hom.congr_right (hom.sq_from_comp f g i)
+  (i : M) : hom.next (f ≫ g) i = hom.next f i ≫ hom.next g i := rfl
 
 end homological_complex
 
@@ -156,7 +138,7 @@ def homology_functor [abelian C] : short_complex C ⥤ C :=
 variable (C)
 
 @[simps]
-def functor_homological_complex [has_zero_morphisms C] [has_zero_object C]
+def functor_homological_complex [has_zero_morphisms C]
   {M : Type*} (c : complex_shape M) (i : M) :
   homological_complex C c ⥤ short_complex C :=
 { obj := λ X, mk (X.d_to i) (X.d_from i) (X.d_to_comp_d_from i),
@@ -219,27 +201,21 @@ namespace short_complex
 
 variable {C}
 
-def functor_homological_complex_map [preadditive C] [has_zero_object C]
-  [preadditive D] [has_zero_object D] (F : C ⥤ D) [F.additive]
+def functor_homological_complex_map [preadditive C] [preadditive D] (F : C ⥤ D) [F.additive]
   {M : Type*} (c : complex_shape M) (i : M) :
 short_complex.functor_homological_complex C c i ⋙ F.map_short_complex ≅
 F.map_homological_complex c ⋙ short_complex.functor_homological_complex D c i :=
-nat_iso.of_components
-  (λ X, iso_mk (F.obj_X_prev X i) (iso.refl _) ((F.obj_X_next X i))
-    (by simpa only [iso.refl_hom, comp_id] using F.map_d_to X i)
-    (by simpa only [iso.refl_hom, id_comp] using F.d_from_map X i))
-  (λ X Y f, begin
-    ext,
-    { simp only [functor.comp_map, comp_τ₁, functor.map_short_complex_map_τ₁,
-        functor_homological_complex_map_τ₁, iso_mk_hom_τ₁, F.map_prev], },
-    { dsimp, simp only [comp_id, id_comp], },
-    { simp only [functor.comp_map, comp_τ₃, functor.map_short_complex_map_τ₃,
-        functor_homological_complex_map_τ₃, iso_mk_hom_τ₃, F.map_next], },
-  end)
+iso.refl _
 
-lemma naturality_functor_homological_complex_map [preadditive C] [has_zero_object C]
-  [preadditive D] [has_zero_object D] {F G : C ⥤ D} [F.additive] [G.additive]
-  {M : Type*} (c : complex_shape M) (i : M) (φ : F ⟶ G) (X : homological_complex C c) :
+variables [preadditive C] [preadditive D] {F G : C ⥤ D} [functor.additive F] [functor.additive G]
+  {M : Type*} (c : complex_shape M) (i : M) (φ : F ⟶ G) (X : homological_complex C c)
+
+lemma nat_trans.map_short_complex_app :
+  (nat_trans.map_short_complex φ).app ((short_complex.functor_homological_complex C c i).obj X) =
+  (short_complex.functor_homological_complex D c i).map
+    ((nat_trans.map_homological_complex φ c).app X) := rfl
+
+lemma naturality_functor_homological_complex_map :
   (nat_trans.map_short_complex φ).app
     ((short_complex.functor_homological_complex C c i).obj X) ≫
     (short_complex.functor_homological_complex_map G c i).hom.app X =
@@ -247,10 +223,8 @@ lemma naturality_functor_homological_complex_map [preadditive C] [has_zero_objec
     (short_complex.functor_homological_complex D c i).map
       ((nat_trans.map_homological_complex φ c).app X) :=
 begin
-  ext; dsimp [functor_homological_complex_map],
-  { apply φ.map_prev, },
-  { simp only [comp_id, id_comp], },
-  { apply φ.map_next, },
+  dsimp only [functor_homological_complex_map, iso.refl_hom, nat_trans.id_app],
+  erw [nat_trans.map_short_complex_app, category.id_comp, category.comp_id],
 end
 
 end short_complex

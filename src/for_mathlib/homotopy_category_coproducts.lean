@@ -169,10 +169,10 @@ def homotopy_coprod {α : Type v} (X : α → cochain_complex A ℤ) (Y)
       homological_complex.hom.comm_assoc, coproduct_ι_coproduct_iso_hom_assoc,
       colimit.ι_desc, cofan.mk_ι_app, colimit.ι_desc_assoc],
     have := (h a).comm i,
-    dsimp at this,
-    rw this,
+    refine this.trans _,
     simp only [homological_complex.cochain_complex_d_next,
       homological_complex.cochain_complex_prev_d],
+    refl
   end }
 
 lemma homotopic_coprod {α : Type v} (X : α → cochain_complex A ℤ) (Y)

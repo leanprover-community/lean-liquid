@@ -45,9 +45,9 @@ begin
   apply finset.sum_le_sum, rintros i -,
   refine le_trans _ (nnreal.rpow_add_le_add_rpow _ _ _ $
     (nnreal.coe_le_coe.mpr (fact.out _)).trans nnreal.coe_one.le),
-  refine nnreal.rpow_le_rpow _ (le_of_lt _),
-  apply nnnorm_add_le,
-  repeat { exact nnreal.coe_pos.mpr (fact.out _) },
+  refine nnreal.rpow_le_rpow _ _,
+  { apply nnnorm_add_le },
+  repeat { exact (nnreal.coe_pos.mpr (fact.out _)).le },
 end
 
 /-- An auxiliary definition to be used in the constructions below. -/

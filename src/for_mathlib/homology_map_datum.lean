@@ -116,3 +116,20 @@ def of_both_are_zeros (φ : S₁ ⟶ S₂) (hf₁ : S₁.1.f = 0) (hg₁ : S₁.
   fac₃' := by tidy, }
 
 end homology_map_datum
+
+namespace short_complex
+
+lemma homology_functor_map_eq_id {K : short_complex C}
+  (φ : K ⟶ K) (hφ : φ.τ₂ = 𝟙 K.obj.Y) : homology_functor.map φ = 𝟙 _ :=
+begin
+  let μ : homology_map_datum φ (homology_iso_datum.tautological' _ _ K.2)
+    (homology_iso_datum.tautological' _ _ K.2) (𝟙 _) :=
+  { κ := 𝟙 _,
+    fac₁' := by { ext, dsimp, simp only [comp_id, kernel.lift_ι, assoc, ← φ.comm₁₂, hφ], },
+    fac₂' := by { dsimp, simp only [hφ, id_comp, comp_id], },
+    fac₃' := by simp only [comp_id, id_comp], },
+  simpa only [μ.homology_map_eq, homology_iso_datum.tautological'_iso,
+    iso.refl_hom, comp_id],
+end
+
+end short_complex

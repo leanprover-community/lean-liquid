@@ -63,16 +63,16 @@ begin
   exact_mod_cast hp.out.ne',
 end
 
-protected lemma nnnorm_add [h0p : fact (0 < p)] [hp1 : fact (p ≤ 1)]
+protected lemma nnnorm_add [h0p : fact (0 ≤ p)] [hp1 : fact (p ≤ 1)]
   (F G : ℳ p S) : ∥F + G∥₊ ≤ ∥F∥₊ + ∥G∥₊ :=
 begin
   dsimp [nnnorm_def],
   rw ← finset.sum_add_distrib,
   apply finset.sum_le_sum,
   intros s hs,
-  have h0p' : (0 : ℝ) < p, exact_mod_cast h0p.out,
+  have h0p' : (0 : ℝ) ≤ p, exact_mod_cast h0p.out,
   have hp1' : (p : ℝ) ≤ 1, exact_mod_cast hp1.out,
-  exact (nnreal.rpow_le_rpow (nnnorm_add_le _ _) h0p'.le).trans
+  exact (nnreal.rpow_le_rpow (nnnorm_add_le _ _) h0p').trans
     (@nnreal.rpow_add_le_add_rpow p (∥F s∥₊) (∥G s∥₊) h0p' hp1'),
 end
 

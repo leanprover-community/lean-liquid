@@ -244,7 +244,7 @@ is_iso_of_op (cokernel.desc f g h.w)
 -- move
 lemma sq_from_epi_of_epi {ι : Type*} {V : Type*} [_inst_1 : category V] [_inst_2 : abelian V]
   {c : complex_shape ι}
-  {C₁ C₂ : homological_complex V c} [_inst_3 : has_zero_object V] (φ : C₁.hom C₂) (i : ι)
+  {C₁ C₂ : homological_complex V c} (φ : C₁.hom C₂) (i : ι)
   (h2 : is_zero (C₂.X_next i)) [epi (φ.f i)] :
 epi (homological_complex.hom.sq_from φ i) :=
 ⟨begin
@@ -358,27 +358,13 @@ lemma single.d_eq_zero (V : Type*) [category V] [has_zero_morphisms V] [has_zero
 lemma single.d_from_eq_zero (V : Type*) [category V] [has_zero_morphisms V] [has_zero_object V]
   {ι : Type*} [decidable_eq ι] (c : complex_shape ι) (i j : ι) ( v : V) :
   ((single V c i).obj v).d_from j = 0 :=
-begin
-  rcases hj : c.next j with _ | ⟨k, hjk⟩,
-  { rw homological_complex.d_from_eq_zero _ hj, },
-  { rw homological_complex.d_from_eq _ hjk,
-    rw single.d_eq_zero,
-    apply zero_comp,
-  },
-end
+single.d_eq_zero _ _ _ _ _ _
 
 -- move to `single`
 lemma single.d_to_eq_zero (V : Type*) [category V] [has_zero_morphisms V] [has_zero_object V]
   {ι : Type*} [decidable_eq ι] (c : complex_shape ι) (i j : ι) ( v : V) :
   ((single V c i).obj v).d_to j = 0 :=
-begin
-  rcases hj : c.prev j with _ | ⟨k, hjk⟩,
-  { rw homological_complex.d_to_eq_zero _ hj, },
-  { rw homological_complex.d_to_eq _ hjk,
-    rw single.d_eq_zero,
-    apply comp_zero,
-  },
-end
+single.d_eq_zero _ _ _ _ _ _
 
 -- this is preparation for `imker.map_is_iso` which follows.
 lemma homology_functor.is_iso_of_is_zero_of_is_zero_of_is_zero {ι : Type*} {c : complex_shape ι}

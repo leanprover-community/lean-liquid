@@ -149,10 +149,7 @@ end
 -- ℤ[X] version without C
 lemma polynomial.sum_range_int_mul_X_pow_coeff (f : ℕ → ℤ) (d n : ℕ) :
 (∑ i in range d, (f i : polynomial ℤ) * X^i).coeff n = if n < d then f n else 0 :=
-begin
-  convert polynomial.sum_range_const_mul_X_pow_coeff f d n,
-  ext, simp only [ring_hom.eq_int_cast],
-end
+polynomial.sum_range_const_mul_X_pow_coeff f d n
 
 lemma of_laurent_measures_strict [fact (r' < 1)] (F : laurent_measures r' S) :
   ∥of_laurent_measures r' S F∥₊ ≤ ∥F∥₊ :=

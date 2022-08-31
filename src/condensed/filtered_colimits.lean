@@ -316,7 +316,7 @@ begin
       (discrete.mk walking_pair.left), dsimp at this,
   slice_rhs 2 3 { rw this }, clear this,
   simp only [limit.cone_π, category.assoc, limit.lift_π_assoc,
-    cones.postcompose_obj_π, nat_trans.comp_app, nat_iso.of_components.hom_app],
+    cones.postcompose_obj_π, nat_trans.comp_app, nat_iso.of_components_hom_app],
   have := (is_colimit_of_preserves ((evaluation _ C).obj (discrete.mk walking_pair.left))
     (colimit.is_colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip)).fac _ j,
   dsimp at this, slice_rhs 3 4 { rw this }, clear this,
@@ -354,7 +354,7 @@ begin
       (discrete.mk walking_pair.right), dsimp at this,
   slice_rhs 2 3 { rw this }, clear this,
   simp only [limit.cone_π, category.assoc, limit.lift_π_assoc,
-    cones.postcompose_obj_π, nat_trans.comp_app, nat_iso.of_components.hom_app],
+    cones.postcompose_obj_π, nat_trans.comp_app, nat_iso.of_components_hom_app],
   have := (is_colimit_of_preserves ((evaluation _ C).obj (discrete.mk walking_pair.right))
     (colimit.is_colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip)).fac _ j,
   dsimp at this, slice_rhs 3 4 { rw this }, clear this,
@@ -438,7 +438,7 @@ begin
       (G.flip.map (Profinite.pullback.snd f f).op)))).fac (limit.cone _)
       walking_parallel_pair.zero,
     dsimp at this, simp only [nat_trans.naturality, category.assoc, reassoc_of this], clear this,
-    simp only [has_limit.iso_of_nat_iso_hom_π, nat_iso.of_components.hom_app,
+    simp only [has_limit.iso_of_nat_iso_hom_π, nat_iso.of_components_hom_app,
       equalizer.lift_ι_assoc, functor.flip_obj_map, has_limit.iso_of_nat_iso_hom_π_assoc],
     dsimp [first_iso_aux_aux._match_1],
     simp only [category.comp_id, category.id_comp, nat_trans.naturality] },
@@ -455,7 +455,7 @@ begin
       (G.flip.map (Profinite.pullback.snd f f).op)))).fac (limit.cone _)
       walking_parallel_pair.one,
     dsimp at this, simp only [nat_trans.naturality, category.assoc, reassoc_of this], clear this,
-    simp only [has_limit.iso_of_nat_iso_hom_π, nat_iso.of_components.hom_app,
+    simp only [has_limit.iso_of_nat_iso_hom_π, nat_iso.of_components_hom_app,
       limit.lift_π_assoc, fork.of_ι_π_app, category.assoc, functor.flip_obj_map,
       has_limit.iso_of_nat_iso_hom_π_assoc],
     dsimp [first_iso_aux_aux._match_1],

@@ -42,7 +42,7 @@ begin
     simp only [← functor.map_comp], congr' 1,
     ext S : 3,
     dsimp only [Sheaf.category_theory.category_comp_val, ExtrSheaf.map_tensor_val, Sheaf.iso.mk_hom_val,
-      nat_iso.of_components.hom_app, nat_trans.comp_app,
+      nat_iso.of_components_hom_app, nat_trans.comp_app,
       ExtrSheafProd.map_tensor_val_app, iso.trans_hom],
     simp only [category.assoc],
     dsimp [AddCommGroup.tensor_functor_iso_flip],
