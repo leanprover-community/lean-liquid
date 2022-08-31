@@ -15,7 +15,7 @@ lemma Fintype.induction_empty_sum {P : Fintype.{u} → Prop}
   (α : Fintype.{u}) : P α :=
 begin
   let Q : Π (α : Type u) [fintype α], Prop := λ a h, P ⟨a,h⟩,
-  have H := @fintype.induction_empty_option' Q _ _ _ α α.str,
+  have H := @fintype.induction_empty_option Q _ _ _ α α.str,
   { cases α, exact H },
   { introsI α β _ e h,
     haveI : fintype α := fintype.of_equiv _ e.symm,
