@@ -628,8 +628,7 @@ begin
     homology_functor 𝓐 (complex_shape.up ℤ) (-i) : functor.associator _ _ _
   ... ≅ (data.eval_functor F).obj BD.data ⋙ homology_functor 𝓐 (complex_shape.down ℕ) i :
     iso_whisker_left _ _,
-  refine homological_complex.homology_embed_nat_iso 𝓐 complex_shape.embedding.nat_down_int_up
-    complex_shape.embedding.nat_down_int_up_c_iff _ _ _,
+  refine homological_complex.homology_embed_nat_iso 𝓐 complex_shape.embedding.nat_down_int_up _ _ _,
   { cases i; refl }
 end
 

@@ -92,7 +92,7 @@ variables {α : Type*}
 def to_rational_point : (α → ℤ) →ₗ[ℤ] (α → ℚ) :=
 { to_fun := λ f x, f x,
   map_add' := λ f g, by { ext1 x, simp only [int.cast_add, pi.add_apply] },
-  map_smul' := λ m f, by { ext1 x, simp, } }
+  map_smul' := λ m f, by { ext1 x, simp only [zsmul_eq_mul, pi.mul_apply, int.cast_mul, ring_hom.eq_int_cast, int.cast_id, mul_eq_mul_right_iff, int.cast_eq_zero], left, refl } }
 
 @[simp] lemma to_rational_point_apply (x : α → ℤ) (i : α) :
   to_rational_point x i = x i := rfl
@@ -201,7 +201,8 @@ lemma to_rational_point_scale_up {α : Type*} [fintype α] (x : α → ℚ) :
   to_rational_point (scale_up x) = scale_factor x • x :=
 begin
   ext1 i,
-  simp [scale_up_coord],
+  simp only [scale_up_coord, to_rational_point_apply, nsmul_eq_mul, pi.mul_apply, mul_eq_mul_right_iff],
+  left, refl,
 end
 
 example {a b : ℤ} : (a : ℚ) = b → a = b :=

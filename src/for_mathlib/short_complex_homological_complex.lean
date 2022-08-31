@@ -28,77 +28,34 @@ end category_theory
 
 namespace homological_complex
 
-variables (C : Type*) [category C] [has_zero_morphisms C] [has_zero_object C]
+variables (C : Type*) [category C] [has_zero_morphisms C]
   {M : Type*} (c : complex_shape M)
 
 @[simps]
 def prev_functor (i : M) : homological_complex C c ⥤ C :=
-{ obj := λ X, X.X_prev i,
-  map := λ X Y f, f.prev i,
-  map_id' := λ X, begin
-    rcases h : c.prev i with _ | ⟨j, hij⟩,
-    { apply is_zero.eq_of_src,
-      exact is_zero.of_iso (limits.is_zero_zero C) (X.X_prev_iso_zero h), },
-    { simp only [hom.prev_eq _ hij, id_f, id_comp, iso.hom_inv_id], },
-  end,
-  map_comp' := λ X Y W f g, begin
-    rcases h : c.prev i with _ | ⟨j, hij⟩,
-    { apply is_zero.eq_of_src,
-      exact is_zero.of_iso (limits.is_zero_zero C) (X.X_prev_iso_zero h), },
-    { simp only [hom.prev_eq _ hij, comp_f, assoc, iso.inv_hom_id_assoc, eq_self_iff_true], },
-  end, }
+homological_complex.eval _ c (c.prev i)
 
 @[simps]
 def next_functor (i : M) : homological_complex C c ⥤ C :=
-{ obj := λ X, X.X_next i,
-  map := λ X Y f, f.next i,
-  map_id' := λ X, begin
-    rcases h : c.next i with _ | ⟨j, hij⟩,
-    { apply is_zero.eq_of_src,
-      exact is_zero.of_iso (limits.is_zero_zero C) (X.X_next_iso_zero h), },
-    { simp only [hom.next_eq _ hij, id_f, id_comp, iso.hom_inv_id], },
-  end,
-  map_comp' := λ X Y W f g, begin
-    rcases h : c.next i with _ | ⟨j, hij⟩,
-    { apply is_zero.eq_of_src,
-      exact is_zero.of_iso (limits.is_zero_zero C) (X.X_next_iso_zero h), },
-    { simp only [hom.next_eq _ hij, comp_f, assoc, iso.inv_hom_id_assoc, eq_self_iff_true], },
-  end, }
-
-def prev_functor_is_zero (i : M) (h : c.prev i = none) : is_zero (prev_functor C c i) :=
-begin
-  rw is_zero.iff_id_eq_zero,
-  ext X,
-  apply is_zero.eq_of_src,
-  exact is_zero.of_iso (limits.is_zero_zero C) (X.X_prev_iso_zero h),
-end
-
-def next_functor_is_zero (i : M) (h : c.next i = none) : is_zero (next_functor C c i) :=
-begin
-  rw is_zero.iff_id_eq_zero,
-  ext X,
-  apply is_zero.eq_of_src,
-  exact is_zero.of_iso (limits.is_zero_zero C) (X.X_next_iso_zero h),
-end
+homological_complex.eval _ c (c.next i)
 
 def prev_functor_iso_eval (i j : M) (hij : c.rel j i) :
   prev_functor C c i ≅ homological_complex.eval C c j :=
 nat_iso.of_components
   (λ X, X.X_prev_iso hij)
-  (λ X Y f, by { dsimp, simp only [hom.prev_eq f hij, assoc, iso.inv_hom_id, comp_id], })
+  (λ X Y f, by { dsimp, rw [← iso.eq_comp_inv, assoc, ← hom.prev_eq f hij], })
 
 def next_functor_iso_eval (i j : M) (hij : c.rel i j) :
   next_functor C c i ≅ homological_complex.eval C c j :=
 nat_iso.of_components
   (λ X, X.X_next_iso hij)
-  (λ X Y f, by { dsimp, simp only [hom.next_eq f hij, assoc, iso.inv_hom_id, comp_id], })
+  (λ X Y f, by { dsimp, rw [← iso.eq_comp_inv, assoc, ← hom.next_eq f hij], })
 
 end homological_complex
 
 namespace short_complex
 
-variables (C : Type*) [category C] [has_zero_morphisms C] [has_zero_object C]
-  {M : Type*} (c : complex_shape M)
+variables (C : Type*) [category C] [has_zero_morphisms C] {M : Type*} (c : complex_shape M)
 
 def functor_homological_complex_π₁_iso_prev_functor (i : M) :
   functor_homological_complex C c i ⋙ π₁ ≅ homological_complex.prev_functor C c i := by refl

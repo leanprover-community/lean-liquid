@@ -13,7 +13,7 @@ variables {ι : Type u'} {c : complex_shape ι}
 section
 variables {C : Type u} [category.{v} C] {Z : C → Prop}
 @[simps]
-def lift_iso {X Y : { X : C // Z X }} (h : (X : C) ≅ Y) : X ≅ Y :=
+def lift_iso {X Y : full_subcategory Z} (h : X.obj ≅ Y.obj) : X ≅ Y :=
 { hom := h.hom, inv := h.inv, hom_inv_id' := h.hom_inv_id, inv_hom_id' := h.inv_hom_id }
 end
 
@@ -124,12 +124,12 @@ variables (c V)
 
 @[simps]
 def complex_to_functor_functor :
-  homological_complex V c ⥤ { F : walking_complex c ⥤ V // ∀ i j, F.map (0 : i ⟶ j) = 0 } :=
+  homological_complex V c ⥤ full_subcategory (λ F : walking_complex c ⥤ V, ∀ i j, F.map (0 : i ⟶ j) = 0) :=
 { obj := λ X, ⟨complex_to_functor X, λ _ _, rfl⟩, map := λ X Y f, { app := f.f } }
 
 @[simps]
 def functor_to_complex_functor :
-  { F : walking_complex c ⥤ V // ∀ i j, F.map (0 : i ⟶ j) = 0 } ⥤ homological_complex V c :=
+  full_subcategory (λ F : walking_complex c ⥤ V, ∀ i j, F.map (0 : i ⟶ j) = 0) ⥤ homological_complex V c :=
 { obj := λ F, functor_to_complex F.1 F.2,
   map := λ F G f, { f := f.app, comm' := by { intros i j r, simp [dif_pos r] } } }
 .
@@ -151,7 +151,7 @@ nat_iso.of_components
 
 @[simps]
 def complex_equiv_functor :
-  homological_complex V c ≌ { F : walking_complex c ⥤ V // ∀ i j, F.map (0 : i ⟶ j) = 0 } :=
+  homological_complex V c ≌ full_subcategory (λ F : walking_complex c ⥤ V, ∀ i j, F.map (0 : i ⟶ j) = 0) :=
 { functor := complex_to_functor_functor V c,
   inverse := functor_to_complex_functor V c,
   unit_iso := complex_equiv_functor_unit V c,

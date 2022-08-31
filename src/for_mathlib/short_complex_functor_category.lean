@@ -148,6 +148,18 @@ functor_category_equivalence.counit_iso.inv.app S₁ ≫
   functor_category_equivalence.functor.map (hom_mk τ₁ τ₂ τ₃ comm₁₂ comm₂₃) ≫
   functor_category_equivalence.counit_iso.hom.app S₂
 
+lemma nat_trans_hom_mk_app_τ₂_eq {S₁ S₂ : J ⥤ short_complex C} (τ₁ : S₁ ⋙ π₁ ⟶ S₂ ⋙ π₁)
+  (τ₂ : S₁ ⋙ π₂ ⟶ S₂ ⋙ π₂) (τ₃ : S₁ ⋙ π₃ ⟶ S₂ ⋙ π₃)
+  (comm₁₂ : (𝟙 S₁) ◫ φ₁₂ ≫ τ₂ = τ₁ ≫ (𝟙 S₂) ◫ φ₁₂)
+  (comm₂₃ : (𝟙 S₁) ◫ φ₂₃ ≫ τ₃ = τ₂ ≫ (𝟙 S₂) ◫ φ₂₃) (j : J) :
+  ((nat_trans_hom_mk τ₁ τ₂ τ₃ comm₁₂ comm₂₃).app j).τ₂ = τ₂.app j :=
+begin
+  dsimp [functor_category_equivalence.counit_iso,
+    functor_category_equivalence.counit_iso.obj, iso.refl],
+  erw [id_comp, comp_id],
+  refl,
+end
+
 @[simp, reassoc]
 def nat_trans_hom_mk_comp {S₁ S₂ S₃ : J ⥤ short_complex C} (τ₁ : S₁ ⋙ π₁ ⟶ S₂ ⋙ π₁)
   (τ₂ : S₁ ⋙ π₂ ⟶ S₂ ⋙ π₂) (τ₃ : S₁ ⋙ π₃ ⟶ S₂ ⋙ π₃)

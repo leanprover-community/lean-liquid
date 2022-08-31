@@ -31,17 +31,7 @@ lemma op_functor_map_homotopy {ι C : Type*} {c : complex_shape ι} [category C]
     simp only [homological_complex.op_functor_map_f, quiver.hom.unop_op, H.comm i,
       op_add, add_left_inj],
     conv_lhs { rw add_comm, },
-    congr' 1,
-    { rcases hi : c.prev i with _ | ⟨j, hj⟩,
-      { dsimp [prev_d, d_next],
-        simpa only [hi], },
-      { have hj' : c.symm.rel i j := hj,
-        simpa only [prev_d_eq _ hj, d_next_eq _ hj'], }, },
-    { rcases hi : c.next i with _ | ⟨j, hj⟩,
-      { dsimp [prev_d, d_next],
-        simpa only [hi], },
-      { have hj' : c.symm.rel j i := hj,
-        simpa only [d_next_eq _ hj, prev_d_eq _ hj'], }, },
+    refl,
   end, }
 
 end homological_complex
@@ -84,16 +74,6 @@ functor.left_op (category_theory.quotient.lift _
         quiver.hom.unop_op, H.comm i],
       conv_lhs { congr, rw add_comm, },
       congr' 2,
-      { rcases hi : c.prev i with _ | ⟨j, hj⟩,
-        { dsimp [prev_d, d_next],
-          simpa only [hi], },
-        { have hj' : c.symm.rel i j := hj,
-          simpa only [prev_d_eq _ hj, d_next_eq _ hj'], }, },
-      { rcases hi : c.next i with _ | ⟨j, hj⟩,
-        { dsimp [prev_d, d_next],
-          simpa only [hi], },
-        { have hj' : c.symm.rel j i := hj,
-          simpa only [d_next_eq _ hj, prev_d_eq _ hj'], }, },
     end, },
 end))
 

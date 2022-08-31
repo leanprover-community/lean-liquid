@@ -62,79 +62,29 @@ noncomputable
 def category_theory.functor.map_homological_complex_X_prev (F : C ⥤ D) [F.additive]
   (X : homological_complex C c) (i : ι) :
   ((F.map_homological_complex c).obj X).X_prev i ≅ F.obj (X.X_prev i) :=
-begin
-  refine if e : c.prev i = none then eq_to_iso _ ≪≫ F.map_zero_object.symm ≪≫ eq_to_iso _ else
-    eq_to_iso _,
-  { delta homological_complex.X_prev, rw e },
-  { delta homological_complex.X_prev, rw e },
-  { delta homological_complex.X_prev,
-    rcases c.prev i with (_|⟨_, _⟩),
-    { intro h, exact (h rfl).elim },
-    { intro _, dsimp, refl } }
-end
+iso.refl _
 
 lemma category_theory.functor.map_homological_complex_X_prev_eq (F : C ⥤ D) [F.additive]
-  (X : homological_complex C c) {i j : ι} (r : c.rel j i) :
-  F.map_homological_complex_X_prev X i = ((F.map_homological_complex c).obj X).X_prev_iso r ≪≫
-    F.map_iso (X.X_prev_iso r).symm :=
-begin
-  ext,
-  dsimp,
-  delta category_theory.functor.map_homological_complex_X_prev homological_complex.X_prev_iso,
-  split_ifs,
-  { injection h.symm.trans (c.prev_eq_some r) },
-  { simp only [eq_to_hom_map, eq_to_iso.hom, eq_to_iso.inv, eq_to_hom_trans] }
-end
+  (X : homological_complex C c) {i : ι} :
+  F.map_homological_complex_X_prev X i = iso.refl _ := rfl
 
 noncomputable
 def category_theory.functor.map_homological_complex_X_next (F : C ⥤ D) [F.additive]
   (X : homological_complex C c) (i : ι) :
   ((F.map_homological_complex c).obj X).X_next i ≅ F.obj (X.X_next i) :=
-begin
-  refine if e : c.next i = none then eq_to_iso _ ≪≫ F.map_zero_object.symm ≪≫ eq_to_iso _ else
-    eq_to_iso _,
-  { delta homological_complex.X_next, rw e },
-  { delta homological_complex.X_next, rw e },
-  { delta homological_complex.X_next,
-    rcases c.next i with (_|⟨_, _⟩),
-    { intro h, exact (h rfl).elim },
-    { intro _, dsimp, refl } }
-end
+iso.refl _
 
 lemma category_theory.functor.map_homological_complex_X_next_eq (F : C ⥤ D) [F.additive]
-  (X : homological_complex C c) {i j : ι} (r : c.rel i j) :
-  F.map_homological_complex_X_next X i = ((F.map_homological_complex c).obj X).X_next_iso r ≪≫
-    F.map_iso (X.X_next_iso r).symm :=
-begin
-  ext,
-  dsimp,
-  delta category_theory.functor.map_homological_complex_X_next homological_complex.X_next_iso,
-  split_ifs,
-  { injection h.symm.trans (c.next_eq_some r) },
-  { simp only [eq_to_hom_map, eq_to_iso.hom, eq_to_iso.inv, eq_to_hom_trans] }
-end
+  (X : homological_complex C c) {i : ι} :
+  F.map_homological_complex_X_next X i = iso.refl _ := rfl
 
 lemma category_theory.functor.map_homological_complex_d_from (F : C ⥤ D) [F.additive]
   (X : homological_complex C c) (i : ι) :
-  ((F.map_homological_complex c).obj X).d_from i = F.map (X.d_from i) ≫
-    (F.map_homological_complex_X_next X i).inv :=
-begin
-  delta homological_complex.d_from,
-  rcases e : c.next i with (_|⟨j, r⟩); dsimp,
-  { rw [F.map_zero, zero_comp] },
-  { rw [iso.eq_comp_inv, F.map_homological_complex_X_next_eq X r], dsimp, simp, }
-end
+  ((F.map_homological_complex c).obj X).d_from i = F.map (X.d_from i) := rfl
 
 lemma category_theory.functor.map_homological_complex_d_to (F : C ⥤ D) [F.additive]
   (X : homological_complex C c) (i : ι) :
-  ((F.map_homological_complex c).obj X).d_to i =
-    (F.map_homological_complex_X_prev X i).hom ≫ F.map (X.d_to i) :=
-begin
-  delta homological_complex.d_to,
-  rcases e : c.prev i with (_|⟨j, r⟩); dsimp,
-  { rw [F.map_zero, comp_zero] },
-  { rw F.map_homological_complex_X_prev_eq X r, dsimp, simp [← F.map_comp, -functor.map_comp] }
-end
+  ((F.map_homological_complex c).obj X).d_to i = F.map (X.d_to i) := rfl
 
 @[simp, reassoc]
 lemma category_theory.limits.preserves_kernel_iso_inv_map (F : C ⥤ D)
@@ -172,12 +122,11 @@ begin
     refine homology_iso_cokernel_lift _ _ _ ≪≫
       cokernel.map_arrow_iso _ _ (arrow.iso_mk _ _ _) ≪≫
       (preserves_cokernel.iso _ _).symm ≪≫ F.map_iso (homology_iso_cokernel_lift _ _ _).symm,
-    { exact F.map_homological_complex_X_prev _ _ },
+    { exact iso.refl _ },
     { refine kernel.map_arrow_iso _ _ (arrow.iso_mk _ _ _) ≪≫ (preserves_kernel.iso _ _).symm,
       { exact iso.refl _ },
-      { exact F.map_homological_complex_X_next _ _ },
-      { dsimp, rw [category.id_comp, F.map_homological_complex_d_from, category.assoc,
-          iso.inv_hom_id, category.comp_id] } },
+      { exact iso.refl _ },
+      { dsimp, rw [category.id_comp, F.map_homological_complex_d_from, category.comp_id] } },
     { dsimp, rw [← category.assoc, iso.eq_comp_inv], ext, simp [F.map_homological_complex_d_to] } },
   { intros X Y f, apply homology.hom_from_ext,
     simp only [category_theory.limits.kernel.map_arrow_iso_hom,

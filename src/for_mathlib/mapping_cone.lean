@@ -148,16 +148,24 @@ def cone.map : cone f ⟶ cone f' :=
     apply category_theory.limits.biprod.hom_ext;
       simp only [biprod.lift_desc, add_zero, preadditive.comp_neg, category.assoc,
         comp_zero, biprod.lift_fst, biprod.lift_snd]; ext,
-    { simp },
-    { simp },
+    { simp only [preadditive.comp_neg, biprod.inl_desc_assoc, hom.comm, preadditive.neg_comp] },
+    { simp only [preadditive.comp_neg, biprod.inr_desc_assoc, zero_comp, neg_zero] },
     { simp only [X_eq_to_iso_f, preadditive.comp_add, biprod.inl_desc_assoc, category.assoc,
         preadditive.neg_comp],
       have := comm.comm (i+1),
       dsimp at this,
       rw [reassoc_of this],
       subst r,
-      simpa [prev_d, d_next, ← add_assoc] using add_comm _ _ },
-    { simp }
+      delta d_from from_next to_prev d_to,
+      simp only [X_eq_to_iso_refl, category.comp_id, add_monoid_hom.mk'_apply],
+      have aux₁ : (complex_shape.up ℤ).next (i + 1) = i + 1 + 1,
+      { simp only [cochain_complex.next] },
+      have aux₂ : i = (complex_shape.up ℤ).prev (i + 1),
+      { simp only [cochain_complex.prev, add_tsub_cancel_right], },
+      rw ← aux₁,
+      simp only [←add_assoc, add_left_neg, zero_add, add_comm (i₁.f (i + 1) ≫ f'.f (i + 1)), add_left_inj],
+      congr' 2, },
+    { simp only [preadditive.comp_add, biprod.inr_desc_assoc, zero_comp, hom.comm] }
   end }
 
 @[simp, reassoc]
@@ -296,7 +304,11 @@ begin
   ext i,
   dsimp,
   have : f.f i ≫ i₂.f i = A.d i (i + 1) ≫ comm.hom (i + 1) i + comm.hom i (i - 1) ≫
-    B'.d (i - 1) i + i₁.f i ≫ f'.f i := by simpa [d_next, prev_d] using comm.comm i,
+    B'.d (i - 1) i + i₁.f i ≫ f'.f i := begin
+      rw [← homological_complex.comp_f, comm.comm i],
+      simp only [d_next, prev_d, add_monoid_hom.mk'_apply, comp_f, add_left_inj],
+      rw [← cochain_complex.next, ← cochain_complex.prev],
+    end,
   simp only [hom.comm_assoc, preadditive.comp_sub, this],
   erw [split_mono.id_assoc, split_mono.id_assoc],
   simp [add_right_comm]
@@ -306,8 +318,10 @@ def of_termwise_split_mono_homotopy [H : ∀ i, split_mono (f.f i)] :
   homotopy i₂ (of_termwise_split_mono comm)  :=
 { hom := λ i j, (H i).retraction ≫ comm.hom i j,
   zero' := λ _ _ r, by rw [comm.zero _ _ r, comp_zero],
-  comm := λ i,
-    by { simp [d_next, prev_d], abel } }
+  comm := λ i, begin
+    simp only [d_next, prev_d, add_monoid_hom.mk'_apply, category.assoc, of_termwise_split_mono_f],
+    rw [← cochain_complex.next, ← cochain_complex.prev], abel
+  end }
 
 @[simps]
 def of_termwise_split_epi [H : ∀ i, split_epi (f'.f i)] : A ⟶ A' :=
@@ -324,7 +338,11 @@ begin
   ext i,
   dsimp,
   have : f.f i ≫ i₂.f i = A.d i (i + 1) ≫ comm.hom (i + 1) i + comm.hom i (i - 1) ≫
-    B'.d (i - 1) i + i₁.f i ≫ f'.f i := by simpa [d_next, prev_d] using comm.comm i,
+    B'.d (i - 1) i + i₁.f i ≫ f'.f i := begin
+      rw [← homological_complex.comp_f, comm.comm i],
+      simp only [d_next, prev_d, add_monoid_hom.mk'_apply, comp_f, add_left_inj],
+      rw [← cochain_complex.next, ← cochain_complex.prev],
+    end,
   simp only [this, category.assoc, preadditive.add_comp, ← f'.comm],
   erw [split_epi.id, split_epi.id_assoc],
   rw [add_comm, add_comm (i₁.f i ≫ f'.f i), ← add_assoc, category.comp_id]
@@ -334,8 +352,10 @@ def of_termwise_split_epi_homotopy [H : ∀ i, split_epi (f'.f i)] :
   homotopy (of_termwise_split_epi comm) i₁ :=
 { hom := λ i j, comm.hom i j ≫ (H j).section_,
   zero' := λ _ _ r, by rw [comm.zero _ _ r, zero_comp],
-  comm := λ i,
-    by { simp [d_next, prev_d], abel } }
+  comm := λ i, begin
+    simp only [d_next, prev_d, add_monoid_hom.mk'_apply, category.assoc, of_termwise_split_epi_f],
+    rw [← cochain_complex.next, ← cochain_complex.prev], abel
+  end }
 
 end cone_functorial
 
@@ -376,8 +396,24 @@ def termwise_split_mono_desc_section (f : A ⟶ B) :
 { hom := λ i j, if h : i = j + 1 then
     biprod.snd ≫ biprod.snd ≫ (A.X_eq_to_iso h).hom ≫ biprod.inl ≫ biprod.inr else 0,
   zero' := λ i j r, dif_neg (ne.symm r),
-  comm := λ i, by { dsimp,
-    simpa [d_next, prev_d, cone.d] using termwise_split_mono_desc_section_aux i } }
+  comm := λ i, begin
+    dsimp,
+    obtain ⟨i, rfl⟩ : ∃ j, j + 1 = i := ⟨i-1, sub_add_cancel _ _⟩,
+    have aux₁ : (complex_shape.up ℤ).rel i (i + 1) := rfl,
+    have aux₂ : (complex_shape.up ℤ).rel (i + 1) (i + 1 + 1) := rfl,
+    rw termwise_split_mono_desc_section_aux (i+1),
+    rw [← d_next_eq_d_from_from_next, ← prev_d_eq_to_prev_d_to,
+      d_next_eq _ aux₂, prev_d_eq _ aux₁, dif_pos rfl, dif_pos rfl],
+    simp only [sub_add_cancel, biproduct_d, cone_d, X_eq_to_iso_refl, category.id_comp,
+      biprod.map_snd_assoc, category.assoc, biprod.inr_map, add_left_inj, cone.d],
+    rw [dif_pos rfl, dif_pos rfl],
+    simp only [id_f, category.comp_id, biprod.lift_snd_assoc, add_right_inj],
+    ext;
+    simp only [biprod.inl_snd_assoc, biprod.inr_snd_assoc, biprod.inr_fst,
+      biprod.lift_fst, biprod.inl_desc, biprod.lift_snd,
+      category.assoc, zero_comp, comp_zero, preadditive.comp_neg,
+      X_eq_to_iso_d, X_eq_to_iso_trans, X_eq_to_iso_refl],
+  end }
 
 instance (f : A ⟶ B) (i : ℤ) : split_mono ((termwise_split_mono_lift f).f i) :=
 { retraction := biprod.snd ≫ biprod.snd, id' := by simp [cone.in] }
@@ -445,8 +481,28 @@ def termwise_split_epi_retraction_lift (f : A ⟶ B) :
 { hom := λ i j, if h : i = j + 1 then
     biprod.snd ≫ biprod.snd ≫ ((B⟦(-1 : ℤ)⟧).X_eq_to_iso h).hom ≫ biprod.inl ≫ biprod.inr else 0,
   zero' := λ i j r, dif_neg (ne.symm r),
-  comm := λ i, by { dsimp,
-    simpa [d_next, prev_d, cone.d] using termwise_split_epi_retraction_lift_aux i } }
+  comm := λ i, begin
+    dsimp,
+    obtain ⟨i, rfl⟩ : ∃ j, j + 1 = i := ⟨i-1, sub_add_cancel _ _⟩,
+    have aux₁ : (complex_shape.up ℤ).rel i (i + 1) := rfl,
+    have aux₂ : (complex_shape.up ℤ).rel (i + 1) (i + 1 + 1) := rfl,
+    rw termwise_split_epi_retraction_lift_aux (i+1),
+    rw [← d_next_eq_d_from_from_next, ← prev_d_eq_to_prev_d_to,
+      d_next_eq _ aux₂, prev_d_eq _ aux₁, dif_pos rfl, dif_pos rfl],
+    simp only [sub_add_cancel, biproduct_d, cone_d, X_eq_to_iso_refl, category.id_comp,
+      biprod.map_snd_assoc, category.assoc, biprod.inr_map, add_left_inj, cone.d],
+    rw [dif_pos rfl, dif_pos rfl],
+    simp only [id_f, category.comp_id, biprod.lift_snd_assoc, add_right_inj],
+    ext;
+    simp only [preadditive.add_comp, category.assoc, biprod.inr_fst,
+      preadditive.comp_add, biprod.inl_snd_assoc, biprod.inl_snd,
+      biprod.inr_snd_assoc, biprod.inl_fst, category.comp_id, biprod.inl_desc,
+      zero_comp, comp_zero, add_zero,
+      biprod.inr_desc, X_eq_to_iso_shift, biprod.lift_fst,
+      X_eq_to_iso_d, shift_d, int.neg_one_pow_neg_one, neg_smul, one_zsmul, neg_neg,
+      biprod.lift_snd, X_eq_to_iso_trans, X_eq_to_iso_refl, zero_add],
+    all_goals { refl }
+  end }
 
 instance (f : A ⟶ B) (i : ℤ) : split_epi ((termwise_split_epi_desc f).f i) :=
 { section_ := (B.X_eq_to_iso $ eq_add_neg_of_add_eq rfl).hom ≫ biprod.inl ≫ biprod.inr,
@@ -494,8 +550,17 @@ def homotopy_connecting_hom_of_splittings (h h' : ∀ (i : ℤ), splitting (f.f 
   comm := λ i, begin
     rw ← cancel_epi (g.f _),
     { dsimp,
-      simp [d_next, prev_d, splitting.π_section_eq_id_sub_assoc, -retraction_X_eq_to_hom],
-      abel },
+      obtain ⟨i, rfl⟩ : ∃ j, j + 1 = i := ⟨i-1, sub_add_cancel _ _⟩,
+      have aux₁ : (complex_shape.up ℤ).rel i (i + 1) := rfl,
+      have aux₂ : (complex_shape.up ℤ).rel (i + 1) (i + 1 + 1) := rfl,
+      rw [← d_next_eq_d_from_from_next, ← prev_d_eq_to_prev_d_to,
+        d_next_eq _ aux₂, prev_d_eq _ aux₁, dif_pos rfl, dif_pos rfl],
+      simp only [d_next, prev_d, splitting.π_section_eq_id_sub_assoc, -retraction_X_eq_to_hom,
+        preadditive.sub_comp_assoc, category.id_comp, category.assoc, hom.comm,
+        preadditive.sub_comp, splitting.ι_retraction, category.comp_id, X_eq_to_iso_refl, shift_d,
+        int.neg_one_pow_one, neg_smul, one_zsmul, preadditive.comp_neg, preadditive.comp_add,
+        hom.comm_assoc, preadditive.comp_sub, neg_sub, splitting.ι_retraction_assoc],
+      abel, apply add_comm, },
     exact (h i).epi
   end,
   zero' := λ _ _ h, dif_neg h }
@@ -660,12 +725,12 @@ end
 @[simp]
 lemma cochain_complex_d_next (i : ℤ) (f : Π i j, A.X i ⟶ B.X j) :
   d_next i f = A.d i (i + 1) ≫ f (i + 1) i :=
-by simp [d_next]
+by { simp only [d_next, add_monoid_hom.mk'_apply], rw [← cochain_complex.next] }
 
 @[simp]
 lemma cochain_complex_prev_d (i : ℤ) (f : Π i j, A.X i ⟶ B.X j) :
   prev_d i f = f i (i - 1) ≫ B.d (i - 1) i :=
-by simp [prev_d]
+by { simp only [prev_d, add_monoid_hom.mk'_apply], rw [← cochain_complex.prev] }
 
 @[simps]
 def termwise_split_to_cone (h : ∀ i, splitting (f.f i) (g.f i)) :
@@ -694,6 +759,11 @@ def comp_termwise_split_to_cone_homotopy (h : ∀ i, splitting (f.f i) (g.f i)) 
   zero' := λ _ _ r, dif_neg r,
   comm := λ i, begin
     dsimp,
+    obtain ⟨i, rfl⟩ : ∃ j, j + 1 = i := ⟨i-1, sub_add_cancel _ _⟩,
+    have aux₁ : (complex_shape.up ℤ).rel i (i + 1) := rfl,
+    have aux₂ : (complex_shape.up ℤ).rel (i + 1) (i + 1 + 1) := rfl,
+    rw [← d_next_eq_d_from_from_next, ← prev_d_eq_to_prev_d_to,
+      d_next_eq _ aux₂, prev_d_eq _ aux₁, dif_pos rfl, dif_pos rfl],
     simp only [dite_eq_ite, cochain_complex_prev_d, dif_pos, if_true, category.assoc, cone_d,
       category.id_comp, add_left_inj, sub_add_cancel, dif_ctx_congr, X_eq_to_iso_refl, cone.d,
       preadditive.comp_neg, eq_self_iff_true, cochain_complex_d_next, preadditive.neg_comp],
@@ -722,12 +792,23 @@ def cone_to_termwise_split_comp_homotopy (h : ∀ i, splitting (f.f i) (g.f i)) 
   comm := begin
     intro i,
     dsimp,
+    obtain ⟨i, rfl⟩ : ∃ j, j + 1 = i := ⟨i-1, sub_add_cancel _ _⟩,
+    have aux₁ : (complex_shape.up ℤ).rel i (i + 1) := rfl,
+    have aux₂ : (complex_shape.up ℤ).rel (i + 1) (i + 1 + 1) := rfl,
+    rw [← d_next_eq_d_from_from_next, ← prev_d_eq_to_prev_d_to,
+      d_next_eq _ aux₂, prev_d_eq _ aux₁, dif_pos rfl, dif_pos rfl],
     simp only [category.comp_id, dite_eq_ite, cochain_complex_prev_d, cone.out, dif_pos, if_true,
       add_left_inj, sub_add_cancel, cone.d, shift_d, dif_ctx_congr, preadditive.comp_neg,
       eq_self_iff_true, int.neg_one_pow_one, cochain_complex_d_next, one_zsmul,
       category.assoc, X_eq_to_iso_d, neg_neg, neg_smul, biprod.lift_snd_assoc,
       X_eq_to_iso_refl, cone_d, preadditive.neg_comp],
-    ext; simp [splitting.π_section_eq_id_sub_assoc, sub_eq_add_neg],
+    ext; -- This is simp [splitting.π_section_eq_id_sub_assoc, sub_eq_add_neg]
+      simp only [splitting.ι_retraction, preadditive.comp_add, preadditive.comp_neg,
+        biprod.inl_snd_assoc, zero_comp, neg_zero, add_zero, biprod.inl_desc_assoc, biprod.inl_fst,
+        add_right_neg, biprod.inr_snd_assoc, biprod.inr_desc_assoc, biprod.inr_fst,
+        splitting.π_section_eq_id_sub_assoc, sub_eq_add_neg, hom.comm, hom.comm_assoc,
+        preadditive.add_comp_assoc, category.id_comp, preadditive.neg_comp, category.assoc,
+        preadditive.add_comp, category.comp_id, add_left_inj, eq_self_iff_true],
   end }
 
 def iso_cone_of_termwise_split_inv_hom_homotopy (h : ∀ i, splitting (f.f i) (g.f i)) :
@@ -738,6 +819,11 @@ def iso_cone_of_termwise_split_inv_hom_homotopy (h : ∀ i, splitting (f.f i) (g
   comm := begin
     intro i,
     dsimp,
+    obtain ⟨i, rfl⟩ : ∃ j, j + 1 = i := ⟨i-1, sub_add_cancel _ _⟩,
+    have aux₁ : (complex_shape.up ℤ).rel i (i + 1) := rfl,
+    have aux₂ : (complex_shape.up ℤ).rel (i + 1) (i + 1 + 1) := rfl,
+    rw [← d_next_eq_d_from_from_next, ← prev_d_eq_to_prev_d_to,
+      d_next_eq _ aux₂, prev_d_eq _ aux₁, dif_pos rfl, dif_pos rfl],
     simp only [category.comp_id, dite_eq_ite, cochain_complex_prev_d, dif_pos, if_true,
       category.id_comp, add_left_inj, sub_add_cancel, cone.d, dif_ctx_congr,
       eq_self_iff_true, cochain_complex_d_next, category.assoc, biprod.lift_snd_assoc,

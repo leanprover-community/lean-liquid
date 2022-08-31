@@ -38,18 +38,7 @@ def homotopy_unop_functor_right_op_map_unop_of_homotopy
     dsimp,
     rw h.comm i,
     simp only [unop_add, unop_comp, add_left_inj],
-    rw add_comm,
-    congr' 1,
-    { rcases h : c.prev i with _ | ⟨j,hj⟩,
-      all_goals { dsimp [d_next, prev_d],
-        let e : c.symm.next i = _ := h,
-        rw [e, h],
-        refl } },
-    { rcases h : c.next i with _ | ⟨j,hj⟩,
-      all_goals { dsimp [d_next, prev_d],
-        let e : c.symm.prev i = _ := h,
-        rw [e, h],
-        refl } }
+    rw add_comm, refl,
   end }
 
 end homotopy

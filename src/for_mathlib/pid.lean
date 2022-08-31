@@ -821,9 +821,8 @@ begin
     exact hj
   },
 
-  have H₂ : submodule.span R (range BB) = ⊤,
-  { rw submodule.eq_top_iff',
-    intro x,
+  have H₂ : ⊤ ≤ submodule.span R (range BB),
+  { rintro x -,
     let l := B.repr (x : M),
     have hl : finsupp.total ords M R B l ∈ N := by simp only [l, basis.total_repr]; exact x.2,
     have hx := HH₂ o (le_refl o) l _ hl,

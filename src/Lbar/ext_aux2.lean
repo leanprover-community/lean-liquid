@@ -257,7 +257,7 @@ begin
   simp only [add_equiv.to_fun_eq_coe, normed_add_group_hom.completion_coe_to_fun,
     add_equiv.to_AddCommGroup_iso_hom, add_equiv.coe_to_add_monoid_hom, add_equiv.trans_apply,
     add_equiv.ulift_apply, equiv.to_fun_as_coe, equiv.ulift_apply_2,
-    Ab.ulift_map_apply_down, add_equiv.coe_mk, nat_iso.of_components.inv_app,
+    Ab.ulift_map_apply_down, add_equiv.coe_mk, nat_iso.of_components_inv_app,
     add_equiv.to_AddCommGroup_iso, add_equiv.mk_symm,
     SemiNormedGroup.forget₂_Ab_map, normed_add_group_hom.coe_to_add_monoid_hom],
   let F := SemiNormedGroup.Completion.{u+1}.map ((SemiNormedGroup.LocallyConstant.{u+1 u}.obj
@@ -458,7 +458,6 @@ begin
   dsimp [Condensed.of_top_ab_map],
   simp only [comp_apply],
   dsimp [LCC_iso_Cond_of_top_ab, forget₂, has_forget₂.forget₂],
-  rw nat_iso.of_components.inv_app,
   apply final_boss,
 end
 
@@ -483,11 +482,11 @@ begin
   simp only [comp_apply],
   dsimp [forget₂, has_forget₂.forget₂, aux_system.T_inv,
     Condensed_LCC_iso_of_top_ab, LCC_iso_Cond_of_top_ab],
-  rw nat_iso.of_components.inv_app,
+  rw nat_iso.of_components_inv_app,
   dsimp only [unop_op],
   -/
   dsimp only [forget₂, has_forget₂.forget₂, ExtQprime_iso_aux_system_obj_aux,
-    nat_iso.of_components.hom_app, id, iso.op, iso.trans_hom, iso.symm,
+    nat_iso.of_components_hom_app, id, iso.op, iso.trans_hom, iso.symm,
     nat_iso.app_inv, aux_system.T_inv, quiver.hom.op_unop, quiver.hom.unop_op,
     homological_complex.unop],
   simp only [comp_apply],
@@ -642,7 +641,7 @@ end
 
 lemma aux₂ (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) (n : ℕ) :
   (homological_complex.homology_embed_nat_iso.{0 0 u+2 u+1} Ab.{u+1}
-    complex_shape.embedding.nat_up_int_down nat_up_int_down_c_iff n (-↑n) (by { cases n; refl})).hom.app
+    complex_shape.embedding.nat_up_int_down n (-↑n) (by { cases n; refl})).hom.app
     (hom_complex_nat.{u} ((QprimeFP_nat.{u} r' BD κ M).obj c₂) V.to_Cond) ≫
     (homology_functor.{u+1 u+2 0} Ab.{u+1} (complex_shape.up.{0} ℕ) n).map
     (((preadditive_yoneda.{u+1 u+2}.obj V.to_Cond).map_homological_complex
@@ -653,7 +652,7 @@ lemma aux₂ (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) (n : ℕ) :
   (category_theory.functor.map _
       (homological_complex.op_functor.map ((QprimeFP_nat r' BD κ M).map h).op)) ≫
   (homological_complex.homology_embed_nat_iso.{0 0 u+2 u+1} Ab.{u+1}
-  complex_shape.embedding.nat_up_int_down nat_up_int_down_c_iff n (-↑n) (by { cases n; refl})).hom.app
+  complex_shape.embedding.nat_up_int_down n (-↑n) (by { cases n; refl})).hom.app
   (hom_complex_nat.{u} ((QprimeFP_nat.{u} r' BD κ M).obj c₁) V.to_Cond) :=
 begin
   erw nat_trans.naturality,
@@ -877,7 +876,7 @@ begin
   ext c : 2,
   dsimp only [ExtQprime_iso_aux_system_obj,
     ExtQprime_iso_aux_system,
-    iso.trans_hom, id, functor.map_iso_hom, nat_iso.of_components.hom_app,
+    iso.trans_hom, id, functor.map_iso_hom, nat_iso.of_components_hom_app,
     nat_trans.comp_app],
   haveI : ((homotopy_category.quotient.{u+1 u+2 0} (Condensed.{u u+1 u+2} Ab.{u+1}) (complex_shape.up.{0} ℤ)).obj
      ((QprimeFP_int.{u} r' BD κ M).obj (unop.{1} c))).is_bounded_above :=
@@ -978,11 +977,11 @@ begin
     homological_complex.unop_functor, homological_complex.comp_f,
     nat_iso.map_homological_complex, nat_iso.app_hom, iso.op_hom, quiver.hom.unop_op,
     nat_trans.map_homological_complex_app_f, ExtQprime_iso_aux_system_obj_aux,
-    nat_iso.of_components.hom_app, id, iso.symm_hom, nat_iso.app_inv,
+    nat_iso.of_components_hom_app, id, iso.symm_hom, nat_iso.app_inv,
     whisker_right_app, nat_trans.op, functor.comp_map],
   simp only [category_theory.functor.map_comp],
   dsimp only [homological_complex.comp_f, functor.map_homological_complex, functor.op_obj,
-    functor.unop, forget₂_unop, nat_iso.of_components.hom_app,
+    functor.unop, forget₂_unop, nat_iso.of_components_hom_app,
     homological_complex.hom.iso_of_components, iso.refl],
   simp only [category.assoc, category.id_comp],
   erw category.id_comp,
@@ -1158,7 +1157,7 @@ begin
 
   dsimp only [ExtQprime_iso_aux_system_obj,
     ExtQprime_iso_aux_system,
-    iso.trans_hom, id, functor.map_iso_hom, nat_iso.of_components.hom_app,
+    iso.trans_hom, id, functor.map_iso_hom, nat_iso.of_components_hom_app,
     nat_trans.comp_app],
 
   haveI : ((homotopy_category.quotient.{u+1 u+2 0} (Condensed.{u u+1 u+2} Ab.{u+1})
@@ -1224,7 +1223,7 @@ begin
   /-
   rw [nat_trans.comp_app, functor.map_comp, ExtQprime.T_inv,
     nat_trans.comp_app, whisker_right_app, whisker_left_app, category.assoc],
-  dsimp only [ExtQprime_iso_aux_system, nat_iso.of_components.hom_app, aux_system,
+  dsimp only [ExtQprime_iso_aux_system, nat_iso.of_components_hom_app, aux_system,
     aux_system.res, functor.comp_map],
   -/
 end
