@@ -230,7 +230,7 @@ begin
   calc _ ≤ 1 * c : mul_le_mul' (le_of_eq _) le_rfl
      ... = c : one_mul c,
   dsimp only [mul_mul_inv],
-  simp only [matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.minor_apply,
+  simp only [matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.submatrix_apply,
     matrix.one_apply, equiv.eq_symm_apply],
   rw [finset.sum_eq_single, if_pos rfl, int.nat_abs_one, nat.cast_one],
   { rintro j - hj,

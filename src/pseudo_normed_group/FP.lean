@@ -233,7 +233,7 @@ lemma mul_iso_eval_FP (N : ℕ) [ϕ.suitable c₂ c₁] (M) :
 begin
   ext x i j,
   dsimp [mul],
-  simp only [eval_png_apply, equiv.symm_apply_apply, matrix.minor_apply, matrix.kronecker],
+  simp only [eval_png_apply, equiv.symm_apply_apply, matrix.submatrix_apply, matrix.kronecker],
   rw [← fin_prod_fin_equiv.sum_comp, ← finset.univ_product_univ, finset.sum_product,
       finset.sum_comm],
   simp only [equiv.symm_apply_apply, matrix.one_apply, boole_mul, ite_smul, zero_smul,
