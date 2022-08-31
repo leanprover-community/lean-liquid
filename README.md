@@ -7,7 +7,7 @@ For the eponymous blogpost by Peter Scholze which started it all: see https://xe
 
 The main aim of this community-owned repository is to *digitise* some mathematical definitions, theorem statements and theorem proofs. Digitisation, or formalisation, is a process where the source material, typically a mathematical textbook or a pdf file or website or video, is transformed into definitions in a target system consisting of a computer implementation of a logical theory (such as set theory or type theory).
 
-## The source.
+## The source
 
 The main "source" definitions, theorems and proofs in this repository are all taken from Scholze's Bonn lecture notes [Analytic.pdf](https://www.math.uni-bonn.de/people/scholze/Analytic.pdf) explaining some of his work with Clausen on the theory of solid and liquid modules, and on their development of a new approach to certain proofs in complex analytic geometry.
 
@@ -21,7 +21,7 @@ The challenge in the blog post is to formalise its `Theorem 1.1`, a variant of `
 We chose to use Lean 3 because of the advanced state of its classical mathematics library `mathlib`, an essential ingredient.
 
 When the project started, it was immediately noticed that there was a "sub-boss" in the form of `Analytic 9.4`, a far more technical theorem involving a completely different class of objects and which Scholze was claiming was a sufficiently powerful stepping stone. The project then split intwo two sub-projects:
-"Prove `Analytic 9.4`" and "Prove that `Analytic 9.4` implies `Theorem 1.1`".
+"Prove `Analytic 9.4`" and "Prove that `Analytic 9.4` implies `Theorem 1.1`"
 
 An important intermediate achievement was the completion of a [blueprint](https://leanprover-community.github.io/liquid/) for the proof of `9.4` and the related `9.5`. The blueprint was a guide which was comprehensible to mathematicians who had no Lean training, whilst also being a visual guide to where progress was needed during the formalisation process.
 
@@ -29,7 +29,7 @@ The preliminary announcement of a proof of Theorem 9.4 was made on 28th May 2021
 The second half of the project was [completed](https://leanprover-community.github.io/blog/posts/lte-final/) on 14th July 2022.
 Together, the two components give a formal verification of Theorem 1.1 of the blogpost.
 
-## The formal statement of `Analytic 9.4`.
+## The formal statement of `Analytic 9.4`
 
 The statement can be found in [`src/liquid.lean`](https://github.com/leanprover-community/lean-liquid/blob/master/src/liquid.lean#L37)
 
@@ -43,7 +43,7 @@ theorem first_target :
 See [`src/liquid.lean`](https://github.com/leanprover-community/lean-liquid/blob/master/src/liquid.lean#40)
 for details on how to read this statement.
 
-## The formal statement of `Theorem 1.1`.
+## The formal statement of `Theorem 1.1`
 
 The statement can be found in [`src/challenge.lean`](https://github.com/leanprover-community/lean-liquid/blob/master/src/challenge.lean#L28)
 
