@@ -419,6 +419,9 @@ def termwise_split_mono_lift_split_mono (f : A ⟶ B) (i : ℤ) :
   split_mono ((termwise_split_mono_lift f).f i) :=
 { retraction := biprod.snd ≫ biprod.snd, id' := by simp [cone.in] }
 
+instance (f : A ⟶ B) (i : ℤ) : mono ((termwise_split_mono_lift f).f i) :=
+(termwise_split_mono_lift_split_mono f i).mono
+
 -- generalize to epi
 @[simp]
 lemma termwise_split_mono_lift_desc (f : A ⟶ B) :
@@ -509,6 +512,9 @@ def termwise_split_epi_desc_split_epi (f : A ⟶ B) (i : ℤ) :
   split_epi ((termwise_split_epi_desc f).f i) :=
 { section_ := (B.X_eq_to_iso $ eq_add_neg_of_add_eq rfl).hom ≫ biprod.inl ≫ biprod.inr,
   id' := by { dsimp, simp [cone.out] } }
+
+instance (f : A ⟶ B) (i : ℤ) : epi ((termwise_split_epi_desc f).f i) :=
+(termwise_split_epi_desc_split_epi f i).epi
 
 end termwise_split_epi_lift
 
@@ -741,7 +747,6 @@ def termwise_split_to_cone (h : ∀ i, splitting (f.f i) (g.f i)) :
   comm' := begin
     rintro i j (rfl : i + 1 = j),
     have He := λ i, (h i).split_epi,
-    have Hm := λ i, (h i).split_mono,
     ext,
     { dsimp [cone.d],
       rw ← cancel_epi (g.f _),
@@ -750,7 +755,7 @@ def termwise_split_to_cone (h : ∀ i, splitting (f.f i) (g.f i)) :
     { dsimp [cone.d],
       rw ← cancel_epi (g.f _),
       { simp [splitting.π_section_eq_id_sub_assoc, splitting.π_section_eq_id_sub] },
-      { exact (Hm _).mono } },
+      { exact (He _).epi } },
   end }
 
 @[simps]
@@ -865,9 +870,9 @@ end
 
 instance : mono (termwise_split_mono_lift f) := mono_of_eval _
 
-def termwise_split_of_termwise_split_mono [H : ∀ i, split_mono (f.f i)] (i : ℤ) :
-  splitting (f.f i)
-    ((@@homological_complex.normal_mono _ _ f (mono_of_eval _)).g.f i) :=
+def termwise_split_of_termwise_split_mono (H : ∀ i, split_mono (f.f i)) (i : ℤ) :
+  have mono f := @mono_of_eval _ _ _ _ _ _ _ f (λ i, (H i).mono), by exactI
+  splitting (f.f i) ((homological_complex.normal_mono f).g.f i) :=
 begin
   apply left_split.splitting,
   dsimp only [normal_mono, cokernel_complex_π],
@@ -882,7 +887,7 @@ def iso_termwise_split_of_cone :
       (category_theory.triangulated.neg₃_functor _).obj (cone.triangleₕ f) ≅
     triangleₕ_of_termwise_split (termwise_split_mono_lift f)
       (homological_complex.normal_mono (termwise_split_mono_lift f)).g
-    (termwise_split_of_termwise_split_mono _) :=
+    (termwise_split_of_termwise_split_mono _ $ termwise_split_mono_lift_split_mono _) :=
 functor.map_iso _ (as_iso $ from_termwise_split_mono_lift_triangleₕ f).symm ≪≫
   (iso_cone_of_termwise_split _ _ _).symm
 
@@ -915,8 +920,7 @@ def iso_connecting_hom_shift_cone (h : ∀ i, splitting (f.f i) (g.f i)) :
 hom.iso_of_components (λ f, (h _).iso ≪≫ biprod.braiding _ _ ≪≫
   biprod.map_iso (C.X_eq_to_iso (by simp)) (A.X_eq_to_iso (by simp)))
 begin
-  haveI := λ i, (h i).split_epi,
-  haveI := λ i, (h i).split_mono,
+  have He := λ i, (h i).split_epi,
   rintro i j (rfl : i + 1 = j),
   dsimp [cone.d],
   rw ← cancel_epi (h i).iso.inv,
@@ -933,7 +937,7 @@ begin
       sub_zero, category.assoc, comp_zero, hom.comm, preadditive.sub_comp, limits.zero_comp,
       splitting.π_section_eq_id_sub_assoc, hom.comm_assoc],
     rw [← X_eq_to_iso_f, X_d_eq_to_iso_assoc],
-    apply_instance },
+    exact (He _).epi },
   { rw ← cancel_epi (g.f _),
     simp only [category.comp_id, X_d_eq_to_iso, category.id_comp, preadditive.sub_comp_assoc,
       splitting.π_section_eq_id_sub_assoc, category.assoc, hom.comm, preadditive.sub_comp,
@@ -943,7 +947,7 @@ begin
       category.id_comp, preadditive.sub_comp_assoc, X_eq_to_iso_d_assoc, splitting.ι_retraction,
       preadditive.comp_sub, hom.comm, preadditive.sub_comp, sub_right_inj, category.assoc],
     rw [← retraction_X_eq_to_hom_assoc, X_eq_to_iso_d],
-    apply_instance }
+    exact (He _).epi }
 end
 
 lemma inv_rotate_iso_cone_triangle_comm₁ (h : ∀ i, splitting (f.f i) (g.f i)) :
