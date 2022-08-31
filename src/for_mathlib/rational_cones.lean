@@ -8,7 +8,7 @@ variables {Λ : Type u} [add_comm_group Λ]
 variable {ι : Type*}
 
 open_locale big_operators
-open_locale nnreal
+open_locale nnrat
 
 variable {α : Type*}
 
@@ -441,14 +441,13 @@ begin
       simp only [and_imp, exists_prop, finset.mem_univ, bex_imp_distrib, finset.mem_image,
         exists_true_left, subtype.exists, exists_imp_distrib],
       rintro _ _ j hj ⟨⟨⟩, rfl⟩ rfl,
-      simp only [nnrat.coe_div, subtype.coe_mk], erw [subtype.coe_mk, subtype.coe_mk],
+      simp only [nnrat.coe_div, subtype.coe_mk],
       have := y_neg _ _ hj gt,
-      rwa [div_le_iff_of_neg gt, ←mul_right_comm, mul_comm (s j y), mul_inv_le_iff hj] } },
+      rwa [div_le_iff_of_neg gt, div_mul_eq_mul_div, mul_comm (s j y), div_le_iff' hj] } },
   by_cases h' : nonempty {i // s i x < 0},
   { have : bs.nonempty,
     { rwa [finset.nonempty.image_iff, finset.univ_nonempty_iff] },
-    refine ⟨nnrat.of_rat (bs.max' ‹bs.nonempty›), _⟩,
-    intros i,
+    refine ⟨(bs.max' ‹bs.nonempty›).to_nnrat, λ i, _⟩,
     rw [linear_map.map_sub, sub_nonneg],
     simp only [linear_map.map_smul_of_tower, subtype.val_eq_coe],
     rcases lt_trichotomy 0 (s i x) with (lt | eq | gt),
