@@ -20,7 +20,7 @@ The formal system which we are using as a target system is Lean's dependent type
 The challenge in the blog post is to formalise its `Theorem 1.1`, a variant of `Analytic 9.1` (i.e. Theorem 9.1 of [`Analytic.pdf`](https://www.math.uni-bonn.de/people/scholze/Analytic.pdf)) in Lean.
 We chose to use Lean 3 because of the advanced state of its classical mathematics library `mathlib`, an essential ingredient.
 
-When the project started, it was immediately noticed that there was a "sub-boss" in the form of `Analytic 9.4`, a far more technical theorem involving a completely different class of objects and which Scholze was claiming was a sufficiently powerful stepping stone. The project then split intwo two sub-projects:
+When the project started, it was immediately noticed that there was a "sub-boss" in the form of `Analytic 9.4`, a far more technical theorem involving a completely different class of objects and which Scholze was claiming was a sufficiently powerful stepping stone. The project then split into two sub-projects:
 "Prove `Analytic 9.4`" and "Prove that `Analytic 9.4` implies `Theorem 1.1`"
 
 An important intermediate achievement was the completion of a [blueprint](https://leanprover-community.github.io/liquid/) for the proof of `9.4` and the related `9.5`. The blueprint was a guide which was comprehensible to mathematicians who had no Lean training, whilst also being a visual guide to where progress was needed during the formalisation process.
