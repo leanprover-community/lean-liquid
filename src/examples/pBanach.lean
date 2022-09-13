@@ -57,15 +57,10 @@ end pBanach
 over $S$ are the continuous maps $S → V$.
 For technical reasons related to size issues in topos theory,
 we need to lift the space of continuous maps to a higher universe using `ulift`. -/
-example : (Γ_ V S : Type 1) = ulift C(S,V) := rfl
-
-/- Continuous maps behave as expected: they are continuous functions. -/
-example (f : C(S,V)) : S → V := f
-example (f : C(S,V)) : continuous f := f.continuous
-example (f : S → V) (hf : continuous f) : C(S,V) := ⟨f,hf⟩
+example : (Γ_ S V : Type 1) = ulift C(S,V) := rfl
 
 /- The group operation on `Γ_ V S` is pointwise addition, as expected. -/
-example (f g : Γ_ V S) (s : S) : (f + g) s = f s + g s := rfl
+example (f g : Γ_ S V) (s : S) : (f + g) s = f s + g s := rfl
 
 /-- An example of a p-Banach space. -/
 example [fact (0 < p)] [fact (p ≤ 1)] : pBanach p :=
