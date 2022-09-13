@@ -53,41 +53,57 @@ example : uniformity V = ⨅ (ε : ℝ) (H : ε > 0),
 end pBanach
 
 section Condensed
-/-! When $V$ is viewed as condensed abelian group, the sections
+/-!
+When $V$ is viewed as condensed abelian group, the sections
 over $S$ are the continuous maps $S → V$.
 For technical reasons related to size issues in topos theory,
-we need to lift the space of continuous maps to a higher universe using `ulift.{1}`. -/
+we need to lift the space of continuous maps to a higher universe using `ulift.{1}`.
+-/
 example : (Γ_ S V : Type 1) = ulift.{1} C(S,V) := rfl
 
-/-! The group operation on `Γ_ S V` is pointwise addition, as expected. -/
+/-!
+The group operation on `Γ_ S V` is pointwise addition, as expected.
+-/
 example (f g : Γ_ S V) (s : S) : (f + g) s = f s + g s := rfl
 
 end Condensed
 
 section lp
 
-/-! An example of a p-Banach space: `ℓ^p(ℕ)`. -/
+/-!
+An example of a p-Banach space: `ℓ^p(ℕ)`.
+-/
 example [fact (0 < p)] [fact (p ≤ 1)] : pBanach p :=
 pBanach.lp p
 
-/-! Elements of `pBanach.lp p` can be considered as functions `ℕ → ℝ`. -/
+/-!
+Elements of `pBanach.lp p` can be considered as functions `ℕ → ℝ`.
+-/
 example [fact (0 < p)] [fact (p ≤ 1)] (f : pBanach.lp p) : ℕ → ℝ :=
 λ i, f i
 
-/-! Given an element of `pBanach.lp p`, the infinite sum `∑' n, | f n |^p` exists. -/
+/-!
+Given an element of `pBanach.lp p`, the infinite sum `∑' n, | f n |^p` exists.
+-/
 example [fact (0 < p)] [fact (p ≤ 1)] (f : pBanach.lp p) :
   summable (λ n, | f n |^(p : ℝ)) :=
 pBanach.lp_type.summable f
 
-/-! The ℝ-module structure behaves as expected. -/
+/-!
+The ℝ-module structure behaves as expected.
+-/
 example [fact (0 < p)] [fact (p ≤ 1)] (f g : pBanach.lp p) (n : ℕ) :
-  (f + g) n = f n + g n := rfl
+  (f + g) n = f n + g n :=
+rfl
 
 example [fact (0 < p)] [fact (p ≤ 1)] (a : ℝ) (f : pBanach.lp p) (n : ℕ) :
-  (a • f) n = a * f n := rfl
+  (a • f) n = a * f n :=
+rfl
 
-/-! Conversely, we can construct elements of `pBanach.lp p` using sequences where the
-  sum above exists. -/
+/-!
+Conversely, we can construct elements of `pBanach.lp p` using sequences
+where the sum above exists.
+-/
 example [fact (0 < p)] [fact (p ≤ 1)] (f : ℕ → ℝ) (hf : summable (λ n, | f n |^(p : ℝ))) :
   pBanach.lp p :=
 { val := f,
@@ -98,7 +114,10 @@ example [fact (0 < p)] [fact (p ≤ 1)] (f : ℕ → ℝ) (hf : summable (λ n, 
     exact (ne_of_gt $ by exact_mod_cast (fact.out (0 < p))),
   end }
 
-/-! `pBanach.lp p` is nontrivial. -/
-example [fact (0 < p)] [fact (p ≤ 1)] : nontrivial (pBanach.lp p) := infer_instance
+/-!
+`pBanach.lp p` is nontrivial.
+-/
+example [fact (0 < p)] [fact (p ≤ 1)] : nontrivial (pBanach.lp p) :=
+infer_instance
 
 end lp
