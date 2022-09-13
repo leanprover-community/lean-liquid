@@ -90,6 +90,12 @@ example (X Y : 𝓐) : Ext' 0 (op X) Y ≅ AddCommGroup.of (X ⟶ Y) :=
 (Ext'_zero_flip_iso _ _).app _
 
 /-!
+The isomorphism above is functorial in the first variable.
+-/
+example (Y : 𝓐) : (Ext' 0).flip.obj Y ≅ preadditive_yoneda.obj Y :=
+Ext'_zero_flip_iso _ _
+
+/-!
 Any natural transformation `Hom(-,B) ⟶ F 0` to the zeroth-component of some
 delta functor `F` extends in a unique way to a morphism of delta functors
 `Ext_δ_functor A B ⟶ F`.
