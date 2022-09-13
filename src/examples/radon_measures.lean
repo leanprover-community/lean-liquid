@@ -26,7 +26,7 @@ For technical reasons related to size issues in topos theory,
 we need to bump to a higher universe using `ulift`.
 -/
 example (X : CompHausFiltPseuNormGrp.{0}) (S : Profinite.{0}) :
-(Γ_ (CompHausFiltPseuNormGrp.to_Condensed X) S : Type 1) =
+(Γ_ S (CompHausFiltPseuNormGrp.to_Condensed X) : Type 1) =
 (ulift.{1}  -- universe bump
   { f : S → X |  -- the set of all functions `S → X` such that...
     ∃ (c : ℝ≥0)  -- there exists a non-negative real `c`,
@@ -40,7 +40,7 @@ The group structure on the `S`-sections of the condensed abelian group associate
 `X : CompHausFiltPseuNormGrp` is the obvious one.
 -/
 example (X : CompHausFiltPseuNormGrp.{0}) (S : Profinite.{0})
-  (f g : Γ_ (CompHausFiltPseuNormGrp.to_Condensed X) S) (s : S) :
+  (f g : Γ_ S (CompHausFiltPseuNormGrp.to_Condensed X)) (s : S) :
   (f + g) s = f s + g s := rfl
 
 /-
@@ -74,8 +74,8 @@ example (S : Profinite.{0}) (μ : S.Radon_png p) (f : C(S,ℝ)) : μ f = μ.1 f 
 /-
 The indicator function on a clopen set behaves as expected.
 -/
-example (S : Profinite.{0}) (C : set S) (hC : is_clopen C) (s : S) :
-  clopens.indicator ⟨C,hC⟩ s = if s ∈ C then 1 else 0 := rfl
+example (S : Profinite.{0}) (V : set S) (hV : is_clopen V) (s : S) :
+  clopens.indicator ⟨V,hV⟩ s = if s ∈ V then 1 else 0 := rfl
 
 /-
 If `μ : S.Radon_png p`, then there exists a nonnegative real `c` such that for all partitions of
@@ -84,9 +84,9 @@ If `μ : S.Radon_png p`, then there exists a nonnegative real `c` such that for 
 -/
 example (S : Profinite.{0}) (μ : S.Radon_png p) :
   ∃ c : ℝ≥0,
-  ∀ (ι : Fintype.{0}) (e : ι → set S)
-    (I : indexed_partition e) (he : ∀ i, is_clopen (e i)),
-    ∑ i : ι, ∥ μ (clopens.indicator ⟨e i, he i⟩) ∥₊^(p : ℝ) ≤ c :=
+  ∀ (ι : Fintype.{0}) (V : ι → set S)
+    (I : indexed_partition V) (hV : ∀ i, is_clopen (V i)),
+    ∑ i : ι, ∥ μ (clopens.indicator ⟨V i, hV i⟩) ∥₊^(p : ℝ) ≤ c :=
 begin
   obtain ⟨c,hc⟩ := μ.2,
   use c,
@@ -98,9 +98,9 @@ satisfying the inequality appearing in the example above, then we may construct 
 the `c`-th term of the filtration of `S.Radon_png p`.
 -/
 example (S : Profinite.{0}) (μ : C(S,ℝ) →L[ℝ] ℝ) (c : ℝ≥0)
-  (h : ∀ (ι : Fintype.{0}) (e : ι → set S)
-      (I : indexed_partition e) (he : ∀ i, is_clopen (e i)),
-      ∑ i : ι, ∥ μ (clopens.indicator ⟨e i, he i⟩) ∥₊^(p : ℝ) ≤ c) :
+  (h : ∀ (ι : Fintype.{0}) (V : ι → set S)
+      (I : indexed_partition V) (hV : ∀ i, is_clopen (V i)),
+      ∑ i : ι, ∥ μ (clopens.indicator ⟨V i, hV i⟩) ∥₊^(p : ℝ) ≤ c) :
   filtration (S.Radon_png p) c :=
 { val := ⟨μ,c, by { rw weak_dual.bdd_iff_indexed_parition, assumption }⟩,
   property := by { erw ← weak_dual.bdd_iff_indexed_parition at h, assumption } }
