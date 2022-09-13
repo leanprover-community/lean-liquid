@@ -24,7 +24,7 @@ example : has_continuous_smul ℝ V := infer_instance
 example : complete_space V := infer_instance
 example : separated_space V := infer_instance
 
-/-!
+/--
 We may *choose* a norm on the p-Banach space satisfying some properties
 which will be discussed below.
 

@@ -15,7 +15,8 @@ variables (p : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)]
 
 /-!
 The functor which associates a condensed abelian group to a
-CompHaus-ly filtered pseudo normed group.
+CompHaus-ly filtered pseudo normed group is denoted by
+`CompHausFiltPseuNormGrp.to_Codnensed`.
 -/
 example : CompHausFiltPseuNormGrp.{0} ⥤ Condensed.{0} Ab.{1} :=
 CompHausFiltPseuNormGrp.to_Condensed
@@ -41,7 +42,8 @@ The group structure on the `S`-sections of the condensed abelian group associate
 -/
 example (X : CompHausFiltPseuNormGrp.{0}) (S : Profinite.{0})
   (f g : Γ_ S (CompHausFiltPseuNormGrp.to_Condensed X)) (s : S) :
-  (f + g) s = f s + g s := rfl
+  (f + g) s = f s + g s :=
+rfl
 
 /-!
 The category `CompHausFiltPseuNormGrp₁` is similar to that of
@@ -68,19 +70,15 @@ CHFPNG₁_to_CHFPNGₑₗ.map_iso $ (S.Radon_png_iso p).symm
 
 /-!
 Any element of `S.Radon_png p` induces a continuous linear map from `C(S,ℝ)` to `ℝ`.
+In particular, this allows us to consider `μ : S.Radon_png p` as a function on `C(S,ℝ)` with
+values in `ℝ`.
 -/
 example (S : Profinite.{0}) (μ : S.Radon_png p) : C(S,ℝ) →L[ℝ] ℝ := μ.1
 example (S : Profinite.{0}) (μ : S.Radon_png p) (f : C(S,ℝ)) : μ f = μ.1 f := rfl
 
 /-!
-The indicator function on a clopen set behaves as expected.
--/
-example (S : Profinite.{0}) (V : set S) (hV : is_clopen V) (s : S) :
-  clopens.indicator ⟨V,hV⟩ s = if s ∈ V then 1 else 0 := rfl
-
-/-!
 If `μ : S.Radon_png p`, then there exists a nonnegative real `c` such that for all partitions of
-`S` into clopens `S = U_1 ∪ ⋯ ∪ U_n`, letting `I_i` denote the indicator function of `U_i`, one has
+`S` into clopens `S = V_1 ∪ ⋯ ∪ V_n`, letting `I_i` denote the indicator function of `V_i`, one has
 `∑ i, ∥ μ (I_i) ∥^p ≤ c`.
 -/
 example (S : Profinite.{0}) (μ : S.Radon_png p) :
@@ -94,6 +92,12 @@ begin
   rwa weak_dual.bdd_iff_indexed_parition at hc,
 end
 
+/-!
+The indicator function on a clopen set, which was used in the example above, behaves as expected.
+-/
+example (S : Profinite.{0}) (V : set S) (hV : is_clopen V) (s : S) :
+  clopens.indicator ⟨V,hV⟩ s = if s ∈ V then 1 else 0 := rfl
+
 /-! Conversely, if we are given a continuous linear map `C(S,ℝ) → ℝ` and a nonnegative real `c`
 satisfying the inequality appearing in the example above, then we may construct an element of
 the `c`-th term of the filtration of `S.Radon_png p`.
@@ -103,14 +107,14 @@ example (S : Profinite.{0}) (μ : C(S,ℝ) →L[ℝ] ℝ) (c : ℝ≥0)
       (I : indexed_partition V) (hV : ∀ i, is_clopen (V i)),
       ∑ i : ι, ∥ μ (clopens.indicator ⟨V i, hV i⟩) ∥₊^(p : ℝ) ≤ c) :
   filtration (S.Radon_png p) c :=
-{ val := ⟨μ,c, by { rw weak_dual.bdd_iff_indexed_parition, assumption }⟩,
+{ val := ⟨μ, c, by { rw weak_dual.bdd_iff_indexed_parition, assumption }⟩,
   property := by { erw ← weak_dual.bdd_iff_indexed_parition at h, assumption } }
 
-/-! The canonical embedding of `S.Radon_png p` into the weak dual of `C(S,ℝ)`. -/
+/-- This is the canonical embedding of `S.Radon_png p` into the weak dual of `C(S,ℝ)`. -/
 def embedding_into_the_weak_dual (S : Profinite.{0}) :
   S.Radon_png p ↪ weak_dual ℝ C(S,ℝ) := ⟨λ μ, μ.1, λ x y h, subtype.ext h⟩
 
-/-! The canonical embedding from the `c`-th term of the filtration of `S.Radon_png p` into
+/-- The canonical embedding from the `c`-th term of the filtration of `S.Radon_png p` into
 the `S.Radon_png p` itself. -/
 def filtration_embedding (S : Profinite.{0}) (c : ℝ≥0) :
   filtration (S.Radon_png p) c ↪ S.Radon_png p := ⟨λ μ, μ.1, λ x y h, subtype.ext h⟩
