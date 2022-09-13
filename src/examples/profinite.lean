@@ -126,22 +126,29 @@ end
 
 /-!
 The category of condensed abelian groups is denoted by `Condensed.{0} Ab.{1}`.
-The objects of `Condensed.{0} Ab.{1}` are indeed just sheaves for `proetale_topology`.
--/
-example (F : Condensed.{0} Ab.{1}) : Profinite.{0}ᵒᵖ ⥤ Ab.{1} := F.1
-example (F : Condensed.{0} Ab.{1}) : presheaf.is_sheaf proetale_topology F.1 := F.2
-
-/-!
-Conversely, any presheaf (with the correct universe levels)
-satisfying the sheaf condition can be considered as an object
-of `Condensed.{0} Ab.{1}`.
--/
-example (F : Profinite.{0}ᵒᵖ ⥤ Ab.{1}) (hF : presheaf.is_sheaf proetale_topology F) :
-  Condensed.{0} Ab.{1} := ⟨F,hF⟩
-
-/-!
 As a type, `Condensed.{0} Ab.{1}` is defined to be the type of sheaves from `mathlib`.
 -/
 example : Condensed.{0} Ab.{1} = Sheaf proetale_topology.{0} Ab.{1} := rfl
+
+/-!
+Any object of `Condensed.{0} Ab.{1}` yields a presheaf of abelian groups.
+-/
+example (F : Condensed.{0} Ab.{1}) : Profinite.{0}ᵒᵖ ⥤ Ab.{1} :=
+F.1
+
+/-!
+The presheaf in the example above is indeed a sheaf.
+-/
+example (F : Condensed.{0} Ab.{1}) : presheaf.is_sheaf proetale_topology F.1 :=
+F.2
+
+/-!
+Conversely, any presheaf of abelian groups on `Profinite.{0}`
+(with the correct universe parameters) which is a sheaf for `proetale_topology`
+yields an object of `Condensed.{0} Ab.{1}`.
+-/
+example (F : Profinite.{0}ᵒᵖ ⥤ Ab.{1}) (hF : presheaf.is_sheaf proetale_topology F) :
+  Condensed.{0} Ab.{1} :=
+⟨F,hF⟩
 
 end proetale_topology
