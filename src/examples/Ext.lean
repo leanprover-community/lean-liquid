@@ -4,7 +4,7 @@ import for_mathlib.universal_delta_functor.Ext
 
 /-!
 
-This file discussed the various Ext groups appearing in our project.
+This file discusses the various Ext groups appearing in our project.
 We also discuss the computation `Ext^1(ℤ/nℤ, ℤ/nℤ) = ℤ/nℤ`.
 
 -/
