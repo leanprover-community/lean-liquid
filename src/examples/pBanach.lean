@@ -3,7 +3,7 @@ import challenge_prerequisites
 
 /-!
 
-This file discusses $p$-Banach spaces and their associated condensed abelian groups.
+This file discusses `p`-Banach spaces and their associated condensed abelian groups.
 
 -/
 
@@ -12,12 +12,12 @@ noncomputable theory
 open_locale liquid_tensor_experiment nnreal zero_object
 open liquid_tensor_experiment category_theory category_theory.limits opposite
 
-/-! Let $p$ be a nonnegative real, $V$ a $p$-Banach space, and $S$ a profinite set. -/
+/-! Let `p` be a nonnegative real, `V` a `p`-Banach space, and `S` a profinite set. -/
 variables (p : ℝ≥0) (V : pBanach.{0} p) (S : Profinite.{0})
 
 section pBanach
 
-/-! The $p$-Banach space $V$ is a complete and separated topological `ℝ`-vector space. -/
+/-! The `p`-Banach space `V` is a complete and separated topological `ℝ`-vector space. -/
 example : topological_add_group V := infer_instance
 example : module ℝ V := infer_instance
 example : has_continuous_smul ℝ V := infer_instance
@@ -25,7 +25,7 @@ example : complete_space V := infer_instance
 example : separated_space V := infer_instance
 
 /--
-We may *choose* a norm on the p-Banach space satisfying some properties
+We may *choose* a norm on the `p`-Banach space satisfying some properties
 which will be discussed below.
 
 NOTE: This is really a *choice* that must be made, and we make this choice only within
@@ -37,11 +37,11 @@ def pBanach.has_norm : has_norm V :=
 /-! We tell the typeclass system to use the norm chosen above. -/
 local attribute [instance] pBanach.has_norm
 
-/-! The chosen norm on $V$ scales via the rule $∥rv∥ = |r|^p * ∥v∥$. -/
+/-! The chosen norm on `V` scales via the rule `∥rv∥ = |r|^p * ∥v∥`. -/
 example (r : ℝ) (v : V) : ∥r • v∥ = |r|^(p : ℝ) * ∥v∥ :=
 (p_banach.exists_p_norm V.p_banach').some.norm_smul r v
 
-/-! The chosen norm on $V$ satisfies the triangle inequality. -/
+/-! The chosen norm on `V` satisfies the triangle inequality. -/
 example (v w : V) : ∥v + w∥ ≤ ∥v∥ + ∥w∥ :=
 (p_banach.exists_p_norm V.p_banach').some.triangle v w
 
@@ -54,8 +54,8 @@ end pBanach
 
 section Condensed
 /-!
-When $V$ is viewed as condensed abelian group, the sections
-over $S$ are the continuous maps $S → V$.
+When `V` is viewed as condensed abelian group, the sections
+over `S` are the continuous maps `S → V`.
 For technical reasons related to size issues in topos theory,
 we need to lift the space of continuous maps to a higher universe using `ulift.{1}`.
 -/
