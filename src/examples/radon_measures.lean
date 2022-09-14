@@ -16,7 +16,7 @@ variables (p : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)]
 /-!
 The functor which associates a condensed abelian group to a
 CompHaus-ly filtered pseudo normed group is denoted by
-`CompHausFiltPseuNormGrp.to_Codnensed`.
+`CompHausFiltPseuNormGrp.to_Condensed`.
 -/
 example : CompHausFiltPseuNormGrp.{0} ⥤ Condensed.{0} Ab.{1} :=
 CompHausFiltPseuNormGrp.to_Condensed
