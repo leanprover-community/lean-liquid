@@ -74,7 +74,7 @@ example (n : ℕ) (X Y : 𝓐) :
 rfl
 
 /-!
-The `Ext' n` can be assembeled into a δ-functor, which is denoted `Ext_δ_functor 𝓐 Y`.
+The `Ext' n` can be assembled into a δ-functor, which is denoted `Ext_δ_functor 𝓐 Y`.
 To be precise, this is considering `Ext' n (X, Y)` as functors in `X`, with `Y` fixed.
 -/
 example (Y : 𝓐) : 𝓐ᵒᵖ ⥤δ Ab.{v} := Ext_δ_functor 𝓐 Y
