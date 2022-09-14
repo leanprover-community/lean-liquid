@@ -96,7 +96,7 @@ example (X Y : 𝓐) : Ext' 0 (op X) Y ≅ AddCommGroup.of (X ⟶ Y) :=
 
 /-!
 The isomorphism above is functorial in the first variable, and the isomorphism of functors
-is dentoed `Ext'_zero_flip_iso 𝓐 Y`. This isomorphism will be used in the example below.
+is denoted `Ext'_zero_flip_iso 𝓐 Y`. This isomorphism will be used in the example below.
 -/
 example (Y : 𝓐) : (Ext' 0).flip.obj Y ≅ preadditive_yoneda.obj Y :=
 Ext'_zero_flip_iso 𝓐 Y
