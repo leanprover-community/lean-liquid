@@ -55,7 +55,8 @@ example : CompHausFiltPseuNormGrp₁ ⥤ CompHausFiltPseuNormGrp :=
 CHFPNG₁_to_CHFPNGₑₗ
 
 example (X : CompHausFiltPseuNormGrp₁) :
-  (CHFPNG₁_to_CHFPNGₑₗ X : Type*) = X := rfl
+  (CHFPNG₁_to_CHFPNGₑₗ X : Type) = X :=
+rfl
 
 /-!
 The condensed abelian group `ℳ_p(S)` is isomorphic to the condensed abelian group associated
@@ -82,9 +83,17 @@ If `μ : S.Radon_png p`, then there exists a nonnegative real `c` such that for 
 `∑ i, ∥ μ (I_i) ∥^p ≤ c`.
 -/
 example (S : Profinite.{0}) (μ : S.Radon_png p) :
+-- there exists some `c : ℝ≥0` such that...
   ∃ c : ℝ≥0,
-  ∀ (ι : Fintype.{0}) (V : ι → set S)
-    (I : indexed_partition V) (hV : ∀ i, is_clopen (V i)),
+-- for any finite indexing set `ι`,
+  ∀ (ι : Fintype.{0})
+-- family of subsets of `S`,
+    (V : ι → set S)
+-- which forms a partition of `S`,
+    (I : indexed_partition V)
+-- by clopens,
+    (hV : ∀ i, is_clopen (V i)),
+-- the sum mentioned above is bounded by `c`.
     ∑ i : ι, ∥ μ (clopens.indicator ⟨V i, hV i⟩) ∥₊^(p : ℝ) ≤ c :=
 begin
   obtain ⟨c,hc⟩ := μ.2,
@@ -112,12 +121,22 @@ example (S : Profinite.{0}) (μ : C(S,ℝ) →L[ℝ] ℝ) (c : ℝ≥0)
 
 /-- This is the canonical embedding of `S.Radon_png p` into the weak dual of `C(S,ℝ)`. -/
 def embedding_into_the_weak_dual (S : Profinite.{0}) :
-  S.Radon_png p ↪ weak_dual ℝ C(S,ℝ) := ⟨λ μ, μ.1, λ x y h, subtype.ext h⟩
+  S.Radon_png p ↪ weak_dual ℝ C(S,ℝ) :=
+⟨λ μ, μ.1, λ x y h, subtype.ext h⟩
+
+/-!
+This embedding is precisely what allows us to view `μ : S.Radon_png p` as `ℝ`-valued functions
+on `C(S,ℝ)`.
+-/
+example (S : Profinite.{0}) (μ : S.Radon_png p) (f : C(S,ℝ)) :
+  embedding_into_the_weak_dual p S μ f = μ f :=
+rfl
 
 /-- The canonical embedding from the `c`-th term of the filtration of `S.Radon_png p` into
 the `S.Radon_png p` itself. -/
 def filtration_embedding (S : Profinite.{0}) (c : ℝ≥0) :
-  filtration (S.Radon_png p) c ↪ S.Radon_png p := ⟨λ μ, μ.1, λ x y h, subtype.ext h⟩
+  filtration (S.Radon_png p) c ↪ S.Radon_png p :=
+⟨λ μ, μ.1, λ x y h, subtype.ext h⟩
 
 /-! The topology of the `c`-th term of the filtration of `S.Radon_png p` is induced
 by the weak topology on the set of continuous linear map `C(S,ℝ) → ℝ`. -/

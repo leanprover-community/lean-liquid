@@ -17,7 +17,8 @@ variables {X Y : Type*} [topological_space X] [topological_space Y]
 /-!
 Any `f : C(X,Y)` can be thought of as a function from `X` to `Y`.
 -/
-example (f : C(X,Y)) : X → Y := f
+example (f : C(X,Y)) : X → Y :=
+f
 
 /-!
 A term `f` of `C(X,Y)` is continuous, when considered as a function `X → Y`.
@@ -68,11 +69,12 @@ example (X : Type)
   Profinite.{0} :=
 Profinite.of X
 
-/-
+/-!
 `Profinite.{0}` has a structure of a category, where morphisms are, by definition,
 continuous maps.
 -/
-example (X Y : Profinite.{0}) : (X ⟶ Y : Type) = C(X,Y) := rfl
+example (X Y : Profinite.{0}) : (X ⟶ Y : Type) = C(X,Y) :=
+rfl
 
 end profinite_sets
 
@@ -128,7 +130,8 @@ end
 The category of condensed abelian groups is denoted by `Condensed.{0} Ab.{1}`.
 As a type, `Condensed.{0} Ab.{1}` is defined to be the type of sheaves from `mathlib`.
 -/
-example : Condensed.{0} Ab.{1} = Sheaf proetale_topology.{0} Ab.{1} := rfl
+example : Condensed.{0} Ab.{1} = Sheaf proetale_topology.{0} Ab.{1} :=
+rfl
 
 /-!
 Any object of `Condensed.{0} Ab.{1}` yields a presheaf of abelian groups.

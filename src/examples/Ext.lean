@@ -59,17 +59,19 @@ example (X : 𝓐) : (X : bounded_homotopy_category 𝓐) = (single _ 0) X := rf
 /-!
 Our Ext functor `Ext n`, for `n : ℤ`, is defined for arbitrary objects in the bounded above
 homotopy category.
+It is a bifunctor which is contravariant in the first component and covariant in the second.
 -/
 example (n : ℤ) : (bounded_homotopy_category 𝓐)ᵒᵖ ⥤ bounded_homotopy_category 𝓐 ⥤ Ab :=
 Ext n
 
 /-!
-`Ext' n (X, B)` is defined to be `Ext n (X, B)`.
+`Ext' n (X, B)` is defined to be `Ext n (X, B)`, modulo the coercion mentioned above.
 We have to manually tell Lean that a coercion is involved in this case using `↑`.
 -/
 example (n : ℕ) (X Y : 𝓐) :
   Ext' n (op X) Y =
-  Ext n (op ↑X) ↑Y := rfl
+  Ext n (op ↑X) ↑Y :=
+rfl
 
 /-!
 The `Ext' n` can be assembeled into a δ-functor, which is denoted `Ext_δ_functor 𝓐 Y`.
@@ -78,35 +80,46 @@ To be precise, this is considering `Ext' n (X, Y)` as functors in `X`, with `Y` 
 example (Y : 𝓐) : 𝓐ᵒᵖ ⥤δ Ab.{v} := Ext_δ_functor 𝓐 Y
 
 /-!
-The `n-th` component of this delta functor is given by `Ext_δ_functor 𝓐 Y n`,
-and it is defined on objects using `Ext' n (op X) Y`. -/
+The `n-th` component of this delta functor is denoted `Ext_δ_functor 𝓐 Y n`,
+and it is defined on objects as `Ext' n (op X) Y`. -/
 example (n : ℕ) (Y : 𝓐) : 𝓐ᵒᵖ ⥤ Ab.{v} := Ext_δ_functor 𝓐 Y n
+
 example (n : ℕ) (X Y : 𝓐) :
   (Ext_δ_functor 𝓐 Y n) (op X) = Ext' n (op X) Y :=
 rfl
 
-/-! `Ext' 0 (-, B) ≅ Hom(-,B)` -/
+/-!
+`Ext' 0 (X, Y) ≅ Hom(X,Y)`.
+-/
 example (X Y : 𝓐) : Ext' 0 (op X) Y ≅ AddCommGroup.of (X ⟶ Y) :=
 (Ext'_zero_flip_iso _ _).app _
 
 /-!
-The isomorphism above is functorial in the first variable.
+The isomorphism above is functorial in the first variable, and the isomorphism of functors
+is dentoed `Ext'_zero_flip_iso 𝓐 Y`. This isomorphism will be used in the example below.
 -/
 example (Y : 𝓐) : (Ext' 0).flip.obj Y ≅ preadditive_yoneda.obj Y :=
-Ext'_zero_flip_iso _ _
+Ext'_zero_flip_iso 𝓐 Y
 
 /-!
 Any natural transformation `Hom(-,B) ⟶ F 0` to the zeroth-component of some
 delta functor `F` extends in a unique way to a morphism of delta functors
 `Ext_δ_functor A B ⟶ F`.
 
-Note that `Ext' 0 (X,B)` is not defeq to `Hom(X,B)`, so we must compose with the isomorphism
-`Ext'_zero_flip_iso` that was mentioned in the previous example.
+Note that `Ext' 0 (X,B)` is not definitionally equal to `Hom(X,B)`,
+so we must compose with the isomorphism `Ext'_zero_flip_iso` from the previous example.
 -/
-theorem Ext_δ_functor_is_universal_for_Hom (Y : 𝓐) (F : 𝓐ᵒᵖ ⥤δ Ab.{v})
+theorem Ext_δ_functor_is_universal_for_Hom
+  (Y : 𝓐)
+  -- Let `F` be a contravariant delta functor on `𝓐`,
+  (F : 𝓐ᵒᵖ ⥤δ Ab.{v})
+  -- and `e0` a morphism from `Hom(-,Y)` to `F 0`.
   (e0 : preadditive_yoneda Y ⟶ F 0) :
+  -- Then there exists a unique morphism of δ-functors `e : Ext_δ_functor 𝓐 Y ⟶ F`
   ∃! (e : Ext_δ_functor 𝓐 Y ⟶ F),
-  e0 = (Ext'_zero_flip_iso _ _).inv ≫ (e : Ext_δ_functor 𝓐 Y ⟶ F) 0 :=
+  -- such that `e0` is the composition of the zero-th component of `e` with the isomorphism
+  -- `Hom(-,Y) ≅ Ext' 0 (-,Y)`.
+  e0 = (Ext'_zero_flip_iso 𝓐 Y).inv ≫ (e : Ext_δ_functor 𝓐 Y ⟶ F) 0 :=
 begin
   let e0' : Ext_δ_functor 𝓐 Y 0 ⟶ F 0 := (Ext'_zero_flip_iso _ _).hom ≫ e0,
   obtain ⟨e,he1,he2⟩ := delta_functor.universal.cond F e0',

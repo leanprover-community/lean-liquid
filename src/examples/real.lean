@@ -23,7 +23,7 @@ The real numbers `ℝ` are a conditionally complete linearly ordered field.
 example : conditionally_complete_linear_ordered_field ℝ :=
 infer_instance
 
-/-
+/-!
 The type of nonnegative real numbers is denoted by `ℝ≥0`.
 -/
 example : ℝ≥0 = {r : ℝ // r ≥ 0} :=
