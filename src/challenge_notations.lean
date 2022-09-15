@@ -42,13 +42,13 @@ abbreviation liquid_tensor_experiment.Ext (i : ℤ) (A B : Condensed.{u} Ab.{u+1
 instance : has_coe (pBanach.{u} p) (Condensed.{u} Ab.{u+1}) :=
 { coe := λ V, Condensed.of_top_ab V }
 
-abbreviation liquid_tensor_experiment.sections (F : Condensed.{0} Ab.{1}) (S : Profinite.{0}) :
+abbreviation liquid_tensor_experiment.sections (S : Profinite.{0}) (F : Condensed.{0} Ab.{1}) :
   Ab.{1} := F.val.obj (opposite.op S)
 
 localized "notation `Γ_` := liquid_tensor_experiment.sections" in liquid_tensor_experiment
 
 def pBanach.has_coe_to_fun_condensed_eval (V : pBanach.{0} p) (S : Profinite.{0}) :
-  has_coe_to_fun (Γ_ (V : Condensed.{0} Ab.{1}) S) (λ _, S → V) :=
+  has_coe_to_fun (Γ_ S (V : Condensed.{0} Ab.{1})) (λ _, S → V) :=
 ⟨λ f, ((ulift.down f : C(S,V)) : S → V)⟩
 
 localized "attribute [instance] pBanach.has_coe_to_fun_condensed_eval" in
@@ -67,7 +67,7 @@ def functor_coe_to_fun {C D : Type*} [category C] [category D] :
 /-- Notation hack for LTE examples. -/
 def CHPNG_coe_to_fun (X : CompHausFiltPseuNormGrp.{0}) (S : Profinite.{0}) :
   has_coe_to_fun
-  (Γ_ (CompHausFiltPseuNormGrp.to_Condensed.obj X) S)
+  (Γ_ S (CompHausFiltPseuNormGrp.to_Condensed.obj X))
   (λ f, S → X) :=
 ⟨λ f s, f.down.val s⟩
 
