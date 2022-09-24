@@ -354,10 +354,7 @@ begin
     tauto},
   intro s,
   apply (@function.injective.summable_iff _ _ _ _ _ _ _ hinj (h_range_norm s)).mp,
-  convert summable_nnnorm ξ (g s) r (fact.out _),
-  ext n,
-  simp only [zpow_coe_nat, nonneg.coe_mul, coe_nnnorm, nnreal.coe_pow],
-  congr',
+  exact summable_nnnorm ξ (g s) r (fact.out _),
 end
 
 theorem ϑ_surjective (r p : ℝ≥0) (S : Fintype) (g : real_measures p S) [fact (r < 1)] [fact (0 < ξ)]

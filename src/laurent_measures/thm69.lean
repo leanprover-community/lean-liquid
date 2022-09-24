@@ -1,4 +1,3 @@
--- import for_mathlib.short_exact_sequence
 import data.int.interval
 import data.finset.nat_antidiagonal
 import laurent_measures.aux_lemmas
@@ -126,7 +125,7 @@ variable [fact(0 < p)]
 
 lemma r_lt_one : r < 1 :=
 begin
-  refine rpow_lt_one two_inv_lt_one _,
+  refine rpow_lt_one nnreal.two_inv_lt_one _,
   rw nnreal.coe_pos,
   exact fact.out _
 end
@@ -175,7 +174,7 @@ begin
     rw hmn,
     norm_cast,
     apply pow_le_pow_of_le_left', clear hn hmn hm m n,
-    apply nnreal.le_self_rpow' (two_inv_lt_one.le),
+    apply nnreal.le_self_rpow' (nnreal.two_inv_lt_one.le),
     norm_cast,
     exact fact.out _,
   },
