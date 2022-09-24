@@ -431,12 +431,13 @@ begin
   rw ← (nat.equiv_int_lt_compl d).tsum_eq, swap, apply_instance,
   simp only [nat.equiv_int_lt_compl, zpow_add₀ hs0.ne', ←mul_assoc, equiv.coe_fn_mk, subtype.coe_mk,
     zpow_coe_nat, nonneg.coe_one, nnreal.tsum_mul_right],
-  rw mul_le_mul_right₀ (zpow_ne_zero _ hs0.ne'),
-  rw ← tsum_geometric_nnreal hs,
-  refine nnreal.tsum_le_tsum (λ n, _) (nnreal.summable_geometric hs),
-  apply mul_le_of_le_one_left',
-  norm_cast,
-  apply nnreal.int.binary_le_one,
+  rw mul_le_mul_right₀,
+  { rw ← tsum_geometric_nnreal hs,
+    refine nnreal.tsum_le_tsum (λ n, _) (nnreal.summable_geometric hs),
+    apply mul_le_of_le_one_left',
+    norm_cast,
+    apply nnreal.int.binary_le_one },
+  { exact zpow_ne_zero _ hs0.ne' }
 end
 
 end theta_aux_lemma
