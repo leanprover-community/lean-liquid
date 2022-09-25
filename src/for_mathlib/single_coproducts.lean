@@ -193,8 +193,6 @@ end
 
 variables [enough_projectives A]
 
-instance Ab_op_has_colimits : has_colimits Abᵒᵖ := has_colimits_op_of_has_limits
-
 noncomputable
 instance preserves_coproducts_Ext' {α : Type v} (i : ℤ) (Y : A) [AB4 A] :
   preserves_colimits_of_shape (discrete α)
