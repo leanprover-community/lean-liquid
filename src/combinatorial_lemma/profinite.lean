@@ -17,30 +17,23 @@ variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' < 1)]
 
 namespace pseudo_normed_group
 
-def sum' {c₁ c₂ : ℝ≥0} {M : Type u} [pseudo_normed_group M]
-  (n : ℕ) (h : ↑n * c₁ ≤ c₂) :
-  (Π i : fin n, pseudo_normed_group.filtration M c₁) → pseudo_normed_group.filtration M c₂ :=
-λ t, ⟨∑ i : fin n, (t i).1, begin
-  apply filtration_mono,
-  rotate 1,
-  apply pseudo_normed_group.sum_mem_filtration,
-  intros i hi, exact (t i).2,
-  simpa,
-end⟩
+def sum' {c₁ c₂ : ℝ≥0} {M : Type u} [pseudo_normed_group M] (ι : Type) [fintype ι]
+  (h : ↑(fintype.card ι) * c₁ ≤ c₂) :
+  (Π i : ι, pseudo_normed_group.filtration M c₁) → pseudo_normed_group.filtration M c₂ :=
+λ t, ⟨∑ i, (t i).1, filtration_mono (by simpa) $ pseudo_normed_group.sum_mem_filtration _ _ _ $
+    λ i hi, (t i).2⟩
 
-@[simp] lemma coe_sum' {c₁ c₂ : ℝ≥0} {M : Type u} [pseudo_normed_group M]
-  (n : ℕ) (h : ↑n * c₁ ≤ c₂) (t : Π i : fin n, pseudo_normed_group.filtration M c₁) :
-  (sum' n h t : M) = ∑ i : fin n, (t i : M) := rfl
+@[simp] lemma coe_sum' {c₁ c₂ : ℝ≥0} {M : Type u} [pseudo_normed_group M] (ι : Type) [fintype ι]
+  (h : ↑(fintype.card ι) * c₁ ≤ c₂) (t : Π i, pseudo_normed_group.filtration M c₁) :
+  (sum' ι h t : M) = ∑ i, (t i : M) := rfl
 
-lemma sum'_zero {c₁ c₂ : ℝ≥0} {M : Type u} [pseudo_normed_group M] (h : ↑0 * c₁ ≤ c₂) :
-  (sum' 0 h :
-    (Π i : fin 0, pseudo_normed_group.filtration M c₁) → pseudo_normed_group.filtration M c₂) =
+lemma sum'_zero {c₁ c₂ : ℝ≥0} {M : Type u} [pseudo_normed_group M] (ι : Type) [fintype ι]
+  [is_empty ι] (h : ↑(fintype.card ι) * c₁ ≤ c₂) :
+  (sum' ι h :
+    (Π i, pseudo_normed_group.filtration M c₁) → pseudo_normed_group.filtration M c₂) =
   (λ _, 0) :=
-begin
-  ext t,
-  simp only [sum', fintype.univ_of_is_empty, subtype.val_eq_coe, finset.sum_empty,
-    subtype.coe_mk, filtration.coe_zero],
-end
+by { ext t, simp only [sum', finset.univ_eq_empty, subtype.val_eq_coe, finset.sum_empty,
+    subtype.coe_mk, filtration.coe_zero] }
 
 lemma sum'_succ {c₁ c₂ : ℝ≥0} {M : Type u} [pseudo_normed_group M] (n : ℕ) (h : ↑(n+1) * c₁ ≤ c₂) :
   (sum' (n+1) h :
@@ -60,13 +53,13 @@ namespace comphaus_filtered_pseudo_normed_group
 open pseudo_normed_group
 
 lemma continuous_sum' {c₁ c₂ : ℝ≥0} {M : Type u} [comphaus_filtered_pseudo_normed_group M]
-  (n : ℕ) (h : ↑n * c₁ ≤ c₂) :
-  continuous (pseudo_normed_group.sum' n h :
-    (Π (i : fin n), pseudo_normed_group.filtration M c₁) →
+  (ι : Type) [fintype ι] (h : ↑(fintype.card ι) * c₁ ≤ c₂) :
+  continuous (pseudo_normed_group.sum' ι h :
+    (Π i, pseudo_normed_group.filtration M c₁) →
     pseudo_normed_group.filtration M c₂) :=
 begin
-  have : @pseudo_normed_group.sum' _ _ M _ n h =
-    pseudo_normed_group.cast_le' h ∘ pseudo_normed_group.sum' n le_rfl,
+  have : @pseudo_normed_group.sum' _ _ M _ ι _ h =
+    pseudo_normed_group.cast_le' h ∘ pseudo_normed_group.sum' ι _ _ le_rfl,
   { ext, refl },
   rw this,
   refine (@comphaus_filtered_pseudo_normed_group.continuous_cast_le _ _ _ _ ⟨h⟩).comp _,
@@ -83,19 +76,6 @@ begin
 end
 
 end comphaus_filtered_pseudo_normed_group
-
-/-
-namespace Profinite
-
-def pow (X : Profinite.{u}) (n : ℕ) : Profinite.{u} :=
-Profinite.product (λ i : fin n, X)
-
-def map_pow {X Y : Profinite.{u}} (f : X ⟶ Y) (n : ℕ) :
-  X.pow n ⟶ Y.pow n :=
-Profinite.product.lift _ $ λ n, Profinite.product.π _ n ≫ f
-
-end Profinite
--/
 
 namespace ProFiltPseuNormGrpWithTinv₁
 
@@ -145,13 +125,15 @@ abbreviation cast_lvl {c₁ c₂ : ℝ≥0} (X : ProFiltPseuNormGrpWithTinv₁.{
   map_lvl f c₁ ≫ cast_lvl Y h = cast_lvl X h ≫ map_lvl f c₂ :=
 by { ext, refl }
 
-def sum {c₁ c₂ : ℝ≥0} (X : ProFiltPseuNormGrpWithTinv₁.{u} r') (n : ℕ) (h : ↑n * c₁ ≤ c₂) :
-  (X.lvl c₁).pow n ⟶ X.lvl c₂ :=
+def sum {c₁ c₂ : ℝ≥0} (X : ProFiltPseuNormGrpWithTinv₁.{u} r') (ι : Type) [fintype ι]
+  (h : ↑(fintype.card ι) * c₁ ≤ c₂) :
+  (X.lvl c₁).pow ι ⟶ X.lvl c₂ :=
 ⟨pseudo_normed_group.sum' _ h,
   comphaus_filtered_pseudo_normed_group.continuous_sum' _ _⟩
 
 @[simp] lemma coe_sum {c₁ c₂ : ℝ≥0} (X : ProFiltPseuNormGrpWithTinv₁.{u} r')
-  (n : ℕ) (h : ↑n * c₁ ≤ c₂) : ⇑(X.sum n h) = pseudo_normed_group.sum' n h := rfl
+   (ι : Type) [fintype ι]
+  (h : ↑(fintype.card ι) * c₁ ≤ c₂) : ⇑(X.sum n h) = pseudo_normed_group.sum' n h := rfl
 
 lemma le₁ (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) :
   ↑N * (c / ↑N + d) ≤ c + ↑N * d :=
@@ -234,7 +216,7 @@ def gadget_diagram_fst_snd {J : Type u} [small_category J]
 def gadget_diagram_fst_fst {J : Type u} [small_category J]
   {K : J ⥤ ProFiltPseuNormGrpWithTinv₁ r'} (C : cone K)
   (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) (t : Profinite.punit.{u} ⟶ C.X.lvl c)
-  (i : fin N) :
+  (i) :
   gadget_diagram C N c d t ⟶ K ⋙ (level r').obj (c / ↑N + d) :=
 { app := λ j, Profinite.pullback.fst _ _ ≫ Profinite.pullback.fst _ _ ≫
     Profinite.product.π _ i,
@@ -276,7 +258,7 @@ lemma gadget_cone_lift_aux {J : Type u} [small_category J]
       S' := λ i, (cones.postcompose (η i)).obj S,
       F : Π i, S.X ⟶ _  := λ i, (hC _).lift (S' i),
       S'' :=  (cones.postcompose γ).obj S in
-  Profinite.product.lift (λ (i : fin N), C.X.lvl (c / ↑N + d)) F ≫
+  Profinite.product.lift (λ (i), C.X.lvl (c / ↑N + d)) F ≫
     C.X.sum N (le₁ _ _ _) = (hC c).lift S'' ≫ C.X.cast_lvl (le₂ _ _ _) :=
 begin
   have h₁ := le₁ N c d,
@@ -319,7 +301,7 @@ end
 --   {K : J ⥤ ProFiltPseuNormGrpWithTinv₁ r'} (C : cone K)
 --   (hC : ∀ a : ℝ≥0, is_limit (((level r').obj a).map_cone C))
 --   (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) (t : Profinite.punit.{u} ⟶ C.X.lvl c)
---   (S : cone (gadget_diagram C N c d t)) (i : fin N) (j : J)
+--   (S : cone (gadget_diagram C N c d t)) (i) (j : J)
 --   (g : ((K.obj j).lvl (c / ↑N + d)).pow N ⟶ (((level r').obj (c / ↑N + d)).map_cone C).X) :
 --   (hC (c / N + d)).lift ((cones.postcompose (gadget_diagram_fst_fst C N c d t i)).obj S) =
 --     S.π.app j ≫ Profinite.pullback.fst
