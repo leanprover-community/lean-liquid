@@ -509,7 +509,8 @@ lemma exists_signed_sum_aux {n : ℕ} (sgn : ℕ → sign_type) (b : α) [decida
         (λ j, ite (a = b) ↑(sign (f a)) 0) i :=
 by { unfold piecewise, split_ifs; refl }
 
-lemma exists_signed_sum (s : finset α) (n : ℕ) (f : α → ℤ) (hn : ∑ i in s, (f i).nat_abs ≤ n) :
+-- switch to the version in mathlib
+lemma refactor.exists_signed_sum (s : finset α) (n : ℕ) (f : α → ℤ) (hn : ∑ i in s, (f i).nat_abs ≤ n) :
   ∃ (sgn : ℕ → sign_type) (g : ℕ → α), (∀ i, g i ∉ s → sgn i = 0) ∧
     ∀ a ∈ s, (∑ i in range n, if g i = a then (sgn i : ℤ) else 0) = f a :=
 begin
@@ -545,7 +546,7 @@ lemma Profinite.pmz_to_free_pfpng_epi_aux' [fintype α]
   ∃ (sgn : ℕ → sign_type) (g : ℕ → α),
     ∀ t, (∑ i in range ⌊r⌋₊, if g i = t then (sgn i : ℤ) else 0) = f t :=
 begin
-  refine Exists₂.imp (λ _ _ h t, _) (exists_signed_sum univ ⌊r⌋₊ f _),
+  refine Exists₂.imp (λ _ _ h t, _) (refactor.exists_signed_sum univ ⌊r⌋₊ f _),
   { exact h.2 t (mem_univ _) },
   refine nat.le_floor _,
   simp_rw [nat.cast_sum, nnreal.coe_nat_abs],
