@@ -392,7 +392,7 @@ end preadditive
 
 section additive
 
-variables [additive_category A] [limits.has_finite_limits A]
+variables [additive_category A] --[limits.has_finite_limits A]
 
 instance : additive_category (Sheaf J A) :=
 { has_biproducts_of_shape := begin
