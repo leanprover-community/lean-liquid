@@ -82,7 +82,7 @@ begin
   have ε_pos : ∀ j, 0 < ε j,
   { intro j,
     dsimp [ε],
-    refine div_pos (div_pos (mul_pos _ _) hK') zero_lt_two; norm_num },
+    refine div_pos (div_pos (mul_pos _ _) hK') zero_lt_two; simp },
   have ε_decr : ∀ j, ε (j+1) ≤ ε j,
   { intros j,
     dsimp [ε],

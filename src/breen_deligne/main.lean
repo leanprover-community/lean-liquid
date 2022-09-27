@@ -349,7 +349,6 @@ begin
   let hc'' : is_colimit c'' := is_colimit_of_preserves _ hc',
   change is_zero c''.X.unop,
   apply is_zero.unop,
-  haveI : has_colimits Ab.{v}ᵒᵖ := has_colimits_op_of_has_limits.{v v+1},
   let e : c''.X ≅ colimit ((D ⋙ T) ⋙ ((Ext' i).flip.obj B).right_op) :=
     hc''.cocone_point_unique_up_to_iso (colimit.is_colimit _),
   apply is_zero.of_iso _ e,

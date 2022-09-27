@@ -50,7 +50,7 @@ lemma diff_inter_eq_empty {α : Type*} (a : set α) {b c : set α} (h : c ⊆ b)
   a \ b ∩ c = ∅ :=
 begin
   ext x,
-  simp only [and_imp, mem_empty_eq, mem_inter_eq, not_and, mem_diff, iff_false],
+  simp only [and_imp, not_and, mem_diff, iff_false, mem_inter_iff, mem_empty_iff_false],
   intro _,
   exact mt (@h x),
 end
@@ -93,8 +93,8 @@ lemma clopen_Union_disjoint {H : Type*} [topological_space H]
 begin
   classical,
   apply finset.induction_on' s,
-  { use ∅, simp only [finset.not_mem_empty, set.mem_empty_eq, forall_const,
-      finset.coe_empty, eq_self_iff_true, and_self, is_empty.forall_iff] },
+  { use ∅, simp only [finset.coe_empty, set.mem_empty_iff_false, is_empty.forall_iff, forall_const,
+      eq_self_iff_true, finset.not_mem_empty, and_self]},
   { rintros a S h's hS aS ⟨t, clo, union, sub, disj⟩,
     set b := a \ ⋃₀ S with hb,
     refine ⟨insert b t, _, _, ⟨λ x hx, _, λ x y hx hy ne, _⟩⟩,
@@ -334,7 +334,7 @@ begin
       (set.finite.to_finset (fin ε f)) (λ x hx, (is_clopen_x ε f hx)))).2.2.2 j y hj h1,
     by_cases h : j = y,
     { rw h.symm, },
-    { exfalso, specialize disj h, rw ←set.mem_empty_eq, rw ←disj,
+    { exfalso, specialize disj h, rw ←set.mem_empty_iff_false, rw ←disj,
       apply set.mem_inter aj _,
       simp only [and_true, implies_true_iff, eq_iff_true_of_subsingleton] at h2,
       exact h2, }, },

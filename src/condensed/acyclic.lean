@@ -146,7 +146,7 @@ end
 
 instance presheaf_to_Sheaf_additive :
   (presheaf_to_Sheaf.{u+2 u u+1} ExtrDisc.proetale_topology.{u} Ab.{u+1}).additive :=
-category_theory.Sheaf.presheaf_to_Sheaf_additive
+category_theory.Sheaf.presheaf_to_Sheaf_additive.{u+2 u u+1}
 
 def acyclic_of_exact.induction_step_ex₂_aux
   {C : Type*} [category C] {𝓐 : Type*} [category 𝓐] [abelian 𝓐] {𝓑 : Type*} [category 𝓑] [abelian 𝓑]

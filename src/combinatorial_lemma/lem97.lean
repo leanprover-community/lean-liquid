@@ -1,5 +1,5 @@
 import algebra.group.basic
-import analysis.convex.cone
+import analysis.convex.cone.basic
 import linear_algebra.dual
 import algebra.order.ring
 import algebra.module.hom
@@ -41,7 +41,7 @@ begin
   refine ⟨λ x : (Λ →+ ℤ), if H: x ∈ S₀ then (y ⟨x, H⟩ : ℕ) else 0, _⟩,
   rw ← finset.sum_attach,
   refine finset.sum_congr rfl (λ s hs, _),
-  simp only [*, dif_pos, dite_eq_ite, val_eq_coe, if_true, finset.coe_mem, finset.mk_coe]
+  simp only [finset.coe_mem, finset.mk_coe, dite_eq_ite, if_true, fin.val_eq_coe, val_eq_coe]
 end
 
 /-- A technical auxiliary lemma used in the proof of `lem97_pos`. -/

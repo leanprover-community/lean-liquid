@@ -72,7 +72,7 @@ open submodule.is_principal set submodule
 universe u
 
 -- Equivalent of lt_of_lt_of_le for unbundled orders. (??)
-lemma lt_of_lt_of_le_unbundled {α : Type u} {r : α → α → Prop} [is_strict_total_order' α r] {a b c : α}
+lemma lt_of_lt_of_le_unbundled {α : Type u} {r : α → α → Prop} [is_strict_total_order α r] {a b c : α}
   (hab : r a b) (hbc : ¬r c b) :
 r a c :=
 begin
@@ -86,7 +86,7 @@ begin
 end
 
 -- Characterization of le for unbundled orders. (??)
-lemma le_unbundled {α : Type u} {r : α → α → Prop} [is_strict_total_order' α r] {a b : α} :
+lemma le_unbundled {α : Type u} {r : α → α → Prop} [is_strict_total_order α r] {a b : α} :
   r a b ∨ a = b ↔  ¬r b a :=
 begin
   split,

@@ -60,8 +60,7 @@ def _root_.laurent_measures.to_slm (F : ℒ S) : slm r S :=
   summable' := begin
     refine λ s, summable_coe.mp _,
     convert ((@int_summable_iff _ _ _ _ _ (λ (n : ℤ), ∥F.to_fun s n∥ * r ^ n)).mp _).1,
-    { convert summable_coe.mpr (F.summable' s),
-      simp }
+    exact summable_coe.mpr (F.summable' s)
   end }
 
 /--  A Simple Laurent Measure `F : slm S` "usual" Laurent Measure of type `ℒ S`. -/
@@ -72,10 +71,9 @@ def slm.to_laurent_measures {r : ℝ≥0} (F : slm r S) : laurent_measures r S :
   summable' := begin
     refine λ s, summable_coe.mp _,
     convert ((@int_summable_iff _ _ _ _ _ (λ (n : ℤ), ∥F.to_fun s n∥ * r ^ n)).mpr _),
-    { simp },
-    { refine ⟨_, summable_of_eventually_zero (λ (n : ℤ), ∥F.to_fun s n∥ * ↑r ^ n) F.d (λ n nd, _)⟩,
-      { convert summable_coe.mpr (F.summable' s), },
-      { simp [F.zero_lt_d s n nd] } }
+    refine ⟨_, summable_of_eventually_zero (λ (n : ℤ), ∥F.to_fun s n∥ * ↑r ^ n) F.d (λ n nd, _)⟩,
+    { convert summable_coe.mpr (F.summable' s), },
+    { simp [F.zero_lt_d s n nd] }
   end }
 
 lemma slm_lm_to_fun_eq {r : ℝ≥0} (F : slm r S) : F.to_fun = F.to_laurent_measures.to_fun := rfl

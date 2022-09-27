@@ -364,6 +364,7 @@ section preadditive
 
 variable [preadditive A]
 
+/-
 instance : preadditive (Sheaf J A) :=
 { hom_group := λ P Q,
   { add := λ f g, ⟨f.val + g.val⟩,
@@ -385,12 +386,13 @@ instance : preadditive (Sheaf J A) :=
     add_comm := by { intros, ext1, apply add_comm } },
   add_comp' := λ P Q R f g h, by { ext1, apply preadditive.add_comp },
   comp_add' := λ P Q R f g h, by { ext1, apply preadditive.comp_add } }
+-/
 
 end preadditive
 
 section additive
 
-variables [additive_category A] [limits.has_finite_limits A]
+variables [additive_category A] --[limits.has_finite_limits A]
 
 instance : additive_category (Sheaf J A) :=
 { has_biproducts_of_shape := begin

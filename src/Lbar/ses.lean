@@ -106,11 +106,11 @@ the corresponding power series `Fₛ : ℤ[[T]][T⁻¹]`. -/
         simpa },
       /- setup equiv with `ℕ` using `k → -k` and use `F.nnreal_summable s` -/ },
     { convert summable_zero, ext ⟨((_|n)|n), hn⟩,
-      { simp only [int.of_nat_eq_coe, int.coe_nat_zero, set.mem_compl_eq, set.mem_set_of_eq,
-         le_refl, not_true] at hn,
+      { simp only [int.of_nat_eq_coe, int.coe_nat_zero, le_refl, not_true, set.mem_compl_iff,
+          set.mem_set_of_eq] at hn,
         exact hn.elim },
       { erw [nnnorm_zero, zero_mul, nnreal.coe_zero], },
-      { simp only [set.mem_compl_eq, set.mem_set_of_eq, not_le, int.neg_succ_not_pos] at hn,
+      { simp only [not_le, int.neg_succ_not_pos, set.mem_compl_iff, set.mem_set_of_eq] at hn,
         exact hn.elim }, },
   end }
 
@@ -490,7 +490,7 @@ begin
   { intro S, ext F s (_|n); refl, },
   { rintro S c F ⟨hF1, hF2⟩,
     simp only [whisker_right_app, laurent_measures.to_Lbar_nat_trans_app, functor.comp_map,
-      set.mem_inter_eq, set.mem_preimage, set.mem_singleton_iff] at hF1 hF2,
+      set.mem_preimage, set.mem_singleton_iff] at hF1 hF2,
     change laurent_measures.to_Lbar r' S F = 0 at hF1,
     change F ∈ pseudo_normed_group.filtration (laurent_measures r' S) c at hF2,
     show F ∈ invpoly.to_laurent_measures r' S ''

@@ -95,7 +95,7 @@ begin
   { suffices : W = f ⁻¹' V ∪ Uᶜ,
     { rw this, exact (hV.preimage hf).union U.clopen.compl.is_open },
     classical, ext x,
-    simp only [set.mem_preimage, set.mem_union_eq, set.mem_compl_eq, set_like.mem_coe,
+    simp only [set.mem_preimage, set.mem_union, set.mem_compl_iff, set_like.mem_coe,
       set.indicator_apply],
     split_ifs with hxU,
     { simp only [hxU, not_true, or_false] },
@@ -103,11 +103,11 @@ begin
   { suffices : W = f ⁻¹' V ∩ U,
     { rw this, exact (hV.preimage hf).inter U.clopen.is_open },
     classical, ext x,
-    simp only [set.mem_preimage, set.mem_union_eq, set.mem_compl_eq, set_like.mem_coe,
+    simp only [set.mem_preimage, set.mem_union, set.mem_compl_iff, set_like.mem_coe,
       set.indicator_apply],
     split_ifs with hxU,
-    { simp only [hxU, set.mem_inter_eq, set.mem_preimage, set_like.mem_coe, and_true] },
-    { simp only [h0, false_iff, set.mem_inter_eq, set.mem_preimage, set_like.mem_coe, not_and],
+    { simp only [hxU, set.mem_inter_iff, set.mem_preimage, set_like.mem_coe, and_true] },
+    { simp only [h0, false_iff, set.mem_inter_iff, set.mem_preimage, set_like.mem_coe, not_and],
       intro, assumption, } }
 end
 
@@ -130,10 +130,10 @@ begin
   all_goals
   { ext x,
     by_cases xU : x ∈ U,
-    { simp only [xU, s1, set.mem_preimage, set.indicator_of_mem, pi.one_apply, set.mem_compl_eq,
-        not_true, set.mem_univ, set.mem_empty_eq] },
+    { simp only [xU, s1, set.mem_preimage, set.indicator_of_mem, pi.one_apply, set.mem_compl_iff,
+        not_true, set.mem_univ, set.mem_empty_iff_false] },
     { simp only [xU, s0, set.mem_preimage, set.indicator_of_not_mem, not_false_iff,
-      set.mem_compl_eq, set.mem_univ, set.mem_empty_eq] } }
+        set.mem_compl_iff, set.mem_univ, set.mem_empty_iff_false] } }
 end
 
 /--  The indicator function of a clopen set, bundled as a locally constant function. -/
@@ -489,8 +489,9 @@ begin
   { intros hμ T,
     refine hμ (Fintype.of T) (λ t, T.proj ⁻¹' {t}) _ (λ t, (T.fibre t).2),
     fapply indexed_partition.mk',
-    { intros i j hij a ha, simp only [set.bot_eq_empty, set.mem_empty_eq], apply hij,
-      simp only [set.inf_eq_inter, set.mem_inter_eq, set.mem_preimage, set.mem_singleton_iff] at ha,
+    { intros i j hij a ha, simp only [set.bot_eq_empty, set.mem_empty_iff_false], apply hij,
+      simp only [set.inf_eq_inter, set.mem_inter_iff, set.mem_preimage,
+        set.mem_singleton_iff] at ha,
       rw [← ha.1, ha.2] },
     { rintros (t : T), obtain ⟨t,rfl⟩ := T.proj_surjective t, use t, change _ = _, refl, },
     { intros s, use T.proj s, change _ = _, refl } }
