@@ -51,24 +51,24 @@ In this section, we discuss the category of profinite sets.
 -/
 
 /-!
-`Profinite.{0}` denotes the type of profinite sets whose underlying type
-lives in `Type = Type 0`.
+`Profinite` denotes the category of profinite sets. Note that in Lean the category
+of all sets is called `Type`.
 -/
-example : Type 1 := Profinite.{0}
-example (X : Profinite.{0}) : Type := X
+example := Profinite
+example (X : Profinite) : Type := X
 
 /-!
 Any profinite set is a compact, Hausdorff, totally disconnected topological space.
 -/
-example (X : Profinite.{0}) : topological_space X := infer_instance
-example (X : Profinite.{0}) : compact_space X := infer_instance
-example (X : Profinite.{0}) : t2_space X := infer_instance
-example (X : Profinite.{0}) : totally_disconnected_space X := infer_instance
+example (X : Profinite) : topological_space X := infer_instance
+example (X : Profinite) : compact_space X := infer_instance
+example (X : Profinite) : t2_space X := infer_instance
+example (X : Profinite) : totally_disconnected_space X := infer_instance
 
 /-!
 Conversely, any topological space which is compact, Hausdorff and
 totally disconnected is a profinite set.
-The function `Profinite.of` is used to make an object of `Profinite.{0}`
+The function `Profinite.of` is used to make an object of `Profinite`
 from such a topological space.
 -/
 example (X : Type)
@@ -76,14 +76,15 @@ example (X : Type)
   [compact_space X]
   [t2_space X]
   [totally_disconnected_space X] :
-  Profinite.{0} :=
+  Profinite :=
 Profinite.of X
 
 /-!
-`Profinite.{0}` has a structure of a category, where morphisms are, by definition,
+`Profinite` has a structure of a category. The morphisms are, by definition,
 continuous maps.
 -/
-example (X Y : Profinite.{0}) : (X ⟶ Y : Type) = C(X,Y) :=
+example (X Y : Profinite) : (X ⟶ Y) = C(X,Y) :=
+-- True by definition
 rfl
 
 end profinite_sets
@@ -91,29 +92,29 @@ end profinite_sets
 section proetale_topology
 
 /-!
-This section describes the Grothendieck topology on `Profinite.{0}` which is used in
+This section describes the Grothendieck topology on `Profinite` which is used in
 our formalization of condensed mathematics.
 We use the name `proetale_topology` for this Grothendieck topology.
 -/
-example : grothendieck_topology Profinite.{0} := proetale_topology
+example : grothendieck_topology Profinite := proetale_topology
 
 /-!
 This example shows that the sheaf condition with respect to this Grothendieck topology,
-for a presheaf of abelian groups on `Profinite.{0}`, is equivalent to the usual definition.
+for a presheaf of abelian groups on `Profinite`, is equivalent to the usual definition.
 -/
 example
--- Let `F` be a presheaf of abelian groups on `Profinite.{0}`.
-  (F : Profinite.{0}ᵒᵖ ⥤ Ab.{1}) :
+-- Let `F` be a presheaf of abelian groups on `Profinite`.
+  (F : Profiniteᵒᵖ ⥤ Ab) :
 -- `F` is a sheaf for `proetale_topology`
   presheaf.is_sheaf proetale_topology F
 -- if and only if the following condition holds:
   ↔
 -- For any finite indexing type `α`,
-  ∀ (α : Fintype.{0})
+  ∀ (α : Fintype)
 -- profinite set `B`,
-    (B : Profinite.{0})
+    (B : Profinite)
 -- family of profinite sets `X` indexed by `α`
-    (X : α → Profinite.{0})
+    (X : α → Profinite)
 -- which map to `B` with a family of maps `π`,
     (π : Π i, X i ⟶ B)
 -- such that `π` is jointly surjective,
@@ -137,31 +138,32 @@ begin
 end
 
 /-!
-The category of condensed abelian groups is denoted by `Condensed.{0} Ab.{1}`.
-As a type, `Condensed.{0} Ab.{1}` is defined to be the type of sheaves from `mathlib`.
+The category of condensed abelian groups is denoted by `Condensed Ab`.
+As a type, `Condensed Ab` is defined to be the type of sheaves from `mathlib`.
 -/
-example : Condensed.{0} Ab.{1} = Sheaf proetale_topology.{0} Ab.{1} :=
+example : Condensed Ab = Sheaf proetale_topology Ab :=
+-- true by definition
 rfl
 
 /-!
-Any object of `Condensed.{0} Ab.{1}` yields a presheaf of abelian groups.
+Any object of `Condensed Ab` yields a presheaf of abelian groups.
 -/
-example (F : Condensed.{0} Ab.{1}) : Profinite.{0}ᵒᵖ ⥤ Ab.{1} :=
+example (F : Condensed Ab) : Profiniteᵒᵖ ⥤ Ab :=
 F.1
 
 /-!
 The presheaf in the example above is indeed a sheaf.
 -/
-example (F : Condensed.{0} Ab.{1}) : presheaf.is_sheaf proetale_topology F.1 :=
+example (F : Condensed Ab) : presheaf.is_sheaf proetale_topology F.1 :=
 F.2
 
 /-!
-Conversely, any presheaf of abelian groups on `Profinite.{0}`
+Conversely, any presheaf of abelian groups on `Profinite`
 (with the correct universe parameters) which is a sheaf for `proetale_topology`
-yields an object of `Condensed.{0} Ab.{1}`.
+yields an object of `Condensed Ab`.
 -/
-example (F : Profinite.{0}ᵒᵖ ⥤ Ab.{1}) (hF : presheaf.is_sheaf proetale_topology F) :
-  Condensed.{0} Ab.{1} :=
+example (F : Profiniteᵒᵖ ⥤ Ab) (hF : presheaf.is_sheaf proetale_topology F) :
+  Condensed Ab :=
 ⟨F,hF⟩
 
 end proetale_topology
