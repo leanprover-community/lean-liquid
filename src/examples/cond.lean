@@ -2,8 +2,8 @@ import challenge
 
 /-!
 
-The main goal of this file is to discuss our definition of
-condensed abelian groups.
+The main goal of this file is to discuss the definition of
+condensed abelian groups which is used in this project.
 
 As prerequisites, we also discuss continuous maps and the
 category of profinite sets.
