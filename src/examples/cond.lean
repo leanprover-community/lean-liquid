@@ -1,5 +1,15 @@
 import challenge
 
+/-!
+
+The main goal of this file is to discuss our definition of
+condensed abelian groups.
+
+As prerequisites, we also discuss continuous maps and the
+category of profinite sets.
+
+-/
+
 open category_theory category_theory.limits opposite
 open_locale liquid_tensor_experiment
 
