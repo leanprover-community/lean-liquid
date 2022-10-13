@@ -32,12 +32,12 @@ rfl
 /-!
 Any conditionally complete linear ordered field is isomorphic (as an ordered ring) to `ℝ`.
 -/
-example {R : Type*} [conditionally_complete_linear_ordered_field R] : R ≃+*o ℝ :=
+example {R : Type} [conditionally_complete_linear_ordered_field R] : R ≃+*o ℝ :=
 default
 
 /-!
 The isomorphism above is unique.
 -/
-example {R : Type*} [conditionally_complete_linear_ordered_field R] (e₁ e₂ : R ≃+*o ℝ) :
+example {R : Type} [conditionally_complete_linear_ordered_field R] (e₁ e₂ : R ≃+*o ℝ) :
   e₁ = e₂ :=
 subsingleton.elim _ _

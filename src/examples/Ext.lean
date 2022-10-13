@@ -92,7 +92,7 @@ rfl
 `Ext' 0 (X, Y) ≅ Hom(X,Y)`.
 -/
 example (X Y : 𝓐) : Ext' 0 (op X) Y ≅ AddCommGroup.of (X ⟶ Y) :=
-(Ext'_zero_flip_iso _ _).app _
+(Ext'_zero_flip_iso 𝓐 Y).app (op X)
 
 /-!
 The isomorphism above is functorial in the first variable, and the isomorphism of functors

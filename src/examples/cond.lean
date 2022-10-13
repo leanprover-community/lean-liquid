@@ -118,8 +118,8 @@ example
     (π : Π i, X i ⟶ B)
 -- such that `π` is jointly surjective,
     (hπ : ∀ b : B, ∃ i (x : X i), π i x = b)
--- and all families of elements `x i : F (op $ X i)`,
-    (x : Π i, F (op $ X i))
+-- and all families of elements `x i : F (op (X i))`,
+    (x : Π i, F (op (X i)))
 -- which are compatible on pullbacks `X i ×_{B} X j`
     (hx : ∀ i j : α,
       F.map (pullback.fst : pullback (π i) (π j) ⟶ X i).op (x i) =
