@@ -3,7 +3,7 @@ import analysis.normed.group.SemiNormedGroup.kernels
 import Lbar.basic
 import normed_group.pseudo_normed_group
 import combinatorial_lemma.partition
-import combinatorial_lemma.lem97
+import combinatorial_lemma.torsion
 import polyhedral_lattice.pseudo_normed_group
 import pseudo_normed_group.splittable
 
@@ -351,12 +351,12 @@ by convert (polyhedral_lattice.polyhedral Λ).some_spec.some_spec.some_spec.1
 lemma hl' : ∀ i, l Λ i ≠ 0 :=
 (polyhedral_lattice.polyhedral Λ).some_spec.some_spec.some_spec.2
 
-def A (N : ℕ) [hN : fact (0 < N)] := (lem97' N hN.1 (l Λ)).some
+def A (N : ℕ) [hN : fact (0 < N)] := (lem97'' N hN.1 (l Λ)).some
 
 lemma hA (N : ℕ) [hN : fact (0 < N)] (x : Λ →+ ℤ) :
   ∃ x' (H : x' ∈ A Λ N) y, x = N • y + x' ∧
     ∀ i, (x (l Λ i)).nat_abs = N * (y (l Λ i)).nat_abs + (x' (l Λ i)).nat_abs :=
-(lem97' N hN.1 (l Λ)).some_spec x
+(lem97'' N hN.1 (l Λ)).some_spec x
 
 def d  (N : ℕ) [hN : fact (0 < N)] : ℝ≥0 :=
 finset.univ.sup (λ i, ∑ a in A Λ N, ∥a (l Λ i)∥₊ / ∥l Λ i∥₊)

@@ -29,33 +29,6 @@ quotient_add_group.eq_zero_iff _
 lemma π_is_quotient : L.normed_mk.is_quotient :=
 normed_add_group_hom.is_quotient_quotient _
 
-instance [H : fact L.saturated] : no_zero_smul_divisors ℤ (Λ ⧸ L) :=
-{ eq_zero_or_eq_zero_of_smul_eq_zero :=
-  begin
-    intros n x h,
-    obtain ⟨x, rfl⟩ : ∃ y, L.normed_mk y = x := quotient.surjective_quotient_mk' x,
-    have : L.normed_mk (n • x) = n • L.normed_mk x := L.normed_mk.to_add_monoid_hom.map_zsmul x n,
-    simp only [← this, π_apply_eq_zero_iff] at h ⊢,
-    exact add_subgroup.saturated_iff_zsmul.mp H.1 _ _ h,
-  end }
-
-instance quotient_finite : module.finite ℤ (Λ ⧸ L) :=
-begin
-  apply module.finite.of_surjective (L.normed_mk).to_add_monoid_hom.to_int_linear_map,
-  exact quotient.surjective_quotient_mk'
-end
-
-instance quotient_free [H : fact L.saturated] : module.free ℤ (Λ ⧸ L) :=
-begin
-  let φ := L.normed_mk.to_add_monoid_hom.to_int_linear_map,
-  suffices : submodule.span ℤ (set.range (φ ∘ (module.free.choose_basis ℤ Λ))) = ⊤,
-  { obtain ⟨n, b⟩ := module.free_of_finite_type_torsion_free this,
-    exact module.free.of_basis b, },
-  rw [set.range_comp, ← submodule.map_span, basis.span_eq,
-    submodule.map_top, linear_map.range_eq_top],
-  exact quotient.surjective_quotient_mk'
-end
-
 open pseudo_normed_group
 
 lemma norm_lift (y : Λ ⧸ L) :
@@ -102,7 +75,7 @@ begin
     exact ⟨x₀, ⟨hx₀.1, (hx₀.2.trans key.le).trans (H.ge.trans hx.2)⟩, rfl⟩, }
 end
 
-instance [H : fact L.saturated] : polyhedral_lattice (Λ ⧸ L) :=
+instance : polyhedral_lattice (Λ ⧸ L) :=
 { polyhedral' :=
   begin
     obtain ⟨ι, _inst_ι, l, hl, hl'⟩ := polyhedral_lattice.polyhedral Λ, resetI,

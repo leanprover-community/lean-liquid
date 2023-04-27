@@ -51,22 +51,11 @@ lemma generates_norm_of_generates_nnnorm {x : ι → Λ}
 end generates_norm
 
 class polyhedral_lattice (Λ : Type*) extends normed_add_comm_group Λ :=
-[finite [] : module.finite ℤ Λ]
-[free   [] : module.free ℤ Λ]
 (polyhedral' [] : ∃ (ι : Type) [fintype ι] (l : ι → Λ), generates_norm l)
 
 namespace polyhedral_lattice
 
 variables (Λ : Type*) [polyhedral_lattice Λ]
-
-attribute [instance] polyhedral_lattice.finite polyhedral_lattice.free
-
-instance no_zero_smul_divisors_int : no_zero_smul_divisors ℤ Λ :=
-module.free.no_zero_smul_divisors ℤ Λ
-
-instance no_zero_smul_divisors_nat : no_zero_smul_divisors ℕ Λ :=
-⟨λ n l h, by { rw  [← coe_nat_zsmul, smul_eq_zero] at h,
-  refine h.imp _ id, simp only [imp_self, int.coe_nat_eq_zero] }⟩
 
 lemma polyhedral :
   ∃ (ι : Type) (_ : fintype ι) (l : ι → Λ), by exactI generates_norm l ∧ ∀ i, l i ≠ 0 :=
@@ -88,6 +77,22 @@ begin
     { dsimp, rintro i j - hi - hj, simp only [imp_self], },
     { rintro ⟨i, hi⟩ -, dsimp, intro H, refine ⟨i, finset.mem_univ _, H, rfl⟩ },
     { intros, refl } },
+end
+
+instance module.finite' : module.finite ℤ Λ :=
+begin
+  constructor,
+  obtain ⟨ι, _ι_inst, l, hl⟩ := polyhedral Λ, resetI,
+  refine ⟨finset.image l finset.univ, _⟩,
+  simp only [finset.coe_image, finset.coe_univ, eq_top_iff],
+  rintro x -,
+  obtain ⟨x, rfl, -⟩ := hl.1 x,
+  rw [finsupp.span_image_eq_map_total, submodule.mem_map],
+  refine ⟨finsupp.equiv_fun_on_fintype.symm (coe ∘ x), _, _⟩,
+  { simp only [finsupp.supported_univ], },
+  { simp only [finsupp.total, finsupp.coe_lsum, linear_map.coe_smul_right, linear_map.id_coe, id.def],
+    rw [finsupp.sum_fintype], swap, { simp only [zero_smul, eq_self_iff_true, implies_true_iff] },
+    simp only [finsupp.equiv_fun_on_fintype_symm_apply_to_fun, coe_nat_zsmul], }
 end
 
 end polyhedral_lattice

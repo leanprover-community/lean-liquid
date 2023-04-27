@@ -112,9 +112,7 @@ namespace finsupp
 variables [polyhedral_lattice Λ]
 
 instance {ι : Type} [fintype ι] : polyhedral_lattice (ι →₀ Λ) :=
-{ finite := module.finite.of_basis (finsupp.basis (λ i, module.free.choose_basis ℤ Λ)),
-  free := module.free.of_basis (finsupp.basis (λ i, module.free.choose_basis ℤ Λ)),
-  polyhedral' :=
+{ polyhedral' :=
   begin
     obtain ⟨J, _instJ, x, hx⟩ := polyhedral_lattice.polyhedral' Λ, resetI,
     refine ⟨ι × J, infer_instance, λ j, single j.1 (x j.2), _⟩,

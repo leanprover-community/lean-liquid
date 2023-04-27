@@ -62,23 +62,6 @@ def L : add_subgroup (fin m →₀ Λ') :=
       rw [f.map_neg, hl, finsupp.neg_apply] }
   end }
 
-instance L_saturated [hf : fact f.to_add_monoid_hom.range.saturated] :
-  fact (L f m).saturated :=
-begin
-  constructor,
-  rw add_subgroup.saturated_iff_nsmul,
-  rintro n l' ⟨hl', Hl'⟩,
-  simp only [zsmul_eq_smul, finsupp.smul_apply, ← finset.smul_sum, smul_eq_zero] at hl' Hl',
-  rw or_iff_not_imp_left,
-  intro hn,
-  refine ⟨hl'.resolve_left hn, λ i, _⟩,
-  obtain ⟨li, hli⟩ := Hl' i,
-  have hl'i : n • l' i ∈ f.to_add_monoid_hom.range,
-  { rw [← hli, add_monoid_hom.mem_range], refine ⟨li, rfl⟩ },
-  have Hf := hf.1,
-  exact (Hf hl'i).resolve_left hn,
-end
-
 section open finsupp
 
 lemma L_le_comap {n} (g : fin (n+1) → fin (m+1)) :
@@ -143,7 +126,7 @@ end
 lemma π_is_quotient : (π f m).is_quotient :=
 normed_add_group_hom.is_quotient_quotient _
 
-instance [fact f.to_add_monoid_hom.range.saturated] : polyhedral_lattice (obj f m) :=
+instance : polyhedral_lattice (obj f m) :=
 by { delta obj, apply_instance }
 
 end objects
@@ -202,8 +185,6 @@ rfl
 @[simp] lemma map_add_hom_π (x : fin (n+1) →₀ Λ') :
   (map_add_hom f g) (π _ _ x) = π _ _ (map_domain.add_monoid_hom g x) :=
 rfl
-
-variables [fact f.to_add_monoid_hom.range.saturated]
 
 @[simps]
 def map : polyhedral_lattice_hom (obj f (n+1)) (obj f (m+1)) :=
@@ -267,7 +248,7 @@ universe variables u
 
 open polyhedral_lattice simplex_category _root_.category_theory
 
-variables {Λ Λ' : PolyhedralLattice.{u}} (f : Λ ⟶ Λ') [fact f.to_add_monoid_hom.range.saturated]
+variables {Λ Λ' : PolyhedralLattice.{u}} (f : Λ ⟶ Λ')
 
 namespace Cech_conerve
 
