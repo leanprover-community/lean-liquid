@@ -131,7 +131,7 @@ def sign_vectors (ι : Type*) := (ι → units ℤ)
 
 instance sign_vectors_inhabited : inhabited (sign_vectors ι) := ⟨(λ i, 1)⟩
 
-def fintype_sign_vectors [fintype ι] : fintype (sign_vectors ι) := pi.fintype
+instance fintype_sign_vectors [fintype ι] : fintype (sign_vectors ι) := pi.fintype
 
 /-- Given a list l of elements of Λ and a functional x, (pos_vector l x) is the sign-vector of
 the values of x (l i). -/
@@ -213,7 +213,7 @@ lemma lem97 [fintype ι] [module.finite ℤ Λ] [module.free ℤ Λ] (N : ℕ) (
     x = N • y + x' ∧
     ∀ i, (0 ≤ x' (l i) ∧ 0 ≤ (x - x') (l i)) ∨ (x' (l i) ≤ 0 ∧ (x - x') (l i) ≤ 0) :=
 begin
-  refine ⟨(@finset.univ (sign_vectors ι) (fintype_sign_vectors)).bUnion (pos_A N hN l), λ x, _⟩,
+  refine ⟨(@finset.univ (sign_vectors ι) _).bUnion (pos_A N hN l), λ x, _⟩,
   have hx : x ∈ (explicit_dual_set ((pos_vector l x) • l)) := smul_to_explicit_dual_set l x,
   obtain ⟨x', y, mem_x', hy, hx'⟩ := exists_good_pair N hN l (pos_vector l x) x hx,
   refine ⟨x', _, _⟩,
