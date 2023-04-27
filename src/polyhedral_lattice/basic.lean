@@ -50,6 +50,10 @@ lemma generates_norm_of_generates_nnnorm {x : ι → Λ}
 
 end generates_norm
 
+/-- The definition of *polyhedral lattice* in this project
+deviates from the one in [Analytic.pdf].
+
+The current definitions is roughly equivalent to "finitely generated pseudo-normed group". -/
 class polyhedral_lattice (Λ : Type*) extends normed_add_comm_group Λ :=
 (polyhedral' [] : ∃ (ι : Type) [fintype ι] (l : ι → Λ), generates_norm l)
 
