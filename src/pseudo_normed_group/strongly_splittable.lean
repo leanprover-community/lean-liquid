@@ -51,9 +51,22 @@ begin
     rw [finset.subset_empty, finsupp.support_eq_empty] at hs, subst x,
     refine ⟨0, 0, by simp, λ i, zero_mem_filtration _, by simp⟩, },
   rintro ⟨γ, hγ, hx⟩,
-  have := (λ i, exists_strong_split N d (γ i) (x i) (hx i)),
-  choose y δ H1 H2 H3 H4 using this,
+  obtain ⟨y₀, γ₀, h₀₁, h₀₂, h₀₃, h₀₄⟩ := exists_strong_split N d (γ i₀) (x i₀) (hx i₀),
+  let x₀ := finsupp.single i (x i),
+  let xₛ := x.erase i,
+  have h₀ₛ : x = x₀ + xₛ,
+  { sorry },
+  have hxs : xₛ.support ⊆ s,
+  { sorry },
+  -- Proof sketch:
+  -- Use the induction hypothesis to obtain a strong split `yₛ` of `xₛ`, with pseudo-norms `γₛ`.
+  -- Then reindex the `γ₀` to be increasing and the `γₛ` to be decreasing.
+  -- After the corresponding reindexing of `y₀` and `yₛ`, define `y = y₀ + yₛ`.
+  -- Now go with the flow.
   sorry
+  -- Old stuff:
+  -- have := (λ i, exists_strong_split N d (γ i) (x i) (hx i)),
+  -- choose y δ H1 H2 H3 H4 using this,
 end
 
 -- jmc: not sure if this is true, but we shouldn't need it
