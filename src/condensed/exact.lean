@@ -720,6 +720,29 @@ end move_this
 -- move this
 constant StoneCech : Type u ⥤ ExtrDisc.{u}
 
+constant CompHausFiltPseuNormGrp₁.presheaf_ExtrDisc (A : CompHausFiltPseuNormGrp₁) (S : Type*) :
+  (CompHausFiltPseuNormGrp.of A).presheaf (StoneCech.obj S).val ≃
+  {f : S → A // ∃ c, set.range f ⊆ filtration A c}
+
+constant CompHausFiltPseuNormGrp₁.presheaf_ExtrDisc_zero
+  (A : CompHausFiltPseuNormGrp₁) (S : Type*) :
+  ↑((CompHausFiltPseuNormGrp₁.presheaf_ExtrDisc A S) 0) = (0 : S → A)
+
+constant CompHausFiltPseuNormGrp₁.presheaf_ExtrDisc_map {A B : CompHausFiltPseuNormGrp₁}
+  (φ : A ⟶ B) (S : Type*) (x) :
+  (CompHausFiltPseuNormGrp.presheaf.map $ CHFPNG₁_to_CHFPNGₑₗ.map φ) (StoneCech.obj S).val
+    ((CompHausFiltPseuNormGrp₁.presheaf_ExtrDisc _ _).symm x) =
+  (CompHausFiltPseuNormGrp₁.presheaf_ExtrDisc _ _).symm
+  begin
+    refine ⟨φ ∘ x.1, _⟩,
+    obtain ⟨c, hc⟩ := x.2,
+    refine ⟨c, _⟩,
+    rw set.range_comp,
+    refine subset_trans (set.monotone_image hc) _,
+    rintro _ ⟨a, ha, rfl⟩,
+    exact φ.strict ha
+  end
+
 lemma strongly_exact_of_exact_aux {A B C : CompHausFiltPseuNormGrp₁.{u}}
   (f : A ⟶ B) (g : B ⟶ C) (hfg : exact (to_Condensed.map f) (to_Condensed.map g)) (c : ℝ≥0) :
   ∃ c', g ⁻¹' {0} ∩ (filtration B c) ⊆ f '' (filtration A c') :=
@@ -729,10 +752,23 @@ begin
   specialize hfg S,
   dsimp at hfg,
   simp only [Ab.exact_ulift_map] at hfg,
-  rw AddCommGroup.exact_iff at hfg,
-  let α : (CompHausFiltPseuNormGrp.of B).presheaf S.val :=
-  sorry,
+  rw [AddCommGroup.exact_iff, set_like.ext_iff] at hfg,
+  let β : (CompHausFiltPseuNormGrp.of B).presheaf S.val :=
+    (CompHausFiltPseuNormGrp₁.presheaf_ExtrDisc _ _).symm
+    ⟨coe, c, by simp only [subtype.range_coe, set.inter_subset_right]⟩,
+  specialize hfg β,
+  obtain ⟨α, hα⟩ := hfg.mpr _,
+  swap,
+  { rw [add_monoid_hom.mem_ker],
+    erw [CompHausFiltPseuNormGrp₁.presheaf_ExtrDisc_map],
+    apply (CompHausFiltPseuNormGrp₁.presheaf_ExtrDisc _ _).injective,
+    ext1,
+    rw [equiv.apply_symm_apply, CompHausFiltPseuNormGrp₁.presheaf_ExtrDisc_zero],
+    ext x, exact x.2.1 },
+  obtain ⟨c', hc'⟩ := ((CompHausFiltPseuNormGrp₁.presheaf_ExtrDisc _ _) α).property,
+  refine ⟨c', subset_trans _ (set.monotone_image hc')⟩,
   sorry
+  -- use `CompHausFiltPseuNormGrp₁.presheaf_ExtrDisc_map` but conjugate the equiv to the other side
 end
 
 lemma exact_iff_strongly_exact {A B C : CompHausFiltPseuNormGrp₁.{u}}
@@ -747,21 +783,26 @@ begin
     from strongly_exact_of_exact_aux f g hfg,
   choose r' h' using this,
   refine ⟨r' ⊔ id, ⟨_, _, le_sup_right⟩⟩,
-  { rw exact_iff_ExtrDisc at hfg,
-    haveI : projective (Profinite.of punit.{u+1}) := sorry,
-    have H := (hfg (ExtrDisc.of (Profinite.of $ punit))).w,
-    dsimp at H,
-    rw [← functor.map_comp, _root_.Ab.ulift.map_eq_zero_iff] at H,
+  { replace hfg := hfg.w,
+    rw [← to_Condensed.map_comp, zero_iff_ExtrDisc] at hfg,
+    let S := StoneCech.obj punit,
+    have H := hfg S,
+    dsimp only [to_Condensed_map, whisker_right_app] at H,
+    rw [_root_.Ab.ulift.map_eq_zero_iff] at H,
     ext x,
     obtain ⟨c, hc⟩ := exhaustive _ x,
-    have aux := congr_hom H ⟨function.const _ x, ⟨c, λ _, ⟨x, hc⟩, _⟩⟩,
-    have := congr_fun (congr_arg subtype.val aux) punit.star, exact this,
-    refine ⟨continuous_const, rfl⟩ },
+    have aux := congr_hom H ((CompHausFiltPseuNormGrp₁.presheaf_ExtrDisc _ _).symm _),
+    swap, { refine ⟨function.const _ x, c, _⟩, simp [hc] },
+    erw [CompHausFiltPseuNormGrp₁.presheaf_ExtrDisc_map] at aux,
+    apply_fun (CompHausFiltPseuNormGrp₁.presheaf_ExtrDisc _ _) at aux,
+    rw [equiv.apply_symm_apply, subtype.ext_iff] at aux,
+    replace aux := congr_fun aux punit.star,
+    erw [CompHausFiltPseuNormGrp₁.presheaf_ExtrDisc_zero] at aux,
+    exact aux, },
   { intros c,
     refine subset_trans (h' c) (set.image_subset _ _),
     refine filtration_mono le_sup_left }
 end
-
 
 @[simp] lemma to_Condensed_map_zero (A B : CompHausFiltPseuNormGrp₁.{u}) :
   to_Condensed.map (0 : A ⟶ B) = 0 :=
