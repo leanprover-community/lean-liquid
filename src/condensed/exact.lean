@@ -767,8 +767,16 @@ begin
     ext x, exact x.2.1 },
   obtain ⟨c', hc'⟩ := ((CompHausFiltPseuNormGrp₁.presheaf_ExtrDisc _ _) α).property,
   refine ⟨c', subset_trans _ (set.monotone_image hc')⟩,
-  sorry
-  -- use `CompHausFiltPseuNormGrp₁.presheaf_ExtrDisc_map` but conjugate the equiv to the other side
+  rw [← set.range_comp],
+  transitivity set.range
+    (CompHausFiltPseuNormGrp₁.presheaf_ExtrDisc _ _ β : (g ⁻¹' {0} ∩ (filtration B c) : set B) → B),
+  { erw [equiv.apply_symm_apply, subtype.range_coe], },
+  { refine subset_of_eq _,
+    congr' 1,
+    erw [← hα, ← (CompHausFiltPseuNormGrp₁.presheaf_ExtrDisc _ _).symm_apply_apply α,
+      CompHausFiltPseuNormGrp₁.presheaf_ExtrDisc_map,
+      equiv.apply_symm_apply, equiv.apply_symm_apply],
+    refl }
 end
 
 lemma exact_iff_strongly_exact {A B C : CompHausFiltPseuNormGrp₁.{u}}
