@@ -138,6 +138,7 @@ instance : has_zero_morphisms (CompHausFiltPseuNormGrp₁.{u}) :=
 { has_zero := λ M₁ M₂, ⟨0⟩,
   comp_zero' := λ _ _ f _, rfl,
   zero_comp' := λ _ _ _ f, by { ext, exact f.map_zero } }
+
 variables {A B C : CompHausFiltPseuNormGrp₁.{u}}
 
 structure strongly_exact (f : A ⟶ B) (g : B ⟶ C) (r : ℝ≥0 → ℝ≥0) : Prop :=
@@ -698,6 +699,53 @@ begin
     exact congr_arg subtype.val this, }
 end
 .
+
+lemma strongly_exact_of_exact_aux {A B C : CompHausFiltPseuNormGrp₁.{u}}
+  (f : A ⟶ B) (g : B ⟶ C) (hfg : exact (to_Condensed.map f) (to_Condensed.map g)) (c : ℝ≥0) :
+  ∃ c', g ⁻¹' {0} ∩ (filtration B c) ⊆ f '' (filtration A c') :=
+begin
+  sorry
+end
+
+-- move this
+@[simp]
+lemma _root_.Ab.ulift.map_eq_zero_iff {A B : Ab} (f : A ⟶ B) :
+  (Ab.ulift.{v}).map f = 0 ↔ f = 0 :=
+begin
+  split, swap, { rintro rfl, refl },
+  intro h,
+  ext x,
+  have := congr_hom h ⟨x⟩,
+  exact congr_arg ulift.down this
+end
+
+lemma exact_iff_strongly_exact {A B C : CompHausFiltPseuNormGrp₁.{u}}
+  (f : A ⟶ B) (g : B ⟶ C) :
+  exact (to_Condensed.map f) (to_Condensed.map g) ↔
+    ∃ r, strongly_exact f g r :=
+begin
+  split, swap,
+  { rintro ⟨r, hfg⟩, exact exact_of_strongly_exact f g r hfg },
+  intro hfg,
+  have : ∀ c : ℝ≥0, ∃ c', g ⁻¹' {0} ∩ (filtration B c) ⊆ f '' (filtration A c'),
+    from strongly_exact_of_exact_aux f g hfg,
+  choose r' h' using this,
+  refine ⟨r' ⊔ id, ⟨_, _, le_sup_right⟩⟩,
+  { rw exact_iff_ExtrDisc at hfg,
+    haveI : projective (Profinite.of punit.{u+1}) := sorry,
+    have H := (hfg (ExtrDisc.of (Profinite.of $ punit))).w,
+    dsimp at H,
+    rw [← functor.map_comp, _root_.Ab.ulift.map_eq_zero_iff] at H,
+    ext x,
+    obtain ⟨c, hc⟩ := exhaustive _ x,
+    have aux := congr_hom H ⟨function.const _ x, ⟨c, λ _, ⟨x, hc⟩, _⟩⟩,
+    have := congr_fun (congr_arg subtype.val aux) punit.star, exact this,
+    refine ⟨continuous_const, rfl⟩ },
+  { intros c,
+    refine subset_trans (h' c) (set.image_subset _ _),
+    refine filtration_mono le_sup_left }
+end
+
 
 @[simp] lemma to_Condensed_map_zero (A B : CompHausFiltPseuNormGrp₁.{u}) :
   to_Condensed.map (0 : A ⟶ B) = 0 :=
