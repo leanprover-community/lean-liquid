@@ -700,14 +700,10 @@ begin
 end
 .
 
-lemma strongly_exact_of_exact_aux {A B C : CompHausFiltPseuNormGrp₁.{u}}
-  (f : A ⟶ B) (g : B ⟶ C) (hfg : exact (to_Condensed.map f) (to_Condensed.map g)) (c : ℝ≥0) :
-  ∃ c', g ⁻¹' {0} ∩ (filtration B c) ⊆ f '' (filtration A c') :=
-begin
-  sorry
-end
+section move_this
 
--- move this
+-- generalize to faithful additive functors
+-- (and show that `Ab.ulift` is an instance)
 @[simp]
 lemma _root_.Ab.ulift.map_eq_zero_iff {A B : Ab} (f : A ⟶ B) :
   (Ab.ulift.{v}).map f = 0 ↔ f = 0 :=
@@ -717,6 +713,26 @@ begin
   ext x,
   have := congr_hom h ⟨x⟩,
   exact congr_arg ulift.down this
+end
+
+end move_this
+
+-- move this
+constant StoneCech : Type u ⥤ ExtrDisc.{u}
+
+lemma strongly_exact_of_exact_aux {A B C : CompHausFiltPseuNormGrp₁.{u}}
+  (f : A ⟶ B) (g : B ⟶ C) (hfg : exact (to_Condensed.map f) (to_Condensed.map g)) (c : ℝ≥0) :
+  ∃ c', g ⁻¹' {0} ∩ (filtration B c) ⊆ f '' (filtration A c') :=
+begin
+  rw exact_iff_ExtrDisc at hfg,
+  let S := StoneCech.obj (g ⁻¹' {0} ∩ (filtration B c) : set B),
+  specialize hfg S,
+  dsimp at hfg,
+  simp only [Ab.exact_ulift_map] at hfg,
+  rw AddCommGroup.exact_iff at hfg,
+  let α : (CompHausFiltPseuNormGrp.of B).presheaf S.val :=
+  sorry,
+  sorry
 end
 
 lemma exact_iff_strongly_exact {A B C : CompHausFiltPseuNormGrp₁.{u}}
