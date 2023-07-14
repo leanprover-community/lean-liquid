@@ -720,14 +720,17 @@ end move_this
 -- move this
 constant StoneCech : Type u ⥤ ExtrDisc.{u}
 
+-- move this
 constant CompHausFiltPseuNormGrp₁.presheaf_ExtrDisc (A : CompHausFiltPseuNormGrp₁) (S : Type*) :
   (CompHausFiltPseuNormGrp.of A).presheaf (StoneCech.obj S).val ≃
   {f : S → A // ∃ c, set.range f ⊆ filtration A c}
 
+-- move this
 constant CompHausFiltPseuNormGrp₁.presheaf_ExtrDisc_zero
   (A : CompHausFiltPseuNormGrp₁) (S : Type*) :
   ↑((CompHausFiltPseuNormGrp₁.presheaf_ExtrDisc A S) 0) = (0 : S → A)
 
+-- move this
 constant CompHausFiltPseuNormGrp₁.presheaf_ExtrDisc_map {A B : CompHausFiltPseuNormGrp₁}
   (φ : A ⟶ B) (S : Type*) (x) :
   (CompHausFiltPseuNormGrp.presheaf.map $ CHFPNG₁_to_CHFPNGₑₗ.map φ) (StoneCech.obj S).val
