@@ -18,8 +18,7 @@ section eg
 
 open breen_deligne.eg
 
-@[simp]
-lemma eg_factor_hom (n : ℕ) :
+@[simp] lemma eg_factor_hom (n : ℕ) :
   breen_deligne.universal_map.factor (breen_deligne.eg.homotopy.hom n (n + 1)) = 1 :=
 begin
   dsimp only [breen_deligne.eg, h],
@@ -41,6 +40,68 @@ begin
   { refine ⟨⟨_, ⟨0, pow_pos zero_lt_two (n+1)⟩⟩, _⟩, swap,
     simp only [finset.mem_product, finset.mem_univ, and_true],
     erw [free_abelian_group.support_of, finset.mem_singleton], }
+end
+
+@[simp] lemma factor_proj (N n : ℕ) : (breen_deligne.universal_map.proj n N).factor = 1 :=
+begin
+  refine (finset.sup_congr rfl _).trans (finset.sup_const _ _),
+  { rintro ⟨f, i⟩ hf,
+    obtain ⟨k, rfl⟩ : ∃ k, f = breen_deligne.basic_universal_map.proj n k,
+    sorry { simp only [finset.mem_product, finset.mem_univ, and_true] at hf,
+      dsimp only [breen_deligne.universal_map.proj] at hf,
+      have := free_abelian_group.support_sum (finset.univ : finset (fin N)) (λ _, 1),
+      squeeze_simp at this,
+      rw [free_abelian_group.sum_support_coeff] at hf, sorry },
+    clear hf,
+    rw [finset.sum_eq_single (fin_prod_fin_equiv (k, i))],
+    sorry { dsimp only [breen_deligne.basic_universal_map.proj,
+        breen_deligne.basic_universal_map.proj_aux],
+      simp only [matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.submatrix_apply,
+        equiv.punit_prod_symm_apply, matrix.kronecker_apply, boole_mul, nat.cast_eq_one, one_mul,
+        equiv.symm_apply_apply, eq_self_iff_true, matrix.one_apply_eq, if_true, int.nat_abs_one], },
+    { refine fin_prod_fin_equiv.forall_congr_left.mp _,
+      rintro ⟨l, j⟩ - hlj,
+      dsimp only [breen_deligne.basic_universal_map.proj,
+        breen_deligne.basic_universal_map.proj_aux],
+      simp only [matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.submatrix_apply,
+        equiv.punit_prod_symm_apply, matrix.kronecker_apply, boole_mul, nat.cast_eq_one, one_mul,
+        equiv.symm_apply_apply, eq_self_iff_true, matrix.one_apply_eq, if_true, int.nat_abs_one],
+      sorry },
+    { intro h, exact (h $ finset.mem_univ _).elim } },
+  { sorry }
+end
+
+@[simp] lemma factor_sum (N n : ℕ) : (breen_deligne.universal_map.sum n N).factor = 1 :=
+begin
+  dsimp only [breen_deligne.universal_map.sum],
+  sorry
+end
+
+@[simp] lemma eg_factor_d (n : ℕ) :
+  breen_deligne.universal_map.factor (breen_deligne.eg.data.d (n + 1) n) ≤ 1 :=
+begin
+  dsimp only [breen_deligne.eg, BD],
+  rw [dif_pos rfl],
+  dsimp only,
+  induction n with n ih,
+  { dsimp only [map, σπ],
+    refine le_trans (breen_deligne.universal_map.factor_sub _ _) _,
+    erw [factor_proj, factor_sum],
+    simp only [max_eq_right], },
+  dsimp only [map, σπ],
+  sorry
+end
+
+@[simp] lemma eg_bound_d (n : ℕ) :
+  breen_deligne.universal_map.bound (breen_deligne.eg.data.d (n + 1) n) = 3 ^ (n+1) :=
+begin
+  dsimp only [breen_deligne.eg, BD],
+  rw [dif_pos rfl],
+  induction n with n ih,
+  { dsimp only [map, σπ],
+    sorry },
+  dsimp only [map, σπ],
+  sorry
 end
 
 lemma eg_κ'_le_one [fact (r < 1)] (n : ℕ) :
