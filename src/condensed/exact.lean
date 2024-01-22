@@ -140,13 +140,13 @@ instance : has_zero_morphisms (CompHausFiltPseuNormGrp₁.{u}) :=
   zero_comp' := λ _ _ _ f, by { ext, exact f.map_zero } }
 variables {A B C : CompHausFiltPseuNormGrp₁.{u}}
 
-structure exact_with_constant (f : A ⟶ B) (g : B ⟶ C) (r : ℝ≥0 → ℝ≥0) : Prop :=
+structure strongly_exact (f : A ⟶ B) (g : B ⟶ C) (r : ℝ≥0 → ℝ≥0) : Prop :=
 (comp_eq_zero : f ≫ g = 0)
 (cond : ∀ c : ℝ≥0, g ⁻¹' {0} ∩ (filtration B c) ⊆ f '' (filtration A (r c)))
 (large : id ≤ r)
 
-lemma exact_with_constant.exact {f : A ⟶ B} {g : B ⟶ C} {r : ℝ≥0 → ℝ≥0}
-  (h : exact_with_constant f g r) :
+lemma strongly_exact.exact {f : A ⟶ B} {g : B ⟶ C} {r : ℝ≥0 → ℝ≥0}
+  (h : strongly_exact f g r) :
   exact ((to_PNG₁ ⋙ PseuNormGrp₁.to_Ab).map f) ((to_PNG₁ ⋙ PseuNormGrp₁.to_Ab).map g) :=
 begin
   rw AddCommGroup.exact_iff',
@@ -168,7 +168,7 @@ instance mono_Filtration_map_app (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) (M) :
   mono ((Filtration.map h).app M) :=
 by { rw CompHaus.mono_iff_injective, convert injective_cast_le _ _ }
 
-namespace exact_with_constant
+namespace strongly_exact
 noncomputable theory
 
 variables (f : A ⟶ B) (g : B ⟶ C) (r : ℝ≥0 → ℝ≥0) (c : ℝ≥0) (hrc : c ≤ r c)
@@ -201,7 +201,7 @@ lemma P1_to_P2_comp_fst (hfg : f ≫ g = 0) :
   P1_to_P2 f g hrc hfg ≫ pullback.fst = pullback.fst :=
 pullback.lift_fst _ _ _
 
-lemma surjective (h : exact_with_constant f g r) :
+lemma surjective (h : strongly_exact f g r) :
   ∃ (hfg : f ≫ g = 0), ∀ c, function.surjective (P1_to_P2 f g (h.large c) hfg) :=
 begin
   have hfg : f ≫ g = 0,
@@ -232,7 +232,7 @@ end
 
 lemma of_surjective (hfg : f ≫ g = 0) (hr : id ≤ r)
   (h : ∀ c, function.surjective (P1_to_P2 f g (hr c) hfg)) :
-  exact_with_constant f g r :=
+  strongly_exact f g r :=
 begin
   suffices H : ∀ (c : ℝ≥0), g ⁻¹' {0} ∩ filtration B c ⊆ f '' filtration A (r c),
   { refine ⟨_, H, hr⟩,
@@ -258,7 +258,7 @@ begin
 end
 
 lemma iff_surjective :
-  exact_with_constant f g r ↔
+  strongly_exact f g r ↔
   ∃ (hfg : f ≫ g = 0) (hr : ∀ c, c ≤ r c),
     ∀ c, function.surjective (P1_to_P2 f g (hr c) hfg) :=
 begin
@@ -267,9 +267,9 @@ begin
   { rintro ⟨hfg, hr, h⟩, exact of_surjective f g hfg hr h }
 end
 
-end exact_with_constant
+end strongly_exact
 
-namespace exact_with_constant
+namespace strongly_exact
 
 variables {J : Type u} [small_category J]
 variables {A' B' C' : J ⥤ CompHausFiltPseuNormGrp₁.{u}}
@@ -486,7 +486,7 @@ begin
       category_theory.limits.has_limit.iso_of_nat_iso_inv_π_assoc],
     erw [limit_flip_comp_lim_iso_limit_comp_lim'_hom_π_π, lim_map_π_assoc],
     simp only [category_theory.category.id_comp,
-      CompHausFiltPseuNormGrp₁.exact_with_constant.P1_to_P2_nat_trans_app,
+      CompHausFiltPseuNormGrp₁.strongly_exact.P1_to_P2_nat_trans_app,
       category_theory.category.assoc],
     erw [lim_map_π],
     dsimp [P1_to_P2],
@@ -513,12 +513,12 @@ end
 
 lemma extend {A B C : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
   (f : A ⟶ B) (g : B ⟶ C) (r : ℝ≥0 → ℝ≥0)
-  (hfg : ∀ S, exact_with_constant (f.app S) (g.app S) r) (S : Profinite) :
-  exact_with_constant
+  (hfg : ∀ S, strongly_exact (f.app S) (g.app S) r) (S : Profinite) :
+  strongly_exact
     ((Profinite.extend_nat_trans f).app S) ((Profinite.extend_nat_trans g).app S) r :=
 begin
   have hr : id ≤ r := (hfg $ Fintype.of punit).large,
-  rw exact_with_constant.iff_surjective,
+  rw strongly_exact.iff_surjective,
   refine ⟨_, hr, _⟩,
   { rw [← nat_trans.comp_app, ← Profinite.extend_nat_trans_comp],
     apply limit.hom_ext,
@@ -553,7 +553,7 @@ begin
   apply subsingleton.elim,
 end
 
-end exact_with_constant
+end strongly_exact
 
 instance has_zero_nat_trans_CHFPNG₁ {𝒞 : Type*} [category 𝒞]
   (A B : 𝒞 ⥤ CompHausFiltPseuNormGrp₁.{u}) :
@@ -572,31 +572,31 @@ begin
   simp only [nat_trans.comp_app, whisker_left_app, zero_app, zero_comp, comp_zero],
 end
 
-lemma exact_with_constant_extend_zero_left (A B C : Fintype ⥤ CompHausFiltPseuNormGrp₁.{u})
+lemma strongly_exact_extend_zero_left (A B C : Fintype ⥤ CompHausFiltPseuNormGrp₁.{u})
   (g : B ⟶ C) (r : ℝ≥0 → ℝ≥0)
-  (hfg : ∀ S, exact_with_constant (0 : A.obj S ⟶ B.obj S) (g.app S) r) (S : Profinite) :
-  exact_with_constant (0 : (Profinite.extend A).obj S ⟶ (Profinite.extend B).obj S)
+  (hfg : ∀ S, strongly_exact (0 : A.obj S ⟶ B.obj S) (g.app S) r) (S : Profinite) :
+  strongly_exact (0 : (Profinite.extend A).obj S ⟶ (Profinite.extend B).obj S)
     ((Profinite.extend_nat_trans g).app S) r :=
 begin
-  have := exact_with_constant.extend (0 : A ⟶ B) g r hfg S,
+  have := strongly_exact.extend (0 : A ⟶ B) g r hfg S,
   simpa,
 end
 
-lemma exact_with_constant_extend_zero_right (A B C : Fintype ⥤ CompHausFiltPseuNormGrp₁.{u})
+lemma strongly_exact_extend_zero_right (A B C : Fintype ⥤ CompHausFiltPseuNormGrp₁.{u})
   (f : A ⟶ B) (r : ℝ≥0 → ℝ≥0)
-  (hfg : ∀ S, exact_with_constant (f.app S) (0 : B.obj S ⟶ C.obj S) r) (S : Profinite) :
-  exact_with_constant ((Profinite.extend_nat_trans f).app S)
+  (hfg : ∀ S, strongly_exact (f.app S) (0 : B.obj S ⟶ C.obj S) r) (S : Profinite) :
+  strongly_exact ((Profinite.extend_nat_trans f).app S)
     (0 : (Profinite.extend B).obj S ⟶ (Profinite.extend C).obj S) r :=
 begin
-  have := exact_with_constant.extend f (0 : B ⟶ C) r hfg S,
+  have := strongly_exact.extend f (0 : B ⟶ C) r hfg S,
   simpa,
 end
 
 variables (C)
 
-lemma exact_with_constant_of_epi (f : A ⟶ B) (r : ℝ≥0 → ℝ≥0) (hr : id ≤ r)
+lemma strongly_exact_of_epi (f : A ⟶ B) (r : ℝ≥0 → ℝ≥0) (hr : id ≤ r)
   (hf : ∀ c, filtration B c ⊆ f '' (filtration A (r c))) :
-  exact_with_constant f (0 : B ⟶ C) r :=
+  strongly_exact f (0 : B ⟶ C) r :=
 begin
   refine ⟨_, _, hr⟩,
   { rw comp_zero },
@@ -605,8 +605,8 @@ end
 
 variables (A) {C}
 
-lemma exact_with_constant_of_mono (g : B ⟶ C) [hg : mono ((to_PNG₁ ⋙ PseuNormGrp₁.to_Ab).map g)] :
-  exact_with_constant (0 : A ⟶ B) g id :=
+lemma strongly_exact_of_mono (g : B ⟶ C) [hg : mono ((to_PNG₁ ⋙ PseuNormGrp₁.to_Ab).map g)] :
+  strongly_exact (0 : A ⟶ B) g id :=
 begin
   refine ⟨_, _, le_rfl⟩,
   { rw zero_comp },
@@ -654,16 +654,16 @@ begin
 end
 
 open comphaus_filtered_pseudo_normed_group
-open CompHausFiltPseuNormGrp₁.exact_with_constant (P1 P2 P1_to_P2 P1_to_P2_comp_fst c_le_rc)
+open CompHausFiltPseuNormGrp₁.strongly_exact (P1 P2 P1_to_P2 P1_to_P2_comp_fst c_le_rc)
 
-lemma exact_of_exact_with_constant {A B C : CompHausFiltPseuNormGrp₁.{u}}
+lemma exact_of_strongly_exact {A B C : CompHausFiltPseuNormGrp₁.{u}}
   (f : A ⟶ B) (g : B ⟶ C) (r : ℝ≥0 → ℝ≥0)
-  (hfg : exact_with_constant f g r) :
+  (hfg : strongly_exact f g r) :
   exact (to_Condensed.map f) (to_Condensed.map g) :=
 begin
   rw exact_iff_ExtrDisc,
   intro S,
-  rw exact_with_constant.iff_surjective at hfg,
+  rw strongly_exact.iff_surjective at hfg,
   rcases hfg with ⟨hfg, hr, H⟩,
   simp only [subtype.val_eq_coe, to_Condensed_map, CompHausFiltPseuNormGrp.Presheaf.map_app,
     whisker_right_app, Ab.exact_ulift_map],
@@ -704,20 +704,20 @@ end
 by { ext S s x, refl, }
 
 lemma mono_to_Condensed_map {A B : CompHausFiltPseuNormGrp₁.{u}}
-  (f : A ⟶ B) (hf : exact_with_constant (0 : A ⟶ A) f id) :
+  (f : A ⟶ B) (hf : strongly_exact (0 : A ⟶ A) f id) :
   mono (to_Condensed.map f) :=
 begin
   refine ((abelian.tfae_mono (to_Condensed.obj A) (to_Condensed.map f)).out 2 0).mp _,
-  have := exact_of_exact_with_constant (0 : A ⟶ A) f id hf,
+  have := exact_of_strongly_exact (0 : A ⟶ A) f id hf,
   simpa only [to_Condensed_map_zero],
 end
 
 lemma epi_to_Condensed_map {A B : CompHausFiltPseuNormGrp₁.{u}}
-  (f : A ⟶ B) (r : ℝ≥0 → ℝ≥0) (hf : exact_with_constant f (0 : B ⟶ B) r) :
+  (f : A ⟶ B) (r : ℝ≥0 → ℝ≥0) (hf : strongly_exact f (0 : B ⟶ B) r) :
   epi (to_Condensed.map f) :=
 begin
   refine ((abelian.tfae_epi (to_Condensed.obj B) (to_Condensed.map f)).out 2 0).mp _,
-  have := exact_of_exact_with_constant f (0 : B ⟶ B) r hf,
+  have := exact_of_strongly_exact f (0 : B ⟶ B) r hf,
   simpa only [to_Condensed_map_zero]
 end
 
