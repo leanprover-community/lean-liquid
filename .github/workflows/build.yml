@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     # timeout-minutes: 3
     steps:
-      - uses: styfle/cancel-workflow-action@0.9.0
+      - uses: styfle/cancel-workflow-action@89f242ee29e10c53a841bfe71cc0ce7b2f065abc # 0.9.0
         with:
           all_but_latest: true
           access_token: ${{ github.token }}
@@ -44,7 +44,7 @@ jobs:
       #   with:
       #     swap-size-gb: 14
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2
         with:
           fetch-depth: ${{ env.GIT_HISTORY_DEPTH }}
 
@@ -112,7 +112,7 @@ jobs:
 
       - name: upload precompiled lean-liquid zip file
         if: always() && steps.build.outputs.started == 'true'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@82c141cc518b40d92cc801eee768e7aafc9c2fa2 # v2
         with:
           name: ${{ steps.setup_precompiled.outputs.artifact_name }}
           path: workspace.tar
@@ -124,7 +124,7 @@ jobs:
 
     steps:
       - name: retrieve build
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@cbed621e49e4c01b044d60f6c80ea4ed6328b281 # v2
         with:
           name: ${{ needs.build.outputs.artifact_name }}
 
@@ -152,7 +152,7 @@ jobs:
 
     steps:
       - name: retrieve build
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@cbed621e49e4c01b044d60f6c80ea4ed6328b281 # v2
         with:
           name: ${{ needs.build.outputs.artifact_name }}
 
@@ -168,7 +168,7 @@ jobs:
 
       - name: install Python
         if: ${{ ! 0 }}
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@0f07f7f756721ebd886c2462646a35f78a8bc4de # v1
         with:
           python-version: 3.8
 
@@ -179,7 +179,7 @@ jobs:
     name: Stats for lean-liquid
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2
 
       - name: install ripgrep
         run: sudo apt install -y ripgrep
@@ -205,10 +205,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2
       with:
         fetch-depth: 0
 
     - name: update lean-3.3x branch
       if: github.ref == 'refs/heads/master'
-      uses: leanprover-contrib/update-versions-action@master
+      uses: leanprover-contrib/update-versions-action@f0ead25c644d4d4cd37d46752c4e2ee4d9044060 # master
