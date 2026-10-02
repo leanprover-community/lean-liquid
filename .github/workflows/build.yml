@@ -211,4 +211,4 @@ jobs:
 
     - name: update lean-3.3x branch
       if: github.ref == 'refs/heads/master'
-      uses: leanprover-contrib/update-versions-action@f0ead25c644d4d4cd37d46752c4e2ee4d9044060 # master
+      uses: leanprover-contrib/update-versions-action@f0ead25c644d4d4cd37d46752c4e2ee4d9044060 # master as of 2026-09-28
