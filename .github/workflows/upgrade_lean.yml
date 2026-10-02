@@ -30,7 +30,7 @@ jobs:
         run: ./scripts/fetch_olean_cache.sh
 
       - name: upgrade lean and dependencies
-        uses: leanprover-contrib/lean-upgrade-action@d8031fe6ff31bfbe490b7acf6604e733a8b4e13b # master
+        uses: leanprover-contrib/lean-upgrade-action@d8031fe6ff31bfbe490b7acf6604e733a8b4e13b # master as of 2026-09-28
         with:
           repo: ${{ github.repository }}
           access-token: ${{ secrets.PA_TOKEN }}
